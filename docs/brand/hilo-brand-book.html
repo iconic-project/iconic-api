@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HILO Brand Book v1.0</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi-variable@300,400,500,700,900&display=swap">
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap">
+<style>
+:root {
+  --hilo-blue-50:#EEF0FE; --hilo-blue-100:#D9DCFC; --hilo-blue-200:#B5BAFA;
+  --hilo-blue-300:#8B92F6; --hilo-blue-400:#6168F0; --hilo-blue-500:#3D4AE5;
+  --hilo-blue-600:#2E38C9; --hilo-blue-700:#232BA3; --hilo-blue-800:#1A2080;
+  --hilo-blue-900:#131860; --hilo-blue-950:#0B0E3D;
+  --hilo-blue: var(--hilo-blue-500);
+
+  --neutral-0:#FFFFFF; --neutral-25:#FBFBFC; --neutral-50:#F5F6F8;
+  --neutral-100:#ECEEF2; --neutral-200:#DDE0E6; --neutral-300:#C2C7D0;
+  --neutral-400:#9097A3; --neutral-500:#686F7B; --neutral-600:#4A5060;
+  --neutral-700:#313747; --neutral-800:#1E2333; --neutral-900:#131725;
+  --neutral-950:#0A0B12;
+
+  --success-50:#ECFAF2; --success-700:#0F5C36; --success-500:#1B9D5C;
+  --warning-50:#FEF6E7; --warning-700:#714B07;
+  --danger-50:#FDECEC; --danger-500:#D7332E; --danger-700:#8A1A17;
+
+  --bg-canvas:var(--neutral-25); --bg-surface:var(--neutral-0);
+  --bg-surface-alt:var(--neutral-50); --bg-surface-sunk:var(--neutral-100);
+  --fg-default:var(--neutral-950); --fg-muted:var(--neutral-600);
+  --fg-subtle:var(--neutral-500); --fg-disabled:var(--neutral-400);
+  --fg-brand:var(--hilo-blue-600);
+  --border-subtle:var(--neutral-200); --border-default:var(--neutral-300);
+
+  --font-display:"Satoshi Variable","Satoshi",-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-sans:"Satoshi Variable","Satoshi",-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-mono:"Satoshi Variable","Satoshi",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --font-serif:"Tiempos Headline","GT Sectra","Cambria",Georgia,serif;
+  --tracking-tight:-0.02em; --tracking-snug:-0.01em; --tracking-wide:0.04em;
+
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px;
+  --space-5:20px; --space-6:24px; --space-8:32px; --space-10:40px;
+  --space-12:48px; --space-16:64px; --space-20:80px; --space-24:96px;
+  --space-32:128px;
+
+  --radius-sm:4px; --radius-md:8px; --radius-lg:12px;
+  --radius-xl:16px; --radius-2xl:20px; --radius-full:9999px;
+
+  --shadow-xs:0 1px 2px rgba(10,11,18,0.04);
+  --shadow-sm:0 1px 3px rgba(10,11,18,0.06),0 1px 2px rgba(10,11,18,0.04);
+  --shadow-md:0 4px 12px rgba(10,11,18,0.06),0 2px 4px rgba(10,11,18,0.04);
+  --shadow-lg:0 12px 32px rgba(10,11,18,0.08),0 4px 8px rgba(10,11,18,0.04);
+
+  --dur-fast:120ms; --dur-base:180ms;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+
+[data-theme="dark"] {
+  --bg-canvas:var(--neutral-950); --bg-surface:var(--neutral-900);
+  --bg-surface-alt:var(--neutral-800); --bg-surface-sunk:#06070C;
+  --fg-default:var(--neutral-25); --fg-muted:var(--neutral-300);
+  --fg-subtle:var(--neutral-400); --fg-disabled:var(--neutral-600);
+  --fg-brand:var(--hilo-blue-300);
+  --border-subtle:rgba(255,255,255,0.08);
+  --border-default:rgba(255,255,255,0.14);
+  --shadow-xs:0 1px 2px rgba(0,0,0,0.30);
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.35),0 1px 2px rgba(0,0,0,0.25);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.45),0 2px 4px rgba(0,0,0,0.30);
+  --shadow-lg:0 12px 32px rgba(0,0,0,0.55),0 4px 8px rgba(0,0,0,0.35);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  font-size: 16px; line-height: 1.6;
+  color: var(--fg-default);
+  background: var(--bg-canvas);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background var(--dur-base) var(--ease), color var(--dur-base) var(--ease);
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 0 var(--space-8); }
+.container.wide { max-width: 1280px; }
+
+/* Top nav */
+.topnav {
+  position: sticky; top: 0; z-index: 100;
+  background: color-mix(in srgb, var(--bg-canvas) 92%, transparent);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.topnav-inner { display: flex; align-items: center; gap: var(--space-8); height: 64px; }
+.brand-mark {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 22px; letter-spacing: var(--tracking-tight);
+  color: var(--fg-default); text-decoration: none;
+}
+.brand-mark .v {
+  font-weight: 400; font-size: 12px; color: var(--fg-subtle);
+  margin-left: var(--space-2); letter-spacing: 0;
+  padding: 2px 8px; border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+.topnav nav { display: flex; gap: var(--space-1); margin-left: auto; }
+.topnav nav a {
+  font-size: 13px; font-weight: 500; color: var(--fg-muted);
+  text-decoration: none; padding: 8px 12px;
+  border-radius: var(--radius-md);
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+.topnav nav a:hover { background: var(--bg-surface-alt); color: var(--fg-default); }
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  color: var(--fg-default); font-family: var(--font-sans);
+  font-size: 13px; font-weight: 500; padding: 7px 12px;
+  border-radius: var(--radius-full); cursor: pointer;
+  transition: all var(--dur-fast) var(--ease);
+}
+.theme-toggle:hover { border-color: var(--border-default); }
+
+/* Cover */
+.cover { padding: var(--space-24) 0 var(--space-20); border-bottom: 1px solid var(--border-subtle); }
+.cover .eyebrow {
+  font-size: 11px; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--fg-brand); margin: 0 0 var(--space-4);
+}
+.cover h1 {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 9vw, 112px); line-height: 0.95;
+  font-weight: 800; letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--space-6); color: var(--fg-default);
+}
+.cover h1 .accent { color: var(--hilo-blue-500); }
+.cover .lede {
+  font-size: 22px; line-height: 1.45; color: var(--fg-muted);
+  max-width: 720px; margin: 0 0 var(--space-12); font-weight: 400;
+}
+.cover dl {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-8); border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-6); margin: 0;
+}
+.cover dt {
+  font-size: 11px; font-weight: 500; text-transform: uppercase;
+  letter-spacing: var(--tracking-wide); color: var(--fg-subtle);
+  margin-bottom: var(--space-2);
+}
+.cover dd { font-size: 15px; font-weight: 500; margin: 0; color: var(--fg-default); }
+
+/* Section */
+section { padding: var(--space-20) 0; border-bottom: 1px solid var(--border-subtle); }
+section:last-of-type { border-bottom: none; }
+.section-eyebrow {
+  font-family: var(--font-mono); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--fg-brand); margin: 0 0 var(--space-4);
+}
+.section-header h2 {
+  font-family: var(--font-display); font-size: clamp(36px, 5vw, 56px);
+  line-height: 1.05; font-weight: 700;
+  letter-spacing: var(--tracking-tight); margin: 0 0 var(--space-4);
+  color: var(--fg-default); max-width: 16ch;
+}
+.section-header p.kicker {
+  font-size: 20px; line-height: 1.55; color: var(--fg-muted);
+  max-width: 640px; margin: 0 0 var(--space-12); font-weight: 400;
+}
+
+h3 { font-family: var(--font-display); font-size: 26px; font-weight: 600; letter-spacing: var(--tracking-snug); margin: 0 0 var(--space-3); color: var(--fg-default); }
+h4 { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--fg-subtle); margin: 0 0 var(--space-3); font-family: var(--font-sans); }
+p { color: var(--fg-default); }
+
+.body-large { font-size: 18px; line-height: 1.65; color: var(--fg-default); max-width: 60ch; }
+.body-muted { color: var(--fg-muted); }
+
+/* Quote */
+.pull-quote {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.6vw, 42px);
+  line-height: 1.2; font-weight: 600;
+  letter-spacing: var(--tracking-snug);
+  color: var(--fg-default);
+  max-width: 24ch;
+  margin: var(--space-8) 0;
+  padding-left: var(--space-6);
+  border-left: 3px solid var(--hilo-blue-500);
+}
+.pull-quote .source {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 13px; font-weight: 500;
+  color: var(--fg-subtle);
+  letter-spacing: 0; margin-top: var(--space-3);
+  text-transform: uppercase; letter-spacing: var(--tracking-wide);
+}
+
+/* North Star grid */
+.northstar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--bg-surface);
+}
+.northstar > div {
+  padding: var(--space-8);
+  border-right: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.northstar > div:last-child,
+.northstar > div:nth-child(2n) { border-right: none; }
+.northstar > div:nth-last-child(-n+2) { border-bottom: none; }
+.northstar h4 { color: var(--fg-brand); margin-bottom: var(--space-3); }
+.northstar p { font-family: var(--font-display); font-size: 22px; line-height: 1.3; font-weight: 500; letter-spacing: var(--tracking-snug); margin: 0; color: var(--fg-default); }
+
+/* Positioning statement */
+.position-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10);
+}
+.position-statement {
+  font-family: var(--font-display);
+  font-size: 28px; line-height: 1.35; font-weight: 500;
+  letter-spacing: var(--tracking-snug);
+  margin: 0 0 var(--space-8); color: var(--fg-default);
+}
+.position-statement .b { color: var(--hilo-blue-600); font-weight: 600; }
+[data-theme="dark"] .position-statement .b { color: var(--hilo-blue-300); }
+.position-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--border-subtle); }
+.position-grid h4 { color: var(--fg-subtle); }
+.position-grid p { font-size: 15px; color: var(--fg-default); margin: 0; line-height: 1.5; }
+
+/* Audience cards */
+.audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); }
+.audience-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+}
+.audience-card h3 { font-size: 22px; margin-bottom: var(--space-2); }
+.audience-card .role { font-size: 13px; color: var(--fg-brand); font-weight: 500; text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-4); }
+.audience-card .pain, .audience-card .win { font-size: 14px; line-height: 1.6; color: var(--fg-muted); margin: 0 0 var(--space-4); }
+.audience-card h4 { color: var(--fg-default); margin-bottom: 6px; font-size: 11px; }
+
+/* Personality axes */
+.axes { display: grid; gap: var(--space-4); margin-top: var(--space-6); }
+.axis {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: var(--space-4);
+  padding: var(--space-5) 0; border-bottom: 1px solid var(--border-subtle);
+}
+.axis:last-child { border-bottom: none; }
+.axis .left { text-align: right; font-family: var(--font-display); font-size: 22px; font-weight: 500; color: var(--fg-default); letter-spacing: var(--tracking-snug); }
+.axis .right { color: var(--fg-disabled); font-family: var(--font-display); font-size: 22px; font-weight: 500; letter-spacing: var(--tracking-snug); }
+.axis .right.strike { text-decoration: line-through; text-decoration-color: var(--danger-500); text-decoration-thickness: 2px; }
+.axis .marker {
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--fg-subtle); padding: 4px 10px;
+  border: 1px solid var(--border-subtle); border-radius: var(--radius-full);
+}
+
+/* Voice principles */
+.voice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--space-6); }
+.voice-card {
+  padding-top: var(--space-5);
+  border-top: 2px solid var(--hilo-blue-500);
+}
+.voice-card .num { font-family: var(--font-mono); font-size: 12px; color: var(--fg-subtle); margin: 0 0 var(--space-3); }
+.voice-card h3 { font-size: 22px; margin-bottom: var(--space-2); }
+.voice-card p { font-size: 15px; color: var(--fg-muted); margin: 0; line-height: 1.6; }
+
+/* Do / Don't */
+.dodonts { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: var(--space-8); }
+.dodont {
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+.dodont .header { display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-5); font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: var(--tracking-wide); }
+.dodont.do .header { color: var(--success-700); }
+.dodont.dont .header { color: var(--danger-700); }
+[data-theme="dark"] .dodont.do .header { color: #95DDB6; }
+[data-theme="dark"] .dodont.dont .header { color: #F1A4A1; }
+.dodont .header .badge { padding: 2px 8px; background: var(--success-50); border-radius: var(--radius-full); font-family: var(--font-mono); font-size: 11px; }
+.dodont.dont .header .badge { background: var(--danger-50); }
+[data-theme="dark"] .dodont.do .header .badge { background: rgba(27,157,92,0.18); }
+[data-theme="dark"] .dodont.dont .header .badge { background: rgba(215,51,46,0.18); }
+.dodont ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); }
+.dodont li { font-size: 15px; color: var(--fg-default); line-height: 1.5; padding-left: 22px; position: relative; }
+.dodont.do li::before { content: ""; position: absolute; left: 0; top: 8px; width: 12px; height: 6px; border-left: 2px solid var(--success-500); border-bottom: 2px solid var(--success-500); transform: rotate(-45deg); }
+.dodont.dont li::before { content: ""; position: absolute; left: 4px; top: 6px; width: 10px; height: 10px; }
+.dodont.dont li::after { content: ""; position: absolute; left: 4px; top: 11px; width: 10px; height: 2px; background: var(--danger-500); }
+
+/* Word lists */
+.wordlists { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: var(--space-6); }
+.wordlist {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+}
+.wordlist .label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--fg-subtle); margin-bottom: var(--space-4); }
+.wordlist.use .label { color: var(--success-700); }
+.wordlist.lose .label { color: var(--danger-700); }
+[data-theme="dark"] .wordlist.use .label { color: #95DDB6; }
+[data-theme="dark"] .wordlist.lose .label { color: #F1A4A1; }
+.wordlist .words { display: flex; flex-wrap: wrap; gap: 6px; }
+.wordlist .words span {
+  font-size: 13px; padding: 4px 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--fg-default);
+}
+.wordlist.lose .words span { color: var(--fg-muted); text-decoration: line-through; text-decoration-color: var(--danger-500); }
+
+/* Tone matrix */
+.tone-matrix { width: 100%; border-collapse: collapse; margin-top: var(--space-6); border: 1px solid var(--border-subtle); border-radius: var(--radius-xl); overflow: hidden; background: var(--bg-surface); }
+.tone-matrix th, .tone-matrix td { padding: var(--space-4) var(--space-5); text-align: left; vertical-align: top; }
+.tone-matrix thead { background: var(--bg-surface-alt); }
+.tone-matrix th { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--fg-subtle); }
+.tone-matrix tbody tr { border-top: 1px solid var(--border-subtle); }
+.tone-matrix td.context { font-family: var(--font-display); font-weight: 500; color: var(--fg-default); font-size: 16px; letter-spacing: var(--tracking-snug); }
+.tone-matrix td.tone { color: var(--hilo-blue-700); font-weight: 500; font-size: 14px; }
+[data-theme="dark"] .tone-matrix td.tone { color: var(--hilo-blue-300); }
+.tone-matrix td.example { color: var(--fg-muted); font-style: italic; font-size: 14px; }
+
+/* Messaging hierarchy */
+.messaging-stack { display: grid; gap: var(--space-3); margin-top: var(--space-6); }
+.message-row {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  display: grid; grid-template-columns: 140px 1fr; gap: var(--space-6); align-items: baseline;
+}
+.message-row .level { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--fg-subtle); }
+.message-row .copy { font-family: var(--font-display); font-weight: 500; letter-spacing: var(--tracking-snug); color: var(--fg-default); }
+.message-row.h1 .copy { font-size: 32px; line-height: 1.15; font-weight: 700; }
+.message-row.h2 .copy { font-size: 22px; line-height: 1.25; }
+.message-row.h3 .copy { font-size: 18px; font-family: var(--font-sans); font-weight: 400; color: var(--fg-muted); line-height: 1.55; }
+
+/* Logo */
+.logo-stage {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-16) var(--space-8);
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-mark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(72px, 14vw, 144px);
+  letter-spacing: var(--tracking-tight);
+  color: var(--fg-default);
+  line-height: 1;
+}
+.logo-rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-5); margin-top: var(--space-6); }
+.logo-rule {
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+.logo-rule h4 { color: var(--fg-default); margin-bottom: 6px; font-size: 12px; }
+.logo-rule p { font-size: 13px; color: var(--fg-muted); margin: 0; line-height: 1.5; }
+
+/* Misuse */
+.misuse-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--space-3); margin-top: var(--space-6); }
+.misuse {
+  padding: var(--space-6);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  position: relative;
+  text-align: center;
+}
+.misuse::before {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent calc(50% - 1px), var(--danger-500) 50%, transparent calc(50% + 1px));
+  opacity: 0.6; border-radius: var(--radius-lg);
+}
+.misuse .preview { font-family: var(--font-display); font-weight: 800; letter-spacing: var(--tracking-tight); position: relative; }
+.misuse .label { display: block; font-family: var(--font-sans); font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--danger-700); margin-top: var(--space-3); position: relative; }
+[data-theme="dark"] .misuse .label { color: #F1A4A1; }
+
+/* Color story */
+.color-story { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); }
+.color-tile {
+  border-radius: var(--radius-xl);
+  padding: var(--space-10);
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 280px;
+  position: relative;
+  overflow: hidden;
+}
+.color-tile.cobalt { background: var(--hilo-blue-500); color: #fff; }
+.color-tile.ink { background: var(--neutral-950); color: var(--neutral-25); }
+.color-tile.paper { background: var(--neutral-0); color: var(--neutral-950); border: 1px solid var(--border-subtle); }
+.color-tile h3 { color: inherit; font-size: 28px; margin: 0; }
+.color-tile p { color: inherit; opacity: 0.85; margin: 0; font-size: 14px; line-height: 1.55; max-width: 28ch; }
+.color-tile .meta { font-family: var(--font-mono); font-size: 11px; opacity: 0.7; }
+
+/* Imagery — categories */
+.imagery-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-5); margin-top: var(--space-6); }
+.image-rule {
+  padding: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.image-rule .visual {
+  height: 220px; margin-bottom: 0;
+  display: flex; align-items: flex-end; padding: var(--space-4);
+  color: rgba(255,255,255,0.92); font-family: var(--font-mono); font-size: 10px;
+  text-transform: uppercase; letter-spacing: var(--tracking-wide);
+  position: relative; overflow: hidden;
+}
+.image-rule .visual::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.35) 100%);
+  pointer-events: none;
+}
+.image-rule .visual span { position: relative; z-index: 1; }
+.image-rule .body { padding: var(--space-5); }
+.image-rule h4 { color: var(--fg-default); font-size: 13px; margin-bottom: 6px; }
+.image-rule p { font-size: 13px; color: var(--fg-muted); margin: 0; line-height: 1.55; }
+/* Real hospitality registers — moody, warm, considered */
+.image-rule.architecture .visual { background: linear-gradient(165deg, #C49A6C 0%, #8B6438 35%, #3D2814 100%); }
+.image-rule.detail .visual { background: linear-gradient(135deg, #EFE8DA 0%, #C4B69A 50%, #8B7E62 100%); color: rgba(40,30,20,0.85); }
+.image-rule.detail .visual::after { background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.18) 100%); }
+.image-rule.environment .visual { background: linear-gradient(180deg, #B8C8D0 0%, #6F8794 50%, #2C3E48 100%); }
+.image-rule.guest .visual { background: linear-gradient(135deg, #8B7355 0%, #4A3520 60%, #1F1410 100%); }
+
+/* Photography — color grading + composition */
+.photo-rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); margin-top: var(--space-6); }
+.photo-rule-card {
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+.photo-rule-card .label { font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-2); }
+.photo-rule-card h4 { color: var(--fg-default); margin-bottom: var(--space-2); font-size: 14px; text-transform: none; letter-spacing: 0; }
+.photo-rule-card p { font-size: 13px; color: var(--fg-muted); margin: 0; line-height: 1.55; }
+
+/* Social — Instagram grid */
+.social-tabs { display: flex; gap: var(--space-3); margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border-subtle); }
+.social-tabs span { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--fg-subtle); }
+.social-tabs span.active { color: var(--fg-brand); }
+
+.ig-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--bg-surface-sunk);
+  max-width: 520px;
+  margin: 0 auto;
+}
+.ig-tile {
+  aspect-ratio: 1;
+  position: relative;
+  display: flex;
+  padding: var(--space-4);
+  color: rgba(255,255,255,0.95);
+  overflow: hidden;
+}
+.ig-tile.dark-text { color: rgba(20,12,4,0.92); }
+.ig-tile::after {
+  content: ""; position: absolute; inset: 0;
+  pointer-events: none;
+}
+.ig-tile.scrim-bottom::after { background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.55) 100%); }
+.ig-tile.scrim-radial::after { background: radial-gradient(ellipse at center, rgba(0,0,0,0) 30%, rgba(0,0,0,0.45) 100%); }
+.ig-tile .content { position: relative; z-index: 1; width: 100%; display: flex; flex-direction: column; justify-content: flex-end; }
+.ig-tile.center .content { justify-content: center; align-items: center; text-align: center; }
+.ig-tile.top .content { justify-content: flex-start; }
+
+.ig-quote {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-snug);
+}
+.ig-quote.large { font-size: 22px; }
+.ig-kicker {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+.ig-result {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  letter-spacing: var(--tracking-tight);
+  line-height: 1.05;
+}
+.ig-result-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 6px;
+  opacity: 0.85;
+}
+.ig-mark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 20px;
+  letter-spacing: var(--tracking-tight);
+}
+.ig-mark.large { font-size: 44px; }
+.ig-mark-corner { position: absolute; bottom: 12px; right: 14px; font-size: 14px; z-index: 1; }
+.ig-attr { position: absolute; top: 12px; left: 14px; font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; z-index: 1; opacity: 0.85; }
+
+/* Photo backgrounds — real partner imagery from the proposal deck */
+/* Photography — partner-property reference set.
+   The v1.0 deploy uses curated Unsplash imagery as a stand-in.
+   To swap in a real partner photograph: replace the URL in the
+   matching .photo-* rule with `url('photos/{filename}.jpg')` and
+   drop a 4:5 (1200×1500+) JPG at that path. */
+.photo-tatras { background: url('https://images.unsplash.com/photo-1670177792931-5eb0193c4eea?w=1200&h=1500&fit=crop&crop=entropy&fm=jpg&q=82') center/cover no-repeat; }
+.photo-yacht-dusk { background: url('https://images.unsplash.com/photo-1674606867042-2aa3581c1bb5?w=1200&h=1500&fit=crop&crop=entropy&fm=jpg&q=82') center/cover no-repeat; }
+.photo-iceland { background: url('https://images.unsplash.com/photo-1666209925785-d9facf88a438?w=1200&h=1500&fit=crop&crop=entropy&fm=jpg&q=82') center/cover no-repeat; }
+.photo-vessel { background: url('https://images.unsplash.com/photo-1613690399151-65ea69478674?w=1200&h=1500&fit=crop&crop=entropy&fm=jpg&q=82') center/cover no-repeat; }
+.photo-atacama { background: url('https://images.unsplash.com/photo-1550319063-51ee8574b126?w=1200&h=1500&fit=crop&crop=entropy&fm=jpg&q=82') center/cover no-repeat; }
+.photo-guadalupe { background: url('https://images.unsplash.com/photo-1750859876124-7a57a12c8275?w=1200&h=1500&fit=crop&crop=entropy&fm=jpg&q=82') center/cover no-repeat; }
+.photo-retuerta { background: url('https://images.unsplash.com/photo-1773179655536-82183be4d5dc?w=1200&h=1500&fit=crop&crop=entropy&fm=jpg&q=82') center/cover no-repeat; }
+.photo-bahamas { background: url('https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?w=1200&h=1500&fit=crop&crop=entropy&fm=jpg&q=82') center/cover no-repeat; }
+.bg-cobalt { background: var(--hilo-blue-500); }
+/* Photographic gradient fallbacks (kept for environments without the photo files) */
+.bg-arch-golden { background: linear-gradient(165deg, #C49A6C 0%, #8B6438 35%, #3D2814 100%); }
+.bg-arch-pool { background: linear-gradient(180deg, #5C7B8C 0%, #2F4458 55%, #0F1A24 100%); }
+.bg-detail-linen { background: linear-gradient(135deg, #EFE8DA 0%, #C4B69A 50%, #8B7E62 100%); }
+.bg-detail-brass { background: linear-gradient(135deg, #D4A66A 0%, #8B6028 70%, #3D2810 100%); }
+.bg-detail-marble { background: linear-gradient(160deg, #F5F1E8 0%, #D4CDBC 50%, #9C8E6F 100%); }
+.bg-env-coast { background: linear-gradient(180deg, #B8C8D0 0%, #6F8794 50%, #2C3E48 100%); }
+.bg-env-desert { background: linear-gradient(180deg, #EBC990 0%, #B58850 55%, #5C3A1F 100%); }
+.bg-env-jungle { background: linear-gradient(165deg, #5E7544 0%, #2A3D24 60%, #0F1B0A 100%); }
+.bg-guest-hand { background: linear-gradient(135deg, #8B7355 0%, #4A3520 60%, #1F1410 100%); }
+
+/* Mood reference grid — 4 column on desktop */
+.ig-grid.mood-4 { grid-template-columns: repeat(4, 1fr); max-width: 100%; }
+@media (max-width: 880px) { .ig-grid.mood-4 { grid-template-columns: repeat(2, 1fr); } }
+
+/* Instagram category table */
+.cat-grid { display: grid; gap: var(--space-3); margin-top: var(--space-6); }
+.cat-row {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: grid;
+  grid-template-columns: 200px 1fr 140px;
+  gap: var(--space-5);
+  align-items: start;
+}
+.cat-row .name { font-family: var(--font-display); font-size: 16px; font-weight: 600; letter-spacing: var(--tracking-snug); color: var(--fg-default); margin-bottom: 4px; }
+.cat-row .when { font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); text-transform: uppercase; letter-spacing: var(--tracking-wide); }
+.cat-row .desc { font-size: 14px; color: var(--fg-muted); line-height: 1.55; margin: 0; }
+.cat-row .freq { font-family: var(--font-mono); font-size: 11px; color: var(--fg-default); padding: 4px 10px; background: var(--bg-surface-sunk); border-radius: var(--radius-full); text-align: center; align-self: start; white-space: nowrap; }
+
+/* LinkedIn post mockups */
+.li-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-5); }
+.li-post {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+.li-post .hero {
+  height: 200px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-5);
+  color: rgba(255,255,255,0.95);
+}
+.li-post .hero::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(0,0,0,0.55) 100%);
+  pointer-events: none;
+}
+.li-post .hero .text { position: relative; z-index: 1; }
+.li-post .hero .kicker { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; opacity: 0.85; }
+.li-post .hero h4 { font-family: var(--font-display); font-size: 22px; font-weight: 700; letter-spacing: var(--tracking-tight); color: rgba(255,255,255,0.98); line-height: 1.15; margin: 0; text-transform: none; letter-spacing: var(--tracking-tight); }
+.li-post .body { padding: var(--space-5); }
+.li-post .body .author { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+.li-post .body .avatar-li { width: 36px; height: 36px; border-radius: 50%; background: var(--neutral-950); color: white; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 800; font-size: 14px; letter-spacing: var(--tracking-tight); }
+.li-post .body .author-meta { font-size: 12px; }
+.li-post .body .author-meta strong { display: block; color: var(--fg-default); font-weight: 500; }
+.li-post .body .author-meta span { color: var(--fg-subtle); }
+.li-post .body p { font-size: 14px; line-height: 1.6; color: var(--fg-default); margin: 0 0 var(--space-3); }
+.li-post .body p:last-child { margin: 0; }
+.li-post .body p strong { font-weight: 500; }
+.li-post .body .hashtags { font-size: 12px; color: var(--hilo-blue-600); margin-top: var(--space-3); }
+[data-theme="dark"] .li-post .body .hashtags { color: var(--hilo-blue-300); }
+
+.li-cat-meta { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); padding: var(--space-4) var(--space-5); background: var(--bg-surface-alt); border-top: 1px solid var(--border-subtle); font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); text-transform: uppercase; letter-spacing: var(--tracking-wide); }
+
+/* Copy-on-photo treatment guide */
+.treatment-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-3); margin-top: var(--space-6); }
+.treatment-card {
+  padding: var(--space-5);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+.treatment-card .num { font-family: var(--font-mono); font-size: 11px; color: var(--hilo-blue-600); margin-bottom: var(--space-2); }
+[data-theme="dark"] .treatment-card .num { color: var(--hilo-blue-300); }
+.treatment-card h4 { font-size: 14px; color: var(--fg-default); margin-bottom: 6px; text-transform: none; letter-spacing: 0; }
+.treatment-card p { font-size: 13px; color: var(--fg-muted); margin: 0; line-height: 1.55; }
+
+/* Application examples */
+.app-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-5); }
+.app-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+}
+.app-card .role { font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); text-transform: uppercase; letter-spacing: var(--tracking-wide); margin-bottom: var(--space-3); }
+.app-card .preview {
+  background: var(--bg-surface-alt);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  font-size: 13px;
+  color: var(--fg-default);
+  line-height: 1.55;
+  margin-bottom: var(--space-3);
+  min-height: 100px;
+}
+.app-card .preview .ll {
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 18px; letter-spacing: var(--tracking-tight); display: block;
+  margin-bottom: var(--space-2);
+}
+.app-card .note { font-size: 12px; color: var(--fg-subtle); margin: 0; line-height: 1.5; }
+
+/* Boilerplate */
+.boilerplate {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+}
+.boilerplate p { font-size: 17px; line-height: 1.7; color: var(--fg-default); margin: 0 0 var(--space-4); }
+.boilerplate p:last-child { margin: 0; }
+.boilerplate .length { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: var(--tracking-wide); color: var(--fg-subtle); margin-bottom: var(--space-4); padding-bottom: var(--space-4); border-bottom: 1px solid var(--border-subtle); }
+
+/* Guardrails */
+.guardrails { display: grid; gap: var(--space-3); }
+.guardrail {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--hilo-blue-500);
+  border-radius: var(--radius-md);
+  padding: var(--space-5) var(--space-6);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) 0;
+}
+.guardrail h4 { font-family: var(--font-display); text-transform: none; letter-spacing: var(--tracking-snug); font-size: 16px; font-weight: 600; color: var(--fg-default); margin-bottom: 6px; }
+.guardrail p { font-size: 14px; color: var(--fg-muted); margin: 0; line-height: 1.55; }
+
+/* Footer */
+footer { padding: var(--space-12) 0 var(--space-16); color: var(--fg-subtle); font-size: 13px; }
+footer .row { display: flex; justify-content: space-between; gap: var(--space-6); flex-wrap: wrap; }
+
+@media (max-width: 880px) {
+  .topnav nav { display: none; }
+  .axis { grid-template-columns: 1fr; gap: var(--space-2); }
+  .axis .left, .axis .right { text-align: left; font-size: 18px; }
+  .axis .marker { justify-self: start; }
+  .dodonts, .wordlists, .color-story { grid-template-columns: 1fr; }
+  .message-row { grid-template-columns: 1fr; gap: var(--space-2); }
+  .message-row.h1 .copy { font-size: 24px; }
+}
+
+/* ============================================================
+   Typography weight hierarchy — Satoshi
+   Mirrors hilopeople.com (Satoshi Variable). Hierarchy is
+   carried by SIZE and CASE, not by aggressive weight stepping.
+   Most copy lives at 400 Regular. Bold (700) is reserved for the
+   wordmark, brand moments, and inline emphasis. Medium (500) is
+   used sparingly for small uppercase CTAs and proper-noun labels.
+   Light (300) is reserved for fine print only.
+
+   Logo / wordmark (small + giant) → 700 Bold · UPPERCASE
+   Brand-moment headlines / WORKS-style labels → 700 Bold · UPPERCASE
+   Headlines (descriptive)         → 400 Regular · sentence case
+   Subheadings                     → 400 Regular
+   Section eyebrows                → 400 Regular · UPPERCASE · tracked
+   Small CTAs / proper-noun labels → 500 Medium · UPPERCASE
+   Body                            → 400 Regular
+   Quotes                          → 400 Regular (italic optional)
+   Inline emphasis (<strong>)      → 700 Bold
+   Fine print / legal              → 300 Light
+   ============================================================ */
+
+/* Logo + wordmark (small + giant brand moments) */
+.brand-mark,
+.cover h1,
+.section-hero h1,
+.section-hero .text-glo,
+.misuse .preview,
+.app-card .preview .ll,
+.li-post .body .avatar-li,
+.tagline-card .tagline,
+.ig-tile .stamp,
+.ig-tile .quote-text {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+/* Brand-moment section displays (e.g. "WORKS" treatment) */
+.message-row.h1 .copy { font-weight: 700; text-transform: uppercase; }
+
+/* Headings (descriptive, sentence case) — Regular */
+h1,
+h2,
+.section-header h2 { font-weight: 400; letter-spacing: 0; }
+
+/* Subheadings — Regular */
+h3,
+.guardrail h4,
+.cat-row .name,
+.li-post .hero h4,
+.treatment-card h4,
+.photo-rule-card h4,
+.voice-card h4,
+.dodont .header h5 { font-weight: 400; }
+
+/* Subtitles / supporting copy — Regular */
+.cover .lede,
+.section-header p.kicker,
+.body-large.body-muted { font-weight: 400; }
+
+/* Section eyebrows / mono labels — Regular, uppercase, tracked */
+h4,
+.section-eyebrow,
+.cover .eyebrow,
+.cover dt,
+.cat-row .when,
+.cat-row .freq,
+.color-tile .meta,
+.boilerplate .length,
+.li-cat-meta,
+.message-row .level,
+.dodont .header .badge,
+.wordlist .label,
+.photo-rule-card .label,
+.social-tabs span,
+.treatment-card .num,
+.voice-card .num,
+.li-post .hero .kicker,
+.misuse .label,
+.ig-attr,
+.meta { font-weight: 400; text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* Small CTAs / proper-noun labels — Medium, uppercase */
+.app-card .role,
+.theme-toggle,
+.topnav nav a { font-weight: 500; }
+
+/* Body — Regular */
+p,
+.body-large,
+.boilerplate p,
+.cover dd,
+li,
+td,
+.app-card .preview,
+.app-card .preview.is-signature,
+.app-card .preview.is-signature * { font-weight: 400; }
+
+/* Quotes — Regular (size + indent carry the emphasis) */
+.pull-quote,
+.northstar p,
+.message-row .copy,
+blockquote { font-weight: 400; }
+
+/* Inline emphasis — Bold */
+strong,
+b { font-weight: 700; }
+
+/* Fine print / footer / footnotes — Light */
+footer,
+footer a,
+.app-card .note { font-weight: 300; }
+
+/* The HILO logo inside the email signature keeps the Bold wordmark weight */
+.app-card .preview.is-signature .ll { font-weight: 700; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<header class="topnav">
+  <div class="container wide topnav-inner">
+    <a href="#" class="brand-mark">HILO<span class="v">Brand Book v1.0</span></a>
+    <nav>
+      <a href="#north">North Star</a>
+      <a href="#position">Position</a>
+      <a href="#audience">Audience</a>
+      <a href="#personality">Personality</a>
+      <a href="#voice">Voice</a>
+      <a href="#verbal">Verbal</a>
+      <a href="#visual">Visual</a>
+      <a href="#social">Social</a>
+      <a href="#application">Application</a>
+      <a href="#guardrails">Guardrails</a>
+    </nav>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <svg id="themeIcon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M1 8h2M13 8h2M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+      <span id="themeLabel">Light</span>
+    </button>
+  </div>
+</header>
+
+<!-- COVER -->
+<section class="cover">
+  <div class="container">
+    <p class="eyebrow">HILO Brand Book v1.0 · May 2026</p>
+    <h1>Revenue lift,<br>for <span class="accent">iconic</span><br>hospitality.</h1>
+    <p class="lede">This is HILO — what we believe, who we serve, how we sound, and how we show up. A reference for everyone who builds, sells, writes, or designs in our name.</p>
+    <dl>
+      <div><dt>Founded</dt><dd>Madrid, Spain</dd></div>
+      <div><dt>Operating in</dt><dd>LATAM · US · Spain</dd></div>
+      <div><dt>Category</dt><dd>Revenue lift for hospitality</dd></div>
+      <div><dt>Audience</dt><dd>Boutique &amp; luxury properties</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- NORTH STAR -->
+<section id="north">
+  <div class="container">
+    <p class="section-eyebrow">01 · North Star</p>
+    <div class="section-header">
+      <h2>What we believe.</h2>
+      <p class="kicker">The four ideas that organize every decision — from how we price, to what we build, to how we write a single line of copy.</p>
+    </div>
+
+    <div class="northstar">
+      <div>
+        <h4>Purpose</h4>
+        <p>Translate brand equity into measurable revenue, without diluting what makes a property special.</p>
+      </div>
+      <div>
+        <h4>Mission</h4>
+        <p>Run automated sales systems for iconic hospitality — direct, upsell, and recovery — so properties earn more from the guests they already attract.</p>
+      </div>
+      <div>
+        <h4>Vision</h4>
+        <p>Every iconic property runs HILO under the hood. The guest never sees the system. The owner sees the lift.</p>
+      </div>
+      <div>
+        <h4>Promise</h4>
+        <p>Net revenue generated. Not clicks, not traffic, not percentages.</p>
+      </div>
+    </div>
+
+    <div class="pull-quote">
+      We measure the success of our partnership in net revenue generated — not clicks, not traffic, not percentages.
+      <span class="source">HILO operating principle</span>
+    </div>
+  </div>
+</section>
+
+<!-- POSITIONING -->
+<section id="position">
+  <div class="container">
+    <p class="section-eyebrow">02 · Positioning</p>
+    <div class="section-header">
+      <h2>How we describe ourselves.</h2>
+      <p class="kicker">A single positioning statement that resolves the question — what is HILO, and who is it for? — in one sentence.</p>
+    </div>
+
+    <div class="position-card">
+      <p class="position-statement">
+        HILO is a <span class="b">revenue lift company</span> for boutique and luxury hospitality. We combine hands-on strategy with automation, AI, and performance marketing to <span class="b">increase direct bookings, maximize revenue per guest, and reduce OTA dependency</span> — without adding headcount or changing what makes a property special.
+      </p>
+      <div class="position-grid">
+        <div>
+          <h4>Category</h4>
+          <p>Revenue lift — not "marketing agency", not "RMS software".</p>
+        </div>
+        <div>
+          <h4>For</h4>
+          <p>Boutique and luxury hospitality. 5-star, design-led, independent-spirited.</p>
+        </div>
+        <div>
+          <h4>Differentiator</h4>
+          <p>Hands-on partnership + automation. Outcome priced, not retainer thinking.</p>
+        </div>
+        <div>
+          <h4>Reason to believe</h4>
+          <p>Net revenue generated. We share the number, not the dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCE -->
+<section id="audience">
+  <div class="container">
+    <p class="section-eyebrow">03 · Audience</p>
+    <div class="section-header">
+      <h2>Who we serve.</h2>
+      <p class="kicker">Three personas at the property. We address all three — but the GM is the hero of every conversation.</p>
+    </div>
+
+    <div class="audience-grid">
+      <div class="audience-card">
+        <p class="role">Buyer · Hero</p>
+        <h3>The General Manager</h3>
+        <p class="pain">Knows their reviews are exceptional and OTA dependency is too high. Doesn't have a revenue or marketing team — and doesn't want to build one.</p>
+        <h4>Wins with HILO</h4>
+        <p class="win">Direct booking lift inside one quarter. Guest experience untouched. A partner, not another vendor.</p>
+      </div>
+      <div class="audience-card">
+        <p class="role">Influencer</p>
+        <h3>The Owner</h3>
+        <p class="pain">Cares about the asset. Sees OTA commission as the largest line item they can't seem to dent. Allergic to anything that sounds generic.</p>
+        <h4>Wins with HILO</h4>
+        <p class="win">Predictable monthly cost. Net revenue lift attributable on a P&amp;L. No risk to brand voice.</p>
+      </div>
+      <div class="audience-card">
+        <p class="role">User</p>
+        <h3>The Reservations Lead</h3>
+        <p class="pain">Manually answers inbound, juggles a tired booking engine, and watches upsell opportunities pass by every day.</p>
+        <h4>Wins with HILO</h4>
+        <p class="win">Pre-arrival sequences run themselves. Booking engine actually converts. Their day gets focused, not buried.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERSONALITY -->
+<section id="personality">
+  <div class="container">
+    <p class="section-eyebrow">04 · Personality</p>
+    <div class="section-header">
+      <h2>The HILO temperament.</h2>
+      <p class="kicker">Five traits that describe how we show up. The negative on each axis matters as much as the positive — it's the trap we don't fall into.</p>
+    </div>
+
+    <div class="axes">
+      <div class="axis"><div class="left">Confident</div><div class="marker">not</div><div class="right strike">cocky</div></div>
+      <div class="axis"><div class="left">Refined</div><div class="marker">not</div><div class="right strike">stuffy</div></div>
+      <div class="axis"><div class="left">Specific</div><div class="marker">not</div><div class="right strike">jargon-heavy</div></div>
+      <div class="axis"><div class="left">Direct</div><div class="marker">not</div><div class="right strike">brusque</div></div>
+      <div class="axis"><div class="left">Hospitable</div><div class="marker">not</div><div class="right strike">deferential</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- VOICE -->
+<section id="voice">
+  <div class="container">
+    <p class="section-eyebrow">05 · Voice &amp; Tone</p>
+    <div class="section-header">
+      <h2>How we sound.</h2>
+      <p class="kicker">Our voice is constant. Our tone shifts. Six principles below — they govern every word we publish, send, or paste into a slide.</p>
+    </div>
+
+    <div class="voice-grid">
+      <div class="voice-card"><p class="num">P1</p><h3>Outcome-first.</h3><p>Lead with the number, not the activity. "Recovered $84,400 last month" beats "we ran a campaign".</p></div>
+      <div class="voice-card"><p class="num">P2</p><h3>Plain over polished.</h3><p>If a sentence sounds like marketing, rewrite it. We use the words operators use.</p></div>
+      <div class="voice-card"><p class="num">P3</p><h3>Specific beats clever.</h3><p>Property names, channels, dollar figures, dates. Concrete details earn trust faster than adjectives.</p></div>
+      <div class="voice-card"><p class="num">P4</p><h3>Respect the brand we serve.</h3><p>The property is the protagonist. We're the system underneath. Never compete with their voice.</p></div>
+      <div class="voice-card"><p class="num">P5</p><h3>Short sentences. Earned long ones.</h3><p>Default to clarity. Lengthen only when nuance demands it.</p></div>
+      <div class="voice-card"><p class="num">P6</p><h3>One feeling per sentence.</h3><p>Don't pile on. A confident statement loses its weight when it's chasing a second adjective.</p></div>
+    </div>
+
+    <div class="dodonts">
+      <div class="dodont do">
+        <div class="header"><span class="badge">Use</span></div>
+        <ul>
+          <li>"Recovered $84,400 from abandoned bookings last month."</li>
+          <li>"OTA dependency is the largest cost line you can move."</li>
+          <li>"We charge a flat $15,000/month. Twelve-month contract. Full-service execution."</li>
+          <li>"Your guest experience is the asset. We translate it into revenue."</li>
+          <li>"Net revenue generated. That's the number."</li>
+        </ul>
+      </div>
+      <div class="dodont dont">
+        <div class="header"><span class="badge">Lose</span></div>
+        <ul>
+          <li>"Unlock the power of next-gen revenue intelligence."</li>
+          <li>"World-class, best-in-class, cutting-edge."</li>
+          <li>"Synergy, alignment, holistic, ecosystem."</li>
+          <li>"Are you struggling with low direct bookings?"</li>
+          <li>"Click here to learn more."</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="wordlists">
+      <div class="wordlist use">
+        <p class="label">Words we use</p>
+        <div class="words">
+          <span>Lift</span><span>Net revenue</span><span>Property</span><span>Direct</span>
+          <span>OTA</span><span>Iconic</span><span>Boutique</span><span>Pacing</span>
+          <span>Recovery</span><span>Upsell</span><span>Concierge</span><span>Operator</span>
+          <span>Inventory</span><span>Yield</span><span>Sequence</span><span>Hospitality</span>
+        </div>
+      </div>
+      <div class="wordlist lose">
+        <p class="label">Words we don't</p>
+        <div class="words">
+          <span>Disrupt</span><span>Synergy</span><span>Game-changer</span><span>Unlock</span>
+          <span>Solution</span><span>Empower</span><span>Innovate</span><span>Revolutionize</span>
+          <span>Holistic</span><span>Ecosystem</span><span>Best-in-class</span><span>World-class</span>
+          <span>Hotelier</span><span>Customer</span><span>Click here</span><span>Learn more</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: var(--space-12);">
+      <h3>Tone shifts by context.</h3>
+      <p class="body-large body-muted">The voice doesn't change. The tone meets the moment.</p>
+      <table class="tone-matrix">
+        <thead>
+          <tr><th style="width: 22%">Surface</th><th style="width: 28%">Tone</th><th>How it sounds</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="context">Sales proposal</td>
+            <td class="tone">Confident · specific · partnership-leaning</td>
+            <td class="example">"Your reviews and guest experience are exceptional. The opportunity is to translate that brand equity into revenue."</td>
+          </tr>
+          <tr>
+            <td class="context">In-product copy</td>
+            <td class="tone">Quiet · functional · assistive</td>
+            <td class="example">"Pacing is 19 nights short of forecast. Activate OTA recovery for this weekend?"</td>
+          </tr>
+          <tr>
+            <td class="context">Marketing site</td>
+            <td class="tone">Editorial · declarative · proud</td>
+            <td class="example">"Revenue lift for iconic hospitality."</td>
+          </tr>
+          <tr>
+            <td class="context">Customer success</td>
+            <td class="tone">Direct · attentive · hospitable</td>
+            <td class="example">"We saw the booking issue at 11:14. Re-pushed at 11:31. The reservation is in Opera. No action needed."</td>
+          </tr>
+          <tr>
+            <td class="context">Apology</td>
+            <td class="tone">Plain · accountable · short</td>
+            <td class="example">"That was on us. The sync failed at 09:02. It's running again now. Here's what we're doing to prevent it."</td>
+          </tr>
+          <tr>
+            <td class="context">Internal · partner-to-partner</td>
+            <td class="tone">Plainspoken · technical · warm</td>
+            <td class="example">"Pacing call at 9. Bring the Carlyle and Cheval Blanc dashboards. Skip Singita — they paused."</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- VERBAL IDENTITY -->
+<section id="verbal">
+  <div class="container">
+    <p class="section-eyebrow">06 · Verbal Identity</p>
+    <div class="section-header">
+      <h2>How we name and describe.</h2>
+      <p class="kicker">The fixed pieces — the ones that show up every time. Tagline, messaging hierarchy, boilerplate. Memorize these.</p>
+    </div>
+
+    <h3>Naming</h3>
+    <p class="body-large body-muted" style="margin-bottom: var(--space-6);">
+      <strong style="font-weight: 500; color: var(--fg-default);">HILO</strong>, all caps, always. Never "Hilo", "hilo", or "Hi-Lo". The legal entity is HILO People Inc.
+      The customer-facing voice is HILO.
+    </p>
+
+    <h3 style="margin-top: var(--space-10);">Tagline</h3>
+    <div class="pull-quote" style="border-left-color: var(--hilo-blue-500);">
+      Revenue Lift for Iconic Hospitality.
+      <span class="source">Primary tagline · all surfaces</span>
+    </div>
+
+    <h3 style="margin-top: var(--space-10);">Messaging hierarchy</h3>
+    <div class="messaging-stack">
+      <div class="message-row h1">
+        <span class="level">H1 · Promise</span>
+        <span class="copy">Revenue lift for iconic hospitality.</span>
+      </div>
+      <div class="message-row h2">
+        <span class="level">H2 · Pillar 1</span>
+        <span class="copy">Direct booking lift — without losing the OTA insurance.</span>
+      </div>
+      <div class="message-row h2">
+        <span class="level">H2 · Pillar 2</span>
+        <span class="copy">More revenue per guest, automated.</span>
+      </div>
+      <div class="message-row h2">
+        <span class="level">H2 · Pillar 3</span>
+        <span class="copy">A partnership, priced on outcome.</span>
+      </div>
+      <div class="message-row h3">
+        <span class="level">H3 · Proof</span>
+        <span class="copy">Properties we partner with across LATAM, US, and Spain typically see direct booking revenue grow inside the first quarter — without adding headcount or changing what makes them special.</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top: var(--space-12);">Boilerplate</h3>
+    <p class="body-muted" style="margin-bottom: var(--space-4); font-size: 14px;">For press, partnerships, and the bottom of the proposal. Three lengths — pick the one that fits the space.</p>
+
+    <div class="boilerplate" style="margin-bottom: var(--space-4);">
+      <p class="length">25 words · single sentence</p>
+      <p>HILO is a revenue lift company for boutique and luxury hospitality, helping iconic properties grow direct bookings and revenue per guest without changing what makes them special.</p>
+    </div>
+
+    <div class="boilerplate" style="margin-bottom: var(--space-4);">
+      <p class="length">75 words · short paragraph</p>
+      <p>HILO is a revenue lift company for boutique and luxury hospitality. We combine hands-on strategy with automation, AI, and performance marketing to help iconic properties increase direct bookings, maximize revenue per guest, and reduce OTA dependency. Based in Madrid and operating across LATAM, the US, and Spain, we measure the success of every partnership in net revenue generated — not clicks, traffic, or percentages.</p>
+    </div>
+
+    <div class="boilerplate">
+      <p class="length">150 words · long form</p>
+      <p>HILO is a revenue lift company for boutique and luxury hospitality. Most iconic properties deliver an exceptional guest experience yet leave material revenue on the table — through OTA over-reliance, weak direct conversion, and missed upsell moments before and during the stay.</p>
+      <p>HILO closes that gap with a hands-on partnership backed by automation, AI, and performance marketing. We optimize the booking engine, run pre-arrival upsell sequences, recover abandoned bookings, and tune yield against demand — without changing what makes the property special.</p>
+      <p>Properties we partner with across LATAM, the US, and Spain typically see direct booking revenue grow inside the first quarter. Pricing is a flat $15,000 per month on a twelve-month contract, full-service execution. We measure the success of every partnership in net revenue generated, not clicks, traffic, or percentages.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VISUAL IDENTITY -->
+<section id="visual">
+  <div class="container">
+    <p class="section-eyebrow">07 · Visual Identity</p>
+    <div class="section-header">
+      <h2>How we show up.</h2>
+      <p class="kicker">The wordmark, our color story, our typeface, and how we use photography. Component-level rules live in the design system — this is the brand-level reasoning.</p>
+    </div>
+
+    <h3>Wordmark</h3>
+    <p class="body-large body-muted" style="margin-bottom: var(--space-6);">
+      HILO is a wordmark, never a logotype with a symbol. Satoshi Bold, all caps, normal tracking. The space around it is the hero — we don't add ornamental elements.
+    </p>
+    <div class="logo-stage"><span class="logo-mark">HILO</span></div>
+
+    <div class="logo-rules">
+      <div class="logo-rule"><h4>Clearspace</h4><p>Minimum margin equal to the height of the H. Never tighter.</p></div>
+      <div class="logo-rule"><h4>Minimum size</h4><p>16px on screen. 12pt in print. Below that, use the favicon mark.</p></div>
+      <div class="logo-rule"><h4>Color</h4><p>Black on light. White on dark. Cobalt only for brand moments.</p></div>
+      <div class="logo-rule"><h4>Co-branding</h4><p>HILO sits left, partner sits right, separated by a vertical hairline at 60% opacity.</p></div>
+    </div>
+
+    <h3 style="margin-top: var(--space-12);">Don'ts</h3>
+    <div class="misuse-grid">
+      <div class="misuse"><span class="preview" style="font-style: italic; font-size: 28px;">HILO</span><span class="label">Don't italicize</span></div>
+      <div class="misuse"><span class="preview" style="background: var(--hilo-blue-500); color: white; padding: 6px 12px; font-size: 28px; border-radius: 8px;">HILO</span><span class="label">Don't enclose</span></div>
+      <div class="misuse"><span class="preview" style="font-weight: 400; font-size: 28px;">HILO</span><span class="label">Don't lighten the weight</span></div>
+      <div class="misuse"><span class="preview" style="font-size: 28px; text-transform: capitalize;">Hilo</span><span class="label">Don't lowercase</span></div>
+      <div class="misuse"><span class="preview" style="font-family: var(--font-serif); font-size: 28px;">HILO</span><span class="label">Don't change the font</span></div>
+      <div class="misuse"><span class="preview" style="font-size: 28px; letter-spacing: 0.2em;">H I L O</span><span class="label">Don't track loose</span></div>
+    </div>
+
+    <h3 style="margin-top: var(--space-12);">Color story</h3>
+    <p class="body-large body-muted" style="margin-bottom: var(--space-6);">
+      Three voices. Cobalt for action. Ink for authority. Paper for rest. Anything else is a guest, not a host.
+    </p>
+    <div class="color-story">
+      <div class="color-tile cobalt">
+        <h3>HILO Cobalt</h3>
+        <p>The voice of action. Reserved for primary CTAs, focus states, brand moments, and the wordmark in feature contexts. Used sparingly so it always lands.</p>
+        <span class="meta">#3D4AE5 · --hilo-blue-500</span>
+      </div>
+      <div class="color-tile ink">
+        <h3>Ink</h3>
+        <p>The voice of authority. The wordmark, body type at full strength, headlines that need to land. Near-black, never pure.</p>
+        <span class="meta">#0A0B12 · --neutral-950</span>
+      </div>
+      <div class="color-tile paper" style="grid-column: 1 / -1; min-height: 200px;">
+        <h3>Paper</h3>
+        <p>The voice of rest. The stage on which everything performs. Generous, quiet, almost-but-not-quite-white.</p>
+        <span class="meta">#FBFBFC · --neutral-25</span>
+      </div>
+    </div>
+
+    <h3 style="margin-top: var(--space-12);">Typography</h3>
+    <p class="body-large body-muted" style="margin-bottom: var(--space-6);">
+      Satoshi Variable for everything — wordmark, display moments, body, tabular figures, and code. One family, hierarchy carried by size and case rather than aggressive weight stepping. Most copy lives at 400 Regular; 700 Bold is reserved for the wordmark and inline emphasis; 500 Medium for small uppercase CTAs; 300 Light for fine print only. The full type scale is documented in the <a href="hilo-design-system.html#typography" style="color: var(--fg-brand); text-decoration: none; font-weight: 500;">design system</a>.
+    </p>
+
+    <h3 style="margin-top: var(--space-12);">Photography</h3>
+    <p class="body-large body-muted" style="margin-bottom: var(--space-4);">
+      We work in hospitality photography — moody, considered, hour-of-day specific. The property is the subject; we are the frame around it. Four registers, never people-as-models, and a single hour of light per asset.
+    </p>
+
+    <h4 style="margin-top: var(--space-8); color: var(--fg-default); font-size: 13px;">Subject categories</h4>
+    <div class="imagery-grid">
+      <div class="image-rule architecture">
+        <div class="visual"><span>Architecture · golden hour</span></div>
+        <div class="body">
+          <h4>Architecture</h4>
+          <p>Quiet hero shots — façade, courtyard, empty pool at the golden hour or blue hour. No people, no occupation. The room before service. The lobby before guests. Symmetry, depth, a single point of light.</p>
+        </div>
+      </div>
+      <div class="image-rule detail">
+        <div class="visual"><span style="color: rgba(40,30,20,0.85);">Detail · texture</span></div>
+        <div class="body">
+          <h4>Detail</h4>
+          <p>Close crops — a turned-down bed, a wax-sealed envelope, a folded napkin, a bath drawn in marble, brass tap, candle wick caught mid-light. Texture over scale. Tactile, not styled-flat.</p>
+        </div>
+      </div>
+      <div class="image-rule environment">
+        <div class="visual"><span>Environment · place</span></div>
+        <div class="body">
+          <h4>Environment</h4>
+          <p>The sense of place — the city at first light, a coastline aerial, a jungle canopy, a desert dune at dusk. Establishes geography. The property's host context, never the property itself.</p>
+        </div>
+      </div>
+      <div class="image-rule guest">
+        <div class="visual"><span>Guest · abstracted</span></div>
+        <div class="body">
+          <h4>Guest, abstracted</h4>
+          <p>A hand on a banister. The hem of a robe. A foot on warm stone. Movement, gesture, the edge of the frame. Never a face. The guest is implied, never modeled. If you can identify the person, recompose.</p>
+        </div>
+      </div>
+    </div>
+
+    <h4 style="margin-top: var(--space-12); color: var(--fg-default); font-size: 13px;">Color grading direction</h4>
+    <div class="photo-rules-grid">
+      <div class="photo-rule-card"><p class="label">G1</p><h4>Pull highlights down</h4><p>No blown skies, no glare on chrome. Cap whites at 92% to retain texture.</p></div>
+      <div class="photo-rule-card"><p class="label">G2</p><h4>Lift shadows lightly</h4><p>Open the blacks just enough to read the room. Never crush — the depth is the drama.</p></div>
+      <div class="photo-rule-card"><p class="label">G3</p><h4>Warm whites</h4><p>White balance leans tungsten. No cool fluorescent cast. Walls should read off-cream.</p></div>
+      <div class="photo-rule-card"><p class="label">G4</p><h4>Slight desaturation</h4><p>Pull saturation 10–15%. Color should feel observed, not amplified.</p></div>
+      <div class="photo-rule-card"><p class="label">G5</p><h4>Single hour of day</h4><p>Match every photo in a set to one light condition. Mixed times read as a stock library.</p></div>
+      <div class="photo-rule-card"><p class="label">G6</p><h4>Grain over noise</h4><p>If grain is needed, add it intentionally. Suppress digital noise — film texture, never sensor texture.</p></div>
+    </div>
+
+    <h4 style="margin-top: var(--space-12); color: var(--fg-default); font-size: 13px;">Composition rules</h4>
+    <div class="photo-rules-grid">
+      <div class="photo-rule-card"><p class="label">C1</p><h4>Negative space wins</h4><p>40% of every frame is air. We need it for type — and luxury reads as restraint.</p></div>
+      <div class="photo-rule-card"><p class="label">C2</p><h4>One subject per frame</h4><p>If there are two stories, take two photos. Density signals discount.</p></div>
+      <div class="photo-rule-card"><p class="label">C3</p><h4>Symmetry or strong asymmetry</h4><p>Center the bed, or push it hard left. Never split the difference.</p></div>
+      <div class="photo-rule-card"><p class="label">C4</p><h4>Eye line at hospitality height</h4><p>Camera at 1.4–1.6m for room shots. Standing-tourist height looks transactional.</p></div>
+      <div class="photo-rule-card"><p class="label">C5</p><h4>Aspect ratios</h4><p>4:5 (vertical) for social. 3:2 for editorial and proposals. Never 16:9 in feed — too cinematic for photography.</p></div>
+      <div class="photo-rule-card"><p class="label">C6</p><h4>No watermark on partner imagery</h4><p>The HILO mark goes on our originals only. Partner photography is theirs, attributed.</p></div>
+    </div>
+
+    <h4 style="margin-top: var(--space-12); color: var(--fg-default); font-size: 13px;">Mood reference — partner imagery</h4>
+    <p class="body-muted" style="font-size: 14px; margin-bottom: var(--space-6); max-width: 60ch;">
+      Eight photographs from across the partner network. Range — alpine, ocean, desert, vineyard, tundra, coast — held together by hour-of-day discipline, restrained palette, and absent-of-people composition.
+    </p>
+    <div class="ig-grid mood-4">
+      <div class="ig-tile photo-tatras scrim-bottom"><div class="content"><span class="ig-kicker">Architecture · alpine winter</span></div></div>
+      <div class="ig-tile photo-iceland scrim-bottom"><div class="content"><span class="ig-kicker">Architecture · tundra</span></div></div>
+      <div class="ig-tile photo-yacht-dusk scrim-bottom"><div class="content"><span class="ig-kicker">Environment · golden hour</span></div></div>
+      <div class="ig-tile photo-vessel scrim-bottom"><div class="content"><span class="ig-kicker">Environment · open ocean</span></div></div>
+      <div class="ig-tile photo-guadalupe scrim-bottom"><div class="content"><span class="ig-kicker">Detail · valley · warm hour</span></div></div>
+      <div class="ig-tile photo-retuerta scrim-bottom"><div class="content"><span class="ig-kicker">Detail · vineyard</span></div></div>
+      <div class="ig-tile photo-atacama scrim-bottom"><div class="content"><span class="ig-kicker">Guest · abstracted · desert</span></div></div>
+      <div class="ig-tile photo-bahamas scrim-bottom"><div class="content"><span class="ig-kicker">Environment · aerial · coast</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL -->
+<section id="social">
+  <div class="container">
+    <p class="section-eyebrow">08 · Social</p>
+    <div class="section-header">
+      <h2>How we appear in the feed.</h2>
+      <p class="kicker">Two surfaces, two registers. Instagram is photography-led — copy sits on top of the image. LinkedIn is operator-led — substance over polish. Both speak with the same voice.</p>
+    </div>
+
+    <h3>Instagram</h3>
+    <p class="body-large body-muted" style="margin-bottom: var(--space-6);">
+      The feed reads as a single composed surface. Every nine posts make a grid — the grid is the brand. Photography first, type second, brand mark last and small.
+    </p>
+
+    <h4 style="margin-top: var(--space-8); color: var(--fg-default); font-size: 13px;">A representative 3 × 3 grid</h4>
+    <p class="body-muted" style="font-size: 14px; margin-bottom: var(--space-6); max-width: 60ch;">
+      Demonstrates the rhythm: hero photograph, principle quote, detail crop, result number, brand moment, principle quote, headline, abstracted guest, environment. The Cobalt brand-moment tile in the center anchors the composition.
+    </p>
+
+    <div class="ig-grid">
+      <!-- Tile 1: Architecture hero — Tatras chalet -->
+      <div class="ig-tile photo-tatras scrim-bottom">
+        <span class="ig-attr" style="color: rgba(255,255,255,0.85);">High Tatras, Slovakia</span>
+        <span class="ig-mark ig-mark-corner">HILO</span>
+      </div>
+      <!-- Tile 2: Pull quote — Iceland ION -->
+      <div class="ig-tile photo-iceland center scrim-radial">
+        <div class="content">
+          <span class="ig-quote large">Net revenue<br>generated.</span>
+        </div>
+      </div>
+      <!-- Tile 3: Detail crop — Retuerta vineyard -->
+      <div class="ig-tile photo-retuerta scrim-bottom">
+        <div class="content">
+          <span class="ig-kicker">11:18 · Sardón de Duero</span>
+        </div>
+      </div>
+      <!-- Tile 4: Result number — Galápagos yacht at dusk -->
+      <div class="ig-tile photo-yacht-dusk scrim-bottom">
+        <div class="content">
+          <span class="ig-result">$84,400</span>
+          <span class="ig-result-meta">June · partner property · direct</span>
+        </div>
+      </div>
+      <!-- Tile 5: Cobalt brand moment -->
+      <div class="ig-tile bg-cobalt center">
+        <div class="content">
+          <span class="ig-mark large" style="color: white;">HILO</span>
+        </div>
+      </div>
+      <!-- Tile 6: Principle quote — Guadalupe loungers -->
+      <div class="ig-tile photo-guadalupe scrim-bottom" style="padding: var(--space-5);">
+        <div class="content">
+          <span class="ig-quote">Without changing<br>what makes you<br>special.</span>
+        </div>
+      </div>
+      <!-- Tile 7: Headline kicker — Bahamas aerial -->
+      <div class="ig-tile photo-bahamas scrim-bottom">
+        <div class="content">
+          <span class="ig-kicker">Revenue strategy</span>
+          <span class="ig-quote">More per guest.<br>Same guest.</span>
+        </div>
+      </div>
+      <!-- Tile 8: Abstracted guest — Atacama horseback -->
+      <div class="ig-tile photo-atacama scrim-bottom">
+        <div class="content">
+          <span class="ig-kicker">Pre-arrival · the hour before check-in</span>
+        </div>
+      </div>
+      <!-- Tile 9: Environment with attribution — Galápagos vessel -->
+      <div class="ig-tile photo-vessel scrim-bottom">
+        <span class="ig-attr" style="color: rgba(255,255,255,0.85);">Galápagos Islands</span>
+        <span class="ig-mark ig-mark-corner">HILO</span>
+      </div>
+    </div>
+
+    <h4 style="margin-top: var(--space-12); color: var(--fg-default); font-size: 13px;">Post categories &amp; cadence</h4>
+    <div class="cat-grid">
+      <div class="cat-row">
+        <div><div class="name">Property hero</div><span class="when">Architecture · 4:5</span></div>
+        <p class="desc">A single photograph, no copy on the image. Caption tells the story. Always attributed in the lower-left corner. The wordmark sits bottom-right at 14pt.</p>
+        <span class="freq">2 of every 9</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Pull quote</div><span class="when">Quote on photo</span></div>
+        <p class="desc">A HILO operating principle in display weight, set on a moody dusk or detail tile. Center-aligned, near-white text, radial scrim. Maximum 7 words.</p>
+        <span class="freq">2 of every 9</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Result card</div><span class="when">Number-led</span></div>
+        <p class="desc">A specific dollar figure or percentage point, set on a property-context image. Mono caption underneath: month, property, channel. Anonymous when permission isn't granted.</p>
+        <span class="freq">1 of every 9</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Detail crop</div><span class="when">Texture · 1:1</span></div>
+        <p class="desc">A tactile close-up — brass, linen, candle, paper. Mono kicker only ("06:42 · Madrid"). The image carries the entire weight.</p>
+        <span class="freq">1 of every 9</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Headline kicker</div><span class="when">Editorial</span></div>
+        <p class="desc">Mono caption in caps + display headline below. Two lines max. Used to introduce a carousel essay or a longer LinkedIn cross-post.</p>
+        <span class="freq">1 of every 9</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Brand moment</div><span class="when">HILO Cobalt · solid</span></div>
+        <p class="desc">A solid Cobalt tile with the HILO wordmark centered. The grid's punctuation. Used once per nine, never twice in a row.</p>
+        <span class="freq">1 of every 9</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Environment</div><span class="when">Place · location</span></div>
+        <p class="desc">The city, coast, jungle, dune. Establishes where the partnership lives. Mono caption with the city name. Never a famous landmark — too obvious.</p>
+        <span class="freq">1 of every 9</span>
+      </div>
+    </div>
+
+    <h4 style="margin-top: var(--space-12); color: var(--fg-default); font-size: 13px;">Copy-on-photography treatment rules</h4>
+    <div class="treatment-grid">
+      <div class="treatment-card"><p class="num">T1</p><h4>Scrim, always</h4><p>A 0–55% black gradient bottom-up, or radial for centered quotes. Never type on raw photography — readability over poetry.</p></div>
+      <div class="treatment-card"><p class="num">T2</p><h4>Near-white, not pure white</h4><p>Type at <code>rgba(255,255,255,0.95)</code>. Pure white reads as tech. The slight softness reads as editorial.</p></div>
+      <div class="treatment-card"><p class="num">T3</p><h4>Satoshi Bold, uppercase</h4><p>700 Bold + UPPERCASE for type on photography. Lighter weights disappear at small sizes. Tracking normal (0).</p></div>
+      <div class="treatment-card"><p class="num">T4</p><h4>Maximum 7 words</h4><p>If the line breaks past two rows on a 4:5 frame, cut it. The point is to land — not to read aloud.</p></div>
+      <div class="treatment-card"><p class="num">T5</p><h4>Anchor to one corner</h4><p>Bottom-left for stories, bottom-right for the wordmark, dead-center for principle quotes. Never floating mid-frame.</p></div>
+      <div class="treatment-card"><p class="num">T6</p><h4>Sentence case · period at end</h4><p>"Net revenue generated." reads like a statement. "Net Revenue Generated" reads like a feature name.</p></div>
+      <div class="treatment-card"><p class="num">T7</p><h4>No type on detail crops</h4><p>The texture is the message. A caption underneath the image is fine; type on top compromises both.</p></div>
+      <div class="treatment-card"><p class="num">T8</p><h4>HILO mark at 14pt, optical bottom-right</h4><p>Optical alignment, not pixel-perfect. 12px from bottom edge, 14px from right edge. Same on every post.</p></div>
+    </div>
+
+    <h3 style="margin-top: var(--space-16);">LinkedIn</h3>
+    <p class="body-large body-muted" style="margin-bottom: var(--space-6);">
+      LinkedIn is where buyers read. Less moody, more substance. We lead with the result and tell the operational story underneath. One image per post, always — never the carousel-of-stats template that made LinkedIn boring.
+    </p>
+
+    <h4 style="margin-top: var(--space-8); color: var(--fg-default); font-size: 13px;">Three post categories with examples</h4>
+
+    <div class="li-grid" style="margin-top: var(--space-6);">
+
+      <!-- Post A: Number-led case story -->
+      <div class="li-post">
+        <div class="hero photo-iceland">
+          <div class="text">
+            <span class="kicker">Case · The Carlyle, NY</span>
+            <h4>$84,400 in recovered<br>direct bookings.<br>One month.</h4>
+          </div>
+        </div>
+        <div class="body">
+          <div class="author">
+            <div class="avatar-li">H</div>
+            <div class="author-meta"><strong>Eric Schvartzman · HILO</strong><span>Partner · 2d</span></div>
+          </div>
+          <p>The Carlyle's reviews and guest experience were already exceptional. The OTA dependency wasn't.</p>
+          <p>We rebuilt the booking engine flow, ran abandonment recovery, and tuned yield against a soft midweek window. <strong>$84,400 net, attributed, in June.</strong></p>
+          <p>Three things mattered: the booking engine actually converting, abandoned-cart recovery in under 30 minutes, and pacing-aware pricing on the soft nights. Nothing the property hadn't already imagined — just executed in concert.</p>
+          <p class="hashtags">#hospitality · #directbookings</p>
+        </div>
+        <div class="li-cat-meta"><span>Category · Case story</span><span>Cadence · weekly</span></div>
+      </div>
+
+      <!-- Post B: Principle post -->
+      <div class="li-post">
+        <div class="hero photo-yacht-dusk">
+          <div class="text">
+            <span class="kicker">Operating principle</span>
+            <h4>Net revenue<br>generated.<br>That's the number.</h4>
+          </div>
+        </div>
+        <div class="body">
+          <div class="author">
+            <div class="avatar-li">H</div>
+            <div class="author-meta"><strong>HILO</strong><span>Company · 5d</span></div>
+          </div>
+          <p>We measure the success of every partnership in net revenue generated. <strong>Not clicks. Not traffic. Not percentages.</strong></p>
+          <p>It's a discipline more than a slogan. It changes what we report, what we test, and what we say no to. If we can't tie an activity to a dollar moved on the property's P&amp;L, we don't run it.</p>
+          <p>It also changes the conversation with owners. We share the number, not the dashboard.</p>
+          <p class="hashtags">#luxuryhospitality · #revenuemanagement</p>
+        </div>
+        <div class="li-cat-meta"><span>Category · Principle</span><span>Cadence · biweekly</span></div>
+      </div>
+
+      <!-- Post C: Industry observation -->
+      <div class="li-post">
+        <div class="hero photo-bahamas">
+          <div class="text">
+            <span class="kicker">Industry observation</span>
+            <h4>Most boutique<br>properties leave<br>25 points on OTAs.</h4>
+          </div>
+        </div>
+        <div class="body">
+          <div class="author">
+            <div class="avatar-li">H</div>
+            <div class="author-meta"><strong>Eric Schvartzman · HILO</strong><span>Partner · 1w</span></div>
+          </div>
+          <p>The math is unforgiving. <strong>Twenty-five percentage points of bookable nights, sent through OTAs, paying 15–25% commission.</strong></p>
+          <p>For a property doing $4M in room revenue, that's $150–250k a year leaving the building — most of it on weeks where the direct channel could have closed the same guest.</p>
+          <p>The fix is rarely "spend more on Google." It's a direct booking engine that converts, an email capture worth opening, and recovery flows that are already running by the time the OTA tab closes.</p>
+          <p class="hashtags">#hotels · #revenuelift · #OTA</p>
+        </div>
+        <div class="li-cat-meta"><span>Category · Observation</span><span>Cadence · weekly</span></div>
+      </div>
+
+    </div>
+
+    <h4 style="margin-top: var(--space-12); color: var(--fg-default); font-size: 13px;">LinkedIn rhythm</h4>
+    <div class="cat-grid">
+      <div class="cat-row">
+        <div><div class="name">Case story</div><span class="when">Monday</span></div>
+        <p class="desc">A specific property, a specific dollar figure, the operational story behind it. Anonymized when partnership permission isn't granted. Open with the number, then the property, then how.</p>
+        <span class="freq">Weekly</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Operating principle</div><span class="when">Wednesday</span></div>
+        <p class="desc">A HILO principle expanded into a paragraph. Less moody than Instagram — explanatory, almost essay-like. Always rooted in a real client conversation we've had this month.</p>
+        <span class="freq">Bi-weekly</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Industry observation</div><span class="when">Thursday</span></div>
+        <p class="desc">Sharp take on something happening in luxury hospitality — a market shift, a competitor move, an OTA change. Open with a stat, close with what we'd do.</p>
+        <span class="freq">Weekly</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Property feature</div><span class="when">Quarter</span></div>
+        <p class="desc">A partner property's permission-granted result. Photo-forward, longer caption, named partner. Used 2–3 times per quarter — saves the punch.</p>
+        <span class="freq">Quarterly</span>
+      </div>
+      <div class="cat-row">
+        <div><div class="name">Company milestone</div><span class="when">As earned</span></div>
+        <p class="desc">A new market, a hire, a partnership announcement. Plain language — no corporate-comms voice. Always tied back to what it means for properties.</p>
+        <span class="freq">As earned</span>
+      </div>
+    </div>
+
+    <h4 style="margin-top: var(--space-12); color: var(--fg-default); font-size: 13px;">Format rules — both platforms</h4>
+    <div class="treatment-grid">
+      <div class="treatment-card"><p class="num">F1</p><h4>Open with the number</h4><p>Or the property name. Or the place. Never with "Excited to share" or "Big news".</p></div>
+      <div class="treatment-card"><p class="num">F2</p><h4>One image per post</h4><p>No carousels of stats, no template-driven slide decks. The single image is the discipline.</p></div>
+      <div class="treatment-card"><p class="num">F3</p><h4>Hashtags at end · maximum 3</h4><p>Inline mentions of properties only with permission and tagged. Never hashtag the property name.</p></div>
+      <div class="treatment-card"><p class="num">F4</p><h4>Sentence-case captions</h4><p>Title Case in social copy reads as marketing-trying-too-hard. Sentence case reads as a person speaking.</p></div>
+      <div class="treatment-card"><p class="num">F5</p><h4>No emoji in copy</h4><p>Anywhere. The wordmark and the type carry the brand — emoji compete with both. (Exception: a single ◆ as a section break in long captions, sparingly.)</p></div>
+      <div class="treatment-card"><p class="num">F6</p><h4>Properties named only with permission</h4><p>Default is anonymous. "A property in Madrid" beats name-dropping without sign-off — every time.</p></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- APPLICATION -->
+<section id="application">
+  <div class="container">
+    <p class="section-eyebrow">09 · Application</p>
+    <div class="section-header">
+      <h2>How we appear in the wild.</h2>
+      <p class="kicker">A few representative examples — the first time HILO is encountered should feel of a piece, regardless of where it shows up.</p>
+    </div>
+
+    <div class="app-grid">
+      <div class="app-card">
+        <p class="role">Email signature</p>
+        <div class="preview is-signature">
+          <span class="ll">HILO</span>
+          Eric Schvartzman · Partner<br>
+          eric@hilopeople.com<br>
+          hilopeople.com · Madrid
+        </div>
+        <p class="note">Wordmark, name, role, email, site, city. Nothing else.</p>
+      </div>
+
+      <div class="app-card">
+        <p class="role">Cold email · subject line</p>
+        <div class="preview" style="font-family: var(--font-display); font-weight: 500;">
+          The Carlyle, $84k of recoverable direct bookings.
+        </div>
+        <p class="note">Specific. Property name. Number. Action implied. No question mark.</p>
+      </div>
+
+      <div class="app-card">
+        <p class="role">Slide kicker</p>
+        <div class="preview" style="display: flex; flex-direction: column; justify-content: space-between; min-height: 100px;">
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--fg-subtle); text-transform: uppercase; letter-spacing: 0.06em;">REVENUE STRATEGY</span>
+          <span class="ll" style="font-size: 22px; font-weight: 700;">More revenue per guest,<br>without changing the guest.</span>
+        </div>
+        <p class="note">Eyebrow in mono caps. Headline in display weight. Always sentence case.</p>
+      </div>
+
+      <div class="app-card">
+        <p class="role">Social · LinkedIn opener</p>
+        <div class="preview" style="font-size: 14px;">
+          We measure partnership success in net revenue generated. Not clicks. Not traffic. Not percentages.<br><br>
+          A short story about a property in Madrid, a tired booking engine, and a quiet $94,000 month →
+        </div>
+        <p class="note">Open with the principle. Earn the click with specificity.</p>
+      </div>
+
+      <div class="app-card">
+        <p class="role">Out-of-office</p>
+        <div class="preview" style="font-size: 14px;">
+          Off until Monday — at a partner property, walking the floor.<br><br>
+          For anything urgent: hola@hilopeople.com.<br>
+          Otherwise I'll see you back inbox-side soon.
+        </div>
+        <p class="note">Hospitable. Worldly. Not corporate.</p>
+      </div>
+
+      <div class="app-card">
+        <p class="role">Error message · in-app</p>
+        <div class="preview" style="font-size: 14px;">
+          <strong style="font-weight: 500; color: var(--fg-default);">Stripe sync paused at 09:02.</strong><br>
+          We're re-running the connection now. No action needed on your end.
+        </div>
+        <p class="note">Specific time. Active fix. Reassurance. No apologies that promise nothing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GUARDRAILS -->
+<section id="guardrails">
+  <div class="container">
+    <p class="section-eyebrow">10 · Guardrails</p>
+    <div class="section-header">
+      <h2>What never ships in our name.</h2>
+      <p class="kicker">When in doubt, these win — over taste, over speed, over the urge to sound like everyone else in tech.</p>
+    </div>
+
+    <div class="guardrails">
+      <div class="guardrail">
+        <h4>Don't compete with the property's voice.</h4>
+        <p>The hotel is the protagonist of the guest's experience. We are the system underneath. Our copy never appears in front of guests except in the property's voice.</p>
+      </div>
+      <div class="guardrail">
+        <h4>Don't promise outcomes we can't measure.</h4>
+        <p>If we can't tie it to net revenue generated, we don't claim it. "Brand awareness", "engagement", "thought leadership" — out.</p>
+      </div>
+      <div class="guardrail">
+        <h4>Don't write about technology for its own sake.</h4>
+        <p>AI and automation are tools, not features. Lead with what they do for the property, never with what they are.</p>
+      </div>
+      <div class="guardrail">
+        <h4>Don't use stock people in imagery.</h4>
+        <p>Ever. Faces are a slippery slope to a category we are not — generic SaaS. The guest is implied, not modeled.</p>
+      </div>
+      <div class="guardrail">
+        <h4>Don't open a sentence with a question to the prospect.</h4>
+        <p>"Are you struggling with..." is a tell. We open with a number, a place, or a position.</p>
+      </div>
+      <div class="guardrail">
+        <h4>Don't use the word "solution".</h4>
+        <p>It's a tax word. We say "system", "approach", "lever", or — better — what the thing actually does.</p>
+      </div>
+      <div class="guardrail">
+        <h4>Don't ship a deck without a number.</h4>
+        <p>Every HILO presentation contains at least one specific dollar figure or percentage point in the first three slides. If the answer is "we don't have one yet", we work the deal harder.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="row">
+      <span>HILO Brand Book v1.0 · © 2026 HILO People Inc.</span>
+      <span>Pairs with the <a href="hilo-design-system.html" style="color: var(--fg-brand); text-decoration: none; font-weight: 500;">HILO Design System</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var html = document.documentElement;
+  var btn = document.getElementById('themeToggle');
+  var label = document.getElementById('themeLabel');
+  var icon = document.getElementById('themeIcon');
+  function set(theme) {
+    html.setAttribute('data-theme', theme);
+    label.textContent = theme === 'dark' ? 'Dark' : 'Light';
+    if (theme === 'dark') {
+      icon.innerHTML = '<path d="M14 9.5A6 6 0 1 1 6.5 2a4.5 4.5 0 0 0 7.5 7.5z"/>';
+    } else {
+      icon.innerHTML = '<circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M1 8h2M13 8h2M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/>';
+    }
+    try { localStorage.setItem('hilo-theme', theme); } catch (e) {}
+  }
+  btn.addEventListener('click', function(){
+    set(html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+  try {
+    var saved = localStorage.getItem('hilo-theme');
+    if (saved) set(saved);
+  } catch (e) {}
+  document.querySelectorAll('.topnav nav a').forEach(function(a){
+    a.addEventListener('click', function(e){
+      var id = a.getAttribute('href').slice(1);
+      var el = document.getElementById(id);
+      if (el) { e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
