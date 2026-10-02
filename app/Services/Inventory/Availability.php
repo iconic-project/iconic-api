@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Inventory;
 
-use App\Enums\CabinCategory;
 use App\Enums\CabinState;
 use App\Enums\ClaimKind;
 use App\Enums\DepartureStatus;
@@ -38,7 +37,7 @@ final class Availability
             ? $departures
             : new EloquentCollection($departures->all());
 
-        $models->loadMissing(['property.cabins', 'itinerary']);
+        $models->loadMissing(['property.cabins.roomType', 'itinerary']);
 
         $claims = CabinClaim::query()
             ->whereIn('departure_id', $models->modelKeys())
@@ -115,7 +114,7 @@ final class Availability
         $activeByCabin = $claims
             ->filter(fn (CabinClaim $claim): bool => $claim->released_at === null)
             ->filter(fn (CabinClaim $claim): bool => ! $this->isExpiredHold($claim))
-            ->keyBy('cabin_id');
+            ->keyBy('room_id');
 
         $rows = [];
         $sold = 0;
@@ -133,7 +132,7 @@ final class Availability
                 'cabin' => [
                     'code' => $cabin->code,
                     'label' => $cabin->label,
-                    'category' => $cabin->category->value,
+                    'category' => $cabin->roomType->code,
                 ],
                 'state' => $state->value,
                 'claim' => $claim instanceof CabinClaim ? $this->claimSummary($claim) : null,
@@ -147,7 +146,7 @@ final class Availability
             };
 
             if ($state === CabinState::Free) {
-                if ($cabin->category === CabinCategory::Owner) {
+                if ($cabin->roomType->code === 'OWNER') {
                     $ownerFree = true;
                 } else {
                     $suitesFree++;

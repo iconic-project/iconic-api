@@ -56,7 +56,7 @@ function templateBooking(): Booking
     ]);
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S7')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S7')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-1101',
         'total' => 26600,

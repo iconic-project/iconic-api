@@ -14,10 +14,10 @@ use App\Enums\ReferenceType;
 use App\Events\BookingCreated;
 use App\Exceptions\CabinUnavailableException;
 use App\Models\Booking;
-use App\Models\Cabin;
 use App\Models\Contact;
 use App\Models\Departure;
 use App\Models\Group;
+use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\ClaimService;
@@ -79,7 +79,7 @@ final class CreateReservation extends Action
                 $commission = $this->commissions->resolve(
                     $data,
                     $departure,
-                    $party->cabin?->category,
+                    $party->cabin?->pricingCategory(),
                 );
 
                 $booking = $this->createBooking(
@@ -205,7 +205,7 @@ final class CreateReservation extends Action
             'request_reference' => null,
             'type' => $quote->type,
             'departure_id' => $quote->departure->id,
-            'cabin_id' => $party->cabin?->id,
+            'room_id' => $party->cabin?->id,
             'contact_id' => $contact->id,
             'group_id' => $group?->id,
             'owner_id' => $actor->id,
@@ -279,9 +279,9 @@ final class CreateReservation extends Action
         return strtoupper(trim($code));
     }
 
-    private function requireCabin(QuotedParty $party): Cabin
+    private function requireCabin(QuotedParty $party): Room
     {
-        if (! $party->cabin instanceof Cabin) {
+        if (! $party->cabin instanceof Room) {
             throw ValidationException::withMessages([
                 'cabins' => ['Pick a cabin for each party.'],
             ]);

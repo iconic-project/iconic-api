@@ -8,10 +8,10 @@ use App\Actions\Action;
 use App\Enums\ClaimKind;
 use App\Enums\ReferenceType;
 use App\Exceptions\CabinUnavailableException;
-use App\Models\Cabin;
 use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\InternalBlock;
+use App\Models\Room;
 use App\Services\Inventory\ClaimService;
 use App\Services\References\ReferenceService;
 use App\Support\Blocks\ConflictMessage;
@@ -86,7 +86,7 @@ final class CreateInternalBlock extends Action
 
     /**
      * @param  list<array{departure_id: int, cabin_codes: list<string>|string}>  $departures
-     * @return list<array{departure: Departure, cabins: Collection<int, Cabin>}>
+     * @return list<array{departure: Departure, cabins: Collection<int, Room>}>
      */
     private function resolveScopes(array $departures): array
     {
@@ -103,7 +103,7 @@ final class CreateInternalBlock extends Action
             if ($codes !== 'ALL') {
                 $wanted = is_array($codes) ? $codes : [];
                 $cabins = $cabins
-                    ->filter(fn (Cabin $cabin): bool => in_array($cabin->code, $wanted, true))
+                    ->filter(fn (Room $cabin): bool => in_array($cabin->code, $wanted, true))
                     ->values();
             }
 
@@ -117,7 +117,7 @@ final class CreateInternalBlock extends Action
     }
 
     /**
-     * @param  list<array{departure: Departure, cabins: Collection<int, Cabin>}>  $remaining
+     * @param  list<array{departure: Departure, cabins: Collection<int, Room>}>  $remaining
      */
     private function conflictsAcross(
         CabinUnavailableException $first,
@@ -145,7 +145,7 @@ final class CreateInternalBlock extends Action
     /**
      * Plain SELECT of remaining requested pairs. No FOR UPDATE / lock in share mode.
      *
-     * @param  list<array{departure: Departure, cabins: Collection<int, Cabin>}>  $remaining
+     * @param  list<array{departure: Departure, cabins: Collection<int, Room>}>  $remaining
      * @return list<array{unavailable: array{cabin: array{id: int, code: string, label: string}, held_by: array{kind: string, holder_type: string, reference: string|null}}, line: string}>
      */
     private function scanRemaining(array $remaining, InternalBlock $block): array
@@ -164,7 +164,7 @@ final class CreateInternalBlock extends Action
                 foreach ($remaining as $scope) {
                     $outer->orWhere(function ($inner) use ($scope): void {
                         $inner->where('departure_id', $scope['departure']->id)
-                            ->whereIn('cabin_id', $scope['cabins']->pluck('id'));
+                            ->whereIn('room_id', $scope['cabins']->pluck('id'));
                     });
                 }
             })

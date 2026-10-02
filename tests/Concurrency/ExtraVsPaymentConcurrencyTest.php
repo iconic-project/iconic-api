@@ -57,7 +57,7 @@ test('adding an extra and recording a payment on the same booking wait 1205 neve
     $departure = ReservationFixtures::anamaraDeparture('2028-08-06');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'owner_id' => $actor->id,
         'total' => 26600,

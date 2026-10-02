@@ -343,6 +343,7 @@ class Offer extends Model
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
+    // TODO(Sprint 18): room type pricing (09 H8)
     public function scopeApplicableTo(
         Builder $query,
         Departure $departure,
@@ -398,6 +399,7 @@ class Offer extends Model
     /**
      * @return EloquentCollection<int, static>
      */
+    // TODO(Sprint 18): room type pricing (09 H8)
     public static function applicableTo(
         Departure $departure,
         CabinCategory $cabinType,

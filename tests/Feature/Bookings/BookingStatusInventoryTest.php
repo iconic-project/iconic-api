@@ -47,14 +47,14 @@ test('a cancelled factory booking has no active claim and a confirmed one can', 
 
     $cancelled = Booking::factory()->cancelled()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin?->id,
+        'room_id' => $cabin?->id,
     ]);
     expect($cancelled->status->holdsInventory())->toBeFalse();
     expect($cancelled->claims()->whereNull('released_at')->count())->toBe(0);
 
     $confirmed = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin?->id,
+        'room_id' => $cabin?->id,
         'status' => BookingStatus::Confirmed,
     ]);
 

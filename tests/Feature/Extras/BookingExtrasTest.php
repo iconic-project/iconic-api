@@ -25,7 +25,7 @@ function extrasCabin(?int $ownerId = null, BookingStatus $status = BookingStatus
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $ownerId ?? adminUser()->id,
         'status' => $status,
         'total' => 26600,

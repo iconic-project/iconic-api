@@ -16,10 +16,10 @@ use App\Events\BookingChargesChanged;
 use App\Exceptions\CabinUnavailableException;
 use App\Exceptions\ConflictException;
 use App\Models\Booking;
-use App\Models\Cabin;
 use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\Group;
+use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
@@ -125,10 +125,10 @@ final class MoveBooking extends Action
 
             $cabin = $booking->type === BookingType::Charter
                 ? null
-                : $target->property->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
+                : $target->property->cabins->first(fn (Room $item): bool => $item->code === $cabinCode);
 
             $booking->departure_id = $target->id;
-            $booking->cabin_id = $cabin?->id;
+            $booking->room_id = $cabin?->id;
             $booking->rates_version_id = $this->config->version(ConfigKind::Rates)->id;
             $booking->price_lines = $quoted['new_price_lines'];
             $booking->total = $quoted['new_total'];
@@ -193,7 +193,7 @@ final class MoveBooking extends Action
 
         $sameDeparture = (int) $booking->departure_id === (int) $target->id;
         $sameCabin = $booking->type === BookingType::Charter
-            || ($booking->cabin instanceof Cabin && $booking->cabin->code === $cabinCode);
+            || ($booking->cabin instanceof Room && $booking->cabin->code === $cabinCode);
 
         if ($sameDeparture && $sameCabin) {
             throw ValidationException::withMessages([
@@ -218,9 +218,9 @@ final class MoveBooking extends Action
         }
 
         if ($booking->type === BookingType::Cabin) {
-            $cabin = $target->property->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
+            $cabin = $target->property->cabins->first(fn (Room $item): bool => $item->code === $cabinCode);
 
-            if (! $cabin instanceof Cabin) {
+            if (! $cabin instanceof Room) {
                 throw ValidationException::withMessages([
                     'cabin_code' => ['Pick a cabin on this departure\'s property.'],
                 ]);
@@ -377,7 +377,7 @@ final class MoveBooking extends Action
     }
 
     /**
-     * @return Collection<int, Cabin>
+     * @return Collection<int, Room>
      */
     private function targetCabins(Booking $booking, Departure $target, ?string $cabinCode): Collection
     {
@@ -385,9 +385,9 @@ final class MoveBooking extends Action
             return $target->property->cabins->sortBy('sort')->values();
         }
 
-        $cabin = $target->property->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
+        $cabin = $target->property->cabins->first(fn (Room $item): bool => $item->code === $cabinCode);
 
-        if (! $cabin instanceof Cabin) {
+        if (! $cabin instanceof Room) {
             throw ValidationException::withMessages([
                 'cabin_code' => ['Pick a cabin on this departure\'s property.'],
             ]);

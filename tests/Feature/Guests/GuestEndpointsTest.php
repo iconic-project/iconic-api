@@ -27,7 +27,7 @@ function guestCabin(?int $ownerId = null): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $ownerId ?? managerUser()->id,
         'status' => BookingStatus::PendingPayment,
         'adults' => 2,
@@ -206,7 +206,7 @@ test('png uses the galapagos calendar date at 23:30 galt not the utc next day', 
     $departure = ReservationFixtures::anamaraDeparture('2026-09-21');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 

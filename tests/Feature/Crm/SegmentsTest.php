@@ -412,7 +412,7 @@ function booked(Contact $contact, User $owner, int $departureId, string $cabin, 
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => $status,

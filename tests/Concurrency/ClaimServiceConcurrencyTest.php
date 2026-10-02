@@ -7,12 +7,12 @@ use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
 use App\Exceptions\CabinUnavailableException;
-use App\Models\Cabin;
 use App\Models\CabinClaim;
 use App\Models\CheckoutSession;
 use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Property;
+use App\Models\Room;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Database\QueryException;
@@ -51,7 +51,7 @@ function claimMysqlError(QueryException $e): int
 }
 
 /**
- * @return array{departure: Departure, cabin: Cabin}
+ * @return array{departure: Departure, cabin: Room}
  */
 function concurrencyCabin(): array
 {
@@ -99,7 +99,7 @@ test('two claimers of the same free cabin never deadlock or double-occupy', func
         DB::commit();
     });
 
-    expect(CabinClaim::query()->whereNull('released_at')->where('cabin_id', $cabin->id)->count())->toBe(1);
+    expect(CabinClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->count())->toBe(1);
     expect($observed)->toBe('1205');
     fwrite(STDOUT, "free-cabin concurrency observed: {$observed}\n");
 });
@@ -151,7 +151,7 @@ test('two claimers of the same expired hold never deadlock or double-occupy', fu
         DB::commit();
     });
 
-    expect(CabinClaim::query()->whereNull('released_at')->where('cabin_id', $cabin->id)->count())->toBe(1);
+    expect(CabinClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->count())->toBe(1);
     expect($observed)->toBe('1205');
     fwrite(STDOUT, "expired-hold concurrency observed: {$observed}\n");
 });
@@ -215,7 +215,7 @@ test('a date change holds the departure so a claim waits', function (): void {
     });
 
     expect($observed)->toBe('1205');
-    expect(CabinClaim::query()->whereNull('released_at')->where('cabin_id', $cabin->id)->count())->toBe(0);
+    expect(CabinClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->count())->toBe(0);
     fwrite(STDOUT, "date-change-then-claim concurrency observed: {$observed}\n");
 });
 
@@ -333,7 +333,7 @@ test('submit convert versus a competing claim never frees the cabin', function (
         DB::commit();
     });
 
-    $live = CabinClaim::query()->whereNull('released_at')->where('cabin_id', $cabin->id)->get();
+    $live = CabinClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->get();
     expect($live)->toHaveCount(1);
     expect($live->first()?->holder_id)->toBe($bookingHolder->id);
     expect($live->first()?->hold_type)->toBe(HoldType::Request);

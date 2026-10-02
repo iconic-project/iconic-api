@@ -27,7 +27,8 @@ test('core tables exist after migration', function (): void {
     expect(Schema::hasTable('extra_versions'))->toBeTrue('extra_versions table missing after migration.');
     expect(Schema::hasTable('booking_extras'))->toBeTrue('booking_extras table missing after migration.');
     expect(Schema::hasTable('properties'))->toBeTrue('properties table missing after migration.');
-    expect(Schema::hasTable('cabins'))->toBeTrue('cabins table missing after migration.');
+    expect(Schema::hasTable('rooms'))->toBeTrue('rooms table missing after migration.');
+    expect(Schema::hasTable('room_types'))->toBeTrue('room_types table missing after migration.');
     expect(Schema::hasTable('itineraries'))->toBeTrue('itineraries table missing after migration.');
     expect(Schema::hasTable('departures'))->toBeTrue('departures table missing after migration.');
     expect(Schema::hasTable('calendar_date_hosts'))->toBeTrue(

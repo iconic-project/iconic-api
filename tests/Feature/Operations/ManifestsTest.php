@@ -12,12 +12,12 @@ use App\Enums\ManifestKind;
 use App\Enums\ManifestReason;
 use App\Models\Alert;
 use App\Models\Booking;
-use App\Models\Cabin;
 use App\Models\ChangeHistory;
 use App\Models\Delivery;
 use App\Models\Departure;
 use App\Models\Guest;
 use App\Models\Manifest;
+use App\Models\Room;
 use App\Support\Alerts\AlertKeys;
 use App\Support\Manifests\ManifestDue;
 use App\Support\Manifests\ManifestFiles;
@@ -470,9 +470,9 @@ function manifestDeparture(string $date = '2026-07-05'): Departure
     return Departure::factory()->create(['date' => $date]);
 }
 
-function manifestCabin(Departure $departure, int $sort, string $code, string $label): Cabin
+function manifestCabin(Departure $departure, int $sort, string $code, string $label): Room
 {
-    return Cabin::factory()->create([
+    return Room::factory()->create([
         'property_id' => $departure->property_id,
         'sort' => $sort,
         'code' => $code,
@@ -483,13 +483,13 @@ function manifestCabin(Departure $departure, int $sort, string $code, string $la
 function manifestBooking(
     Departure $departure,
     BookingStatus $status,
-    ?Cabin $cabin,
+    ?Room $cabin,
     string $reference,
     BookingType $type = BookingType::Cabin,
 ): Booking {
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $type === BookingType::Charter ? null : $cabin?->id,
+        'room_id' => $type === BookingType::Charter ? null : $cabin?->id,
         'type' => $type,
         'status' => $status,
         'reference' => $reference,

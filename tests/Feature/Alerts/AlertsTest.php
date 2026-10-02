@@ -616,7 +616,7 @@ function alertBooking(array $overrides = []): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabinId,
+        'room_id' => $cabinId,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
         'balance_days' => 120,

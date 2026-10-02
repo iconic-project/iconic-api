@@ -19,7 +19,7 @@ use LogicException;
 /**
  * @property int $id
  * @property int $departure_id
- * @property int $cabin_id
+ * @property int $room_id
  * @property string $holder_type
  * @property int $holder_id
  * @property ClaimKind $kind
@@ -33,12 +33,12 @@ use LogicException;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Departure $departure
- * @property-read Cabin $cabin
+ * @property-read Room $cabin
  * @property-read Model $holder
  */
 #[Fillable([
     'departure_id',
-    'cabin_id',
+    'room_id',
     'holder_type',
     'holder_id',
     'kind',
@@ -79,11 +79,11 @@ class CabinClaim extends Model
     }
 
     /**
-     * @return BelongsTo<Cabin, $this>
+     * @return BelongsTo<Room, $this>
      */
     public function cabin(): BelongsTo
     {
-        return $this->belongsTo(Cabin::class);
+        return $this->belongsTo(Room::class, 'room_id');
     }
 
     /**

@@ -15,11 +15,11 @@ use App\Events\AvailabilityChanged;
 use App\Listeners\OfferWaitlistCabins;
 use App\Mail\Waitlist\WaitlistOfferMail;
 use App\Models\Booking;
-use App\Models\Cabin;
 use App\Models\CabinClaim;
 use App\Models\CrmTask;
 use App\Models\Delivery;
 use App\Models\Departure;
+use App\Models\Room;
 use App\Models\WaitlistEntry;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\ConfigSeeder;
@@ -185,7 +185,7 @@ function blockSuitesExcept(Departure $departure, string $keep): array
 {
     $holders = [];
     $cabins = $departure->property->cabins->filter(
-        fn (Cabin $cabin): bool => $cabin->category === CabinCategory::Suite && $cabin->code !== $keep,
+        fn (Room $cabin): bool => $cabin->roomType->code === 'SUITE' && $cabin->code !== $keep,
     );
 
     DB::transaction(function () use ($departure, $cabins, &$holders): void {

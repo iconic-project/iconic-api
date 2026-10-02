@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Pricing;
 
-use App\Models\Cabin;
+use App\Models\Room;
 
 final readonly class QuotedParty
 {
@@ -21,7 +21,7 @@ final readonly class QuotedParty
         public ?Quote $quote,
         public array $errors,
         public array $warnings,
-        public ?Cabin $cabin = null,
+        public ?Room $cabin = null,
     ) {}
 
     public function hasErrors(): bool

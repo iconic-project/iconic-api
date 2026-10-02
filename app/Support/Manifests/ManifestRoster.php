@@ -35,14 +35,14 @@ final class ManifestRoster
                 $join->on('bookings.id', '=', 'guests.booking_id')
                     ->whereNull('bookings.deleted_at');
             })
-            ->leftJoin('cabins', 'cabins.id', '=', 'bookings.cabin_id')
+            ->leftJoin('rooms', 'rooms.id', '=', 'bookings.room_id')
             ->where('bookings.departure_id', $departure->id)
             ->whereIn('bookings.status', array_map(
                 fn (BookingStatus $status): string => $status->value,
                 self::COUNTED,
             ))
-            ->orderByRaw('cabins.sort IS NULL')
-            ->orderBy('cabins.sort')
+            ->orderByRaw('rooms.sort IS NULL')
+            ->orderBy('rooms.sort')
             ->orderBy('guests.position')
             ->orderBy('guests.id')
             ->with(['booking.cabin', 'currentPreference'])

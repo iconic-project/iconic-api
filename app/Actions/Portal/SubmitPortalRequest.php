@@ -20,10 +20,10 @@ use App\Exceptions\CabinUnavailableException;
 use App\Models\AgencyUser;
 use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\Cabin;
 use App\Models\Contact;
 use App\Models\Departure;
 use App\Models\Group;
+use App\Models\Room;
 use App\Services\Config\CurrentConfig;
 use App\Services\Engine\EngineFeed;
 use App\Services\Inventory\Availability;
@@ -150,7 +150,7 @@ final class SubmitPortalRequest extends Action
         foreach ($quote->parties as $party) {
             $priced = $party->quote;
 
-            if ($priced === null || ! $party->cabin instanceof Cabin) {
+            if ($priced === null || ! $party->cabin instanceof Room) {
                 throw ValidationException::withMessages([
                     'cabins' => ['A price could not be calculated.'],
                 ]);
@@ -159,7 +159,7 @@ final class SubmitPortalRequest extends Action
             $commission = $this->commissions->resolve([
                 'agency_id' => $actor->agency_id,
                 'main_channel' => $channels['main'],
-            ], $departure, $party->cabin->category);
+            ], $departure, $party->cabin->pricingCategory());
 
             if ($commission === null) {
                 throw ValidationException::withMessages([
@@ -172,7 +172,7 @@ final class SubmitPortalRequest extends Action
                 'request_reference' => $this->references->next(ReferenceType::Request),
                 'type' => BookingType::Cabin,
                 'departure_id' => $departure->id,
-                'cabin_id' => $party->cabin->id,
+                'room_id' => $party->cabin->id,
                 'contact_id' => $contact->id,
                 'group_id' => $group?->id,
                 'owner_id' => $owner->id,
@@ -263,7 +263,7 @@ final class SubmitPortalRequest extends Action
     }
 
     /**
-     * @return list<Cabin>
+     * @return list<Room>
      */
     private function freeCabins(Departure $departure, DepartureSnapshot $snapshot, CabinCategory $category, int $needed): array
     {
@@ -276,7 +276,7 @@ final class SubmitPortalRequest extends Action
         }
 
         $cabins = $departure->property->cabins
-            ->filter(fn (Cabin $cabin): bool => in_array($cabin->code, $freeCodes, true))
+            ->filter(fn (Room $cabin): bool => in_array($cabin->code, $freeCodes, true))
             ->sortBy('sort')
             ->values();
 
@@ -284,7 +284,7 @@ final class SubmitPortalRequest extends Action
             throw new CabinUnavailableException([]);
         }
 
-        /** @var list<Cabin> $picked */
+        /** @var list<Room> $picked */
         $picked = $cabins->take($needed)->all();
 
         return $picked;

@@ -239,7 +239,7 @@ final class SubmitEngineCheckout extends Action
             'request_reference' => $this->references->next(ReferenceType::Request),
             'type' => BookingType::Cabin,
             'departure_id' => $quote->departure->id,
-            'cabin_id' => $party->cabin?->id,
+            'room_id' => $party->cabin?->id,
             'contact_id' => $contact->id,
             'group_id' => $group?->id,
             'owner_id' => $ownerId,

@@ -170,7 +170,7 @@ test('the stage projection follows the booking and a mixed group uses the furthe
     $make = function (BookingStatus $status, string $cabin) use ($departure, $cabins, $contact): Deal {
         $booking = Booking::factory()->create([
             'departure_id' => $departure->id,
-            'cabin_id' => $cabins->firstWhere('code', $cabin)?->id,
+            'room_id' => $cabins->firstWhere('code', $cabin)?->id,
             'contact_id' => $contact->id,
             'status' => $status,
             'reference' => 'ANK-'.$cabin.'-'.$status->value,
@@ -207,7 +207,7 @@ test('the stage projection follows the booking and a mixed group uses the furthe
     $releasedDeparture = ReservationFixtures::anamaraDeparture('2027-12-12');
     $releasedBooking = Booking::factory()->create([
         'departure_id' => $releasedDeparture->id,
-        'cabin_id' => $releasedDeparture->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $releasedDeparture->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'status' => BookingStatus::Released,
         'reference' => 'ANK-REL-RELEASED',
@@ -225,14 +225,14 @@ test('the stage projection follows the booking and a mixed group uses the furthe
     $group = Group::factory()->create(['departure_id' => $departure->id, 'coordinator_contact_id' => $contact->id]);
     Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'group_id' => $group->id,
         'status' => BookingStatus::Cancelled,
     ]);
     Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $cabins->firstWhere('code', 'S2')?->id,
         'contact_id' => $contact->id,
         'group_id' => $group->id,
         'status' => BookingStatus::Requested,
@@ -308,7 +308,7 @@ test('moves follow ownership and a bound deal names the booking', function (): v
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'reference' => 'ANK-2027-0099',
         'status' => BookingStatus::PendingPayment,
@@ -355,7 +355,7 @@ test('pipeline cash matches payments and revenue and the query count stays flat'
     $departure = ReservationFixtures::anamaraDeparture('2027-12-19');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
     ]);

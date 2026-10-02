@@ -7,11 +7,11 @@ namespace Database\Seeders;
 use App\Enums\BlockReason;
 use App\Enums\ClaimKind;
 use App\Enums\ReferenceType;
-use App\Models\Cabin;
 use App\Models\Departure;
 use App\Models\InternalBlock;
 use App\Models\Itinerary;
 use App\Models\Property;
+use App\Models\Room;
 use App\Services\Inventory\ClaimService;
 use App\Services\References\ReferenceService;
 use App\Support\Departures\SeedMapper as DepartureSeedMapper;
@@ -89,7 +89,7 @@ final class DemoInventorySeeder extends Seeder
         }
 
         $cabins = $departure->property->cabins
-            ->filter(fn (Cabin $cabin): bool => in_array($cabin->code, ['S7', 'S8'], true))
+            ->filter(fn (Room $cabin): bool => in_array($cabin->code, ['S7', 'S8'], true))
             ->sortBy('sort')
             ->values();
 

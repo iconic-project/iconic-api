@@ -65,7 +65,7 @@ function requestedHold(bool $expired = false, string $cabinCode = 'S2'): Booking
         'request_reference' => 'ANK-R-2026-'.str_pad((string) fake()->unique()->numberBetween(1, 99), 4, '0', STR_PAD_LEFT),
         'status' => BookingStatus::Requested,
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin?->id,
+        'room_id' => $cabin?->id,
         'owner_id' => $actor->id,
     ]);
 
@@ -229,7 +229,7 @@ test('an expired hold is reclaimed or 409 if the cabin was taken', function (): 
         'departure' => ReservationFixtures::anamaraDeparture('2027-11-14'),
         'cabin_code' => 'S1',
     ]);
-    $other->update(['cabin_id' => $cabin?->id, 'departure_id' => $departure->id]);
+    $other->update(['room_id' => $cabin?->id, 'departure_id' => $departure->id]);
     DB::transaction(function () use ($departure, $cabin, $other): void {
         $other->claims()->whereNull('released_at')->update([
             'released_at' => now(),

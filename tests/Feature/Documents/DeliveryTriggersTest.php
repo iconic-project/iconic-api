@@ -27,7 +27,7 @@ function aDelivery(): Delivery
     $departure = ReservationFixtures::anamaraDeparture('2028-08-06');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
     ]);
 

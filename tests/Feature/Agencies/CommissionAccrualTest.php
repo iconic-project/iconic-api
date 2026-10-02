@@ -55,7 +55,7 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
 
     $cancelled = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -65,7 +65,7 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
 
     $payable = Booking::factory()->create([
         'departure_id' => $past->id,
-        'cabin_id' => $past->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $past->property->cabins->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -106,7 +106,7 @@ test('the payable date is thirty days after the return date', function (): void 
     $departure = ReservationFixtures::anamaraDeparture('2027-11-14');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -142,7 +142,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
 
     $cancelled = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin('S1'),
+        'room_id' => $cabin('S1'),
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -158,7 +158,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
 
     $blocked = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin('S2'),
+        'room_id' => $cabin('S2'),
         'agency_id' => $agency->id,
         'commission_pct' => 15,
         'commission_approved' => false,
@@ -174,7 +174,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
 
     $paid = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin('S3'),
+        'room_id' => $cabin('S3'),
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -191,7 +191,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
 
     $payable = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin('S4'),
+        'room_id' => $cabin('S4'),
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -202,7 +202,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
 
     $earned = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin('S5'),
+        'room_id' => $cabin('S5'),
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,

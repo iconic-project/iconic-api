@@ -43,6 +43,8 @@ use App\Http\Controllers\Rms\ReportController;
 use App\Http\Controllers\Rms\ReportSubscriptionController;
 use App\Http\Controllers\Rms\RequestController;
 use App\Http\Controllers\Rms\RoleController;
+use App\Http\Controllers\Rms\RoomController;
+use App\Http\Controllers\Rms\RoomTypeController;
 use App\Http\Controllers\Rms\SalesMaterialController;
 use App\Http\Controllers\Rms\UserController;
 use App\Http\Controllers\Rms\WaitlistController;
@@ -99,6 +101,16 @@ Route::get('properties', [PropertyController::class, 'index']);
 Route::get('properties/{property}', [PropertyController::class, 'show'])->whereNumber('property');
 Route::patch('properties/{property}', [PropertyController::class, 'update'])->whereNumber('property');
 Route::get('yachts', [PropertyController::class, 'index']);
+
+Route::get('properties/{property}/room-types', [RoomTypeController::class, 'index'])->whereNumber('property');
+Route::post('properties/{property}/room-types', [RoomTypeController::class, 'store'])->whereNumber('property');
+Route::patch('room-types/{roomType}', [RoomTypeController::class, 'update'])->whereNumber('roomType');
+Route::post('room-types/{roomType}/deactivate', [RoomTypeController::class, 'deactivate'])->whereNumber('roomType');
+
+Route::get('properties/{property}/rooms', [RoomController::class, 'index'])->whereNumber('property');
+Route::post('properties/{property}/rooms', [RoomController::class, 'store'])->whereNumber('property');
+Route::patch('rooms/{room}', [RoomController::class, 'update'])->whereNumber('room');
+Route::post('rooms/{room}/deactivate', [RoomController::class, 'deactivate'])->whereNumber('room');
 
 Route::get('itineraries', [ItineraryController::class, 'index']);
 Route::get('itineraries/defaults', [ItineraryController::class, 'defaults']);

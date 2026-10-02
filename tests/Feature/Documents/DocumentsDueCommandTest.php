@@ -40,7 +40,7 @@ function reminderBooking(string $due = '2028-06-01'): Booking
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-6301',
         'total' => 26600,
@@ -154,7 +154,7 @@ test('pretrip at T-45 and voucher at T-7 only with a transfer extra and a missed
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-6302',
         'total' => 26600,

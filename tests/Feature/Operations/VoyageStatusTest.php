@@ -64,7 +64,7 @@ test('a charter follows the same departure-date move', function (): void {
     $departure = Departure::factory()->create(['date' => '2026-06-07']);
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => null,
+        'room_id' => null,
         'type' => BookingType::Charter,
         'status' => BookingStatus::FullyPaid,
         'reference' => 'ANK-2026-6112',

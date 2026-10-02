@@ -17,6 +17,7 @@ final class PromoCode
     public static function check(
         string $code,
         Departure $departure,
+        // TODO(Sprint 18): room type pricing (09 H8)
         CabinCategory $cabinType,
         BookingSegment $channel,
         string $bookingDate,

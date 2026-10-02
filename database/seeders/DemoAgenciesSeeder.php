@@ -16,9 +16,9 @@ use App\Enums\ReferenceType;
 use App\Models\Agency;
 use App\Models\AgencyUser;
 use App\Models\Booking;
-use App\Models\Cabin;
 use App\Models\Departure;
 use App\Models\Property;
+use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\ClaimService;
@@ -207,7 +207,7 @@ final class DemoAgenciesSeeder extends Seeder
 
         $cabin = $departure->property->cabins->firstWhere('code', 'S1');
 
-        if (! $cabin instanceof Cabin) {
+        if (! $cabin instanceof Room) {
             throw new RuntimeException('Suite 01 is missing on ANAMARA.');
         }
 
@@ -215,7 +215,7 @@ final class DemoAgenciesSeeder extends Seeder
         $input = new QuoteInput(
             year: 2027,
             type: BookingType::Cabin->quoteType(),
-            category: $cabin->category,
+            category: $cabin->pricingCategory(),
             adults: 2,
             children: 0,
             festive: $departure->festive,
@@ -237,7 +237,7 @@ final class DemoAgenciesSeeder extends Seeder
             'reference' => 'ANK-2026-0021',
             'type' => BookingType::Cabin,
             'departure_id' => $departure->id,
-            'cabin_id' => $cabin->id,
+            'room_id' => $cabin->id,
             'contact_id' => $contact->id,
             'owner_id' => $owner->id,
             'agency_id' => $agency->id,

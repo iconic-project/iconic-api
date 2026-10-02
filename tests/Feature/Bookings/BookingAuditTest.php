@@ -42,7 +42,7 @@ test('the audit lists deleted and released rows newest first', function (): void
         'reference' => null,
         'request_reference' => 'ANK-R-2026-0042',
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin?->id,
+        'room_id' => $cabin?->id,
         'owner_id' => $admin->id,
     ]);
     DB::transaction(function () use ($departure, $cabin, $request): void {

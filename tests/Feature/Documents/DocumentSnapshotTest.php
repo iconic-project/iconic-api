@@ -34,7 +34,7 @@ function snapshotCabin(array $overrides = []): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -59,7 +59,7 @@ test('snapshot totals match a charter and a booking with extras fees refund and 
     $charterDep = ReservationFixtures::anamaraDeparture('2028-09-10');
     $charter = Booking::factory()->create([
         'departure_id' => $charterDep->id,
-        'cabin_id' => null,
+        'room_id' => null,
         'type' => BookingType::Charter,
         'status' => BookingStatus::Confirmed,
         'total' => 199500,

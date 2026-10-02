@@ -97,7 +97,7 @@ test('a portal request matches an engine request and freezes the agency commissi
         ->and($booking->commission_pct)->toBe(10)
         ->and($booking->commission_approved)->toBeTrue()
         ->and($booking->checkout_session_id)->toBeNull()
-        ->and($booking->cabin_id)->not->toBeNull()
+        ->and($booking->room_id)->not->toBeNull()
         ->and($booking->price_lines)->not->toBeEmpty()
         ->and($booking->total)->toBeGreaterThan(0)
         ->and($booking->deposit_pct)->toBeGreaterThan(0)
@@ -240,7 +240,7 @@ test('a sold-out, closed, hidden, or out-of-calendar departure is refused and wr
 
     $ownerTaken = ReservationFixtures::anamaraDeparture('2027-12-12');
     $ownerTaken->load('property.cabins');
-    $owner = $ownerTaken->property->cabins->first(fn ($cabin) => $cabin->category === CabinCategory::Owner);
+    $owner = $ownerTaken->property->cabins->first(fn ($cabin) => $cabin->roomType->code === 'OWNER');
     $ownerHolder = ClaimHolder::query()->create(['reference' => 'OWN', 'name' => 'Owner taken']);
 
     DB::transaction(function () use ($ownerTaken, $owner, $ownerHolder): void {

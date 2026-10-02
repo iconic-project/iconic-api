@@ -42,7 +42,7 @@ test('finance records one immutable payout and the kpis move', function (): void
     $departure = ReservationFixtures::anamaraDeparture('2027-11-14');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -87,7 +87,7 @@ test('finance records one immutable payout and the kpis move', function (): void
 
     $early = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -233,7 +233,7 @@ test('the portal preview shows net rates and only that agency', function (): voi
     $booking = Booking::factory()->create([
         'reference' => 'ANK-2026-8801',
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -250,7 +250,7 @@ test('the portal preview shows net rates and only that agency', function (): voi
     $otherBooking = Booking::factory()->create([
         'reference' => 'ANK-2026-8802',
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'agency_id' => $other->id,
         'commission_pct' => 12,
         'commission_approved' => true,

@@ -153,7 +153,7 @@ test('pay deposit opens a stripe checkout session and a stripe failure keeps the
         ->assertJsonPath('path', CheckoutPath::PayDeposit->value)
         ->assertJsonStructure(['references', 'message']);
 
-    expect(Booking::query()->where('cabin_id', $departure->property->cabins->firstWhere('code', 'S2')?->id)->value('status'))
+    expect(Booking::query()->where('room_id', $departure->property->cabins->firstWhere('code', 'S2')?->id)->value('status'))
         ->toBe(BookingStatus::Requested);
 });
 

@@ -24,7 +24,7 @@ function feesCabin(?int $ownerId = null): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'owner_id' => $ownerId ?? adminUser()->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,

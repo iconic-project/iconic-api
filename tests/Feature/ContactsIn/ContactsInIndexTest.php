@@ -26,7 +26,7 @@ function contactsInCabin(User $owner, string $cabin, string $date = '2027-11-07'
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
         'owner_id' => $owner->id,
         ...$overrides,
     ]);

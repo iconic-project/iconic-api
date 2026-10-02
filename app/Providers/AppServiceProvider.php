@@ -82,6 +82,8 @@ use App\Models\RefundRequest;
 use App\Models\ReportRun;
 use App\Models\ReportSubscription;
 use App\Models\Role;
+use App\Models\Room;
+use App\Models\RoomType;
 use App\Models\SalesMaterial;
 use App\Models\Segment;
 use App\Models\SubjectRequest;
@@ -246,6 +248,8 @@ class AppServiceProvider extends ServiceProvider
             'itinerary' => Itinerary::class,
             'departure' => Departure::class,
             'property' => Property::class,
+            'room' => Room::class,
+            'room_type' => RoomType::class,
             'internal_block' => InternalBlock::class,
             'contact' => Contact::class,
             'deal' => Deal::class,

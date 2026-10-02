@@ -29,7 +29,7 @@ final readonly class ManifestPassenger
     {
         $booking = $this->guest->booking;
 
-        if ($booking->type === BookingType::Charter && $booking->cabin_id === null) {
+        if ($booking->type === BookingType::Charter && $booking->room_id === null) {
             return 'Full property';
         }
 

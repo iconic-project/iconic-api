@@ -40,7 +40,7 @@ function completeBooking(array $overrides = []): Booking
 
     return Booking::factory()->create(array_merge([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::PendingPayment,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -157,12 +157,12 @@ test('GET for a group includes every booking and guest', function (): void {
     $group = Group::factory()->create(['departure_id' => $departure->id]);
     $first = completeBooking([
         'group_id' => $group->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'reference' => 'ANK-2026-8110',
     ]);
     $second = completeBooking([
         'group_id' => $group->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'reference' => 'ANK-2026-8111',
     ]);
     Guest::factory()->create(['booking_id' => $first->id, 'first_name' => 'Ada']);

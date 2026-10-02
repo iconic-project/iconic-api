@@ -18,7 +18,7 @@ final class PropertyController extends Controller
         $this->authorize('viewAny', Property::class);
 
         $properties = Property::query()
-            ->with('cabins')
+            ->with('rooms.roomType')
             ->orderBy('code')
             ->get();
 

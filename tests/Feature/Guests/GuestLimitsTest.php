@@ -22,7 +22,7 @@ test('a cabin booking cannot exceed guests.max_per_cabin', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
     $max = app(CurrentConfig::class)->engineSettings()->guests->maxPerCabin;
@@ -50,7 +50,7 @@ test('a charter cannot exceed guests.max_per_property', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => null,
+        'room_id' => null,
         'type' => BookingType::Charter,
         'owner_id' => $actor->id,
     ]);
@@ -73,7 +73,7 @@ test('only an empty non-lead guest can be removed', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 

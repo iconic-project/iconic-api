@@ -15,10 +15,10 @@ use App\Enums\PaymentStatus;
 use App\Enums\PreferredChannel;
 use App\Enums\ReferenceType;
 use App\Models\Booking;
-use App\Models\Cabin;
 use App\Models\Departure;
 use App\Models\Group;
 use App\Models\Property;
+use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\ClaimService;
@@ -152,7 +152,7 @@ final class DemoBookingsSeeder extends Seeder
                 'request_reference' => null,
                 'type' => $type,
                 'departure_id' => $departure->id,
-                'cabin_id' => $cabin?->id,
+                'room_id' => $cabin?->id,
                 'contact_id' => $contact->id,
                 'group_id' => ($row['grp'] ?? null) === 'GRP-007' ? $group?->id : null,
                 'owner_id' => $this->owner((string) $row['owner'])->id,
@@ -219,7 +219,7 @@ final class DemoBookingsSeeder extends Seeder
         $input = new QuoteInput(
             year: (int) $departure->date->format('Y'),
             type: $type->quoteType(),
-            category: $cabin?->category,
+            category: $cabin?->pricingCategory(),
             adults: (int) ($row['adults'] ?? 0),
             children: (int) ($row['children'] ?? 0),
             festive: $departure->festive,
@@ -237,17 +237,17 @@ final class DemoBookingsSeeder extends Seeder
     /**
      * @param  array<string, mixed>  $row
      */
-    private function cabin(Departure $departure, array $row): ?Cabin
+    private function cabin(Departure $departure, array $row): ?Room
     {
         if (($row['type'] ?? '') === 'CHARTER' || ($row['cab'] ?? '') === 'ALL') {
             return null;
         }
 
         $cabin = $departure->property->cabins->first(
-            fn (Cabin $item): bool => $item->code === (string) $row['cab'],
+            fn (Room $item): bool => $item->code === (string) $row['cab'],
         );
 
-        if (! $cabin instanceof Cabin) {
+        if (! $cabin instanceof Room) {
             throw new RuntimeException('Cabin '.$row['cab'].' is missing on '.$departure->reference.'.');
         }
 

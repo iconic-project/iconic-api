@@ -15,8 +15,8 @@ use App\Events\BookingStatusChanged;
 use App\Exceptions\CabinUnavailableException;
 use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\Cabin;
 use App\Models\CabinClaim;
+use App\Models\Room;
 use App\Models\User;
 use App\Services\Inventory\ClaimService;
 use App\Services\References\ReferenceService;
@@ -208,11 +208,11 @@ final class TransitionBooking extends Action
     }
 
     /**
-     * @return Collection<int, Cabin>
+     * @return Collection<int, Room>
      */
     private function cabinsFor(Booking $booking): Collection
     {
-        if ($booking->cabin instanceof Cabin) {
+        if ($booking->cabin instanceof Room) {
             return collect([$booking->cabin]);
         }
 

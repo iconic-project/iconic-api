@@ -55,7 +55,7 @@ test('two concurrent staff records produce one row and wait 1205 never 1213', fu
     $departure = ReservationFixtures::anamaraDeparture('2028-05-14');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'owner_id' => $actor->id,
     ]);

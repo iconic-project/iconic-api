@@ -63,7 +63,7 @@ test('the bookings list query count does not grow with extra bookings', function
     Booking::factory()->create([
         'reference' => 'ANK-2026-5001',
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -93,7 +93,7 @@ test('the bookings list query count does not grow with extra bookings', function
         Booking::factory()->create([
             'reference' => 'ANK-2026-'.$suffix,
             'departure_id' => $departure->id,
-            'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+            'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
             'agency_id' => $agency->id,
             'commission_pct' => 10,
             'commission_approved' => true,

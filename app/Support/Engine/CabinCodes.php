@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Support\Engine;
 
-use App\Models\Cabin;
 use App\Models\Departure;
+use App\Models\Room;
 
 final class CabinCodes
 {
-    public static function resolve(Departure $departure, string $input): ?Cabin
+    public static function resolve(Departure $departure, string $input): ?Room
     {
         $departure->loadMissing('property.cabins');
         $needle = trim($input);
@@ -19,7 +19,7 @@ final class CabinCodes
         }
 
         return $departure->property->cabins->first(
-            fn (Cabin $cabin): bool => $cabin->code === $needle
+            fn (Room $cabin): bool => $cabin->code === $needle
                 || strcasecmp($cabin->code, $needle) === 0
                 || $cabin->label === $needle,
         );
@@ -37,7 +37,7 @@ final class CabinCodes
             $code = isset($row['cabin_code']) ? (string) $row['cabin_code'] : '';
             $cabin = self::resolve($departure, $code);
 
-            if ($cabin instanceof Cabin) {
+            if ($cabin instanceof Room) {
                 $row['cabin_code'] = $cabin->code;
             }
 

@@ -32,12 +32,12 @@ test('users without view_all only see their own bookings', function (): void {
 
     $mine = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $owner->id,
     ]);
     Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'owner_id' => $other->id,
     ]);
 
@@ -58,7 +58,7 @@ test('can_act follows the own-records rule', function (): void {
     $other = salesExecUser();
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $owner->id,
     ]);
 
@@ -143,7 +143,7 @@ test('groups are scoped like bookings.view_all', function (): void {
         'departure_id' => $departure->id,
         'group_id' => $group->id,
         'owner_id' => $owner->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
     ]);
 
     $this->actingAs($owner)
@@ -166,13 +166,13 @@ test('groups filter by departure date from and to', function (): void {
         'departure_id' => $nov->id,
         'group_id' => $novGroup->id,
         'owner_id' => adminUser()->id,
-        'cabin_id' => $nov->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $nov->property->cabins->firstWhere('code', 'S1')?->id,
     ]);
     Booking::factory()->create([
         'departure_id' => $dec->id,
         'group_id' => $decGroup->id,
         'owner_id' => adminUser()->id,
-        'cabin_id' => $dec->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $dec->property->cabins->firstWhere('code', 'S1')?->id,
     ]);
 
     $this->actingAs(adminUser())

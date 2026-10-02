@@ -41,7 +41,7 @@ function sendableBooking(): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S6')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S6')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-5100',
     ]);

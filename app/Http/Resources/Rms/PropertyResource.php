@@ -39,12 +39,12 @@ class PropertyResource extends JsonResource
      *     meta_title: string|null,
      *     meta_description: string|null,
      *     status: string,
-     *     cabins: list<array{id: int, code: string, label: string, category: string, sort: int}>
+     *     rooms: list<array{id: int, code: string, label: string, floor: string|null, sort: int, status: string, room_type: array{id: int, code: string, name: string}}>
      * }
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing('cabins');
+        $this->resource->loadMissing('rooms.roomType');
 
         return [
             'id' => $this->id,
@@ -69,27 +69,33 @@ class PropertyResource extends JsonResource
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
             'status' => $this->status->value,
-            'cabins' => $this->cabinPayloads(),
+            'rooms' => $this->roomPayloads(),
         ];
     }
 
     /**
-     * @return list<array{id: int, code: string, label: string, category: string, sort: int}>
+     * @return list<array{id: int, code: string, label: string, floor: string|null, sort: int, status: string, room_type: array{id: int, code: string, name: string}}>
      */
-    private function cabinPayloads(): array
+    private function roomPayloads(): array
     {
-        $cabins = [];
+        $rooms = [];
 
-        foreach ($this->cabins as $cabin) {
-            $cabins[] = [
-                'id' => $cabin->id,
-                'code' => $cabin->code,
-                'label' => $cabin->label,
-                'category' => $cabin->category->value,
-                'sort' => $cabin->sort,
+        foreach ($this->rooms as $room) {
+            $rooms[] = [
+                'id' => $room->id,
+                'code' => $room->code,
+                'label' => $room->label,
+                'floor' => $room->floor,
+                'sort' => $room->sort,
+                'status' => $room->status->value,
+                'room_type' => [
+                    'id' => $room->roomType->id,
+                    'code' => $room->roomType->code,
+                    'name' => $room->roomType->name,
+                ],
             ];
         }
 
-        return $cabins;
+        return $rooms;
     }
 }

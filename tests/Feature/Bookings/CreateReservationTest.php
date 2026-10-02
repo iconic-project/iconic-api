@@ -95,7 +95,7 @@ test('a charter claims all nine cabins under one booking', function (): void {
         ->assertJsonPath('bookings.0.total', 199500);
 
     $booking = Booking::query()->firstOrFail();
-    expect($booking->cabin_id)->toBeNull();
+    expect($booking->room_id)->toBeNull();
     expect($booking->claims()->whereNull('released_at')->count())->toBe(9);
 });
 
@@ -124,7 +124,7 @@ test('existing_group_id must be visible to the actor', function (): void {
     $group = Group::factory()->create(['departure_id' => $departure->id]);
     Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S8')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S8')?->id,
         'group_id' => $group->id,
         'owner_id' => $owner->id,
     ]);
@@ -146,7 +146,7 @@ test('a visible existing group accepts a single cabin', function (): void {
     ]);
     Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S8')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S8')?->id,
         'group_id' => $group->id,
         'owner_id' => $actor->id,
     ]);

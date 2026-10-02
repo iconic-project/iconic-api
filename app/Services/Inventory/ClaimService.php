@@ -10,9 +10,9 @@ use App\Enums\ReleaseReason;
 use App\Events\AvailabilityChanged;
 use App\Events\HoldExpired;
 use App\Exceptions\CabinUnavailableException;
-use App\Models\Cabin;
 use App\Models\CabinClaim;
 use App\Models\Departure;
+use App\Models\Room;
 use App\Support\BusinessTime;
 use App\Support\History\History;
 use App\Support\Inventory\DepartureLocks;
@@ -38,7 +38,7 @@ final class ClaimService
     public static ?Closure $beforeConvert = null;
 
     /**
-     * @param  Collection<int, Cabin>  $cabins
+     * @param  Collection<int, Room>  $cabins
      * @return Collection<int, CabinClaim>
      */
     public function claim(
@@ -69,7 +69,7 @@ final class ClaimService
     }
 
     /**
-     * @param  Collection<int, Cabin>|null  $cabins
+     * @param  Collection<int, Room>|null  $cabins
      */
     public function release(Model $holder, ReleaseReason $reason, ?Collection $cabins = null): int
     {
@@ -89,7 +89,7 @@ final class ClaimService
     }
 
     /**
-     * @param  Collection<int, Cabin>|null  $cabins
+     * @param  Collection<int, Room>|null  $cabins
      */
     public function convert(
         Model $fromHolder,
@@ -136,7 +136,7 @@ final class ClaimService
                 continue;
             }
 
-            $targetCabins = $group->map(fn (CabinClaim $claim): Cabin => $claim->cabin)->sortBy('sort')->values();
+            $targetCabins = $group->map(fn (CabinClaim $claim): Room => $claim->cabin)->sortBy('sort')->values();
             try {
                 $created = $created->concat(
                     $this->insertClaims($departure, $targetCabins, $toHolder, $kind, $holdType, $expiresAt),
@@ -196,13 +196,13 @@ final class ClaimService
     }
 
     /**
-     * @param  Collection<int, Cabin>  $cabins
+     * @param  Collection<int, Room>  $cabins
      */
     private function releaseExpiredHoldsFor(Departure $departure, Collection $cabins): void
     {
         $ids = CabinClaim::query()
             ->where('departure_id', $departure->id)
-            ->whereIn('cabin_id', $cabins->pluck('id'))
+            ->whereIn('room_id', $cabins->pluck('id'))
             ->where('kind', ClaimKind::Hold)
             ->whereNull('released_at')
             ->where('expires_at', '<', now())
@@ -278,7 +278,7 @@ final class ClaimService
     }
 
     /**
-     * @param  Collection<int, Cabin>|null  $cabins
+     * @param  Collection<int, Room>|null  $cabins
      * @return list<int>
      */
     private function activeHolderClaimIds(Model $holder, ?Collection $cabins): array
@@ -287,7 +287,7 @@ final class ClaimService
     }
 
     /**
-     * @param  Collection<int, Cabin>|null  $cabins
+     * @param  Collection<int, Room>|null  $cabins
      * @return Collection<int, CabinClaim>
      */
     private function activeHolderClaims(Model $holder, ?Collection $cabins): Collection
@@ -299,14 +299,14 @@ final class ClaimService
             ->with(['cabin', 'departure']);
 
         if ($cabins instanceof Collection) {
-            $query->whereIn('cabin_id', $cabins->pluck('id'));
+            $query->whereIn('room_id', $cabins->pluck('id'));
         }
 
         return $query->get();
     }
 
     /**
-     * @param  Collection<int, Cabin>  $cabins
+     * @param  Collection<int, Room>  $cabins
      * @return Collection<int, CabinClaim>
      */
     private function insertClaims(
@@ -322,7 +322,7 @@ final class ClaimService
         foreach ($cabins as $cabin) {
             $claims->push(CabinClaim::query()->create([
                 'departure_id' => $departure->id,
-                'cabin_id' => $cabin->id,
+                'room_id' => $cabin->id,
                 'holder_type' => $holder->getMorphClass(),
                 'holder_id' => $holder->getKey(),
                 'kind' => $kind,
@@ -335,7 +335,7 @@ final class ClaimService
     }
 
     /**
-     * @param  Collection<int, Cabin>  $cabins
+     * @param  Collection<int, Room>  $cabins
      */
     private function conflictOrRethrow(
         UniqueConstraintViolationException $exception,
@@ -351,13 +351,13 @@ final class ClaimService
     }
 
     /**
-     * @param  Collection<int, Cabin>  $cabins
+     * @param  Collection<int, Room>  $cabins
      */
     private function unavailable(Departure $departure, Collection $cabins, Model $holder): CabinUnavailableException
     {
         $conflicts = CabinClaim::query()
             ->where('departure_id', $departure->id)
-            ->whereIn('cabin_id', $cabins->pluck('id'))
+            ->whereIn('room_id', $cabins->pluck('id'))
             ->whereNull('released_at')
             ->where(function ($query) use ($holder): void {
                 $query->where('holder_type', '!=', $holder->getMorphClass())

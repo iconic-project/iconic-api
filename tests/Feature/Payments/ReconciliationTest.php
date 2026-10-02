@@ -49,7 +49,7 @@ test('reconciliation buckets a matched, unmatched and amount-mismatch charge', f
     $other = pendingCabin([
         'departure' => ReservationFixtures::anamaraDeparture('2028-02-06'),
         'reference' => 'ANK-2026-0541',
-        'cabin_id' => ReservationFixtures::anamaraDeparture('2028-02-06')->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture('2028-02-06')->property->cabins->firstWhere('code', 'S2')?->id,
     ]);
 
     Payment::factory()->create([

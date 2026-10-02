@@ -141,6 +141,7 @@ final class CabinPricer
         );
     }
 
+    // TODO(Sprint 18): room type pricing (09 H8)
     private function cabinCategory(QuoteInput $input): CabinCategory
     {
         return $input->category ?? CabinCategory::Suite;

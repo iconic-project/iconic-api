@@ -38,7 +38,7 @@ function recipientBooking(array $overrides = []): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-4100',
         ...$overrides,

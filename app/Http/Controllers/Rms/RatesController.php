@@ -72,6 +72,7 @@ class RatesController extends ConfigController
     /**
      * @return array<string, array{label: string, input: QuoteInput}>
      */
+    // TODO(Sprint 18): room type pricing (09 H8)
     private static function scenarios(int $year): array
     {
         return [

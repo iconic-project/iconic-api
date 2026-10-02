@@ -18,7 +18,7 @@ use App\Events\BookingCreated;
 use App\Exceptions\CabinUnavailableException;
 use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\Cabin;
+use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\ClaimService;
@@ -90,7 +90,7 @@ final class CreateBookingRequest extends Action
 
             $cabin = $party->cabin;
 
-            if (! $cabin instanceof Cabin) {
+            if (! $cabin instanceof Room) {
                 throw ValidationException::withMessages([
                     'cabins' => ['Pick a cabin.'],
                 ]);
@@ -115,7 +115,7 @@ final class CreateBookingRequest extends Action
                 'request_reference' => $this->references->next(ReferenceType::Request, $referenceAt),
                 'type' => BookingType::Cabin,
                 'departure_id' => $departure->id,
-                'cabin_id' => $cabin->id,
+                'room_id' => $cabin->id,
                 'contact_id' => $contact->id,
                 'group_id' => null,
                 'owner_id' => $actor->id,

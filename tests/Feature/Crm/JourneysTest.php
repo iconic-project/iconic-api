@@ -466,7 +466,7 @@ function journeyBooking(Contact $contact, User $owner, BookingStatus $status, st
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin->id,
+        'room_id' => $cabin->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => $status,

@@ -261,7 +261,7 @@ test('requested with no active claim cannot be moved', function (): void {
         'reference' => null,
         'request_reference' => 'ANK-R-2026-0099',
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin?->id,
+        'room_id' => $cabin?->id,
         'owner_id' => managerUser()->id,
     ]);
 
@@ -284,7 +284,7 @@ test('a requested hold moves and keeps its expiry', function (): void {
         'reference' => null,
         'request_reference' => 'ANK-R-2026-0098',
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin?->id,
+        'room_id' => $cabin?->id,
         'owner_id' => managerUser()->id,
     ]);
     $expires = now()->addDays(3);

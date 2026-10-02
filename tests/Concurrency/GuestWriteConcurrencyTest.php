@@ -53,7 +53,7 @@ test('two guest writes on one booking wait 1205 never 1213', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2028-05-14');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::PendingPayment,
         'owner_id' => $actor->id,
     ]);

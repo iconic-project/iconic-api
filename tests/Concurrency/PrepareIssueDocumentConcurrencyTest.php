@@ -63,7 +63,7 @@ test('a payment recorded while PrepareIssueDocument holds the lock waits 1205 ne
     $departure = ReservationFixtures::anamaraDeparture('2028-10-15');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S8')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S8')?->id,
         'status' => BookingStatus::Confirmed,
         'owner_id' => $actor->id,
         'total' => 26600,

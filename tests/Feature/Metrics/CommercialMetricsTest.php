@@ -48,7 +48,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
 
     $cabin = Booking::factory()->create([
         'departure_id' => $cabinDeparture->id,
-        'cabin_id' => $cabinDeparture->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $cabinDeparture->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $admin->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
@@ -59,7 +59,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     ]);
     $blocked = Booking::factory()->create([
         'departure_id' => $cabinDeparture->id,
-        'cabin_id' => $cabinDeparture->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $cabinDeparture->property->cabins->firstWhere('code', 'S2')?->id,
         'owner_id' => $admin->id,
         'status' => BookingStatus::Confirmed,
         'total' => 10000,
@@ -70,7 +70,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     ]);
     $charter = Booking::factory()->create([
         'departure_id' => $charterDeparture->id,
-        'cabin_id' => null,
+        'room_id' => null,
         'owner_id' => $admin->id,
         'type' => BookingType::Charter,
         'status' => BookingStatus::Confirmed,
@@ -269,7 +269,7 @@ test('the metrics query count stays flat as bookings grow', function (): void {
 
     $extra = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 28000,
     ]);

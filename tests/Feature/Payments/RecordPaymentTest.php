@@ -42,7 +42,7 @@ test('admin and external finance can record a payment and a sales exec cannot', 
     $other = pendingCabin([
         'departure' => ReservationFixtures::anamaraDeparture('2028-01-02'),
         'reference' => 'ANK-2026-0412',
-        'cabin_id' => ReservationFixtures::anamaraDeparture('2028-01-02')->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture('2028-01-02')->property->cabins->firstWhere('code', 'S2')?->id,
     ]);
 
     $this->actingAs(adminUser())

@@ -136,7 +136,7 @@ function pickerDeparture(string $date, string $first, string $last, BookingStatu
     $departure = ReservationFixtures::anamaraDeparture($date);
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'status' => $status,
         'owner_id' => managerUser()->id,
     ]);

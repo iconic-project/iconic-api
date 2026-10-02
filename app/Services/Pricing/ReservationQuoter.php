@@ -8,8 +8,8 @@ use App\Enums\BookingSegment;
 use App\Enums\BookingType;
 use App\Enums\CabinState;
 use App\Enums\MainChannel;
-use App\Models\Cabin;
 use App\Models\Departure;
+use App\Models\Room;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
 use App\Support\BusinessTime;
@@ -60,7 +60,7 @@ final class ReservationQuoter
 
         $parties = $type === BookingType::Charter
             ? [$this->quoteCharter($departure, $rows[0], $snapshot, $backToBack, $year, $guests->maxPerProperty, $rates)]
-            : $this->quoteCabins($departure, $rows, $snapshot, $backToBack, $year, $guests->maxPerCabin, $rates, $context);
+            : $this->quoteRooms($departure, $rows, $snapshot, $backToBack, $year, $guests->maxPerCabin, $rates, $context);
 
         $warnings = [];
 
@@ -153,7 +153,7 @@ final class ReservationQuoter
      * @param  array{channel: BookingSegment, booking_date: string, online_deposit: bool, promo_code: string|null}  $context
      * @return list<QuotedParty>
      */
-    private function quoteCabins(
+    private function quoteRooms(
         Departure $departure,
         array $rows,
         DepartureSnapshot $snapshot,
@@ -173,10 +173,10 @@ final class ReservationQuoter
             $errors = [];
             $warnings = [];
             $cabin = $departure->property->cabins->first(
-                fn (Cabin $item): bool => $item->code === $code,
+                fn (Room $item): bool => $item->code === $code,
             );
 
-            if ($code === '' || ! $cabin instanceof Cabin) {
+            if ($code === '' || ! $cabin instanceof Room) {
                 $errors[] = 'Pick a cabin for cabin '.($index + 1).'.';
             } elseif (in_array($code, $used, true)) {
                 $errors[] = ($cabin->label).' is selected twice.';
@@ -197,9 +197,9 @@ final class ReservationQuoter
             }
 
             $available = false;
-            $label = $cabin instanceof Cabin ? $cabin->label : ($code !== '' ? $code : 'Cabin '.($index + 1));
+            $label = $cabin instanceof Room ? $cabin->label : ($code !== '' ? $code : 'Cabin '.($index + 1));
 
-            if ($cabin instanceof Cabin) {
+            if ($cabin instanceof Room) {
                 foreach ($snapshot->cabins as $cabinRow) {
                     if ($cabinRow['cabin']['code'] === $cabin->code) {
                         $available = $cabinRow['state'] === CabinState::Free->value;
@@ -210,11 +210,11 @@ final class ReservationQuoter
 
             $quote = null;
 
-            if ($cabin instanceof Cabin) {
+            if ($cabin instanceof Room) {
                 $priced = $this->pricer->quote($rates, new QuoteInput(
                     year: $year,
                     type: QuoteType::Cabin,
-                    category: $cabin->category,
+                    category: $cabin->pricingCategory(),
                     adults: $adults,
                     children: $children,
                     festive: $departure->festive,
@@ -229,7 +229,7 @@ final class ReservationQuoter
             }
 
             $parties[] = new QuotedParty(
-                cabinCode: $cabin instanceof Cabin ? $cabin->code : ($code !== '' ? $code : null),
+                cabinCode: $cabin instanceof Room ? $cabin->code : ($code !== '' ? $code : null),
                 cabinLabel: $label,
                 adults: $adults,
                 children: $children,
@@ -237,7 +237,7 @@ final class ReservationQuoter
                 quote: $quote,
                 errors: $errors,
                 warnings: $warnings,
-                cabin: $cabin instanceof Cabin ? $cabin : null,
+                cabin: $cabin instanceof Room ? $cabin : null,
             );
         }
 
@@ -282,7 +282,7 @@ final class ReservationQuoter
     private function withDiscounts(
         Quote $priced,
         Departure $departure,
-        Cabin $cabin,
+        Room $cabin,
         array $context,
         int $adults,
         int $children,
@@ -295,7 +295,7 @@ final class ReservationQuoter
         $applied = $this->discounts->apply(
             $priced,
             $departure,
-            $cabin->category,
+            $cabin->pricingCategory(),
             $context['channel'],
             $context['booking_date'],
             $adults,

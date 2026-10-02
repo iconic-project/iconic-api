@@ -7,12 +7,12 @@ use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
 use App\Enums\ReleaseReason;
 use App\Exceptions\CabinUnavailableException;
-use App\Models\Cabin;
 use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Property;
+use App\Models\Room;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Database\QueryException;
@@ -39,7 +39,7 @@ function futureDeparture(?Property $property = null): Departure
     ]);
 }
 
-function cabinOn(Property $property, string $code): Cabin
+function cabinOn(Property $property, string $code): Room
 {
     return $property->cabins()->where('code', $code)->firstOrFail();
 }
@@ -70,7 +70,7 @@ test('the database refuses a second active claim on the same cabin', function ()
 
     $row = [
         'departure_id' => $departure->id,
-        'cabin_id' => $cabin->id,
+        'room_id' => $cabin->id,
         'holder_type' => 'claim_holder',
         'holder_id' => $holder->id,
         'kind' => ClaimKind::Hold->value,

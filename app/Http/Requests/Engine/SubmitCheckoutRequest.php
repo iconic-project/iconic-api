@@ -7,8 +7,8 @@ namespace App\Http\Requests\Engine;
 use App\Enums\CheckoutPath;
 use App\Enums\ConsentDocument;
 use App\Enums\PreferredChannel;
-use App\Models\Cabin;
 use App\Models\CheckoutSession;
+use App\Models\Room;
 use App\Support\Countries;
 use App\Support\Engine\CabinCodes;
 use App\Support\Engine\EngineSessionId;
@@ -101,7 +101,7 @@ class SubmitCheckoutRequest extends FormRequest
 
                 $raw = (string) ($guest['cabin_code'] ?? '');
                 $cabin = CabinCodes::resolve($departure, $raw);
-                $code = $cabin instanceof Cabin ? $cabin->code : $raw;
+                $code = $cabin instanceof Room ? $cabin->code : $raw;
                 $guest['cabin_code'] = $code;
                 $normalized[] = $guest;
 

@@ -9,10 +9,10 @@ use App\Enums\BookingType;
 use App\Enums\ChannelOfOrigin;
 use App\Enums\MainChannel;
 use App\Models\Booking;
-use App\Models\Cabin;
 use App\Models\Contact;
 use App\Models\Departure;
 use App\Models\RateVersion;
+use App\Models\Room;
 use App\Models\User;
 use App\Support\Bookings\SoldOn;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -33,7 +33,7 @@ class BookingFactory extends Factory
             'request_reference' => null,
             'type' => BookingType::Cabin,
             'departure_id' => Departure::factory(),
-            'cabin_id' => Cabin::factory(),
+            'room_id' => Room::factory(),
             'contact_id' => Contact::factory(),
             'group_id' => null,
             'owner_id' => User::factory(),

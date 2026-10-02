@@ -58,7 +58,7 @@ test('two issues on the same booking wait 1205 never 1213 and keep distinct numb
     $departure = ReservationFixtures::anamaraDeparture('2028-07-09');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-0702',
         'total' => 26600,

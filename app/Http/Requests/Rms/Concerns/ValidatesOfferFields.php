@@ -31,6 +31,7 @@ trait ValidatesOfferFields
             'channel' => [$presence, Rule::enum(OfferChannel::class)],
             'partner' => ['sometimes', 'nullable', 'string', 'max:255'],
             'cabin_types' => [$presence, 'array', 'min:1'],
+            // TODO(Sprint 18): room type pricing (09 H8)
             'cabin_types.*' => [Rule::enum(CabinCategory::class)],
             'itinerary_codes' => [$presence, 'array', 'min:1'],
             'itinerary_codes.*' => ['string', 'max:10'],

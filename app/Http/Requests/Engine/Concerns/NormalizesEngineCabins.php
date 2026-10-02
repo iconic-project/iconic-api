@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Engine\Concerns;
 
-use App\Models\Cabin;
 use App\Models\Departure;
+use App\Models\Room;
 use App\Support\Engine\CabinCodes;
 use Illuminate\Validation\Validator;
 
@@ -79,7 +79,7 @@ trait NormalizesEngineCabins
                     : (isset($row['code']) ? (string) $row['code'] : '');
                 $cabin = CabinCodes::resolve($departure, $code);
 
-                if (! $cabin instanceof Cabin) {
+                if (! $cabin instanceof Room) {
                     $after->errors()->add('cabins.'.$index.'.cabin_code', 'Pick a cabin.');
 
                     continue;

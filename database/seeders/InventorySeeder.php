@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Enums\CabinCategory;
-use App\Models\Cabin;
+use App\Enums\RoomStatus;
 use App\Models\Property;
+use App\Models\Room;
+use App\Support\Rooms\BackfillRoomTypes;
 use Illuminate\Database\Seeder;
 
 final class InventorySeeder extends Seeder
 {
     public function run(): void
     {
+        $types = app(BackfillRoomTypes::class);
+        $maxPerCabin = $types->maxPerCabin();
+
         foreach (['ANAMARA', 'ANATIVA'] as $code) {
             $property = Property::query()->firstOrCreate(
                 ['code' => $code],
@@ -20,15 +24,18 @@ final class InventorySeeder extends Seeder
             );
 
             foreach ($this->cabins() as $cabin) {
-                Cabin::query()->firstOrCreate(
+                $type = $types->ensure($property->id, $cabin['category'], $maxPerCabin);
+
+                Room::query()->firstOrCreate(
                     [
                         'property_id' => $property->id,
                         'code' => $cabin['code'],
                     ],
                     [
                         'label' => $cabin['label'],
-                        'category' => $cabin['category'],
+                        'room_type_id' => $type->id,
                         'sort' => $cabin['sort'],
+                        'status' => RoomStatus::Active,
                     ],
                 );
             }
@@ -36,7 +43,7 @@ final class InventorySeeder extends Seeder
     }
 
     /**
-     * @return list<array{code: string, label: string, category: CabinCategory, sort: int}>
+     * @return list<array{code: string, label: string, category: string, sort: int}>
      */
     private function cabins(): array
     {
@@ -46,7 +53,7 @@ final class InventorySeeder extends Seeder
             $cabins[] = [
                 'code' => 'S'.$index,
                 'label' => 'Suite 0'.$index,
-                'category' => CabinCategory::Suite,
+                'category' => 'SUITE',
                 'sort' => $index,
             ];
         }
@@ -54,7 +61,7 @@ final class InventorySeeder extends Seeder
         $cabins[] = [
             'code' => 'OWNER',
             'label' => "Owner's Suite",
-            'category' => CabinCategory::Owner,
+            'category' => 'OWNER',
             'sort' => 9,
         ];
 

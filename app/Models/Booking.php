@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\DB;
  * @property string|null $request_reference
  * @property BookingType $type
  * @property int $departure_id
- * @property int|null $cabin_id
+ * @property int|null $room_id
  * @property int $contact_id
  * @property int|null $group_id
  * @property int $owner_id
@@ -86,7 +86,7 @@ use Illuminate\Support\Facades\DB;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Departure $departure
- * @property-read Cabin|null $cabin
+ * @property-read Room|null $cabin
  * @property-read Contact $contact
  * @property-read Group|null $group
  * @property-read User $owner
@@ -119,7 +119,7 @@ use Illuminate\Support\Facades\DB;
     'request_reference',
     'type',
     'departure_id',
-    'cabin_id',
+    'room_id',
     'contact_id',
     'group_id',
     'owner_id',
@@ -203,11 +203,11 @@ class Booking extends Model
     }
 
     /**
-     * @return BelongsTo<Cabin, $this>
+     * @return BelongsTo<Room, $this>
      */
     public function cabin(): BelongsTo
     {
-        return $this->belongsTo(Cabin::class);
+        return $this->belongsTo(Room::class, 'room_id');
     }
 
     /**
@@ -816,7 +816,7 @@ class Booking extends Model
 
         $cabin = $this->cabin;
 
-        return $cabin instanceof Cabin ? $cabin->label : 'Cabin';
+        return $cabin instanceof Room ? $cabin->label : 'Cabin';
     }
 
     public function historyLabel(): string

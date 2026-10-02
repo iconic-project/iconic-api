@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use App\Enums\PropertyStatus;
-use App\Models\Cabin;
 use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\Property;
+use App\Models\Room;
 use App\Models\User;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -26,12 +26,12 @@ test('a sales exec can list properties with cabins in sort order', function (): 
     $data = $response->json('data');
     expect($data)->toHaveCount(2);
     expect(array_column($data, 'code'))->toBe(['ANAMARA', 'ANATIVA']);
-    expect($data[0]['cabins'])->toHaveCount(9);
-    expect(array_column($data[0]['cabins'], 'code'))->toBe([
+    expect($data[0]['rooms'])->toHaveCount(9);
+    expect(array_column($data[0]['rooms'], 'code'))->toBe([
         'S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'OWNER',
     ]);
-    expect($data[0]['cabins'][8]['label'])->toBe("Owner's Suite");
-    expect($data[0]['cabins'][8]['category'])->toBe('OWNER');
+    expect($data[0]['rooms'][8]['label'])->toBe("Owner's Suite");
+    expect($data[0]['rooms'][8]['room_type']['code'])->toBe('OWNER');
     expect($data[0]['status'])->toBe('ACTIVE');
 });
 
@@ -158,11 +158,13 @@ test('seeded inventory keeps every cabin and departure on a property', function 
     Departure::factory()->create(['property_id' => $property->id]);
 
     expect(Schema::hasTable('properties'))->toBeTrue();
-    expect(Schema::hasColumn('cabins', 'property_id'))->toBeTrue();
+    expect(Schema::hasTable('rooms'))->toBeTrue();
+    expect(Schema::hasColumn('rooms', 'property_id'))->toBeTrue();
+    expect(Schema::hasColumn('rooms', 'room_type_id'))->toBeTrue();
     expect(Schema::hasColumn('departures', 'property_id'))->toBeTrue();
     expect(Property::query()->count())->toBe(2);
-    expect(Cabin::query()->count())->toBe(18);
-    expect(Cabin::query()->whereDoesntHave('property')->exists())->toBeFalse();
+    expect(Room::query()->count())->toBe(18);
+    expect(Room::query()->whereDoesntHave('property')->exists())->toBeFalse();
     expect(Departure::query()->whereDoesntHave('property')->exists())->toBeFalse();
-    expect(Cabin::query()->where('property_id', $property->id)->count())->toBe(9);
+    expect(Room::query()->where('property_id', $property->id)->count())->toBe(9);
 });

@@ -35,6 +35,7 @@ final class OfferPresentation
             : $offer->channel->value.($offer->partner !== null && $offer->partner !== '' ? ' · '.$offer->partner : '');
 
         $cabins = collect($offer->cabin_types)
+            // TODO(Sprint 18): room type pricing (09 H8)
             ->map(fn (string $code): string => $code === CabinCategory::Owner->value ? "Owner's" : 'Suites')
             ->implode(' + ');
 

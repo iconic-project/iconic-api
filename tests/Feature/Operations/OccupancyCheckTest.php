@@ -8,10 +8,10 @@ use App\Enums\CabinCategory;
 use App\Enums\ClaimKind;
 use App\Models\Alert;
 use App\Models\Booking;
-use App\Models\Cabin;
 use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\Property;
+use App\Models\Room;
 use App\Support\Alerts\AlertKeys;
 use App\Support\BusinessTime;
 use Database\Seeders\ConfigSeeder;
@@ -32,7 +32,7 @@ test('occupancy alerts sit below the percent and inside the day window, and a sa
     expect(BusinessTime::now()->toDateString())->toBe('2020-01-05');
 
     $property = Property::factory()->create();
-    $cabins = collect(range(1, 10))->map(fn (int $number): Cabin => Cabin::factory()->create([
+    $cabins = collect(range(1, 10))->map(fn (int $number): Room => Room::factory()->create([
         'property_id' => $property->id,
         'code' => 'S'.$number,
         'label' => 'Suite '.$number,
@@ -67,7 +67,7 @@ test('occupancy alerts sit below the percent and inside the day window, and a sa
 });
 
 /**
- * @param  Collection<int, Cabin>  $cabins
+ * @param  Collection<int, Room>  $cabins
  */
 function occupiedDeparture(Property $property, Collection $cabins, Booking $holder, string $date, int $sold): Departure
 {
@@ -80,7 +80,7 @@ function occupiedDeparture(Property $property, Collection $cabins, Booking $hold
     foreach ($cabins->take($sold) as $cabin) {
         CabinClaim::query()->create([
             'departure_id' => $departure->id,
-            'cabin_id' => $cabin->id,
+            'room_id' => $cabin->id,
             'holder_type' => $holder->getMorphClass(),
             'holder_id' => $holder->id,
             'kind' => ClaimKind::Booking,

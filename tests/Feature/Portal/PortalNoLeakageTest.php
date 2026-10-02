@@ -73,7 +73,7 @@ test('no portal response leaks a public rate, sensitive guest fields, or a payme
     $booking = Booking::factory()->create([
         'reference' => 'ANK-2026-6001',
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,

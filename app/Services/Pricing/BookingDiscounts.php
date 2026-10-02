@@ -23,6 +23,7 @@ final class BookingDiscounts
     public function apply(
         Quote $cabin,
         Departure $departure,
+        // TODO(Sprint 18): room type pricing (09 H8)
         CabinCategory $category,
         BookingSegment $channel,
         string $bookingDate,

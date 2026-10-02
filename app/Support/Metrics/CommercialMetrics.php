@@ -435,7 +435,7 @@ final class CommercialMetrics
         $statusIn = implode(', ', array_fill(0, count($statuses), '?'));
 
         $sql = 'SELECT departures.id AS id, departures.`date` AS departure_date, properties.code AS property_code,
-            (SELECT COUNT(*) FROM cabins WHERE cabins.property_id = departures.property_id) AS cabins,
+            (SELECT COUNT(*) FROM rooms WHERE rooms.property_id = departures.property_id) AS cabins,
             (SELECT COUNT(*) FROM cabin_claims blk
                 WHERE blk.departure_id = departures.id AND blk.released_at IS NULL AND blk.kind = ?) AS blocked,
             (SELECT COUNT(*) FROM cabin_claims cc

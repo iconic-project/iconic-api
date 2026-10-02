@@ -53,7 +53,7 @@ test('two payment draws on one booking wait 1205 never 1213 and stay distinct', 
     $departure = ReservationFixtures::anamaraDeparture('2028-05-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'reference' => 'ANK-2026-0501',
     ]);
 

@@ -20,7 +20,7 @@ final class CalendarController extends Controller
         [$from, $to] = $request->range();
 
         $properties = Property::query()
-            ->with('cabins')
+            ->with('cabins.roomType')
             ->when($request->filled('property_id'), fn ($query) => $query->whereKey($request->validated('property_id')))
             ->orderBy('code')
             ->get();
@@ -68,7 +68,7 @@ final class CalendarController extends Controller
                         'id' => $cabin->id,
                         'code' => $cabin->code,
                         'label' => $cabin->label,
-                        'category' => $cabin->category->value,
+                        'category' => $cabin->roomType->code,
                         'sort' => $cabin->sort,
                     ],
                     'cells' => $cells,

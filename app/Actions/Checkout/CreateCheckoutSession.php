@@ -11,9 +11,9 @@ use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ReleaseReason;
 use App\Exceptions\CabinUnavailableException;
-use App\Models\Cabin;
 use App\Models\CheckoutSession;
 use App\Models\Departure;
+use App\Models\Room;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\ReservationQuote;
@@ -111,14 +111,14 @@ final class CreateCheckoutSession extends Action
 
     /**
      * @param  list<array{cabin_code: string, adults: int, children: int}>  $cabins
-     * @return Collection<int, Cabin>
+     * @return Collection<int, Room>
      */
     private function cabinsFor(Departure $departure, array $cabins): Collection
     {
         $codes = array_map(fn (array $row): string => $row['cabin_code'], $cabins);
 
         return $departure->property->cabins
-            ->filter(fn (Cabin $cabin): bool => in_array($cabin->code, $codes, true))
+            ->filter(fn (Room $cabin): bool => in_array($cabin->code, $codes, true))
             ->sortBy('sort')
             ->values();
     }
