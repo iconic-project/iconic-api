@@ -24,4 +24,4 @@ K4: a cabin blocked or held in the RMS must change the engine label within 30 se
 - [ ] E4 · Carolina Calendar: blocked cells `FAM`; Suite 04 on 21 Nov remains a hold (`REQ` / request), not a block.
 
 ## Notes
-Do not use DEP-013 (chartered, not shown). LIMITED is the second beat — blocks alone go FULL, not LIMITED. Guest context has no staff cookies. Before any other click, click `Analytics off` (or set `localStorage['anakata-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.
+Do not use DEP-013 (chartered, not shown). LIMITED is the second beat — blocks alone go FULL, not LIMITED. Guest context has no staff cookies. Before any other click, click `Analytics off` (or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.

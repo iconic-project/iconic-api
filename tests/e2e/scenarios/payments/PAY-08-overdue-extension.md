@@ -8,7 +8,7 @@
 OVERDUE is derived. Nothing auto-cancels. Granting an extension with a reason must clear the flag and write History.
 
 ## Steps
-1. From `anakata-api`, with the running compose project: `docker compose exec app sh -c "php artisan anakata:set-overdue-fixture"`. Do **not** put this in `reset.sh`.
+1. From `iconic-api`, with the running compose project: `docker compose exec app sh -c "php artisan iconic:set-overdue-fixture"`. Do **not** put this in `reset.sh`.
 2. Sign in as Carolina. Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
 3. Click **Overdue only**. Open ANK-2026-0018 (A. Fontaine).
 4. Click `Grant extension`. Modal title `Grant extension (OPS-007)`. New due date = tomorrow (Galápagos). Reason `E2E extend 0018`. `Record`.
@@ -21,4 +21,4 @@ OVERDUE is derived. Nothing auto-cancels. Granting an extension with a reason mu
 - [ ] E4 · History includes the OPS-007 extension (`OPS-007 decision — extension granted · OVERDUE → CONFIRMED`) under Carolina with reason `E2E extend 0018`.
 
 ## Notes
-0018 sails 12 Dec 2027; its stored due date is 14 Aug 2027, so it is not overdue until the fixture sets `balance_due_date_override` to yesterday. `anakata:flag-overdue` is optional — the pill is derived from the due date.
+0018 sails 12 Dec 2027; its stored due date is 14 Aug 2027, so it is not overdue until the fixture sets `balance_due_date_override` to yesterday. `iconic:flag-overdue` is optional — the pill is derived from the due date.

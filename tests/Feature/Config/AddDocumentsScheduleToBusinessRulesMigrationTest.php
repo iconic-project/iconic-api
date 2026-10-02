@@ -48,7 +48,7 @@ test('config-verify fails on a latest document missing documents schedule, then 
     $v1 = insertPreChangeDocumentsSchedule();
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('business_rules v1: documents.pretrip_days_before')
         ->expectsOutputToContain('business_rules v1: documents.voucher_days_before');
@@ -73,7 +73,7 @@ test('config-verify fails on a latest document missing documents schedule, then 
     expect($history)->not->toBeNull();
     expect($history?->actor_label)->toBe('System');
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('business_rules v2: valid');
 });

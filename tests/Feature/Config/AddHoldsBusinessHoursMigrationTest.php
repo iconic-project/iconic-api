@@ -54,7 +54,7 @@ test('config-verify fails on a latest document missing the five hold fields, the
     $v1 = insertPreChangeBusinessRules();
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('business_rules v1: holds.business_days')
         ->expectsOutputToContain('business_rules v1: holds.business_day_start')
@@ -94,7 +94,7 @@ test('config-verify fails on a latest document missing the five hold fields, the
     expect($history?->actor_label)->toBe('System');
     expect($history?->reason)->toBe(HOLDS_BUSINESS_HOURS_APPROVAL);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('business_rules v2: valid');
 });

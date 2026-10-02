@@ -10,7 +10,7 @@ The engine cannot sell a cabin the RMS has taken. The 409 must name the cabin an
 
 ## Steps
 1. **Guest.** 2 adults, Nov 2027–Jan 2028. Select **7 Nov 2027 · ANATIVA** (Northern Passage — all nine cabins free after reset). Stop on trip details (`/itineraries/northern-passage`). Do **not** open cabins yet.
-2. **Carolina.** `/rms/reservations/bookings` → `＋ New reservation`. Type CABIN. Guest `E2E Web11`, email `e2e.web11@anakata.test`, phone `+1 555 0811`, preferred EMAIL, D2C, Hotel Booking Engine. Departure `7 Nov 2027` · ANATIVA. Adults 2. Cabin **Suite 01**. `Create reservation` → `Done`.
+2. **Carolina.** `/rms/reservations/bookings` → `＋ New reservation`. Type CABIN. Guest `E2E Web11`, email `e2e.web11@iconic.test`, phone `+1 555 0811`, preferred EMAIL, D2C, Hotel Booking Engine. Departure `7 Nov 2027` · ANATIVA. Adults 2. Cabin **Suite 01**. `Create reservation` → `Done`.
 3. **Guest.** `Select cabins — continue`. Pick **Suite 01** if it is still clickable, then `Next — your details`. If Suite 01 is already `.taken`, pick it is impossible — record that and pick Suite 01’s taken state, then try Continue without a free pick if the UI allows, or pick Suite 01 only if the stale deck still offers it.
 
 ## Expected
@@ -19,4 +19,4 @@ The engine cannot sell a cabin the RMS has taken. The 409 must name the cabin an
 - [ ] E3 · If the deck refreshed before Continue and Suite 01 is already `.taken`, that also passes the “engine names it” intent — the cabin is not selectable. Prefer the 409 path when the stale pick is still shown.
 
 ## Notes
-Target is 7 Nov ANATIVA so this does not collide with ANAMARA seed claims. Guest context has no staff cookies. Before any other click, click `Analytics off` (or set `localStorage['anakata-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.
+Target is 7 Nov ANATIVA so this does not collide with ANAMARA seed claims. Guest context has no staff cookies. Before any other click, click `Analytics off` (or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.

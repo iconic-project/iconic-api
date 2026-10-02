@@ -6,10 +6,10 @@ After sign-in the header who-menu shows `{NAME} — {ROLE}` **uppercased** (em d
 
 | Name on screen | Email | Role name | Header |
 |---|---|---|---|
-| Carolina M. | carolina@anakata.test | Admin | `CAROLINA M. — ADMIN` |
-| Mateo R. | mateo@anakata.test | Manager | `MATEO R. — MANAGER` |
-| Lucía B. | lucia@anakata.test | Sales Exec | `LUCÍA B. — SALES EXEC` |
-| CFO (external) | cfo@anakata.test | External finance | `CFO (EXTERNAL) — EXTERNAL FINANCE` |
+| Carolina M. | carolina@iconic.test | Admin | `CAROLINA M. — ADMIN` |
+| Mateo R. | mateo@iconic.test | Manager | `MATEO R. — MANAGER` |
+| Lucía B. | lucia@iconic.test | Sales Exec | `LUCÍA B. — SALES EXEC` |
+| CFO (external) | cfo@iconic.test | External finance | `CFO (EXTERNAL) — EXTERNAL FINANCE` |
 
 ## Portal
 

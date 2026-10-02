@@ -21,4 +21,4 @@ Pausing must take the offer off the public feed (K4). Resume without a material 
 - [ ] E3 · Resume toast `Offer resumed.` Status `LIVE`. Badge returns within 30 s. (If Carolina edited a price field while paused, resume is `PENDING DIRECTOR` — do not edit.)
 
 ## Notes
-Rates **Promotions** compact list also has Pause on LIVE rows and `Manage in Offers →`. Either surface is valid. Before any other click on the engine, click `Analytics off` (or set `localStorage['anakata-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.
+Rates **Promotions** compact list also has Pause on LIVE rows and `Manage in Offers →`. Either surface is valid. Before any other click on the engine, click `Analytics off` (or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.

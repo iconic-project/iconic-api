@@ -61,7 +61,7 @@ final class ConsentDataMap
                 'data' => 'Card data',
                 'stored_in' => 'Stripe',
                 'in_crm' => 'no',
-                'retention' => 'Held by Stripe. Anakata stores no PAN.',
+                'retention' => 'Held by Stripe. Iconic stores no PAN.',
                 'rule_key' => null,
                 'rule_value' => null,
             ],

@@ -27,7 +27,7 @@ class BookingAccessTokenFactory extends Factory
             'purpose' => BookingAccessTokenPurpose::Complete,
             'expires_at' => now()->addYear(),
             'revoked_at' => null,
-            'page_url' => rtrim((string) config('anakata.engine_url'), '/').'/complete/'.$token,
+            'page_url' => rtrim((string) config('iconic.engine_url'), '/').'/complete/'.$token,
         ];
     }
 }

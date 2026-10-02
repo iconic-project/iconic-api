@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 final class EventsRetentionCommand extends Command
 {
-    protected $signature = 'anakata:events-retention {--dry-run : Print counts and write nothing}';
+    protected $signature = 'iconic:events-retention {--dry-run : Print counts and write nothing}';
 
     protected $description = 'Roll raw behavioural events into daily counts and delete expired anonymous sessions (L6, LEG-002)';
 

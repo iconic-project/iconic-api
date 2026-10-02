@@ -93,7 +93,7 @@ final class UpdateBookingFees extends Action
     private function suffix(bool $collected): string
     {
         return $collected
-            ? ' — collected by Anakata (invoiced, due with the balance)'
+            ? ' — collected by Iconic (invoiced, due with the balance)'
             : ' — paid directly by the guest (information only on the invoice)';
     }
 }

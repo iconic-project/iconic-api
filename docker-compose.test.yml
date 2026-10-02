@@ -1,7 +1,7 @@
 services:
   test:
     image: webdevops/php-nginx:8.4-alpine
-    container_name: anakata-test
+    container_name: iconic-test
     working_dir: /app
     user: application
     environment:
@@ -24,7 +24,7 @@ services:
 
   test-db:
     image: mysql:8.4
-    container_name: anakata-test-db
+    container_name: iconic-test-db
     environment:
       MYSQL_DATABASE: testing
       MYSQL_USER: laravel

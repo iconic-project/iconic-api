@@ -1,7 +1,7 @@
 # PAY-03 · Awaiting wire, then mark received
 - **Tags:** sprint-5, payments
 - **Priority:** P1
-- **Users:** Carolina then cfo@anakata.test
+- **Users:** Carolina then cfo@iconic.test
 - **Start:** reset
 
 ## Why
@@ -9,7 +9,7 @@ A wire is pledged, not paid, until finance marks it received. Carolina can see t
 
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/rms/reservations/bookings`. Open ANK-2026-0014 (R. Ellison). Overview, then **Payments**.
-2. Sign out. Sign in as `cfo@anakata.test` / `password`. Open `/rms/commercial/payments` (or reopen 0014 → Payments).
+2. Sign out. Sign in as `cfo@iconic.test` / `password`. Open `/rms/commercial/payments` (or reopen 0014 → Payments).
 3. On `ANK-2026-0014-D01` click `Mark received`. Modal title `Wire received — bank reference`. Bank reference `SWIFT-PAY03`. Submit.
 
 ## Expected

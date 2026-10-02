@@ -8,7 +8,7 @@
 The calendar and yacht layout must show the seeded 2027 inventory and the demo fam-trip block. If the default date range hides the seed, the rest of inventory e2e looks empty.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/rms/reservations/calendar`.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms/reservations/calendar`.
 2. The default range is today → +6 months and is empty of demo Sundays. In **Date range**, choose **Year 2027** (`2027-01-01`–`2027-12-31`). If that chip is missing (machine date ≥ 2028), set Custom to those dates.
 3. Read the date columns, both yacht sections, the ANAMARA Suite 03 / 05 / 07 / 08 cells on 14 Nov, and all ANAMARA cabins on 19 Dec.
 4. Open `http://localhost:3001/rms/reservations/yacht-layout`. Apply the same Year 2027 range. In **Departure**, pick `14 Nov 2027`, then `19 Dec 2027`.

@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class VoyageStatusCommand extends Command
 {
-    protected $signature = 'anakata:voyage-status';
+    protected $signature = 'iconic:voyage-status';
 
     protected $description = 'Move FULLY_PAID voyages to ON_BOARD and ON_BOARD voyages to COMPLETED on Galápagos dates';
 

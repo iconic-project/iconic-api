@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 
 final class FlagOverdueCommand extends Command
 {
-    protected $signature = 'anakata:flag-overdue';
+    protected $signature = 'iconic:flag-overdue';
 
     protected $description = 'Write booking.overdue_flagged once per overdue episode (does not change status)';
 

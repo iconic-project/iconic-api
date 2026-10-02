@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class CommissionScanCommand extends Command
 {
-    protected $signature = 'anakata:commission-scan';
+    protected $signature = 'iconic:commission-scan';
 
     protected $description = 'Raise commission leakage findings and resolve the ones that have cleared';
 

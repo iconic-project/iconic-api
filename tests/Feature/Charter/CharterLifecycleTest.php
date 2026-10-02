@@ -50,7 +50,7 @@ test('a proposal is accepted into a frozen charter booking and an old version ca
         'contact' => [
             'first_name' => 'Ada',
             'last_name' => 'Lovelace',
-            'email' => 'ada-'.uniqid().'@anakata.test',
+            'email' => 'ada-'.uniqid().'@iconic.test',
         ],
         'message' => 'The whole yacht, please.',
     ])->assertCreated();
@@ -141,7 +141,7 @@ test('declining a proposal records the reason and does not create a booking', fu
         'guests' => 12,
         'contact' => [
             'name' => 'Decline Guest',
-            'email' => 'decline-'.uniqid().'@anakata.test',
+            'email' => 'decline-'.uniqid().'@iconic.test',
         ],
         'message' => 'Send the proposal.',
     ])->assertCreated();
@@ -168,7 +168,7 @@ test('an expired proposal still opens and cannot be accepted', function (): void
         'guests' => 12,
         'contact' => [
             'name' => 'Grace Hopper',
-            'email' => 'grace-'.uniqid().'@anakata.test',
+            'email' => 'grace-'.uniqid().'@iconic.test',
         ],
         'message' => 'A week in March.',
     ])->assertCreated();
@@ -202,7 +202,7 @@ test('a missed charter deposit raises one task and one warning and a payment clo
         'guests' => 12,
         'contact' => [
             'name' => 'Deposit Guest',
-            'email' => 'deposit-'.uniqid().'@anakata.test',
+            'email' => 'deposit-'.uniqid().'@iconic.test',
         ],
         'message' => 'Please send the proposal.',
     ])->assertCreated();
@@ -221,8 +221,8 @@ test('a missed charter deposit raises one task and one warning and a payment clo
     $booking = Booking::query()->where('reference', $accepted->json('booking_reference'))->firstOrFail();
 
     Carbon::setTestNow(Carbon::parse('2027-11-13 15:00:00', 'UTC'));
-    $this->artisan('anakata:charter-deposits')->assertSuccessful();
-    $this->artisan('anakata:charter-deposits')->assertSuccessful();
+    $this->artisan('iconic:charter-deposits')->assertSuccessful();
+    $this->artisan('iconic:charter-deposits')->assertSuccessful();
 
     expect(CrmTask::query()->where('kind', TaskKind::CharterDeposit)->count())->toBe(1);
     expect(Alert::query()->where('kind', 'CHARTER_DEPOSIT_DUE')->whereNull('resolved_at')->count())->toBe(1);
@@ -237,14 +237,14 @@ test('a missed charter deposit raises one task and one warning and a payment clo
         ->assertCreated()
         ->assertJsonPath('booking.status', BookingStatus::Confirmed->value);
 
-    $this->artisan('anakata:charter-deposits')->assertSuccessful();
+    $this->artisan('iconic:charter-deposits')->assertSuccessful();
 
     expect(CrmTask::query()->where('kind', TaskKind::CharterDeposit)->firstOrFail()->status)->toBe(TaskStatus::AutoClosed);
     expect(Alert::query()->where('kind', 'CHARTER_DEPOSIT_DUE')->whereNull('resolved_at')->count())->toBe(0);
     expect($booking->refresh()->status)->not->toBe(BookingStatus::Cancelled);
 
     Artisan::call('schedule:list');
-    expect(Artisan::output())->toContain('anakata:charter-deposits');
+    expect(Artisan::output())->toContain('iconic:charter-deposits');
     expect(BusinessTime::zone())->toBe('Pacific/Galapagos');
 });
 
@@ -255,7 +255,7 @@ test('a charter cancellation freezes the charter bands and a cabin cancellation 
         'guests' => 12,
         'contact' => [
             'name' => 'Cancel Charter',
-            'email' => 'cancel-charter-'.uniqid().'@anakata.test',
+            'email' => 'cancel-charter-'.uniqid().'@iconic.test',
         ],
         'message' => 'Proposal first.',
     ])->assertCreated();

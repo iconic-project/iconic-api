@@ -195,7 +195,7 @@ test('extras cannot be added or removed on cancelled or released bookings', func
 
 test('own-records blocks another sales exec from adding an extra', function (): void {
     $owner = salesExecUser();
-    $other = salesExecUser(['email' => 'other-sales@anakata.test']);
+    $other = salesExecUser(['email' => 'other-sales@iconic.test']);
     $booking = extrasCabin($owner->id);
 
     $this->actingAs($other)

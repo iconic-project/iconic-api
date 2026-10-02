@@ -36,7 +36,7 @@ test('each listed trade channel with no agency raises one leakage alert and a wh
         'reference' => 'ANK-2026-8099',
     ]);
 
-    Artisan::call('anakata:commission-scan');
+    Artisan::call('iconic:commission-scan');
 
     expect(Alert::query()->where('kind', AlertKind::CommissionLeakage)->count())->toBe(count(CommissionScan::tradeChannels()))
         ->and(Alert::query()->where('base_key', AlertKeys::leakTrade($wholesaler->id))->exists())->toBeFalse();
@@ -45,7 +45,7 @@ test('each listed trade channel with no agency raises one leakage alert and a wh
     $booking->agency_id = Agency::factory()->create()->id;
     $booking->save();
 
-    Artisan::call('anakata:commission-scan');
+    Artisan::call('iconic:commission-scan');
 
     expect(Alert::query()->where('base_key', AlertKeys::leakTrade($booking->id))->whereNull('resolved_at')->exists())->toBeFalse()
         ->and(Alert::query()->where('base_key', AlertKeys::leakTrade($booking->id))->first()?->resolution)->toBe('the finding is gone');
@@ -63,7 +63,7 @@ test('a travel advisor request with no agency is its own finding', function (): 
         'travel_advisor' => true,
     ]);
 
-    Artisan::call('anakata:commission-scan');
+    Artisan::call('iconic:commission-scan');
 
     expect(Alert::query()->where('base_key', AlertKeys::leakAdvisor($booking->id))->whereNull('resolved_at')->exists())->toBeTrue()
         ->and(Alert::query()->where('kind', AlertKind::CommissionLeakage)->count())->toBe(1);
@@ -88,7 +88,7 @@ test('an over-cap booking that is not held and not approved leaks, and a cancell
         'reference' => 'ANK-2026-8202',
     ]);
 
-    Artisan::call('anakata:commission-scan');
+    Artisan::call('iconic:commission-scan');
 
     expect(Alert::query()->where('base_key', AlertKeys::leakCap($cancelled->id))->exists())->toBeFalse()
         ->and(Alert::query()->where('base_key', AlertKeys::leakCap($open->id))->whereNull('resolved_at')->exists())->toBeTrue();
@@ -101,14 +101,14 @@ test('an approved agency with no payment terms raises one alert and resolves whe
         'commission_pct' => 10,
     ]);
 
-    Artisan::call('anakata:commission-scan');
+    Artisan::call('iconic:commission-scan');
 
     $alert = Alert::query()->where('base_key', AlertKeys::leakTerms($agency->id))->first();
     expect($alert?->resolved_at)->toBeNull();
 
     $agency->payment_terms = 'Net 30';
     $agency->save();
-    Artisan::call('anakata:commission-scan');
+    Artisan::call('iconic:commission-scan');
 
     expect($alert?->fresh()?->resolution)->toBe('the finding is gone');
 });

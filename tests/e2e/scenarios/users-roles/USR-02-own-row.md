@@ -8,8 +8,8 @@
 An admin must not disable or demote themselves from the UI.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `/rms/admin/permissions`.
-2. Find the row `Carolina M.` / `carolina@anakata.test`.
+1. Sign in as `carolina@iconic.test` / `password`. Open `/rms/admin/permissions`.
+2. Find the row `Carolina M.` / `carolina@iconic.test`.
 3. Click `Edit`.
 
 ## Expected

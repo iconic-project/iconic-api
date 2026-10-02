@@ -44,7 +44,7 @@
             <tr><td>Ancillary services</td><td>{{ \App\Support\Money::formatDocument((int) $totals['extras']) }}</td></tr>
         @endif
         @if(((int) ($totals['fees_collected'] ?? 0)) > 0)
-            <tr><td>Galápagos entry &amp; transit fees (collected by Anakata)</td><td>{{ \App\Support\Money::formatDocument((int) $totals['fees_collected']) }}</td></tr>
+            <tr><td>Galápagos entry &amp; transit fees (collected by Iconic)</td><td>{{ \App\Support\Money::formatDocument((int) $totals['fees_collected']) }}</td></tr>
         @endif
     </table>
     <table class="dgrand">

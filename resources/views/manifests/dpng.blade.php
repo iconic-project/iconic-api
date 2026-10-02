@@ -6,7 +6,7 @@
     <table class="dh">
         <tr>
             <td>
-                <div class="dlogo">ANAKATA</div>
+                <div class="dlogo">ICONIC</div>
                 <div class="dtag">INTIMATE YACHT EXPEDITIONS</div>
             </td>
             <td>
@@ -19,7 +19,7 @@
             </td>
         </tr>
     </table>
-    <div class="dnote">Column set approved by Anakata, 12 Sep 2026.</div>
+    <div class="dnote">Column set approved by Iconic, 12 Sep 2026.</div>
     <table class="dt">
         <thead>
             <tr>

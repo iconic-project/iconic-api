@@ -1,7 +1,7 @@
 # PAY-10 · Refund Approvals: approve, CFO executes, ledger negative row
 - **Tags:** sprint-5, payments
 - **Priority:** P1
-- **Users:** Carolina then cfo@anakata.test
+- **Users:** Carolina then cfo@iconic.test
 - **Start:** reset
 
 ## Why
@@ -11,7 +11,7 @@ Director approval then finance execution must write a negative REFUNDED row. The
 1. Sign in as Carolina. Open `http://localhost:3001/rms/operations/refunds`. Date range **All dates**. Confirm the empty queue.
 2. Open `/rms/reservations/bookings`. Open ANK-2026-0003. `→ CANCELLED`. Reason `E2E refund 0003`. `Record`.
 3. Open `/rms/operations/refunds`. On ANK-2026-0003 click `Approve`. Modal `Approve refund`. Reason `E2E approve 0003`. Submit.
-4. Sign out. Sign in as `cfo@anakata.test` / `password`. Open `/rms/operations/refunds`. On the approved row click `Execute`. Modal `Record refund execution`. Amount is locked. Method `Card (Stripe)`. External reference optional. `Record execution`.
+4. Sign out. Sign in as `cfo@iconic.test` / `password`. Open `/rms/operations/refunds`. On the approved row click `Execute`. Modal `Record refund execution`. Amount is locked. Method `Card (Stripe)`. External reference optional. `Record execution`.
 5. Open ANK-2026-0003 **Payments**.
 
 ## Expected

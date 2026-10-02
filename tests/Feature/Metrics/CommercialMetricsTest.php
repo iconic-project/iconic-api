@@ -117,7 +117,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
         'first_name' => 'QX-METRIC-GUEST',
         'last_name' => 'Hidden',
         'nationality' => 'GB',
-        'email' => 'qx-metric-guest@anakata.test',
+        'email' => 'qx-metric-guest@iconic.test',
     ]);
     $companion = Guest::factory()->create([
         'booking_id' => $cabin->id,
@@ -149,7 +149,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     assertNoSensitiveFields($response);
     $encoded = (string) json_encode($response->json());
     expect($encoded)->not->toContain('QX-METRIC-GUEST')
-        ->and($encoded)->not->toContain('qx-metric-guest@anakata.test');
+        ->and($encoded)->not->toContain('qx-metric-guest@iconic.test');
 
     $metrics = $response->json('metrics');
     expect($metrics)->toHaveKeys([

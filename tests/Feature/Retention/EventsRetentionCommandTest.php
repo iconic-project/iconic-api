@@ -35,7 +35,7 @@ test('stitched events older than 24 months are rolled up and deleted', function 
     $old = agedEvent(now()->subMonths(25)->toDateTimeString(), $contact->id);
     $kept = agedEvent(now()->subMonths(23)->toDateTimeString(), $contact->id);
 
-    Artisan::call('anakata:events-retention');
+    Artisan::call('iconic:events-retention');
 
     expect(BehaviouralEvent::query()->whereKey($old->id)->exists())->toBeFalse();
     expect(BehaviouralEvent::query()->whereKey($kept->id)->exists())->toBeTrue();
@@ -46,7 +46,7 @@ test('unstitched events older than 30 days are rolled up and deleted', function 
     $old = agedEvent(now()->subDays(31)->toDateTimeString(), null);
     $kept = agedEvent(now()->subDays(29)->toDateTimeString(), null);
 
-    Artisan::call('anakata:events-retention');
+    Artisan::call('iconic:events-retention');
 
     expect(BehaviouralEvent::query()->whereKey($old->id)->exists())->toBeFalse();
     expect(BehaviouralEvent::query()->whereKey($kept->id)->exists())->toBeTrue();
@@ -57,7 +57,7 @@ test('a stitched event 31 days old is kept', function (): void {
     $contact = Contact::factory()->create();
     $event = agedEvent(now()->subDays(31)->toDateTimeString(), $contact->id);
 
-    Artisan::call('anakata:events-retention');
+    Artisan::call('iconic:events-retention');
 
     expect(BehaviouralEvent::query()->whereKey($event->id)->exists())->toBeTrue();
     expect(BehaviouralEventDaily::query()->count())->toBe(0);
@@ -67,7 +67,7 @@ test('dry run writes nothing', function (): void {
     agedEvent(now()->subMonths(25)->toDateTimeString(), Contact::factory()->create()->id);
     agedEvent(now()->subDays(31)->toDateTimeString(), null);
 
-    $this->artisan('anakata:events-retention', ['--dry-run' => true])
+    $this->artisan('iconic:events-retention', ['--dry-run' => true])
         ->assertSuccessful();
 
     expect(BehaviouralEvent::query()->count())->toBe(2);
@@ -77,7 +77,7 @@ test('dry run writes nothing', function (): void {
 test('the events retention command is scheduled daily in Galapagos time', function (): void {
     $events = collect(app(Schedule::class)->events());
     $event = $events->first(
-        fn ($scheduled): bool => str_contains((string) ($scheduled->command ?? ''), 'anakata:events-retention'),
+        fn ($scheduled): bool => str_contains((string) ($scheduled->command ?? ''), 'iconic:events-retention'),
     );
 
     expect($event)->not->toBeNull();

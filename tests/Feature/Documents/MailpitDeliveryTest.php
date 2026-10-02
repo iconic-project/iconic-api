@@ -63,7 +63,7 @@ test('a document send arrives in Mailpit', function (): void {
 
         if ($search->successful()) {
             foreach ($search->json('messages') ?? [] as $message) {
-                if (($message['Subject'] ?? '') === 'Your Anakata booking summary — ANK-2026-7100') {
+                if (($message['Subject'] ?? '') === 'Your Iconic booking summary — ANK-2026-7100') {
                     $found = true;
                     break 2;
                 }

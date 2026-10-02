@@ -10,11 +10,11 @@ Wrong landing, header, or leftover session breaks every role-specific scenario.
 ## Steps
 For each user below: sign out (or use a fresh private context) before the next.
 
-1. Open `http://localhost:3001/login`. Sign in with `carolina@anakata.test` / `password`. Click `Sign in`.
+1. Open `http://localhost:3001/login`. Sign in with `carolina@iconic.test` / `password`. Click `Sign in`.
 2. Open the account menu (who-menu). Click `Sign out`.
-3. Sign in as `mateo@anakata.test` / `password`. Sign out.
-4. Sign in as `lucia@anakata.test` / `password`. Sign out.
-5. Sign in as `cfo@anakata.test` / `password`. Sign out.
+3. Sign in as `mateo@iconic.test` / `password`. Sign out.
+4. Sign in as `lucia@iconic.test` / `password`. Sign out.
+5. Sign in as `cfo@iconic.test` / `password`. Sign out.
 
 ## Expected
 - [ ] E1 · Carolina lands on `/rms/reservations/calendar`. Header who-menu shows `CAROLINA M. — ADMIN`. Sidebar includes **Permissions** and **Business Rules**. Section switch **RMS** / **CRM** is visible.

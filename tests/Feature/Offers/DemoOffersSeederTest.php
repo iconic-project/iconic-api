@@ -25,7 +25,7 @@ test('the placeholder offers are live and approved', function (): void {
     expect($codes)->toBe([
         'OPENING-27',
         'VIRTUOSO-EARLY',
-        'ANAKATA10',
+        'ICONIC10',
         'ADVISOR5',
         'EARLY500',
         'SHOULDER15',
@@ -35,7 +35,7 @@ test('the placeholder offers are live and approved', function (): void {
     ]);
 
     expect(Offer::query()->where('status', OfferStatus::Live)->count())->toBe(9);
-    expect(Offer::query()->where('code', 'ANAKATA10')->firstOrFail()->is_promo_code)->toBeTrue();
+    expect(Offer::query()->where('code', 'ICONIC10')->firstOrFail()->is_promo_code)->toBeTrue();
     expect(Offer::query()->where('code', 'VIRTUOSO-EARLY')->firstOrFail()->channel->value)->toBe('B2B');
     expect(Offer::query()->whereNotNull('first_live_at')->count())->toBe(9);
 });

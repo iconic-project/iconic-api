@@ -51,7 +51,7 @@ final class SendPortalInviteMail implements ShouldQueue
             return;
         }
 
-        $acceptUrl = rtrim((string) config('anakata.portal_url'), '/').'/accept?'.http_build_query([
+        $acceptUrl = rtrim((string) config('iconic.portal_url'), '/').'/accept?'.http_build_query([
             'token' => $this->token,
             'email' => $agencyUser->email,
         ]);

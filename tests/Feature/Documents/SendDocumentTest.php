@@ -227,12 +227,12 @@ test('a recipient-does-not-exist failure is a hard bounce once and a bare 550 st
     expect($soft->fresh()?->status)->toBe(DeliveryStatus::Failed);
 
     $phase = 'hard';
-    $orphan = Contact::factory()->create(['email' => 'missing-box@anakata.test']);
+    $orphan = Contact::factory()->create(['email' => 'missing-box@iconic.test']);
     $byAddress = Delivery::factory()->create([
         'booking_id' => null,
         'document_id' => null,
         'kind' => DeliveryKind::Journey,
-        'to' => ['missing-box@anakata.test'],
+        'to' => ['missing-box@iconic.test'],
         'status' => DeliveryStatus::Queued,
         'triggered_by' => DeliveryTriggeredBy::System,
     ]);

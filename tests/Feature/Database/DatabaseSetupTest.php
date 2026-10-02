@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Schema;
 
-test('default connection is mysql anakata_test', function (): void {
+test('default connection is mysql iconic_test', function (): void {
     $connection = config('database.default');
     $driver = config("database.connections.{$connection}.driver");
     $database = config("database.connections.{$connection}.database");
 
     expect($driver)->toBe('mysql', "Tests must use the mysql driver on the default connection, got [{$driver}]. Check phpunit.xml (DB_CONNECTION=mysql).");
-    expect($database)->toBe('anakata_test', "Tests must use the anakata_test database, got [{$database}]. Check phpunit.xml (DB_DATABASE=anakata_test) so tests never hit the app database.");
+    expect($database)->toBe('iconic_test', "Tests must use the iconic_test database, got [{$database}]. Check phpunit.xml (DB_DATABASE=iconic_test) so tests never hit the app database.");
 });
 
 test('core tables exist after migration', function (): void {

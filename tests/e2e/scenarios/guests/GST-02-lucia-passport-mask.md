@@ -8,7 +8,7 @@
 Sales Exec must never receive a full passport or medical note. Empty save must leave the stored number unchanged (task 02). If the mask leaks, the dedicated-key work is wasted.
 
 ## Steps
-1. Sign in as `lucia@anakata.test` / `password` (fresh context). Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
+1. Sign in as `lucia@iconic.test` / `password` (fresh context). Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
 2. Open ANK-2026-0007 (M. Castellanos — Lucía’s own). **Guests** tab. Read Mariana Castellanos’s card.
 3. **Edit**. Passport field is empty with placeholder `Restricted — enter to replace` and hint `Leave empty to keep the stored number. Typing a value replaces it.` There are **no** medical / dietary / accessibility fields.
 4. Type dummy `E2E000999` in Passport number (not a seeded passport). `Save guest`. Read the card.

@@ -9,7 +9,7 @@ Deep links must survive sign-in. If `redirect` is dropped, staff lose the page t
 
 ## Steps
 1. With no session (fresh context or signed out), open `http://localhost:3001/rms/reservations/bookings`.
-2. On `/login`, sign in as `mateo@anakata.test` / `password`.
+2. On `/login`, sign in as `mateo@iconic.test` / `password`.
 
 ## Expected
 - [ ] E1 · Step 1 lands on `/login?redirect=/rms/reservations/bookings` (not a bare `/login`).

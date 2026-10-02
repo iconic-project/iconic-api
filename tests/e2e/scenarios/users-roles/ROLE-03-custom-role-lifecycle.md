@@ -9,7 +9,7 @@ A role with users must not be deletable. After the last user is moved, delete mu
 
 ## Steps
 1. As Carolina on `/rms/admin/permissions`, `＋ New role`. Name `Copy Exec`. `Copy permissions from` = `Sales Exec`. `Create`.
-2. Invite (or Edit an invited throwaway) — invite `copyexec@anakata.test`, name `Copy User`, role `Copy Exec`. (No need to accept.)
+2. Invite (or Edit an invited throwaway) — invite `copyexec@iconic.test`, name `Copy User`, role `Copy Exec`. (No need to accept.)
 3. On the `Copy Exec` column menu (`···`), hover `Delete`.
 4. Edit `Copy User` and set Role back to `Sales Exec`. `Save`.
 5. Delete `Copy Exec`. Confirm `Delete this role? This cannot be undone.`

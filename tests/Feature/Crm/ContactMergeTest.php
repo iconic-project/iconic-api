@@ -42,7 +42,7 @@ function mergeFixture(): array
     ]);
     $loser = Contact::factory()->create([
         'name' => 'Newer Guest',
-        'email' => 'loser@anakata.test',
+        'email' => 'loser@iconic.test',
         'phone' => '6502530000',
         'country' => 'US',
         'phone_e164' => '+16502530000',
@@ -92,7 +92,7 @@ test('merge repoints every contact-bearing table, fills empty fields and keeps t
     expect($response->json('swapped'))->toBeTrue();
     expect($response->json('merge.survivor_id'))->toBe($fixture['survivor']->id);
     expect($response->json('merge.loser_id'))->toBe($fixture['loser']->id);
-    expect($response->json('contact.email'))->toBe('loser@anakata.test');
+    expect($response->json('contact.email'))->toBe('loser@iconic.test');
     expect($response->json('contact.phone_e164'))->toBe('+16502530000');
     expect($response->json('contact.country'))->toBe('US');
 
@@ -154,13 +154,13 @@ test('merge moves behavioural events and unmerge restores them', function (): vo
 
 test('merge does not overwrite a value the survivor already has', function (): void {
     $survivor = Contact::factory()->create([
-        'email' => 'keep@anakata.test',
+        'email' => 'keep@iconic.test',
         'phone' => '020 7031 3000',
         'country' => 'GB',
         'phone_e164' => '+442070313000',
     ]);
     $loser = Contact::factory()->create([
-        'email' => 'drop@anakata.test',
+        'email' => 'drop@iconic.test',
         'phone' => '6502530000',
         'country' => 'US',
         'phone_e164' => '+16502530000',
@@ -172,10 +172,10 @@ test('merge does not overwrite a value the survivor already has', function (): v
             'reason' => 'Keep survivor fields',
         ])
         ->assertOk()
-        ->assertJsonPath('contact.email', 'keep@anakata.test')
+        ->assertJsonPath('contact.email', 'keep@iconic.test')
         ->assertJsonPath('contact.country', 'GB');
 
-    expect($loser->fresh()?->email)->toBe('drop@anakata.test');
+    expect($loser->fresh()?->email)->toBe('drop@iconic.test');
 });
 
 test('sales exec cannot merge and a crm viewer without the permission is forbidden', function (): void {
@@ -234,7 +234,7 @@ test('unmerge restores recorded rows and leaves a booking created after the merg
     expect($fixture['later']->fresh()?->contact_id)->toBe($fixture['loser']->id);
     expect($after->fresh()?->contact_id)->toBe($fixture['survivor']->id);
     expect($fixture['loser']->fresh()?->merged_into_id)->toBeNull();
-    expect($fixture['loser']->fresh()?->email)->toBe('loser@anakata.test');
+    expect($fixture['loser']->fresh()?->email)->toBe('loser@iconic.test');
     expect($fixture['survivor']->fresh()?->email)->toBeNull();
 
     $this->actingAs($actor)
@@ -248,7 +248,7 @@ test('unmerge restores recorded rows and leaves a booking created after the merg
 
 test('unmerge skips a recorded booking that was moved to a third contact', function (): void {
     $fixture = mergeFixture();
-    $third = Contact::factory()->create(['email' => 'third@anakata.test']);
+    $third = Contact::factory()->create(['email' => 'third@iconic.test']);
     $actor = managerUser();
 
     $mergeId = $this->actingAs($actor)
@@ -321,9 +321,9 @@ test('unmerge after 30 days is refused and an erased merge cannot be undone', fu
 });
 
 test('a chained merge cannot be undone until the later merge is undone', function (): void {
-    $a = Contact::factory()->create(['email' => 'a@anakata.test']);
-    $b = Contact::factory()->create(['email' => 'b@anakata.test']);
-    $c = Contact::factory()->create(['email' => 'c@anakata.test']);
+    $a = Contact::factory()->create(['email' => 'a@iconic.test']);
+    $b = Contact::factory()->create(['email' => 'b@iconic.test']);
+    $c = Contact::factory()->create(['email' => 'c@iconic.test']);
     $actor = managerUser();
 
     $firstId = $this->actingAs($actor)
@@ -361,8 +361,8 @@ test('a chained merge cannot be undone until the later merge is undone', functio
 });
 
 test('resolve follows a merged loser email to the survivor', function (): void {
-    $survivor = Contact::factory()->create(['email' => 'keep-res@anakata.test']);
-    $loser = Contact::factory()->create(['email' => 'follow@anakata.test']);
+    $survivor = Contact::factory()->create(['email' => 'keep-res@iconic.test']);
+    $loser = Contact::factory()->create(['email' => 'follow@iconic.test']);
 
     $this->actingAs(managerUser())
         ->postJson('/api/crm/contacts/'.$survivor->id.'/merge', [
@@ -373,7 +373,7 @@ test('resolve follows a merged loser email to the survivor', function (): void {
 
     $resolved = app(ResolveContact::class)->handle([
         'name' => 'Whoever',
-        'email' => 'FOLLOW@anakata.test',
+        'email' => 'FOLLOW@iconic.test',
     ]);
 
     expect($resolved->id)->toBe($survivor->id);

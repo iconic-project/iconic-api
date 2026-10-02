@@ -43,19 +43,19 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
     $actor = managerUser();
     $holders = blockSuitesExcept($departure, 'S1');
 
-    $first = waitlistEntry($departure, 'First Guest', 'first-wait@anakata.test');
-    $second = waitlistEntry($departure, 'Second Guest', 'second-wait@anakata.test');
-    waitlistEntry($departure, 'Third Guest', 'third-wait@anakata.test');
+    $first = waitlistEntry($departure, 'First Guest', 'first-wait@iconic.test');
+    $second = waitlistEntry($departure, 'Second Guest', 'second-wait@iconic.test');
+    waitlistEntry($departure, 'Third Guest', 'third-wait@iconic.test');
 
     $bookingId = $this->actingAs($actor)
         ->postJson('/api/rms/bookings', ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S1', 'adults' => 2, 'children' => 0]],
-            'client' => ['name' => 'Cabin Guest', 'email' => 'cabin-guest@anakata.test'],
+            'client' => ['name' => 'Cabin Guest', 'email' => 'cabin-guest@iconic.test'],
         ]))
         ->assertCreated()
         ->json('bookings.0.id');
 
-    $this->artisan('anakata:waitlist-notify')->assertSuccessful();
+    $this->artisan('iconic:waitlist-notify')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->count())->toBe(0);
 
     $this->actingAs($actor)
@@ -69,8 +69,8 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
     $openClaims = CabinClaim::query()->whereNull('released_at')->count();
     $statuses = Booking::query()->orderBy('id')->pluck('status')->map(fn (BookingStatus $status): string => $status->value)->all();
 
-    $this->artisan('anakata:waitlist-notify')->assertSuccessful();
-    $this->artisan('anakata:waitlist-notify')->assertSuccessful();
+    $this->artisan('iconic:waitlist-notify')->assertSuccessful();
+    $this->artisan('iconic:waitlist-notify')->assertSuccessful();
     app(OfferWaitlistCabins::class)->handle(new AvailabilityChanged([(int) $departure->id]));
 
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->where('status', DeliveryStatus::Sent)->count())->toBe(1)
@@ -90,7 +90,7 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
         app(ClaimService::class)->release($holder, ReleaseReason::Released);
     });
 
-    $this->artisan('anakata:waitlist-notify')->assertSuccessful();
+    $this->artisan('iconic:waitlist-notify')->assertSuccessful();
 
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->where('status', DeliveryStatus::Sent)->count())->toBe(2)
         ->and(WaitlistEntry::query()->findOrFail($second)->notified_at)->not->toBeNull();
@@ -99,7 +99,7 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
     $openClaims = CabinClaim::query()->whereNull('released_at')->count();
     $statuses = Booking::query()->orderBy('id')->pluck('status')->map(fn (BookingStatus $status): string => $status->value)->all();
 
-    $this->artisan('anakata:waitlist-notify')->assertSuccessful();
+    $this->artisan('iconic:waitlist-notify')->assertSuccessful();
 
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->where('status', DeliveryStatus::Sent)->count())->toBe(2)
         ->and(CabinClaim::query()->count())->toBe($claims)
@@ -123,7 +123,7 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
         ->assertJsonPath('data.2.auto_notified', false);
 
     Artisan::call('schedule:list');
-    expect(Artisan::output())->toContain('anakata:waitlist-notify');
+    expect(Artisan::output())->toContain('iconic:waitlist-notify');
 });
 
 test('a missing address is one blocked delivery and removal closes the follow-up', function (): void {
@@ -132,8 +132,8 @@ test('a missing address is one blocked delivery and removal closes the follow-up
     blockSuitesExcept($departure, 'S1');
 
     $silent = waitlistEntry($departure, 'No Address', null);
-    $removed = waitlistEntry($departure, 'Already Gone', 'gone-wait@anakata.test');
-    $kept = waitlistEntry($departure, 'Still Waiting', 'kept-wait@anakata.test');
+    $removed = waitlistEntry($departure, 'Already Gone', 'gone-wait@iconic.test');
+    $kept = waitlistEntry($departure, 'Still Waiting', 'kept-wait@iconic.test');
 
     $this->actingAs($actor)
         ->postJson('/api/rms/waitlist/'.$removed.'/remove', ['reason' => 'No longer interested'])
@@ -142,7 +142,7 @@ test('a missing address is one blocked delivery and removal closes the follow-up
     $bookingId = $this->actingAs($actor)
         ->postJson('/api/rms/bookings', ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S1', 'adults' => 2, 'children' => 0]],
-            'client' => ['name' => 'Other Guest', 'email' => 'other-guest@anakata.test'],
+            'client' => ['name' => 'Other Guest', 'email' => 'other-guest@iconic.test'],
         ]))
         ->assertCreated()
         ->json('bookings.0.id');
@@ -154,8 +154,8 @@ test('a missing address is one blocked delivery and removal closes the follow-up
         ])
         ->assertOk();
 
-    $this->artisan('anakata:waitlist-notify')->assertSuccessful();
-    $this->artisan('anakata:waitlist-notify')->assertSuccessful();
+    $this->artisan('iconic:waitlist-notify')->assertSuccessful();
+    $this->artisan('iconic:waitlist-notify')->assertSuccessful();
 
     $blocked = Delivery::query()->where('idempotency_key', 'waitlist:'.$silent)->get();
     expect($blocked)->toHaveCount(1)
@@ -174,7 +174,7 @@ test('a missing address is one blocked delivery and removal closes the follow-up
 
     expect($task->fresh()?->status)->toBe(TaskStatus::AutoClosed);
 
-    $this->artisan('anakata:waitlist-notify')->assertSuccessful();
+    $this->artisan('iconic:waitlist-notify')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->count())->toBe(2);
 });
 

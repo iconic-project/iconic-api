@@ -72,7 +72,7 @@ final class ExtrasDocument extends ConfigDocument
                 ],
                 [
                     'code' => 'BTQ',
-                    'name' => 'Anakata boutique',
+                    'name' => 'Iconic boutique',
                     'unit' => 'per item',
                     'price_usd' => null,
                     'triggers_transfer_voucher' => false,

@@ -32,8 +32,8 @@ return new class extends Migration
                 '430 Grand Bay Drive, Apt 1108',
                 'Key Biscayne, FL 33149, United States',
             ],
-            'email' => 'info@anakata.co',
-            'website' => 'anakata.co',
+            'email' => 'info@iconic.co',
+            'website' => 'iconic.co',
             'ein' => '42-4742064',
         ];
 

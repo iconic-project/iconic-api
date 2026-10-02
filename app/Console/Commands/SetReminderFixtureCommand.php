@@ -10,14 +10,14 @@ use Illuminate\Console\Command;
 
 final class SetReminderFixtureCommand extends Command
 {
-    protected $signature = 'anakata:set-reminder-fixture {reference=ANK-2026-0003}';
+    protected $signature = 'iconic:set-reminder-fixture {reference=ANK-2026-0003}';
 
     protected $description = 'Set balance_due_date_override to today + 21 days (local/testing only)';
 
     public function handle(): int
     {
         if (! app()->environment(['local', 'testing'])) {
-            $this->error('anakata:set-reminder-fixture only runs in local and testing.');
+            $this->error('iconic:set-reminder-fixture only runs in local and testing.');
 
             return self::FAILURE;
         }

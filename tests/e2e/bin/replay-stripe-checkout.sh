@@ -26,9 +26,9 @@ if [ -z "${reference}" ]; then
 fi
 
 if [ -n "${expired}" ]; then
-  say "anakata:replay-stripe-checkout --expired ${reference}"
-  in_app "php artisan anakata:replay-stripe-checkout --expired $(printf '%q' "${reference}")"
+  say "iconic:replay-stripe-checkout --expired ${reference}"
+  in_app "php artisan iconic:replay-stripe-checkout --expired $(printf '%q' "${reference}")"
 else
-  say "anakata:replay-stripe-checkout ${reference}"
-  in_app "php artisan anakata:replay-stripe-checkout $(printf '%q' "${reference}")"
+  say "iconic:replay-stripe-checkout ${reference}"
+  in_app "php artisan iconic:replay-stripe-checkout $(printf '%q' "${reference}")"
 fi

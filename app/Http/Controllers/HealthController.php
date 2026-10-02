@@ -23,7 +23,7 @@ final class HealthController extends Controller
 
         return response()->json([
             'status' => $failed ? 'degraded' : 'ok',
-            'app' => 'anakata-api',
+            'app' => 'iconic-api',
             'time' => Iso::utc(now()),
             'checks' => $checks,
         ], $failed ? 503 : 200);

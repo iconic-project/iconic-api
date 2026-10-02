@@ -9,7 +9,7 @@
 One or two sentences: what could break and why it matters.
 
 ## Steps
-1. Open `http://localhost:3001/login`, sign in as carolina@anakata.test / password.
+1. Open `http://localhost:3001/login`, sign in as carolina@iconic.test / password.
 2. …  (exact URLs, exact field labels as shown on screen, exact values)
 
 ## Expected

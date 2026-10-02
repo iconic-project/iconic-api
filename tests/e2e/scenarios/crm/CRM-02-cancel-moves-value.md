@@ -8,7 +8,7 @@
 Lifetime value and segment are derived from sold bookings. Cancelling the only sold booking on a contact must move the CRM row by itself. No CRM control writes money.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/crm/sales/contacts`. Find **A. Fontaine**. Read lifecycle, LTV and segment.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/crm/sales/contacts`. Find **A. Fontaine**. Read lifecycle, LTV and segment.
 2. Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**. Open **ANK-2026-0018** (A. Fontaine). Overview tab.
 3. Click `→ CANCELLED`. In the reason modal, type `E2E CRM-02 cancel 0018`. `Record`.
 4. Return to `http://localhost:3001/crm/sales/contacts` (refresh). Find **A. Fontaine**. Read lifecycle, LTV and segment.

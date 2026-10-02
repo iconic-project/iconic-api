@@ -107,7 +107,7 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | WEB-03 | Block then FULL · WAITLIST then LIMITED AVAILABILITY | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-03-block-then-full-then-limited.md](web/WEB-03-block-then-full-then-limited.md) |
 | WEB-04 | Trip details tabs and the Western route map | sprint-8, web | P1 | B8 | Guest | [web/WEB-04-trip-details-tabs-and-west-map.md](web/WEB-04-trip-details-tabs-and-west-map.md) |
 | WEB-05 | Step 4 holds the cabin; leaving releases it | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-05-step4-hold-and-abandon-release.md](web/WEB-05-step4-hold-and-abandon-release.md) |
-| WEB-06 | Walkthrough with ANAKATA10 on both paths | sprint-8, web | P1 | B8 | Guest | [web/WEB-06-walkthrough-anakata10-both-paths.md](web/WEB-06-walkthrough-anakata10-both-paths.md) |
+| WEB-06 | Walkthrough with ICONIC10 on both paths | sprint-8, web | P1 | B8 | Guest | [web/WEB-06-walkthrough-iconic10-both-paths.md](web/WEB-06-walkthrough-iconic10-both-paths.md) |
 | WEB-07 | Pay later creates an ANK-R- request | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-07-pay-later-request-in-rms.md](web/WEB-07-pay-later-request-in-rms.md) |
 | WEB-08 | Pay deposit → replay completed → CONFIRMED | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-08-pay-deposit-replay-confirmed.md](web/WEB-08-pay-deposit-replay-confirmed.md) |
 | WEB-09 | Pay deposit → replay expired → request remains | sprint-8, web | P2 | — | Guest + Carolina | [web/WEB-09-pay-deposit-replay-expired.md](web/WEB-09-pay-deposit-replay-expired.md) |

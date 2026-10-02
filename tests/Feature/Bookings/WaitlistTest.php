@@ -32,7 +32,7 @@ function waitlistPayload(Departure $departure, array $overrides = []): array
         'cabin_category' => CabinCategory::Suite->value,
         'client' => [
             'name' => 'Anna Whitfield',
-            'email' => 'anna-'.uniqid().'@anakata.test',
+            'email' => 'anna-'.uniqid().'@iconic.test',
         ],
         'adults' => 2,
         'children' => 0,
@@ -65,14 +65,14 @@ test('positions compact after a removal and cabin_available flips when a block i
 
     $first = $this->actingAs($actor)
         ->postJson('/api/rms/waitlist', waitlistPayload($departure, [
-            'client' => ['name' => 'First', 'email' => 'first@anakata.test'],
+            'client' => ['name' => 'First', 'email' => 'first@iconic.test'],
         ]))
         ->assertCreated()
         ->json();
 
     $second = $this->actingAs($actor)
         ->postJson('/api/rms/waitlist', waitlistPayload($departure, [
-            'client' => ['name' => 'Second', 'email' => 'second@anakata.test'],
+            'client' => ['name' => 'Second', 'email' => 'second@iconic.test'],
         ]))
         ->assertCreated()
         ->json();
@@ -109,7 +109,7 @@ test('positions compact after a removal and cabin_available flips when a block i
     $this->actingAs($actor)
         ->postJson('/api/rms/waitlist', waitlistPayload($departure, [
             'cabin_category' => CabinCategory::Owner->value,
-            'client' => ['name' => 'Owner wait', 'email' => 'owner-wait@anakata.test'],
+            'client' => ['name' => 'Owner wait', 'email' => 'owner-wait@iconic.test'],
         ]))
         ->assertCreated();
 

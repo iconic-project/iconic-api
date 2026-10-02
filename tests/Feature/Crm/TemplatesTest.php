@@ -53,7 +53,7 @@ test('templates list the published version and a draft is refused without the ru
     expect($index->json('data'))->toHaveCount(24)
         ->and($welcome['kind'])->toBe('MARKETING')
         ->and($welcome['name'])->toBe('Welcome — your Galápagos begins here')
-        ->and($welcome['published']['subject'])->toBe('Your Galápagos adventure begins here — Anakata')
+        ->and($welcome['published']['subject'])->toBe('Your Galápagos adventure begins here — Iconic')
         ->and($welcome['published']['variables'])->toContain('unsubscribe_link', 'first_name')
         ->and($welcome['published']['approval_reference'])->toBe(MessageTemplatesSeeder::APPROVAL_REFERENCE)
         ->and($welcome['draft'])->toBeNull();
@@ -126,7 +126,7 @@ test('preview resolves declared variables and refuses an unknown or empty one', 
         'version' => 1,
     ])->assertOk();
     assertNoSensitiveFields($preview);
-    expect($preview->json('subject'))->toBe('Your Galápagos adventure begins here — Anakata')
+    expect($preview->json('subject'))->toBe('Your Galápagos adventure begins here — Iconic')
         ->and($preview->json('body'))->toContain('Ada')
         ->and($preview->json('body'))->toContain('/unsubscribe/');
     Mail::assertNothingSent();
@@ -229,7 +229,7 @@ test('a test send goes only to the requester and is recorded', function (): void
     ])->assertOk();
     assertNoSensitiveFields($sent);
     expect($sent->json('status'))->toBe('SENT')
-        ->and($sent->json('subject'))->toBe('Your Galápagos adventure begins here — Anakata');
+        ->and($sent->json('subject'))->toBe('Your Galápagos adventure begins here — Iconic');
 
     Mail::assertSent(TemplateTestMail::class, function (TemplateTestMail $mail) use ($admin, $contact): bool {
         return $mail->hasTo($admin->email)
@@ -280,7 +280,7 @@ test('a journey step refuses to send when its template has no published version'
         'enrolled_at' => now()->subHour(),
     ]);
 
-    test()->artisan('anakata:journeys')->assertSuccessful();
+    test()->artisan('iconic:journeys')->assertSuccessful();
 
     $enrolment->refresh();
     expect($enrolment->position)->toBe(1)

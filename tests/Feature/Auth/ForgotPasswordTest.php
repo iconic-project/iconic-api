@@ -11,10 +11,10 @@ test('forgot password always returns the same message', function (string $email)
     Notification::fake();
 
     User::factory()->withRole(SystemRole::Admin)->create([
-        'email' => 'active@anakata.test',
+        'email' => 'active@iconic.test',
     ]);
     User::factory()->disabled()->withRole(SystemRole::Admin)->create([
-        'email' => 'disabled@anakata.test',
+        'email' => 'disabled@iconic.test',
     ]);
 
     withPanelCsrf()->postJson('/api/auth/forgot-password', [
@@ -23,19 +23,19 @@ test('forgot password always returns the same message', function (string $email)
         ->assertOk()
         ->assertJsonPath('message', __('passwords.sent'));
 })->with([
-    'known' => ['active@anakata.test'],
-    'unknown' => ['missing@anakata.test'],
-    'disabled' => ['disabled@anakata.test'],
+    'known' => ['active@iconic.test'],
+    'unknown' => ['missing@iconic.test'],
+    'disabled' => ['disabled@iconic.test'],
 ]);
 
 test('forgot password notifies only an active user', function (): void {
     Notification::fake();
 
     $active = User::factory()->withRole(SystemRole::Admin)->create([
-        'email' => 'active@anakata.test',
+        'email' => 'active@iconic.test',
     ]);
     $disabled = User::factory()->disabled()->withRole(SystemRole::Admin)->create([
-        'email' => 'disabled@anakata.test',
+        'email' => 'disabled@iconic.test',
     ]);
 
     withPanelCsrf()->postJson('/api/auth/forgot-password', [
@@ -47,7 +47,7 @@ test('forgot password notifies only an active user', function (): void {
     ])->assertOk();
 
     withPanelCsrf()->postJson('/api/auth/forgot-password', [
-        'email' => 'missing@anakata.test',
+        'email' => 'missing@iconic.test',
     ])->assertOk();
 
     Notification::assertSentTo($active, ResetPasswordNotification::class);
@@ -60,11 +60,11 @@ test('forgot password is rate limited after six attempts per ip', function (): v
 
     for ($i = 0; $i < 6; $i++) {
         withPanelCsrf()->postJson('/api/auth/forgot-password', [
-            'email' => "user{$i}@anakata.test",
+            'email' => "user{$i}@iconic.test",
         ])->assertOk();
     }
 
     withPanelCsrf()->postJson('/api/auth/forgot-password', [
-        'email' => 'another@anakata.test',
+        'email' => 'another@iconic.test',
     ])->assertStatus(429);
 });

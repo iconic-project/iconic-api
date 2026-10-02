@@ -33,13 +33,13 @@ final class PortalResetPasswordNotification extends Notification implements Shou
             ? $notifiable->getEmailForPasswordReset()
             : (string) $notifiable->email;
 
-        $url = rtrim((string) config('anakata.portal_url'), '/').'/reset-password?'.http_build_query([
+        $url = rtrim((string) config('iconic.portal_url'), '/').'/reset-password?'.http_build_query([
             'token' => $this->token,
             'email' => $email,
         ]);
 
         return (new MailMessage)
-            ->subject('Reset your Anakata portal password')
+            ->subject('Reset your Iconic portal password')
             ->line('You are receiving this email because we received a password reset request for your account.')
             ->action('Reset password', $url)
             ->line('This password reset link expires in 60 minutes.');

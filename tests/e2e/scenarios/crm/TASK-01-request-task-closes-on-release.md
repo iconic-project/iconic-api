@@ -8,8 +8,8 @@
 The request SLA is a task. Releasing the hold closes that task. Nothing cancels the booking by itself — release is the staff action.
 
 ## Steps
-1. **Guest.** Pay later on a free cabin, email `e2e.task01@anakata.test`. Read the request reference.
-2. **Lucía** (`lucia@anakata.test`). Open `http://localhost:3001/crm/sales/tasks`. Find the **Request response** task for that contact.
+1. **Guest.** Pay later on a free cabin, email `e2e.task01@iconic.test`. Read the request reference.
+2. **Lucía** (`lucia@iconic.test`). Open `http://localhost:3001/crm/sales/tasks`. Find the **Request response** task for that contact.
 3. Read the due time.
 4. In the RMS, release that request with a reason. Reload **Tasks** after Horizon has processed the status job. The close is `RaiseTasksOnBookingStatusChanged`, not the five-minute sweep. If Horizon is down, that is **ENV**, not a missing close.
 5. Open `http://localhost:3001/crm/sales/pipeline` and find that contact’s deal.

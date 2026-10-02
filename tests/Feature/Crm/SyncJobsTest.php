@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\ScheduledRunOutcome;
 use App\Models\ScheduledRun;
-use App\Support\Schedule\AnakataSchedule;
+use App\Support\Schedule\IconicSchedule;
 use App\Support\Schedule\RecordScheduledRuns;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -51,12 +51,12 @@ test('every scheduled command is listed and has a recording hook', function (): 
 test('doc 07 jobs are catalogued and the new commands keep galapagos time and a run hook', function (): void {
     $events = collect(app(Schedule::class)->events());
     $expected = [
-        'anakata:voyage-status' => '15 0 * * *',
-        'anakata:ledger-check' => '0 2 * * *',
-        'anakata:commission-scan' => '30 2 * * *',
-        'anakata:occupancy-check' => '0 7 * * *',
-        'anakata:manifests-due' => '0 6 * * *',
-        'anakata:document-check' => '0 * * * *',
+        'iconic:voyage-status' => '15 0 * * *',
+        'iconic:ledger-check' => '0 2 * * *',
+        'iconic:commission-scan' => '30 2 * * *',
+        'iconic:occupancy-check' => '0 7 * * *',
+        'iconic:manifests-due' => '0 6 * * *',
+        'iconic:document-check' => '0 * * * *',
     ];
 
     foreach ($expected as $command => $expression) {
@@ -86,7 +86,7 @@ test('doc 07 jobs are catalogued and the new commands keep galapagos time and a 
         'Segment recompute',
         'Consent sweep',
     ])
-        ->and($byJob['Ledger reconcile']['command'])->toBe('anakata:ledger-check')
+        ->and($byJob['Ledger reconcile']['command'])->toBe('iconic:ledger-check')
         ->and($byJob['Ledger reconcile']['sentence'])->toBe('Drift is reported and never corrected.')
         ->and($byJob['Hold expiry sweep']['command'])->toBe('inventory:release-expired-holds')
         ->and($byJob['Segment recompute']['command'])->toBe('not needed')
@@ -102,7 +102,7 @@ test('sync jobs lists every command over HTTP without the console routes loaded'
 
     expect($schedule->events())->toBeEmpty();
 
-    AnakataSchedule::register($schedule);
+    IconicSchedule::register($schedule);
 
     $expected = collect($schedule->events())
         ->map(fn (Event $event): string => RecordScheduledRuns::commandName($event))
@@ -119,20 +119,20 @@ test('sync jobs lists every command over HTTP without the console routes loaded'
 
 test('a scheduled command records start, finish and outcome', function (): void {
     $event = collect(app(Schedule::class)->events())
-        ->first(fn (Event $event): bool => str_contains(RecordScheduledRuns::commandName($event), 'anakata:flag-overdue'));
+        ->first(fn (Event $event): bool => str_contains(RecordScheduledRuns::commandName($event), 'iconic:flag-overdue'));
 
     expect($event)->toBeInstanceOf(Event::class);
 
     $event->run($this->app);
 
-    $run = ScheduledRun::query()->where('command', 'anakata:flag-overdue')->first();
+    $run = ScheduledRun::query()->where('command', 'iconic:flag-overdue')->first();
     expect($run)->not->toBeNull();
     expect($run?->outcome)->toBe(ScheduledRunOutcome::Succeeded);
     expect($run?->started_at)->not->toBeNull();
     expect($run?->finished_at)->not->toBeNull();
 
     $row = collect($this->actingAs(salesExecUser())->getJson('/api/crm/sync/jobs')->json('data'))
-        ->firstWhere('command', 'anakata:flag-overdue');
+        ->firstWhere('command', 'iconic:flag-overdue');
 
     expect($row['last_outcome'])->toBe('succeeded');
     expect($row['last_started_at'])->not->toBeNull();

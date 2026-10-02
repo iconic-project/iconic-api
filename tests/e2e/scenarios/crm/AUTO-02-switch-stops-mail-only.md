@@ -11,12 +11,12 @@ The catalogue switch stops one email. The overdue flag, the alert, and the task 
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/crm/engine/automations`.
 2. Turn off **Balance reminder — 21 days**. Confirm needs a reason. Type `E2E AUTO-02`. Turn off.
-3. From `anakata-api`, with the running compose project:
+3. From `iconic-api`, with the running compose project:
    ```
-   docker compose exec app sh -c "php artisan anakata:set-overdue-fixture"
-   docker compose exec app sh -c "php artisan anakata:flag-overdue"
-   docker compose exec app sh -c "php artisan anakata:alerts"
-   docker compose exec app sh -c "php artisan anakata:documents-due"
+   docker compose exec app sh -c "php artisan iconic:set-overdue-fixture"
+   docker compose exec app sh -c "php artisan iconic:flag-overdue"
+   docker compose exec app sh -c "php artisan iconic:alerts"
+   docker compose exec app sh -c "php artisan iconic:documents-due"
    ```
 4. Reload Automations. Read the balance-reminder row and the overdue alert row (**Overdue payment**).
 5. Open `http://localhost:3001/crm/engine/alerts` and `http://localhost:3001/crm/sales/tasks`. Look for ANK-2026-0018.
@@ -29,4 +29,4 @@ The catalogue switch stops one email. The overdue flag, the alert, and the task 
 - [ ] E4 · Mailpit has no balance-reminder message for that booking after the switch.
 
 ## Notes
-`anakata:set-overdue-fixture` is the same command PAY-08 uses. Do not add it to `reset.sh`.
+`iconic:set-overdue-fixture` is the same command PAY-08 uses. Do not add it to `reset.sh`.

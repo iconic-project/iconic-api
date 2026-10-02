@@ -10,7 +10,7 @@ use RuntimeException;
 
 final class CreateAdminCommand extends Command
 {
-    protected $signature = 'anakata:create-admin {email} {name}';
+    protected $signature = 'iconic:create-admin {email} {name}';
 
     protected $description = 'Invite the first Admin user and print the accept-invitation link';
 

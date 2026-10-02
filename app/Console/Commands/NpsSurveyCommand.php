@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
 
 final class NpsSurveyCommand extends Command
 {
-    protected $signature = 'anakata:nps-survey';
+    protected $signature = 'iconic:nps-survey';
 
     protected $description = 'Send the post-trip survey once the configured hours after return have passed';
 

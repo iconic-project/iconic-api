@@ -68,7 +68,7 @@ test('switching png collection on stores known fees and reports a pending guest'
 
     $entry = ChangeHistory::query()->where('event', 'booking.fees_changed')->latest('id')->first();
     expect($entry?->after['what'] ?? null)->toBe(
-        'PNG park entry fee — collected by Anakata (invoiced, due with the balance)',
+        'PNG park entry fee — collected by Iconic (invoiced, due with the balance)',
     );
 });
 

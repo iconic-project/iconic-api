@@ -9,7 +9,7 @@ use Illuminate\Validation\ValidationException;
 test('unknown parameter keys are dropped', function (): void {
     $filtered = BehaviouralEventParams::filter(BehaviouralEventName::PageView, [
         'page_path' => '/itineraries/western-realm',
-        'email' => 'ada@anakata.test',
+        'email' => 'ada@iconic.test',
         'name' => 'Ada',
     ]);
 

@@ -21,7 +21,7 @@ use Illuminate\Support\Collection;
 
 final class DocumentFacts
 {
-    public const INSURANCE = 'Travel insurance is the sole responsibility of the passenger. Anakata does not sell or intermediate travel insurance.';
+    public const INSURANCE = 'Travel insurance is the sole responsibility of the passenger. Iconic does not sell or intermediate travel insurance.';
 
     public const CAPTURED_AT_PAYMENT_LINK = '[captured at payment link]';
 

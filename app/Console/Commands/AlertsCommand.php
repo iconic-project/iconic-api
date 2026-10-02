@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 
 final class AlertsCommand extends Command
 {
-    protected $signature = 'anakata:alerts';
+    protected $signature = 'iconic:alerts';
 
     protected $description = 'Raise alerts the ledger calls for, resolve the ones whose facts have cleared, and email critical alerts once';
 

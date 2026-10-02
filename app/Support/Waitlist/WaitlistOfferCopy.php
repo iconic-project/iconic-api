@@ -32,7 +32,7 @@ final class WaitlistOfferCopy
     public static function url(WaitlistEntry $entry): string
     {
         $entry->loadMissing('departure.itinerary');
-        $base = rtrim((string) config('anakata.engine_url'), '/');
+        $base = rtrim((string) config('iconic.engine_url'), '/');
         $slug = $entry->departure->itinerary->slug;
         $path = is_string($slug) && $slug !== '' ? '/itineraries/'.$slug : '/';
 

@@ -39,8 +39,8 @@ final class UserInvitation extends Notification implements ShouldQueue
             : 'You have been invited';
 
         return (new MailMessage)
-            ->subject('Set your Anakata password')
-            ->line("{$who} to Anakata as {$this->roleName}.")
+            ->subject('Set your Iconic password')
+            ->line("{$who} to Iconic as {$this->roleName}.")
             ->action('Set your password', $url)
             ->line('This invitation expires in 7 days.');
     }

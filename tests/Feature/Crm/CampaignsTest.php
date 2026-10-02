@@ -203,8 +203,8 @@ test('the delivery log lists what the rms sent and does not resend it', function
         'booking_id' => $booking->id,
         'document_id' => $first->id,
         'kind' => DeliveryKind::Invoice,
-        'to' => ['secret-guest@anakata.test'],
-        'cc' => ['secret-cc@anakata.test'],
+        'to' => ['secret-guest@iconic.test'],
+        'cc' => ['secret-cc@iconic.test'],
         'status' => DeliveryStatus::Sent,
         'sent_at' => now(),
         'error' => "Mailbox full\nsecond line",
@@ -214,7 +214,7 @@ test('the delivery log lists what the rms sent and does not resend it', function
         'booking_id' => $booking->id,
         'document_id' => null,
         'kind' => DeliveryKind::Reminder,
-        'to' => ['secret-guest@anakata.test'],
+        'to' => ['secret-guest@iconic.test'],
         'status' => DeliveryStatus::Blocked,
         'blocked_reason' => 'No marketing consent',
         'triggered_by' => DeliveryTriggeredBy::User,
@@ -222,7 +222,7 @@ test('the delivery log lists what the rms sent and does not resend it', function
     Delivery::factory()->create([
         'booking_id' => $booking->id,
         'kind' => DeliveryKind::PaymentLink,
-        'to' => ['secret-guest@anakata.test'],
+        'to' => ['secret-guest@iconic.test'],
         'status' => DeliveryStatus::Failed,
         'error' => 'Gateway down',
         'triggered_by' => DeliveryTriggeredBy::System,
@@ -230,7 +230,7 @@ test('the delivery log lists what the rms sent and does not resend it', function
     Delivery::factory()->create([
         'booking_id' => $booking->id,
         'kind' => DeliveryKind::PaymentLink,
-        'to' => ['secret-guest@anakata.test'],
+        'to' => ['secret-guest@iconic.test'],
         'status' => DeliveryStatus::Queued,
         'created_at' => now()->subMinutes(20),
         'triggered_by' => DeliveryTriggeredBy::System,
@@ -239,8 +239,8 @@ test('the delivery log lists what the rms sent and does not resend it', function
     $page = $this->actingAs($manager)->getJson('/api/crm/deliveries')->assertOk();
     assertNoSensitiveFields($page);
     expect($page->json('meta.notes.engagement'))->toBe('Opens and downloads are not tracked (LEG-002)');
-    expect($page->getContent())->not->toContain('secret-guest@anakata.test');
-    expect($page->getContent())->not->toContain('secret-cc@anakata.test');
+    expect($page->getContent())->not->toContain('secret-guest@iconic.test');
+    expect($page->getContent())->not->toContain('secret-cc@iconic.test');
     expect($page->getContent())->not->toContain('documents/inv-1.pdf');
 
     $invoice = collect($page->json('data'))->first(fn (array $row): bool => ($row['document']['version'] ?? null) === 1);

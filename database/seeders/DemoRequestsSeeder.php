@@ -138,14 +138,14 @@ final class DemoRequestsSeeder extends Seeder
             $departure,
             CabinCategory::Suite,
             'Anna Whitfield',
-            'whitfield.anna@anakata.test',
+            'whitfield.anna@iconic.test',
             '2026-07-02 12:00:00',
         );
         $this->waitlistRow(
             $departure,
             CabinCategory::Owner,
             'K. Osei',
-            'k.osei@anakata.test',
+            'k.osei@iconic.test',
             '2026-07-08 12:00:00',
         );
     }

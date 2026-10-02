@@ -49,7 +49,7 @@ test('occupancy alerts sit below the percent and inside the day window, and a sa
     $boundary = occupiedDeparture($yacht, $cabins, $holder, '2020-04-04', 3);
     $outside = occupiedDeparture($yacht, $cabins, $holder, '2020-04-05', 3);
 
-    Artisan::call('anakata:occupancy-check');
+    Artisan::call('iconic:occupancy-check');
 
     $lowAlert = Alert::query()->where('base_key', AlertKeys::occupancy($low->id))->first();
 
@@ -61,7 +61,7 @@ test('occupancy alerts sit below the percent and inside the day window, and a sa
 
     $low->date = '2020-01-05';
     $low->save();
-    Artisan::call('anakata:occupancy-check');
+    Artisan::call('iconic:occupancy-check');
 
     expect($lowAlert?->fresh()?->resolution)->toBe('occupancy is no longer below the threshold, or the departure has sailed');
 });

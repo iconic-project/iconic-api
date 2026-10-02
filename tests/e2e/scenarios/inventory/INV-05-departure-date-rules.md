@@ -5,7 +5,7 @@
 - **Start:** reset
 
 ## Why
-Anakata only sails Sunday → Sunday, and one yacht cannot have two departures on the same date. Both checks must surface the API sentence in the drawer.
+Iconic only sails Sunday → Sunday, and one yacht cannot have two departures on the same date. Both checks must surface the API sentence in the drawer.
 
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/rms/booking-engine/departures`. Count line is `16 departures · all dates`.
@@ -13,7 +13,7 @@ Anakata only sails Sunday → Sunday, and one yacht cannot have two departures o
 3. Change the date to `2027-11-07` (already DEP-001 on ANAMARA). Click `Create departure` again.
 
 ## Expected
-- [ ] E1 · Monday create stays on **New departure** and shows `Anakata sails Sunday → Sunday. 3 Jan 2028 is not a Sunday.`
+- [ ] E1 · Monday create stays on **New departure** and shows `Iconic sails Sunday → Sunday. 3 Jan 2028 is not a Sunday.`
 - [ ] E2 · Duplicate create stays on **New departure** and shows `ANAMARA already has a departure on 7 Nov 2027 (DEP-001).`
 - [ ] E3 · The list is still `16 departures · all dates`.
 

@@ -107,7 +107,7 @@ function npsSendSurveys(Booking $booking): void
     $hours = app(CurrentConfig::class)->businessRules()->nps->surveyHoursAfterReturn;
     $due = BusinessTime::calendarDay($booking->departure->returnDate()->toDateString())->addHours($hours);
     test()->travelTo($due->addMinute());
-    test()->artisan('anakata:nps-survey')->assertSuccessful();
+    test()->artisan('iconic:nps-survey')->assertSuccessful();
 }
 
 function npsPlainToken(Booking $booking, ?int $guestId): string
@@ -178,8 +178,8 @@ test('completing a voyage raises one post-trip call and a replay does not raise 
     ]);
 
     $this->travelTo(CarbonImmutable::parse('2026-06-20 12:00:00', BusinessTime::zone()));
-    $this->artisan('anakata:voyage-status')->assertSuccessful();
-    $this->artisan('anakata:voyage-status')->assertSuccessful();
+    $this->artisan('iconic:voyage-status')->assertSuccessful();
+    $this->artisan('iconic:voyage-status')->assertSuccessful();
 
     $tasks = CrmTask::query()->where('kind', TaskKind::PostTripCall)->get();
     $task = $tasks->first();
@@ -208,11 +208,11 @@ test('the survey waits until return plus the configured hours, sends once, and d
     expect(ContactConsent::query()->count())->toBe(0);
 
     $this->travelTo($due->subHour());
-    $this->artisan('anakata:nps-survey')->assertSuccessful();
+    $this->artisan('iconic:nps-survey')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Survey)->count())->toBe(0);
 
     $this->travelTo($due->addMinute());
-    $this->artisan('anakata:nps-survey')->assertSuccessful();
+    $this->artisan('iconic:nps-survey')->assertSuccessful();
 
     $own = Delivery::query()->where('idempotency_key', 'survey:'.$fixture['lead']->id)->first();
     $shared = Delivery::query()->where('idempotency_key', 'survey:'.$fixture['booking']->id.':lead')->first();
@@ -245,12 +245,12 @@ test('the survey waits until return plus the configured hours, sends once, and d
 
     Mail::assertSent(SurveyMail::class, 2);
 
-    $this->artisan('anakata:nps-survey')->assertSuccessful();
+    $this->artisan('iconic:nps-survey')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Survey)->count())->toBe(2);
 
-    expect(collect(JobCatalogue::rows())->pluck('command')->all())->not->toContain('anakata:nps-survey');
+    expect(collect(JobCatalogue::rows())->pluck('command')->all())->not->toContain('iconic:nps-survey');
     Artisan::call('schedule:list');
-    expect(Artisan::output())->toContain('anakata:nps-survey');
+    expect(Artisan::output())->toContain('iconic:nps-survey');
 });
 
 test('guests with no usable lead address produce one blocked survey delivery', function (): void {
@@ -322,7 +322,7 @@ test('the survey link covers only its guests and rejects the wrong purpose, an e
 });
 
 test('a score below the threshold alerts guest experience and completing the reply task resolves the alert', function (): void {
-    $manager = managerUser(['email' => 'nps-gx@anakata.test']);
+    $manager = managerUser(['email' => 'nps-gx@iconic.test']);
     $fixture = npsBooking('2028-10-02', 'ANK-NPS-LOW', $manager, contactEmail: 'low-score@example.com');
     npsSendSurveys($fixture['booking']);
     $token = npsPlainToken($fixture['booking'], $fixture['lead']->id);
@@ -341,8 +341,8 @@ test('a score below the threshold alerts guest experience and completing the rep
         ->and(npsHistoryWhat($fixture['booking']))->toContain('Post-trip survey recorded — score 6')
         ->and(npsHistoryWhat($fixture['booking']))->toContain('alert sent to guest experience');
 
-    $this->artisan('anakata:alerts')->assertSuccessful();
-    Mail::assertSent(AlertMail::class, fn (AlertMail $mail): bool => $mail->hasTo('nps-gx@anakata.test'));
+    $this->artisan('iconic:alerts')->assertSuccessful();
+    Mail::assertSent(AlertMail::class, fn (AlertMail $mail): bool => $mail->hasTo('nps-gx@iconic.test'));
     expect(Alert::query()->where('kind', AlertKind::NpsLow)->whereNotNull('emailed_at')->count())->toBe(1);
 
     $this->actingAs($manager)->postJson('/api/crm/tasks/'.$task?->id.'/complete', [
@@ -464,7 +464,7 @@ test('staff record a response only on a completed voyage, once, and call notes c
 
     $fixture = npsBooking('2028-11-20', 'ANK-NPS-STAFF', $manager, BookingStatus::FullyPaid, 'staff-voyage@example.com', 'staff-mate@example.com');
     $this->travelTo(CarbonImmutable::parse('2028-12-01 12:00:00', BusinessTime::zone()));
-    $this->artisan('anakata:voyage-status')->assertSuccessful();
+    $this->artisan('iconic:voyage-status')->assertSuccessful();
     $call = CrmTask::query()->where('idempotency_key', 'post-trip-call:'.$fixture['booking']->id)->first();
     expect($call?->status)->toBe(TaskStatus::Open);
 

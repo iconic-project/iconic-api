@@ -8,7 +8,7 @@
 The register is the consent record. The engine form is one capture point. Analytics from a stitched session is another.
 
 ## Steps
-1. **Guest.** Analytics on, then one page view, then pay later with marketing opted in. Email `e2e.priv01@anakata.test`.
+1. **Guest.** Analytics on, then one page view, then pay later with marketing opted in. Email `e2e.priv01@iconic.test`.
 2. **Carolina.** Open `http://localhost:3001/crm/system/consent`. Read the Marketing and Analytics rows.
 3. Open the contact. Read the consent block, then open **History**.
 

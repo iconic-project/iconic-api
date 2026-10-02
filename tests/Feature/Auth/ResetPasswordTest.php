@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Password;
 
 test('reset password with a valid token updates the password and writes history', function (): void {
     $user = User::factory()->withRole(SystemRole::Admin)->create([
-        'email' => 'active@anakata.test',
+        'email' => 'active@iconic.test',
     ]);
     $token = Password::broker()->createToken($user);
 

@@ -67,18 +67,18 @@ function depositDeclarations(): array
     ];
 }
 
-function engineAnakataPromo(): Offer
+function engineIconicPromo(): Offer
 {
     return Offer::factory()->live()->promo()->create([
-        'code' => 'ANAKATA10',
-        'name' => 'Anakata welcome',
+        'code' => 'ICONIC10',
+        'name' => 'Iconic welcome',
         'type' => OfferType::Percent,
         'value' => 10,
         'channel' => OfferChannel::D2C,
         'cabin_types' => [CabinCategory::Suite->value],
         'itinerary_codes' => ['WEST'],
         'combinable' => true,
-        'price_line' => 'Anakata welcome −10%',
+        'price_line' => 'Iconic welcome −10%',
     ]);
 }
 
@@ -218,15 +218,15 @@ test('settling an engine checkout confirms the booking and a replay does not dou
 
 test('fallback on stripe expired removes only the advantage and promo lines', function (): void {
     $departure = checkoutWestDeparture();
-    engineAnakataPromo();
+    engineIconicPromo();
     $created = createCheckoutHold($departure);
-    $quote = depositQuote($departure->id, $created['cabins'], 'ANAKATA10');
+    $quote = depositQuote($departure->id, $created['cabins'], 'ICONIC10');
 
     $this->postJson(
         '/api/engine/checkout/'.$created['token'].'/submit',
         checkoutSubmitPayload($created['cabins'], (int) $quote['total'], [
             'path' => CheckoutPath::PayDeposit->value,
-            'promo_code' => 'ANAKATA10',
+            'promo_code' => 'ICONIC10',
             'declarations' => depositDeclarations(),
         ]),
     )->assertOk();
@@ -271,11 +271,11 @@ test('fallback on stripe expired removes only the advantage and promo lines', fu
     $afterCodes = $after->pluck('code')->all();
 
     expect($afterCodes)->not->toContain('online_deposit');
-    expect($beforeCodes)->toContain('online_deposit', 'ANAKATA10');
-    expect($after->firstWhere('code', 'ANAKATA10')['amount'] ?? null)
-        ->not->toBe($before->firstWhere('code', 'ANAKATA10')['amount'] ?? null);
+    expect($beforeCodes)->toContain('online_deposit', 'ICONIC10');
+    expect($after->firstWhere('code', 'ICONIC10')['amount'] ?? null)
+        ->not->toBe($before->firstWhere('code', 'ICONIC10')['amount'] ?? null);
 
-    $unchanged = array_values(array_diff($beforeCodes, ['online_deposit', 'ANAKATA10']));
+    $unchanged = array_values(array_diff($beforeCodes, ['online_deposit', 'ICONIC10']));
     foreach ($unchanged as $code) {
         expect($after->firstWhere('code', $code)['amount'] ?? null)
             ->toBe($before->firstWhere('code', $code)['amount'] ?? null);
@@ -357,14 +357,14 @@ test('replay-stripe-checkout settles an engine session exactly once when posted 
     $booking = Booking::query()->firstOrFail();
     $reference = (string) $booking->request_reference;
 
-    $this->artisan('anakata:replay-stripe-checkout', ['reference' => $reference])
+    $this->artisan('iconic:replay-stripe-checkout', ['reference' => $reference])
         ->assertSuccessful();
 
     expect(Payment::query()->where('booking_id', $booking->id)->count())->toBe(1);
     expect($booking->fresh()?->status)->toBe(BookingStatus::Confirmed);
     expect($booking->fresh()?->reference)->toStartWith('ANK-');
 
-    $this->artisan('anakata:replay-stripe-checkout', ['reference' => $reference])
+    $this->artisan('iconic:replay-stripe-checkout', ['reference' => $reference])
         ->assertSuccessful();
 
     expect(Payment::query()->where('booking_id', $booking->id)->count())->toBe(1);
@@ -386,7 +386,7 @@ test('replay-stripe-checkout --expired removes the online advantage and keeps th
     $booking = Booking::query()->firstOrFail();
     expect($booking->online_deposit)->toBeTrue();
 
-    $this->artisan('anakata:replay-stripe-checkout', [
+    $this->artisan('iconic:replay-stripe-checkout', [
         'reference' => (string) $booking->request_reference,
         '--expired' => true,
     ])->assertSuccessful();

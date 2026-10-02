@@ -18,12 +18,12 @@ final class SurveyQuestions
     public static function all(): array
     {
         return [
-            self::scale('score', 'How would you rate your overall Anakata expedition? (1–10)', 1, 10, required: true),
+            self::scale('score', 'How would you rate your overall Iconic expedition? (1–10)', 1, 10, required: true),
             self::text('why', 'Please share what influenced your score'),
             self::text('best', 'What was the best part of your expedition?'),
-            self::text('better', 'Is there anything Anakata could have done better?'),
+            self::text('better', 'Is there anything Iconic could have done better?'),
             self::text('crew', 'A crew member, guide or team member to highlight'),
-            self::scale('rec', 'How likely are you to recommend Anakata? (0–10)', 0, 10, required: false),
+            self::scale('rec', 'How likely are you to recommend Iconic? (0–10)', 0, 10, required: false),
         ];
     }
 

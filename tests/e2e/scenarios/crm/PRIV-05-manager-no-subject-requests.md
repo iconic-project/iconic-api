@@ -8,7 +8,7 @@
 `privacy.manage` is Admin only. The register is not.
 
 ## Steps
-1. Sign in as `mateo@anakata.test` / `password`. Open `http://localhost:3001/crm/system/consent`.
+1. Sign in as `mateo@iconic.test` / `password`. Open `http://localhost:3001/crm/system/consent`.
 2. Read the register and the subject-request area.
 3. `GET /api/privacy/requests` with Mateo’s session.
 

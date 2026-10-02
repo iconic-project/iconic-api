@@ -8,7 +8,7 @@
 A commission above the 12 % cap must create `ON_HOLD_AGENCY`. A settled deposit must not confirm it until a director approves the rate (FIN-005 / H8).
 
 ## Steps
-1. Sign in as Carolina. Open `http://localhost:3001/rms/reservations/bookings`. `＋ New reservation`. Type **CABIN (FIT / Group)**. Guest `E2E Pay11`, email `e2e.pay11@anakata.test`, phone `+1 555 0511`, preferred **EMAIL**.
+1. Sign in as Carolina. Open `http://localhost:3001/rms/reservations/bookings`. `＋ New reservation`. Type **CABIN (FIT / Group)**. Guest `E2E Pay11`, email `e2e.pay11@iconic.test`, phone `+1 555 0511`, preferred **EMAIL**.
 2. Main channel **B2B**. Origin **Travel Advisor**. Agent / Agency `Meridian Voyages — ILTM · >12%`. Commission % `15`. Read the cap warning.
 3. Departure `7 Nov 2027` · ANATIVA. Adults `2`. Cabin **Suite 04**. Payment method for deposit **Wire transfer (72h · PENDING_PAYMENT)** (or Card if preferred — then record a deposit on the Payments tab in step 5). `Create reservation`. `Done`.
 4. Read Overview. If the deposit is not yet on the ledger, open **Payments** and record Type `Deposit`, Method `Card (Stripe)`, Amount `2660`. `Record payment`.

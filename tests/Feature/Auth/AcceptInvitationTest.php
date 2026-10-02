@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Password;
 
 test('accept invitation activates the user, writes history and signs them in', function (): void {
     $user = User::factory()->invited()->withRole(SystemRole::Manager)->create([
-        'email' => 'invitee@anakata.test',
+        'email' => 'invitee@iconic.test',
     ]);
     $token = Password::broker('invitations')->createToken($user);
 
@@ -22,7 +22,7 @@ test('accept invitation activates the user, writes history and signs them in', f
     ])
         ->assertOk()
         ->assertJsonPath('id', $user->id)
-        ->assertJsonPath('email', 'invitee@anakata.test');
+        ->assertJsonPath('email', 'invitee@iconic.test');
 
     $user->refresh();
     expect($user->status)->toBe(UserStatus::Active);
@@ -75,10 +75,10 @@ test('accept invitation expires after seven days and cannot be reused', function
 test('accepting an invitation while signed in as carolina returns the new user', function (): void {
     $carolina = User::factory()->withRole(SystemRole::Admin)->create([
         'name' => 'Carolina M.',
-        'email' => 'carolina@anakata.test',
+        'email' => 'carolina@iconic.test',
     ]);
     $invitee = User::factory()->invited()->withRole(SystemRole::SalesExec)->create([
-        'email' => 'newhire@anakata.test',
+        'email' => 'newhire@iconic.test',
     ]);
     $token = Password::broker('invitations')->createToken($invitee);
 

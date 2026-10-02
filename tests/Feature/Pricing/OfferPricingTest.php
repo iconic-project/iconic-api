@@ -121,63 +121,63 @@ function lineLabel(ReservationQuote $quote, string $code): ?string
 }
 
 /*
- * Prototype walkthrough (2 adults, Suite 2027, −12 %, ANAKATA10).
+ * Prototype walkthrough (2 adults, Suite 2027, −12 %, ICONIC10).
  * CabinPricer step-1 = 26,600. Rounding::halfUp matches Math.round.
- * later: −12% = 3,192 → 23,408; ANAKATA10 10% of 23,408 = 2,341 → 21,067; deposit 2,107.
- * online: −12% = 3,192 → 23,408; −5% = 1,170 → 22,238; ANAKATA10 10% of 22,238 = 2,224 → 20,014; deposit 2,001.
+ * later: −12% = 3,192 → 23,408; ICONIC10 10% of 23,408 = 2,341 → 21,067; deposit 2,107.
+ * online: −12% = 3,192 → 23,408; −5% = 1,170 → 22,238; ICONIC10 10% of 22,238 = 2,224 → 20,014; deposit 2,001.
  */
 test('the prototype walkthrough lines and totals for both paths', function (): void {
     livePriceOffer();
     Offer::factory()->live()->promo()->create([
-        'code' => 'ANAKATA10',
-        'name' => 'Anakata welcome',
+        'code' => 'ICONIC10',
+        'name' => 'Iconic welcome',
         'type' => OfferType::Percent,
         'value' => 10,
         'channel' => OfferChannel::D2C,
         'cabin_types' => [CabinCategory::Suite->value],
         'itinerary_codes' => ['WEST'],
         'combinable' => true,
-        'price_line' => 'Anakata welcome −10%',
+        'price_line' => 'Iconic welcome −10%',
     ]);
 
-    $later = quoteWest(['promo_code' => 'ANAKATA10']);
+    $later = quoteWest(['promo_code' => 'ICONIC10']);
     expect($later->total())->toBe(21067);
     expect($later->deposit())->toBe(2107);
     expect(lineAmount($later, 'LAST12'))->toBe(-3192);
-    expect(lineAmount($later, 'ANAKATA10'))->toBe(-2341);
+    expect(lineAmount($later, 'ICONIC10'))->toBe(-2341);
     expect(lineAmount($later, 'online_deposit'))->toBeNull();
 
-    $online = quoteWest(['promo_code' => 'ANAKATA10', 'online_deposit' => true]);
+    $online = quoteWest(['promo_code' => 'ICONIC10', 'online_deposit' => true]);
     expect($online->total())->toBe(20014);
     expect($online->deposit())->toBe(2001);
     expect(lineAmount($online, 'LAST12'))->toBe(-3192);
     expect(lineAmount($online, 'online_deposit'))->toBe(-1170);
-    expect(lineAmount($online, 'ANAKATA10'))->toBe(-2224);
+    expect(lineAmount($online, 'ICONIC10'))->toBe(-2224);
     expect(lineLabel($online, 'online_deposit'))->toBe('Online deposit advantage −5%');
 });
 
 test('the online advantage is calculated before the promo code', function (): void {
     livePriceOffer();
     Offer::factory()->live()->promo()->create([
-        'code' => 'ANAKATA10',
+        'code' => 'ICONIC10',
         'type' => OfferType::Percent,
         'value' => 10,
         'channel' => OfferChannel::D2C,
         'cabin_types' => [CabinCategory::Suite->value],
         'itinerary_codes' => ['WEST'],
         'combinable' => true,
-        'price_line' => 'Anakata welcome −10%',
+        'price_line' => 'Iconic welcome −10%',
     ]);
 
-    $quote = quoteWest(['promo_code' => 'ANAKATA10', 'online_deposit' => true]);
+    $quote = quoteWest(['promo_code' => 'ICONIC10', 'online_deposit' => true]);
     $codes = array_map(
         fn (QuoteLine $line): string => $line->code,
         $quote->parties[0]->quote?->lines ?? [],
     );
 
     expect(array_search('online_deposit', $codes, true))
-        ->toBeLessThan((int) array_search('ANAKATA10', $codes, true));
-    expect(lineAmount($quote, 'ANAKATA10'))->toBe(-2224);
+        ->toBeLessThan((int) array_search('ICONIC10', $codes, true));
+    expect(lineAmount($quote, 'ICONIC10'))->toBe(-2224);
 });
 
 test('a festive departure refuses every discount including EARLY500', function (): void {
@@ -219,22 +219,22 @@ test('a festive departure refuses every discount including EARLY500', function (
 test('a non-combinable pair keeps the larger saving and explains', function (): void {
     livePriceOffer(['combinable' => false, 'name' => 'Shoulder season', 'code' => 'SHOULDER15', 'value' => 15, 'price_line' => 'Shoulder season −15%']);
     Offer::factory()->live()->promo()->create([
-        'code' => 'ANAKATA10',
-        'name' => 'Anakata welcome',
+        'code' => 'ICONIC10',
+        'name' => 'Iconic welcome',
         'type' => OfferType::Percent,
         'value' => 10,
         'channel' => OfferChannel::D2C,
         'cabin_types' => [CabinCategory::Suite->value],
         'itinerary_codes' => ['WEST'],
         'combinable' => true,
-        'price_line' => 'Anakata welcome −10%',
+        'price_line' => 'Iconic welcome −10%',
     ]);
 
-    $quote = quoteWest(['promo_code' => 'ANAKATA10']);
+    $quote = quoteWest(['promo_code' => 'ICONIC10']);
 
     expect(lineAmount($quote, 'SHOULDER15'))->toBe(-3990);
-    expect(lineAmount($quote, 'ANAKATA10'))->toBeNull();
-    expect($quote->warnings)->toContain('ANAKATA10 cannot be combined with Shoulder season — the larger discount was kept');
+    expect(lineAmount($quote, 'ICONIC10'))->toBeNull();
+    expect($quote->warnings)->toContain('ICONIC10 cannot be combined with Shoulder season — the larger discount was kept');
     expect($quote->total())->toBe(22610);
 });
 
@@ -306,7 +306,7 @@ test('publishing the online-deposit rule at 7 updates the line label and amount'
 test('PromoCode::check uses the prototype wording', function (): void {
     $departure = westDeparture();
     Offer::factory()->live()->promo()->create([
-        'code' => 'ANAKATA10',
+        'code' => 'ICONIC10',
         'type' => OfferType::Percent,
         'value' => 10,
         'channel' => OfferChannel::D2C,
@@ -315,7 +315,7 @@ test('PromoCode::check uses the prototype wording', function (): void {
         'combinable' => true,
     ]);
 
-    $ok = PromoCode::check('anakata10', $departure, CabinCategory::Suite, BookingSegment::D2C, SoldOn::today());
+    $ok = PromoCode::check('iconic10', $departure, CabinCategory::Suite, BookingSegment::D2C, SoldOn::today());
     expect($ok['valid'])->toBeTrue();
     expect($ok['reason'])->toBeNull();
 
@@ -384,7 +384,7 @@ test('a move keeps a promo whose booking window has since closed', function (): 
     $this->travelTo($saleDay);
 
     Offer::factory()->live()->promo()->create([
-        'code' => 'ANAKATA10',
+        'code' => 'ICONIC10',
         'type' => OfferType::Percent,
         'value' => 10,
         'channel' => OfferChannel::D2C,
@@ -393,25 +393,25 @@ test('a move keeps a promo whose booking window has since closed', function (): 
         'combinable' => true,
         'booking_from' => '2026-09-20',
         'booking_to' => '2026-09-20',
-        'price_line' => 'Anakata welcome −10%',
+        'price_line' => 'Iconic welcome −10%',
     ]);
 
     $departure = westDeparture();
     $created = app(CreateReservation::class)->handle(
         array_merge(ReservationFixtures::createPayload($departure), [
-            'promo_code' => 'ANAKATA10',
+            'promo_code' => 'ICONIC10',
         ]),
         managerUser(),
     );
     $booking = $created->bookings->firstOrFail();
     expect($booking->total)->toBe(23940);
-    expect($booking->promo_code)->toBe('ANAKATA10');
+    expect($booking->promo_code)->toBe('ICONIC10');
     expect($booking->sold_on->toDateString())->toBe('2026-09-20');
 
     $this->travelTo(CarbonImmutable::parse('2026-09-21 12:00:00', BusinessTime::zone()));
 
     $checkToday = PromoCode::check(
-        'ANAKATA10',
+        'ICONIC10',
         $departure,
         CabinCategory::Suite,
         BookingSegment::D2C,

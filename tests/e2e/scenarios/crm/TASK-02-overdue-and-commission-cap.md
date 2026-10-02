@@ -12,7 +12,7 @@ Those two conditions are tasks with a permission, not a second click that insert
 2. Find **ANK-2026-0021** (Meridian Voyages hold, `commission_approved` false, status ON HOLD AGENCY).
 3. Read the task’s needs permission.
 4. Filter kind **Overdue decision**. Read the payments Overdue figure on `/rms/commercial/payments`.
-5. Run the sweep once more: `docker compose exec app sh -c "php artisan anakata:crm-tasks"`. Reload Tasks. Count both kinds again.
+5. Run the sweep once more: `docker compose exec app sh -c "php artisan iconic:crm-tasks"`. Reload Tasks. Count both kinds again.
 
 ## Expected
 - [ ] E1 · Exactly one open **Commission cap** task for ANK-2026-0021. The card shows `commissions.override_cap`. ⚠ UNVERIFIED — `DemoAgenciesSeeder` hold; the permission string is `Permission::CommissionsOverrideCap`, shown raw on the card.

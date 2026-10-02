@@ -16,31 +16,31 @@ beforeEach(function (): void {
 test('duplicates lists same phone and same normalised name plus country', function (): void {
     $phoneA = Contact::factory()->create([
         'name' => 'Phone One',
-        'email' => 'phone-a@anakata.test',
+        'email' => 'phone-a@iconic.test',
         'phone' => '6502530000',
         'country' => 'US',
         'phone_e164' => '+16502530000',
     ]);
     $phoneB = Contact::factory()->create([
         'name' => 'Phone Two',
-        'email' => 'phone-b@anakata.test',
+        'email' => 'phone-b@iconic.test',
         'phone' => '+1 650 253 0000',
         'country' => 'US',
         'phone_e164' => '+16502530000',
     ]);
     $nameA = Contact::factory()->create([
         'name' => '  Ada   Lovelace ',
-        'email' => 'ada-a@anakata.test',
+        'email' => 'ada-a@iconic.test',
         'country' => 'EC',
     ]);
     Contact::factory()->create([
         'name' => 'ada lovelace',
-        'email' => 'ada-b@anakata.test',
+        'email' => 'ada-b@iconic.test',
         'country' => 'EC',
     ]);
     Contact::factory()->create([
         'name' => 'Unique Person',
-        'email' => 'unique@anakata.test',
+        'email' => 'unique@iconic.test',
         'country' => 'US',
     ]);
 
@@ -63,13 +63,13 @@ test('duplicates lists same phone and same normalised name plus country', functi
 
 test('merged contacts are not listed as duplicates', function (): void {
     $survivor = Contact::factory()->create([
-        'email' => 'surv-dup@anakata.test',
+        'email' => 'surv-dup@iconic.test',
         'phone_e164' => '+16502530000',
         'country' => 'US',
         'name' => 'Same Person',
     ]);
     $loser = Contact::factory()->create([
-        'email' => 'lose-dup@anakata.test',
+        'email' => 'lose-dup@iconic.test',
         'phone_e164' => '+16502530000',
         'country' => 'US',
         'name' => 'Same Person',

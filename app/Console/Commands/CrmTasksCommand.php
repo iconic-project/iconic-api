@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class CrmTasksCommand extends Command
 {
-    protected $signature = 'anakata:crm-tasks';
+    protected $signature = 'iconic:crm-tasks';
 
     protected $description = 'Raise CRM tasks the ledger calls for and auto-close the ones the RMS has cleared';
 

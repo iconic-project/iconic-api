@@ -43,7 +43,7 @@ final class SendConversationReply extends Action
 
         $from = (string) config('mail.from.address');
         $at = strrchr($from, '@');
-        $host = is_string($at) && $at !== '@' ? substr($at, 1) : 'anakata.local';
+        $host = is_string($at) && $at !== '@' ? substr($at, 1) : 'iconic.local';
         $messageId = '<'.Str::uuid()->toString().'@'.$host.'>';
         $subject = str_starts_with(strtolower($conversation->subject), 're:')
             ? $conversation->subject

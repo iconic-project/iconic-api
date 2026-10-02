@@ -54,7 +54,7 @@ function zipBytes(): string
 
     $zip = new ZipArchive;
     $zip->open($path, ZipArchive::OVERWRITE);
-    $zip->addFromString('readme.txt', 'anakata');
+    $zip->addFromString('readme.txt', 'iconic');
     $zip->close();
 
     $contents = file_get_contents($path);
@@ -436,7 +436,7 @@ test('retention leaves sales materials in place', function (): void {
     $material = SalesMaterial::query()->findOrFail($id);
     $path = $material->file_path;
 
-    $this->artisan('anakata:retention')->assertSuccessful();
+    $this->artisan('iconic:retention')->assertSuccessful();
 
     $material->refresh();
 

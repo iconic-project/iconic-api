@@ -66,7 +66,7 @@ test('engine checkout stores UTM on the booking at creation and never again', fu
 });
 
 test('contact first touch is set once and last touch updates on a later submission', function (): void {
-    $email = 'repeat-'.uniqid().'@anakata.test';
+    $email = 'repeat-'.uniqid().'@iconic.test';
     $departure = checkoutWestDeparture();
 
     $firstHold = createCheckoutHold($departure);

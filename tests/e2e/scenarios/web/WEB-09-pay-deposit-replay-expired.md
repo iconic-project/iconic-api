@@ -9,8 +9,8 @@
 K6: an unfinished payment must not lose the booking. The online advantage comes off; the request stays for the team.
 
 ## Steps
-1. **Guest.** Same as WEB-08 through `Pay deposit & confirm` (email `e2e.web09@anakata.test`). Do **not** enter card data.
-2. From `anakata-api`:
+1. **Guest.** Same as WEB-08 through `Pay deposit & confirm` (email `e2e.web09@iconic.test`). Do **not** enter card data.
+2. From `iconic-api`:
    ```
    tests/e2e/bin/replay-stripe-checkout.sh --expired ANK-R-2026-0043
    ```
@@ -28,4 +28,4 @@ K6: an unfinished payment must not lose the booking. The online advantage comes 
 - `bin/db-check.sh 'App\Models\Booking::query()->where("request_reference","ANK-R-2026-0043")->first(["status","online_deposit","reference"])'` → status `REQUESTED`, `online_deposit` false, `reference` null.
 
 ## Notes
-Never live-mode Stripe. `--expired` is the engine Checkout Session path, not a payment-link replay. Before any other click, click `Analytics off` (or set `localStorage['anakata-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.
+Never live-mode Stripe. `--expired` is the engine Checkout Session path, not a payment-link replay. Before any other click, click `Analytics off` (or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.

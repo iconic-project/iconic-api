@@ -284,7 +284,7 @@ final class DemoAgenciesSeeder extends Seeder
             [
                 'name' => 'Unmatched B2B',
                 'contact' => 'Unmatched B2B',
-                'email' => 'nobody-b2b@anakata.test',
+                'email' => 'nobody-b2b@iconic.test',
                 'country' => null,
                 'network' => null,
                 'commission_pct' => 10,

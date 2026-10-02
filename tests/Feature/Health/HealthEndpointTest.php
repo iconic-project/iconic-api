@@ -9,7 +9,7 @@ test('health returns 200 when every check is ok', function (): void {
     $response = $this->getJson('/api/health')
         ->assertOk()
         ->assertJsonPath('status', 'ok')
-        ->assertJsonPath('app', 'anakata-api')
+        ->assertJsonPath('app', 'iconic-api')
         ->assertJsonPath('checks.db', 'ok')
         ->assertJsonPath('checks.redis', 'ok')
         ->assertJsonPath('checks.queue', 'ok')

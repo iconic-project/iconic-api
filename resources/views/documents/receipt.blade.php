@@ -13,5 +13,5 @@
     <table class="dgrand">
         <tr><td>UPDATED BALANCE</td><td>USD {{ \App\Support\Money::formatDocument((int) ($snapshot['balance_after'] ?? 0)) }}</td></tr>
     </table>
-    <div class="dfoot">ANAKATA · {{ $snapshot['footer']['email'] ?? '' }} · {{ $snapshot['footer']['website'] ?? '' }}</div>
+    <div class="dfoot">ICONIC · {{ $snapshot['footer']['email'] ?? '' }} · {{ $snapshot['footer']['website'] ?? '' }}</div>
 @endsection

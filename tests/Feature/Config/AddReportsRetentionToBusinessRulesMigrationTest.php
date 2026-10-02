@@ -48,7 +48,7 @@ test('config-verify fails when report retention is missing, then the migration p
     $v1 = insertPreChangeReportsRetention();
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('business_rules v1: reports.retention_days');
 
@@ -71,7 +71,7 @@ test('config-verify fails when report retention is missing, then the migration p
     expect($history)->not->toBeNull();
     expect($history?->actor_label)->toBe('System');
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('business_rules v2: valid');
 });

@@ -48,7 +48,7 @@ test('config-verify fails when portal rules are missing, then the migration publ
     $v1 = insertPreChangePortalRules();
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('business_rules v1: portal.invite_valid_days');
 
@@ -71,7 +71,7 @@ test('config-verify fails when portal rules are missing, then the migration publ
     expect($history)->not->toBeNull();
     expect($history?->actor_label)->toBe('System');
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('business_rules v2: valid');
 });

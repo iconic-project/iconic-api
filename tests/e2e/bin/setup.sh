@@ -7,9 +7,9 @@
 #   setup.sh portal-resume <AG-reference>
 #   setup.sh agency-over-cap <AG-reference>
 #   setup.sh journey-due <enrolment-id>
-#   setup.sh abandoned-checkout <email@anakata.test>
+#   setup.sh abandoned-checkout <email@iconic.test>
 #   setup.sh hard-bounce <email|ANK-reference>
-#   setup.sh inject-inbound-email <email@anakata.test> <subject> <body>
+#   setup.sh inject-inbound-email <email@iconic.test> <subject> <body>
 #   setup.sh portal-pay <ANK-or-ANK-R-reference> <DEPOSIT|BALANCE>
 set -euo pipefail
 
@@ -17,10 +17,10 @@ set -euo pipefail
 . "$(cd "$(dirname "$0")" && pwd)/_lib.sh"
 
 PASSWORD="password"
-ACTOR_EMAIL="carolina@anakata.test"
+ACTOR_EMAIL="carolina@iconic.test"
 
 usage() {
-  die "usage: setup.sh portal-user|portal-invite|portal-suspend|portal-resume|agency-over-cap <AG-reference> | journey-due <enrolment-id> | abandoned-checkout <email@anakata.test> | hard-bounce <email|ANK-reference> | inject-inbound-email <email@anakata.test> <subject> <body> | portal-pay <ANK-or-ANK-R-reference> <DEPOSIT|BALANCE>"
+  die "usage: setup.sh portal-user|portal-invite|portal-suspend|portal-resume|agency-over-cap <AG-reference> | journey-due <enrolment-id> | abandoned-checkout <email@iconic.test> | hard-bounce <email|ANK-reference> | inject-inbound-email <email@iconic.test> <subject> <body> | portal-pay <ANK-or-ANK-R-reference> <DEPOSIT|BALANCE>"
 }
 
 run_tinker() {
@@ -120,8 +120,8 @@ accept_from_mail() {
   say "Waiting for the portal invitation to ${email}"
   mail_out="$("${E2E_BIN_DIR}/mail-latest.sh" "${email}")"
   printf '%s\n' "${mail_out}"
-  if ! printf '%s\n' "${mail_out}" | grep -q 'Subject: Set your Anakata portal password'; then
-    die "Mailpit subject was not 'Set your Anakata portal password'. Horizon must be running so the invite job is sent."
+  if ! printf '%s\n' "${mail_out}" | grep -q 'Subject: Set your Iconic portal password'; then
+    die "Mailpit subject was not 'Set your Iconic portal password'. Horizon must be running so the invite job is sent."
   fi
   accept_url="$(printf '%s\n' "${mail_out}" | grep -oE 'https?://[^[:space:]]+/accept\?[^[:space:]]+' | head -n 1 || true)"
   if [ -z "${accept_url}" ]; then
@@ -239,14 +239,14 @@ PHP
   local mail_out accept_url
   mail_out="$("${E2E_BIN_DIR}/mail-latest.sh" "${email}")"
   printf '%s\n' "${mail_out}"
-  if ! printf '%s\n' "${mail_out}" | grep -q 'Subject: Set your Anakata portal password'; then
-    die "Mailpit subject was not 'Set your Anakata portal password'. Horizon must be running so the invite job is sent."
+  if ! printf '%s\n' "${mail_out}" | grep -q 'Subject: Set your Iconic portal password'; then
+    die "Mailpit subject was not 'Set your Iconic portal password'. Horizon must be running so the invite job is sent."
   fi
   accept_url="$(printf '%s\n' "${mail_out}" | grep -oE 'https?://[^[:space:]]+/accept\?[^[:space:]]+' | head -n 1 || true)"
   if [ -z "${accept_url}" ]; then
     die "invitation mail had no /accept link"
   fi
-  printf 'email: %s\nsubject: Set your Anakata portal password\naccept: %s\n' "${email}" "${accept_url}"
+  printf 'email: %s\nsubject: Set your Iconic portal password\naccept: %s\n' "${email}" "${accept_url}"
 }
 
 cmd_portal_access() {
@@ -323,10 +323,10 @@ PHP
   printf '%s\n' "${line}"
 }
 
-require_anakata_email() {
+require_iconic_email() {
   local email="${1:-}"
-  if ! printf '%s' "${email}" | grep -Eq '^[^@[:space:]]+@anakata\.test$'; then
-    die "email must be @anakata.test"
+  if ! printf '%s' "${email}" | grep -Eq '^[^@[:space:]]+@iconic\.test$'; then
+    die "email must be @iconic.test"
   fi
   printf '%s' "${email}"
 }
@@ -354,7 +354,7 @@ PHP
   if [ -z "${line}" ] || printf '%s' "${line}" | grep -q '"error"'; then
     die "journey-due failed: ${line:-no E2E_JSON}"
   fi
-  in_app "php artisan anakata:journeys"
+  in_app "php artisan iconic:journeys"
   code="$(cat <<PHP
 \$enrolment = App\\Models\\JourneyEnrolment::query()->with('sends')->find(${id});
 if (! \$enrolment instanceof App\\Models\\JourneyEnrolment) {
@@ -382,7 +382,7 @@ PHP
 
 cmd_abandoned_checkout() {
   local email first code output line
-  email="$(require_anakata_email "${1:-}")"
+  email="$(require_iconic_email "${1:-}")"
   first="$(printf '%s' "${email}" | cut -d@ -f1 | tr -cd '[:alnum:]')"
   if [ -z "${first}" ]; then
     first="E2E"
@@ -445,7 +445,7 @@ PHP
   if [ -z "${line}" ] || printf '%s' "${line}" | grep -q '"error"'; then
     die "abandoned-checkout failed: ${line:-no E2E_JSON}"
   fi
-  in_app "php artisan anakata:journeys"
+  in_app "php artisan iconic:journeys"
   code="$(cat <<PHP
 \$email = '${email}';
 \$contact = App\\Models\\Contact::query()->whereRaw('LOWER(TRIM(email)) = ?', [strtolower(\$email)])->first();
@@ -480,7 +480,7 @@ cmd_hard_bounce() {
     die "hard-bounce needs an email or an ANK- reference"
   fi
   if ! printf '%s' "${arg}" | grep -Eq '^ANK-'; then
-    require_anakata_email "${arg}" >/dev/null
+    require_iconic_email "${arg}" >/dev/null
   fi
   code="$(cat <<PHP
 \$arg = '${arg}';
@@ -579,11 +579,11 @@ PHP
 
 cmd_inject_inbound_email() {
   local email subject body subject_b64 body_b64 code output line
-  email="$(require_anakata_email "${1:-}")"
+  email="$(require_iconic_email "${1:-}")"
   subject="${2:-}"
   body="${3:-}"
   if [ -z "${subject}" ] || [ -z "${body}" ]; then
-    die "usage: setup.sh inject-inbound-email <email@anakata.test> <subject> <body>"
+    die "usage: setup.sh inject-inbound-email <email@iconic.test> <subject> <body>"
   fi
   subject_b64="$(printf '%s' "${subject}" | base64 | tr -d '\n')"
   body_b64="$(printf '%s' "${body}" | base64 | tr -d '\n')"
@@ -593,9 +593,9 @@ cmd_inject_inbound_email() {
 \$body = base64_decode('${body_b64}');
 \$to = (string) config('mail.from.address');
 if (\$to === '') {
-    \$to = 'inbox@anakata.test';
+    \$to = 'inbox@iconic.test';
 }
-\$base = rtrim((string) config('anakata.inbox.mailpit_url'), '/');
+\$base = rtrim((string) config('iconic.inbox.mailpit_url'), '/');
 Illuminate\\Support\\Facades\\Http::acceptJson()->post(\$base.'/api/v1/send', [
     'From' => ['Email' => \$email, 'Name' => \$email],
     'To' => [['Email' => \$to]],

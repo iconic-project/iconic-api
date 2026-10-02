@@ -8,7 +8,7 @@
 The drawer is the CRM profile. Bookings open in the RMS. The timeline must list booking, payment, document and consent items. Passport, date of birth, nationality and notes must never appear.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/crm/sales/contacts`.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/crm/sales/contacts`.
 2. Search `Harrison`. Open **Harrison & Whitfield**.
 3. Read the header (type · lifecycle · contact id), country · language, channels, LTV, first / last touch, NPS, consent, bookings and timeline.
 4. Click booking **ANK-2026-0003**. Confirm the RMS booking panel opens.

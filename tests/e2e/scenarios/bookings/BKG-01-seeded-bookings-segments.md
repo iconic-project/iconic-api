@@ -8,7 +8,7 @@
 The list, segment chips and Groups panel must show the seed. A missed filter or a hidden REQUESTED row makes every later booking scenario look empty. Sprint 5 added a real Balance column and `ANK-2026-0021`.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Date range stays **All dates**.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Date range stays **All dates**.
 2. Read the table and the date-range count. Click chips **D2C — direct**, then **B2B — travel trade**, then **Charter**, then **All**.
 3. Scroll to the **Groups — multi-cabin reservations (OPS-008)** panel. Open GRP-007.
 

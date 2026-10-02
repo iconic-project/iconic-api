@@ -170,7 +170,7 @@ class JourneysSeeder extends Seeder
                 [],
                 [
                     $this->pointer(1, 'Welcome + rate agreement and materials', 'portal_invite', ['anchor' => 'enrolment', 'amount' => 0, 'unit' => 'hours'], ['portal_invite']),
-                    $this->send(2, 'Selling Anakata: positioning one-pager', 'partner_positioning', ['anchor' => 'enrolment', 'amount' => 7, 'unit' => 'days']),
+                    $this->send(2, 'Selling Iconic: positioning one-pager', 'partner_positioning', ['anchor' => 'enrolment', 'amount' => 7, 'unit' => 'days']),
                     $this->send(3, 'First-booking incentive check-in', 'partner_incentive', ['anchor' => 'enrolment', 'amount' => 21, 'unit' => 'days']),
                     $this->task(4, 'Production review + commission statement from the RMS ledger', 'partner_quarterly', ['anchor' => 'previous_step', 'amount' => 3, 'unit' => 'months', 'repeats' => true]),
                 ],

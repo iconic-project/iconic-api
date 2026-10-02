@@ -21,7 +21,7 @@ final class IssueQuestionnaireAccessToken extends Action
         $token = $this->transaction(function () use ($booking, $guestId, $coveredGuestIds): BookingAccessToken {
             $booking->loadMissing('departure.itinerary');
             $plain = bin2hex(random_bytes(32));
-            $pageUrl = rtrim((string) config('anakata.engine_url'), '/').'/questionnaire/'.$plain;
+            $pageUrl = rtrim((string) config('iconic.engine_url'), '/').'/questionnaire/'.$plain;
 
             return BookingAccessToken::query()->create([
                 'booking_id' => $booking->id,

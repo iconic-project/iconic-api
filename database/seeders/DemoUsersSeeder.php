@@ -49,10 +49,10 @@ final class DemoUsersSeeder extends Seeder
             $externalFinance->save();
         }
 
-        $this->seedUser('Carolina M.', 'carolina@anakata.test', $admin);
-        $this->seedUser('Mateo R.', 'mateo@anakata.test', $manager);
-        $this->seedUser('Lucía B.', 'lucia@anakata.test', $salesExec);
-        $this->seedUser('CFO (external)', 'cfo@anakata.test', $externalFinance);
+        $this->seedUser('Carolina M.', 'carolina@iconic.test', $admin);
+        $this->seedUser('Mateo R.', 'mateo@iconic.test', $manager);
+        $this->seedUser('Lucía B.', 'lucia@iconic.test', $salesExec);
+        $this->seedUser('CFO (external)', 'cfo@iconic.test', $externalFinance);
     }
 
     private function seedUser(string $name, string $email, Role $role): void

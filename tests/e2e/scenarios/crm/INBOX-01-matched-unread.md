@@ -9,9 +9,9 @@
 Polled mail from a seeded contact opens a thread on that contact. The inbox shows it unread. Opening it marks it read and puts one line on the contact timeline.
 
 ## Steps
-1. Sign in as Carolina. From `anakata-api` run:
+1. Sign in as Carolina. From `iconic-api` run:
    ```bash
-   tests/e2e/bin/setup.sh inject-inbound-email whitfield.anna@anakata.test "E2E inbox matched" "Is the master cabin free on that Sunday?"
+   tests/e2e/bin/setup.sh inject-inbound-email whitfield.anna@iconic.test "E2E inbox matched" "Is the master cabin free on that Sunday?"
    ```
 2. Read `contact_id`, `conversation_id`, `unread`, and `message_id` from the printed JSON.
 3. Open `http://localhost:3001/crm/sales/inbox`. Find the conversation whose preview is `Is the master cabin free on that Sunday?`.
@@ -29,4 +29,4 @@ Polled mail from a seeded contact opens a thread on that contact. The inbox show
 - `bin/db-check.sh 'App\Models\Conversation::query()->where("subject","E2E inbox matched")->value("unread")'` → false after the thread was opened.
 
 ## Notes
-The seed inserts no conversations. Other Mailpit mail may also appear as unmatched rows. Match this scenario by the subject. The from-address must stay `@anakata.test`.
+The seed inserts no conversations. Other Mailpit mail may also appear as unmatched rows. Match this scenario by the subject. The from-address must stay `@iconic.test`.

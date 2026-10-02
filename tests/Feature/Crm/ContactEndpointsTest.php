@@ -34,8 +34,8 @@ beforeEach(function (): void {
 test('the contacts list is visible to every panel.crm user and includes derived fields and filter meta', function (): void {
     $owner = salesExecUser();
     $other = salesExecUser();
-    $mine = Contact::factory()->create(['name' => 'Alpha Guest', 'email' => 'alpha@anakata.test']);
-    $theirs = Contact::factory()->create(['name' => 'Beta Guest', 'email' => 'beta@anakata.test']);
+    $mine = Contact::factory()->create(['name' => 'Alpha Guest', 'email' => 'alpha@iconic.test']);
+    $theirs = Contact::factory()->create(['name' => 'Beta Guest', 'email' => 'beta@iconic.test']);
 
     $departure = ReservationFixtures::anamaraDeparture('2027-12-05');
     Booking::factory()->create([
@@ -123,17 +123,17 @@ test('patch updates owned fields, records field names, and conflicts on another 
     $actor = salesExecUser();
     $contact = Contact::factory()->create([
         'name' => 'Old Name',
-        'email' => 'old@anakata.test',
+        'email' => 'old@iconic.test',
         'phone' => null,
         'country' => null,
         'language' => 'en',
     ]);
-    $other = Contact::factory()->create(['email' => 'taken@anakata.test']);
+    $other = Contact::factory()->create(['email' => 'taken@iconic.test']);
 
     $this->actingAs($actor)
         ->patchJson('/api/crm/contacts/'.$contact->id, [
             'name' => 'New Name',
-            'email' => 'NEW@anakata.test',
+            'email' => 'NEW@iconic.test',
             'phone' => '+1 555 0100',
             'country' => 'us',
             'language' => 'FR',
@@ -144,7 +144,7 @@ test('patch updates owned fields, records field names, and conflicts on another 
         ])
         ->assertOk()
         ->assertJsonPath('name', 'New Name')
-        ->assertJsonPath('email', 'new@anakata.test')
+        ->assertJsonPath('email', 'new@iconic.test')
         ->assertJsonPath('country', 'US')
         ->assertJsonPath('language', 'fr')
         ->assertJsonPath('type', ContactType::CorporateCharter->value)
@@ -154,7 +154,7 @@ test('patch updates owned fields, records field names, and conflicts on another 
     $history = ChangeHistory::query()->where('event', 'contact.updated')->where('subject_id', $contact->id)->firstOrFail();
     expect($history->before)->toBe(['fields' => ['name', 'email', 'phone', 'country', 'language', 'preferred_channel', 'type']]);
     expect($history->after)->toBe(['fields' => ['name', 'email', 'phone', 'country', 'language', 'preferred_channel', 'type']]);
-    expect(json_encode($history->after))->not->toContain('new@anakata.test');
+    expect(json_encode($history->after))->not->toContain('new@iconic.test');
     expect(json_encode($history->after))->not->toContain('New Name');
 
     $this->actingAs($actor)

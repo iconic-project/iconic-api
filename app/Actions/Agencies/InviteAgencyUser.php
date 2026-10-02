@@ -45,7 +45,7 @@ final class InviteAgencyUser extends Action
                 'idempotency_key' => DeliveryKey::forPortalInvite($agencyUser->id, $sentAt),
                 'to' => [$agencyUser->email],
                 'cc' => [],
-                'subject' => 'Set your Anakata portal password',
+                'subject' => 'Set your Iconic portal password',
                 'status' => DeliveryStatus::Queued,
                 'triggered_by' => $system ? DeliveryTriggeredBy::System : DeliveryTriggeredBy::User,
             ]);

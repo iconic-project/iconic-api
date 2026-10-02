@@ -8,7 +8,7 @@ use App\Support\BusinessTime;
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Telescope\Console\PruneCommand;
 
-final class AnakataSchedule
+final class IconicSchedule
 {
     public static function register(Schedule $schedule): void
     {
@@ -23,7 +23,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:inbox-poll')
+            $schedule->command('iconic:inbox-poll')
                 ->everyMinute()
                 ->withoutOverlapping()
                 ->onOneServer()
@@ -37,19 +37,19 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:crm-tasks')
+            $schedule->command('iconic:crm-tasks')
                 ->everyFiveMinutes()
                 ->withoutOverlapping(),
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:alerts')
+            $schedule->command('iconic:alerts')
                 ->everyFiveMinutes()
                 ->withoutOverlapping(),
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:reports-send')
+            $schedule->command('iconic:reports-send')
                 ->everyFifteenMinutes()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -58,7 +58,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:journeys')
+            $schedule->command('iconic:journeys')
                 ->everyFifteenMinutes()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -67,7 +67,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:waitlist-notify')
+            $schedule->command('iconic:waitlist-notify')
                 ->everyFifteenMinutes()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -76,14 +76,14 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:flag-overdue')
+            $schedule->command('iconic:flag-overdue')
                 ->daily()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping(),
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:charter-deposits')
+            $schedule->command('iconic:charter-deposits')
                 ->daily()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -92,28 +92,28 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:retention')
+            $schedule->command('iconic:retention')
                 ->daily()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping(),
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:events-retention')
+            $schedule->command('iconic:events-retention')
                 ->daily()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping(),
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:documents-due')
+            $schedule->command('iconic:documents-due')
                 ->daily()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping(),
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:voyage-status')
+            $schedule->command('iconic:voyage-status')
                 ->dailyAt('00:15')
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -122,7 +122,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:ledger-check')
+            $schedule->command('iconic:ledger-check')
                 ->dailyAt('02:00')
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -131,7 +131,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:commission-scan')
+            $schedule->command('iconic:commission-scan')
                 ->dailyAt('02:30')
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -140,7 +140,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:manifests-due')
+            $schedule->command('iconic:manifests-due')
                 ->dailyAt('06:00')
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -149,7 +149,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:occupancy-check')
+            $schedule->command('iconic:occupancy-check')
                 ->dailyAt('07:00')
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -158,7 +158,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:document-check')
+            $schedule->command('iconic:document-check')
                 ->hourly()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -167,7 +167,7 @@ final class AnakataSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('anakata:nps-survey')
+            $schedule->command('iconic:nps-survey')
                 ->hourly()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
@@ -185,7 +185,7 @@ final class AnakataSchedule
     private static function alreadyRegistered(Schedule $schedule): bool
     {
         foreach ($schedule->events() as $event) {
-            if (str_contains(RecordScheduledRuns::commandName($event), 'anakata:flag-overdue')) {
+            if (str_contains(RecordScheduledRuns::commandName($event), 'iconic:flag-overdue')) {
                 return true;
             }
         }

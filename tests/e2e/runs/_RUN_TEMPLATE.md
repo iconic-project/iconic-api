@@ -2,7 +2,7 @@
 
 - **Agent:** <name or "local">
 - **Prompt:** <what was asked>
-- **Git:** anakata-api `<sha>` · panel `<sha>` · engine `<sha>` · ui `<sha>` · portal `<sha>`
+- **Git:** iconic-api `<sha>` · panel `<sha>` · engine `<sha>` · ui `<sha>` · portal `<sha>`
 - **Mode:** preview | dev
 - **Stack:** `status.sh` ALL UP / ENV failure
 

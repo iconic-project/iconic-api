@@ -8,7 +8,7 @@
 Pipeline cash is the payments ledger. A deal whose stage follows a booking cannot be dragged.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/crm/sales/pipeline`.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/crm/sales/pipeline`.
 2. Read Collected, Scheduled in, Awaiting first payment, Open pipeline, Weighted forecast and Overdue.
 3. Open `http://localhost:3001/rms/commercial/payments`. Read the same cash figures.
 4. Return to the pipeline. Read **Stage map**.

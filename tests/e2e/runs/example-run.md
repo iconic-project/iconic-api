@@ -19,9 +19,9 @@
 ## Environment
 
 - Memory available at `up.sh`: 9.34 GiB (warn threshold `E2E_MIN_MEM_GB=6`, fail below 3)
-- `COMPOSE_PROJECT_NAME`: `anakata-e2e`
+- `COMPOSE_PROJECT_NAME`: `iconic-e2e`
 - First `up.sh`: no `vendor/`, `.env` copied from `api.env` with empty `APP_KEY`, then `key:generate`. Staged compose (mysql/redis/mailpit `--wait`, then app, then composer).
-- Isolated copy at `/tmp/anakata-e2e-verify`. Working MySQL volume `anakata-api_mysql-data` (created 2026-09-18T13:26:28+03:30) untouched. E2e volume `anakata-e2e_mysql-data`.
+- Isolated copy at `/tmp/iconic-e2e-verify`. Working MySQL volume `iconic-api_mysql-data` (created 2026-09-18T13:26:28+03:30) untouched. E2e volume `iconic-e2e_mysql-data`.
 
 ## Scenarios
 
@@ -29,8 +29,8 @@
 
 - **Result:** PASS
 - E1 · `{"status":"ok","checks":{"db":"ok","redis":"ok","queue":"ok"}}`
-- E2 · `/login`: ANAKATA wordmark, `RMS · REVENUE ENGINE`, heading `Sign in`, fields `Email` / `Password`, button `Sign in`, link `Forgot password?`
-- E3 · Engine home: `INTIMATE YACHT EXPEDITIONS`, nav Expeditions / Private Charter, coords, footer `Anakata · Intimate yacht expeditions · Galápagos`, `API · OK`
+- E2 · `/login`: ICONIC wordmark, `RMS · REVENUE ENGINE`, heading `Sign in`, fields `Email` / `Password`, button `Sign in`, link `Forgot password?`
+- E3 · Engine home: `INTIMATE YACHT EXPEDITIONS`, nav Expeditions / Private Charter, coords, footer `Iconic · Intimate yacht expeditions · Galápagos`, `API · OK`
 - E4 · Mailpit UI title `Mailpit - localhost`
 
 ### SMK-02 · Every demo user can sign in and out

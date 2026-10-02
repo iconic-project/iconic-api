@@ -39,7 +39,7 @@ class PortalMeResource extends JsonResource
                 'reference' => $agency->reference,
                 'name' => $agency->name,
             ],
-            'time_zone' => (string) config('anakata.business_timezone'),
+            'time_zone' => (string) config('iconic.business_timezone'),
         ];
     }
 }

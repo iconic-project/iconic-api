@@ -21,7 +21,7 @@ beforeEach(function (): void {
 });
 
 test('a clean ledger and a two-booking checkout stay silent until the event amount is tampered', function (): void {
-    Artisan::call('anakata:ledger-check');
+    Artisan::call('iconic:ledger-check');
     expect(Alert::query()->where('kind', AlertKind::LedgerDrift)->count())->toBe(0);
 
     $first = Booking::factory()->create([
@@ -38,7 +38,7 @@ test('a clean ledger and a two-booking checkout stay silent until the event amou
     ]);
     $event = checkoutEvent('pi_group', 300000);
 
-    Artisan::call('anakata:ledger-check');
+    Artisan::call('iconic:ledger-check');
     expect(Alert::query()->where('kind', AlertKind::LedgerDrift)->count())->toBe(0);
 
     $before = Payment::query()->orderBy('id')->pluck('amount', 'id')->all();
@@ -47,7 +47,7 @@ test('a clean ledger and a two-booking checkout stay silent until the event amou
     $event->payload = $payload;
     $event->save();
 
-    Artisan::call('anakata:ledger-check');
+    Artisan::call('iconic:ledger-check');
 
     $alert = Alert::query()->where('kind', AlertKind::LedgerDrift)->first();
     expect(Alert::query()->where('kind', AlertKind::LedgerDrift)->count())->toBe(1)
@@ -61,7 +61,7 @@ test('a clean ledger and a two-booking checkout stay silent until the event amou
     $event->payload = $payload;
     $event->save();
 
-    Artisan::call('anakata:ledger-check');
+    Artisan::call('iconic:ledger-check');
 
     expect($alert?->fresh()?->resolved_at)->not->toBeNull()
         ->and($alert?->fresh()?->resolution)->toBe('the next ledger run found no difference')
@@ -106,7 +106,7 @@ test('two partial refunds that sum to the latest amount refunded stay silent', f
         'received_at' => now(),
     ]);
 
-    Artisan::call('anakata:ledger-check');
+    Artisan::call('iconic:ledger-check');
 
     expect(Alert::query()->where('kind', AlertKind::LedgerDrift)->count())->toBe(0);
 });

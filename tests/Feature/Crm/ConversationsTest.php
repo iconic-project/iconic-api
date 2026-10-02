@@ -386,7 +386,7 @@ test('mailpit polling captures a message once and strips the quoted reply', func
 
 test('graph polling reads the inbox and empty keys skip the poll', function (): void {
     config([
-        'anakata.inbox.driver' => 'graph',
+        'iconic.inbox.driver' => 'graph',
         'services.graph.tenant' => 'tenant',
         'services.graph.client_id' => 'client',
         'services.graph.client_secret' => 'secret',
@@ -425,21 +425,21 @@ test('graph polling reads the inbox and empty keys skip the poll', function (): 
         ->and(Message::query()->count())->toBe(1);
 
     config([
-        'anakata.inbox.driver' => 'graph',
+        'iconic.inbox.driver' => 'graph',
         'services.graph.tenant' => '',
         'services.graph.client_id' => '',
         'services.graph.client_secret' => '',
         'services.graph.mailbox' => '',
     ]);
     Bus::fake();
-    $this->artisan('anakata:inbox-poll')->assertSuccessful()->expectsOutputToContain('Graph keys are empty');
+    $this->artisan('iconic:inbox-poll')->assertSuccessful()->expectsOutputToContain('Graph keys are empty');
     Bus::assertNothingDispatched();
 });
 
 test('the inbox poll is scheduled every minute', function (): void {
     Artisan::call('schedule:list');
 
-    expect(Artisan::output())->toContain('anakata:inbox-poll');
+    expect(Artisan::output())->toContain('iconic:inbox-poll');
 });
 
 function inboxMail(

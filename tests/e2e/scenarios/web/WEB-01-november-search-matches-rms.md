@@ -11,7 +11,7 @@ The public engine must render only on-sale departures. If the guest list drifts 
 ## Steps
 1. **Guest** (fresh context, no staff cookies). Open `http://localhost:3000/`. Confirm 2 adults, 0 children. Set the date window **Nov 2027 → Jan 2028** (two-click month picker). Click `Check availability`.
 2. On `/itineraries` read the three cards: **Western Realm**, **Northern Passage**, **Festive Expeditions**. Expand each **Departures (N)**. Record date, yacht, and availability label for every row.
-3. **Carolina** (second context). Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/rms/booking-engine/departures`. Date range covering Nov 2027–Jan 2028. Read each on-sale row’s date, yacht, itinerary, and **Engine shows**.
+3. **Carolina** (second context). Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms/booking-engine/departures`. Date range covering Nov 2027–Jan 2028. Read each on-sale row’s date, yacht, itinerary, and **Engine shows**.
 
 ## Expected
 - [ ] E1 · Guest window line includes `NOV 2027` and `JAN 2028` (or the feed’s `default_search_*` months) and `Party of 2 (2 adults)`. ⚠ UNVERIFIED — i18n `itineraries.window` + task 08 browser.
@@ -20,4 +20,4 @@ The public engine must render only on-sale departures. If the guest list drifts 
 - [ ] E4 · OPENING-27 badge / dealbar on Nov–Dec WEST and NORTH if the feed lists it. If the badge is missing, classify **BUG** — do not drop the expectation. ⚠ UNVERIFIED — task 08/09 once saw `offers: []`.
 
 ## Notes
-Guest context has no panel session. Do not type a promo code on this page. Slugs after Select: `/itineraries/western-realm`, `/itineraries/northern-passage`, `/itineraries/festive-expeditions`. Before any other click, click `Analytics off` (or set `localStorage['anakata-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.
+Guest context has no panel session. Do not type a promo code on this page. Slugs after Select: `/itineraries/western-realm`, `/itineraries/northern-passage`, `/itineraries/festive-expeditions`. Before any other click, click `Analytics off` (or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.

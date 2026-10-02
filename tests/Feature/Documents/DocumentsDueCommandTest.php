@@ -66,11 +66,11 @@ test('reminders fire at minus 21 and minus 7 and not on the days around them', f
     $booking = reminderBooking();
 
     travelTo('2028-05-10');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(0);
 
     travelTo('2028-05-11');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(1);
     Mail::assertSent(ReminderMail::class, function (ReminderMail $mail): bool {
         if ($mail->days !== 21) {
@@ -84,11 +84,11 @@ test('reminders fire at minus 21 and minus 7 and not on the days around them', f
             && ! str_contains($mail->render(), 'buy.stripe.com');
     });
 
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(1);
 
     travelTo('2028-05-25');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(2);
     Mail::assertSent(ReminderMail::class, fn (ReminderMail $mail): bool => $mail->days === 7);
 });
@@ -103,7 +103,7 @@ test('no reminder is sent after the cruise balance is paid', function (): void {
     ]);
 
     travelTo('2028-05-11');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(0);
 });
 
@@ -111,21 +111,21 @@ test('an OPS-007 extension moves the reminder keys', function (): void {
     $booking = reminderBooking('2028-06-01');
 
     travelTo('2028-05-11');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(1);
 
     $booking->balance_due_date_override = '2028-06-15';
     $booking->save();
 
     travelTo('2028-05-25');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->where('idempotency_key', 'like', '%2028-06-15%')->count())->toBe(1);
 });
 
 test('a reminder is not sent after the due date', function (): void {
     reminderBooking();
     travelTo('2028-06-02');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(0);
 });
 
@@ -133,19 +133,19 @@ test('a booking confirmed 10 days before due gets the passed 21-day slot then th
     reminderBooking();
 
     travelTo('2028-05-22');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(1);
     Mail::assertSent(ReminderMail::class, fn (ReminderMail $mail): bool => $mail->days === 10);
 
     travelTo('2028-05-25');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(2);
 });
 
 test('a missed run spanning both reminder slots sends only the smallest N', function (): void {
     reminderBooking();
     travelTo('2028-05-27');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Reminder)->count())->toBe(1);
     Mail::assertSent(ReminderMail::class, fn (ReminderMail $mail): bool => $mail->days === 5);
 });
@@ -161,21 +161,21 @@ test('pretrip at T-45 and voucher at T-7 only with a transfer extra and a missed
     ]);
 
     travelTo('2028-07-19');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::Pretrip)->count())->toBe(0);
 
     travelTo('2028-07-21');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::Pretrip)->count())->toBe(1);
 
     travelTo('2028-08-28');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::Voucher)->count())->toBe(0);
 
     app(AddBookingExtra::class)->handle($booking, ['code' => 'FLT', 'qty' => 2], adminUser());
 
     travelTo('2028-08-28');
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::Voucher)->count())->toBe(1);
 });
 
@@ -183,7 +183,7 @@ test('dry-run lists and writes nothing', function (): void {
     reminderBooking();
     travelTo('2028-05-11');
 
-    $this->artisan('anakata:documents-due', ['--dry-run' => true])
+    $this->artisan('iconic:documents-due', ['--dry-run' => true])
         ->assertSuccessful()
         ->expectsOutputToContain('Would send');
 

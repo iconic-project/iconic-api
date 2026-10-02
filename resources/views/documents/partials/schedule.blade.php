@@ -4,7 +4,7 @@
     $hours = (int) ($schedule['extras_due_hours'] ?? 0);
 @endphp
 <div class="dsec">Payment schedule</div>
-<div class="dnote">The deposit is calculated on the cruise (cabin) charges only. Ancillary services and any fees Anakata collects are due up to {{ $hours }} h before departure; anything added on board is settled during or after the cruise.</div>
+<div class="dnote">The deposit is calculated on the cruise (cabin) charges only. Ancillary services and any fees Iconic collects are due up to {{ $hours }} h before departure; anything added on board is settled during or after the cruise.</div>
 <table class="dkv">
     <tr>
         <td>Deposit ({{ $schedule['deposit_pct'] ?? 0 }}% of cruise charges)</td>
@@ -16,7 +16,7 @@
     </tr>
     @if(((int) ($totals['extras_and_fees'] ?? 0)) > 0)
         <tr>
-            <td>Ancillary services &amp; fees collected by Anakata</td>
+            <td>Ancillary services &amp; fees collected by Iconic</td>
             <td>
                 USD {{ \App\Support\Money::formatDocument((int) $totals['extras_and_fees']) }} — due up to {{ $hours }} h before departure: {{ $schedule['extras_due_date'] ?? '' }}
                 @if(! empty($schedule['on_board_note']))

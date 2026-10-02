@@ -8,7 +8,7 @@
 Contacts are shared people records (L1). Merge is Admin / Manager only. A Sales Exec with `contacts.manage` must still see every contact and must not see Merge.
 
 ## Steps
-1. Sign in as `lucia@anakata.test` / `password`. Header `LUCÍA B. — SALES EXEC`. Open `http://localhost:3001/crm/sales/contacts`.
+1. Sign in as `lucia@iconic.test` / `password`. Header `LUCÍA B. — SALES EXEC`. Open `http://localhost:3001/crm/sales/contacts`.
 2. Confirm the list includes contacts whose bookings Lucía does not own (at least **The Brandt Family** / Mateo’s `ANK-2026-0005`, **Vandermeer Charter** / Carolina’s `ANK-2026-0012`, **S. Ferreira**).
 3. Open **A. Fontaine**. Confirm **Edit** is present. Confirm there is no **Merge** / **Undo** control.
 4. If a previous scenario left a duplicate pair on this reset it will not — this start is reset, so create the same shared phone as CRM-04 steps 2–4 (Anna Whitfield and K. Osei, `+1 650 253 0000`, country `US`) and reload.

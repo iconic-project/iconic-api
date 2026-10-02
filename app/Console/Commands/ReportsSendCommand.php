@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class ReportsSendCommand extends Command
 {
-    protected $signature = 'anakata:reports-send';
+    protected $signature = 'iconic:reports-send';
 
     protected $description = 'Generate and email scheduled reports whose Galápagos moment has passed';
 

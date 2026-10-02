@@ -8,10 +8,10 @@
 The panel must hide what the role cannot use, and the route guard must bounce forbidden URLs with the same toast.
 
 ## Steps
-1. Sign in as `cfo@anakata.test` / `password`.
+1. Sign in as `cfo@iconic.test` / `password`.
 2. Confirm there is no RMS / CRM section switch. Type `/crm/sales/pipeline` in the address bar.
-3. Sign out. Sign in as `mateo@anakata.test` / `password`. Type `/rms/admin/business-rules`.
-4. Sign out. Sign in as `lucia@anakata.test` / `password`. Type `/rms/admin/business-rules`.
+3. Sign out. Sign in as `mateo@iconic.test` / `password`. Type `/rms/admin/business-rules`.
+4. Sign out. Sign in as `lucia@iconic.test` / `password`. Type `/rms/admin/business-rules`.
 5. Still as Lucía, type `/rms/admin/permissions`.
 
 ## Expected

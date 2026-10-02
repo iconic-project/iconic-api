@@ -86,7 +86,7 @@ test('FAILED is shown when the last delivery failed', function (): void {
         'document_id' => $document->id,
         'kind' => DeliveryKind::Invoice,
         'idempotency_key' => DeliveryKey::forDocument($document),
-        'to' => ['guest@anakata.test'],
+        'to' => ['guest@iconic.test'],
         'cc' => [],
         'subject' => 'Invoice',
         'status' => DeliveryStatus::Failed,

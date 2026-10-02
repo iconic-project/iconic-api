@@ -14,12 +14,12 @@ beforeEach(function (): void {
     $this->seed(ConfigSeeder::class);
 });
 
-test('anakata:set-reminder-fixture sets due date to today plus 21 days', function (): void {
+test('iconic:set-reminder-fixture sets due date to today plus 21 days', function (): void {
     $booking = Booking::factory()->create([
         'reference' => 'ANK-2026-0908',
     ]);
 
-    $this->artisan('anakata:set-reminder-fixture', ['reference' => 'ANK-2026-0908'])
+    $this->artisan('iconic:set-reminder-fixture', ['reference' => 'ANK-2026-0908'])
         ->assertSuccessful();
 
     $expected = BusinessTime::now()->addDays(21)->toDateString();
@@ -27,12 +27,12 @@ test('anakata:set-reminder-fixture sets due date to today plus 21 days', functio
     expect($booking->fresh()?->balance_due_date_override?->toDateString())->toBe($expected);
 });
 
-test('anakata:set-reminder-fixture refuses in production', function (): void {
+test('iconic:set-reminder-fixture refuses in production', function (): void {
     $previous = $this->app['env'];
     $this->app['env'] = 'production';
 
     try {
-        $this->artisan('anakata:set-reminder-fixture', ['reference' => 'ANK-2026-0003'])
+        $this->artisan('iconic:set-reminder-fixture', ['reference' => 'ANK-2026-0003'])
             ->assertFailed();
     } finally {
         $this->app['env'] = $previous;

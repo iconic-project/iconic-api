@@ -68,14 +68,14 @@ test('each system kind is raised once and the sweep does not raise it again', fu
 
     $request = app(CreateBookingRequest::class)->handle(
         ReservationFixtures::requestPayload($departure, [
-            'client' => ['email' => 'task-request@anakata.test'],
+            'client' => ['email' => 'task-request@iconic.test'],
         ]),
         $actor,
     );
 
     expect(CrmTask::query()->where('kind', TaskKind::RequestResponse)->count())->toBe(1);
     BookingCreated::dispatch($request);
-    Artisan::call('anakata:crm-tasks');
+    Artisan::call('iconic:crm-tasks');
     expect(CrmTask::query()->where('idempotency_key', 'request:'.$request->id)->count())->toBe(1);
 
     $held = Booking::factory()->create([
@@ -113,7 +113,7 @@ test('each system kind is raised once and the sweep does not raise it again', fu
         null,
     );
 
-    Artisan::call('anakata:crm-tasks');
+    Artisan::call('iconic:crm-tasks');
 
     expect(CrmTask::query()->where('kind', TaskKind::CommissionCap)->where('booking_id', $held->id)->count())->toBe(1);
     expect(CrmTask::query()->where('kind', TaskKind::OverdueDecision)->where('booking_id', $overdue->id)->count())->toBe(1);
@@ -125,7 +125,7 @@ test('each system kind is raised once and the sweep does not raise it again', fu
     $before = CrmTask::query()->count();
     PaymentAwaitingWire::dispatch($wire);
     RefundRequested::dispatch($refund);
-    Artisan::call('anakata:crm-tasks');
+    Artisan::call('iconic:crm-tasks');
 
     expect(CrmTask::query()->where('kind', TaskKind::WireWindow)->count())->toBe(1);
     expect(CrmTask::query()->where('kind', TaskKind::RefundDecision)->count())->toBe(1);
@@ -138,20 +138,20 @@ test('a cleared booking auto-closes the task and does not reopen it', function (
     $booking = app(CreateBookingRequest::class)->handle(
         ReservationFixtures::requestPayload($departure, [
             'cabins' => [['cabin_code' => 'S2', 'adults' => 2, 'children' => 0]],
-            'client' => ['email' => 'task-close@anakata.test'],
+            'client' => ['email' => 'task-close@iconic.test'],
         ]),
         $actor,
     );
     $before = Booking::query()->count();
 
     $booking->forceFill(['status' => BookingStatus::Confirmed])->save();
-    Artisan::call('anakata:crm-tasks');
+    Artisan::call('iconic:crm-tasks');
 
     $task = CrmTask::query()->where('idempotency_key', 'request:'.$booking->id)->firstOrFail();
     expect($task->status)->toBe(TaskStatus::AutoClosed);
     expect($task->outcome)->toBe('Resolved in the RMS');
 
-    Artisan::call('anakata:crm-tasks');
+    Artisan::call('iconic:crm-tasks');
     expect($task->fresh()?->status)->toBe(TaskStatus::AutoClosed);
     expect(CrmTask::query()->where('idempotency_key', 'request:'.$booking->id)->count())->toBe(1);
     expect(Booking::query()->count())->toBe($before);
@@ -164,7 +164,7 @@ test('releasing a request closes its response task without the sweep', function 
     $booking = app(CreateBookingRequest::class)->handle(
         ReservationFixtures::requestPayload($departure, [
             'cabins' => [['cabin_code' => 'S2', 'adults' => 2, 'children' => 0]],
-            'client' => ['email' => 'task-release@anakata.test'],
+            'client' => ['email' => 'task-release@iconic.test'],
         ]),
         $actor,
     );
@@ -206,7 +206,7 @@ test('visibility follows ownership and needs_permission', function (): void {
     expect(collect($admin->json('data'))->pluck('title'))->toContain('Call back');
 
     $enquiry = CharterEnquiry::factory()->create();
-    Artisan::call('anakata:crm-tasks');
+    Artisan::call('iconic:crm-tasks');
     $unassigned = $this->actingAs($other)->getJson('/api/crm/tasks?scope=unassigned')->assertOk();
     expect(collect($unassigned->json('data'))->pluck('kind'))->toContain(TaskKind::CharterQuote->value);
 
@@ -218,7 +218,7 @@ test('visibility follows ownership and needs_permission', function (): void {
         'balance_due_date_override' => '2026-09-01',
         'total' => 26600,
     ]);
-    Artisan::call('anakata:crm-tasks');
+    Artisan::call('iconic:crm-tasks');
 
     $decider = userWithPermissions([Permission::PanelCrm, Permission::BookingsOverdueDecision]);
     $seen = $this->actingAs($decider)->getJson('/api/crm/tasks?scope=mine')->assertOk();

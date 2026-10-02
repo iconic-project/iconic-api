@@ -9,13 +9,13 @@ Completing an objection is the withdrawal. Transactional continues. The register
 
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/crm/marketing/journeys`. Turn **Nurture to Request — D2C** on. The confirm quotes `engine: lead.captured · abandon_cart — marketing consent required`.
-2. Run `tests/e2e/bin/setup.sh abandoned-checkout e2e.priv02@anakata.test`. Keep the printed enrolment ids. Do not run `anakata:journeys` again before Complete. The helper's own run is the only one.
+2. Run `tests/e2e/bin/setup.sh abandoned-checkout e2e.priv02@iconic.test`. Keep the printed enrolment ids. Do not run `iconic:journeys` again before Complete. The helper's own run is the only one.
 3. Open `http://localhost:3001/crm/system/consent`. Read the Marketing contacts count.
-4. **New request**: type **Objection**, `e2e.priv02@anakata.test`, channel **Email**.
+4. **New request**: type **Objection**, `e2e.priv02@iconic.test`, channel **Email**.
 5. Open it. Enter how it was verified. **Complete** with an outcome.
 6. Reload the register. Open the contact and open **History**.
 7. Run `tests/e2e/bin/setup.sh journey-due <id>` once for each enrolment id from step 2 that is still ACTIVE.
-8. Open the contact again. Read **Journeys**. Check Mailpit for a message to `e2e.priv02@anakata.test` that arrived after step 5.
+8. Open the contact again. Read **Journeys**. Check Mailpit for a message to `e2e.priv02@iconic.test` that arrived after step 5.
 
 ## Expected
 - [ ] E1 · Marketing, profiling and remarketing are **NOT OPTED IN**. Each history row for that withdrawal has capture point `SUBJECT_REQUEST`.

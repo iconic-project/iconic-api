@@ -20,4 +20,4 @@ Price-affecting offers must not reach the engine without Director approval (K2).
 - [ ] E3 · Within 30 s the engine shows the new badge on a matching WEST November row (or the card dealbar). Feed top-level offers include the live public offer. ⚠ UNVERIFIED — EngineOfferResource fields (no `id` / `reference` / `status`).
 
 ## Notes
-Do not tick Festive Expeditions. Do not use a seeded code. Guest context has no staff cookies. If Approve is missing, classify **BUG** (Admin has `offers.approve`). Before any other click on the engine, click `Analytics off` (or set `localStorage['anakata-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.
+Do not tick Festive Expeditions. Do not use a seeded code. Guest context has no staff cookies. If Approve is missing, classify **BUG** (Admin has `offers.approve`). Before any other click on the engine, click `Analytics off` (or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.

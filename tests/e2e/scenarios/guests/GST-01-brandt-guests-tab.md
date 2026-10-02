@@ -8,7 +8,7 @@
 The Brandt booking is the complete-party fixture: a lead, a minor with guardian consent, and derived PNG categories. If the tab invents fees or hides the minor, later extras and Contacts In are reading a lie.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
 2. Open ANK-2026-0005 (The Brandt Family). **Guests** tab.
 
 ## Expected

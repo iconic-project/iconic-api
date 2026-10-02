@@ -10,8 +10,8 @@ The unique active-claim index is the last word. A second Create on a taken cabin
 
 ## Steps
 1. Run `tests/e2e/bin/reset.sh`. In context A, sign in as Carolina. Open `http://localhost:3001/rms/reservations/calendar`. Date range **Year 2027**. Confirm ANATIVA Suite 01 on `28 Nov 2027` shows `·` (Available). If it does not, **stop** — the reset did not apply.
-2. Context A: `/rms/reservations/bookings` → `＋ New reservation`. Type CABIN. Guest `E2E First`, email `e2e.bkg05a@anakata.test`, phone `+1 555 0501`, preferred EMAIL, channel D2C / Hotel Booking Engine. Departure `28 Nov 2027` · ANATIVA. 2 adults, Suite 01. Wait until the price box shows `USD 26,600`. Do **not** click Create yet.
-3. Context B (separate browser / private window): sign in as Carolina. Same New reservation, same departure and Suite 01. Guest `E2E Second`, email `e2e.bkg05b@anakata.test`. Price box `USD 26,600`. Click `Create reservation` and wait for the success toast.
+2. Context A: `/rms/reservations/bookings` → `＋ New reservation`. Type CABIN. Guest `E2E First`, email `e2e.bkg05a@iconic.test`, phone `+1 555 0501`, preferred EMAIL, channel D2C / Hotel Booking Engine. Departure `28 Nov 2027` · ANATIVA. 2 adults, Suite 01. Wait until the price box shows `USD 26,600`. Do **not** click Create yet.
+3. Context B (separate browser / private window): sign in as Carolina. Same New reservation, same departure and Suite 01. Guest `E2E Second`, email `e2e.bkg05b@iconic.test`. Price box `USD 26,600`. Click `Create reservation` and wait for the success toast.
 4. Context A: click `Create reservation`.
 5. Run `tests/e2e/bin/db-check.sh 'App\Models\Booking::query()->whereDate("created_at", now())->whereHas("cabin", fn ($q) => $q->where("code", "S1"))->whereHas("departure", fn ($q) => $q->where("date", "2027-11-28")->whereHas("yacht", fn ($y) => $y->where("code", "ANATIVA")))->count()'`.
 

@@ -169,7 +169,7 @@ final class IssueCharterProposal extends Action
                 $document->save();
 
                 $token = bin2hex(random_bytes(32));
-                $pageUrl = rtrim((string) config('anakata.engine_url'), '/').'/charter-proposal/'.$token;
+                $pageUrl = rtrim((string) config('iconic.engine_url'), '/').'/charter-proposal/'.$token;
 
                 BookingAccessToken::query()->create([
                     'booking_id' => null,
@@ -223,7 +223,7 @@ final class IssueCharterProposal extends Action
                 'idempotency_key' => $key,
                 'to' => [],
                 'cc' => [],
-                'subject' => 'Your Anakata charter proposal',
+                'subject' => 'Your Iconic charter proposal',
                 'status' => DeliveryStatus::Blocked,
                 'blocked_reason' => 'No email address on the contact',
                 'triggered_by' => DeliveryTriggeredBy::System,
@@ -238,7 +238,7 @@ final class IssueCharterProposal extends Action
             'idempotency_key' => $key,
             'to' => [$email],
             'cc' => [],
-            'subject' => 'Your Anakata charter proposal',
+            'subject' => 'Your Iconic charter proposal',
             'status' => DeliveryStatus::Queued,
             'triggered_by' => DeliveryTriggeredBy::System,
         ]);

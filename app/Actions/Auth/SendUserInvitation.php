@@ -31,7 +31,7 @@ final class SendUserInvitation
             ? $notifiable->getEmailForPasswordReset()
             : (string) $notifiable->email;
 
-        return rtrim((string) config('anakata.panel_url'), '/').'/accept-invitation?'.http_build_query([
+        return rtrim((string) config('iconic.panel_url'), '/').'/accept-invitation?'.http_build_query([
             'token' => $token,
             'email' => $email,
         ]);

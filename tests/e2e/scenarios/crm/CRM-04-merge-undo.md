@@ -8,7 +8,7 @@
 A merge must move every booking, request, waitlist entry and event onto the older contact, keep the old id as an alias, and undo within 30 days must restore exactly what moved.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/crm/sales/contacts`. Confirm **Possible duplicates** is absent.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/crm/sales/contacts`. Confirm **Possible duplicates** is absent.
 2. Search `Whitfield`. Open **Anna Whitfield**. Under **Edit**, set Phone to `+1 650 253 0000` and Country to `US`. `Save`. Record the contact id from the header (`contact_id {id}`).
 3. Search `Osei`. Open **K. Osei**. Set the same phone and country. `Save`. Record that id.
 4. Close the drawer (or reload `/crm/sales/contacts`). Read **Possible duplicates**.
@@ -25,7 +25,7 @@ A merge must move every booking, request, waitlist entry and event onto the olde
 - [ ] E5 · Undo reason required. Hint: `Recorded rows return to the contact they left if they still point at the survivor.` Toast `Merge undone`. K. Osei is back on the list. The loser’s waitlist row points at the restored contact.
 
 ## Cross-checks
-- After merge: `bin/db-check.sh 'App\Models\Contact::query()->where("email","k.osei@anakata.test")->value("merged_into_id")'` → the survivor id (not null).
+- After merge: `bin/db-check.sh 'App\Models\Contact::query()->where("email","k.osei@iconic.test")->value("merged_into_id")'` → the survivor id (not null).
 - After undo: that `merged_into_id` is null again.
 
 ## Notes

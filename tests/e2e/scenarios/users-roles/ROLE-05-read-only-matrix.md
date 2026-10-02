@@ -10,7 +10,7 @@
 
 ## Steps
 1. As Carolina, create role `Users only`. Grant `panel.rms` and `users.manage` only. Save.
-2. Invite `usersonly@anakata.test`, name `Users Only`, role `Users only`. Accept in a fresh context (`Usersonly1`).
+2. Invite `usersonly@iconic.test`, name `Users Only`, role `Users only`. Accept in a fresh context (`Usersonly1`).
 3. As that user, open `/rms/admin/permissions`.
 
 ## Expected

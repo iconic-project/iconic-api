@@ -36,7 +36,7 @@ final class Defaults
     /** @var list<string> */
     public const EXCLUDED = [
         'International & domestic flights · PNG entry fee (paid at SCY airport) · TCT transit card (USD 20)',
-        'Travel insurance — sole responsibility of the passenger; Anakata does not sell or intermediate travel insurance',
+        'Travel insurance — sole responsibility of the passenger; Iconic does not sell or intermediate travel insurance',
         'Spa, premium bar & boutique — arranged with our concierge after booking',
     ];
 

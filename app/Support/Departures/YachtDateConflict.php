@@ -15,7 +15,7 @@ final class YachtDateConflict
 {
     public static function sundayMessage(DateTimeInterface $date): string
     {
-        return 'Anakata sails Sunday → Sunday. '.Format::calendar($date).' is not a Sunday.';
+        return 'Iconic sails Sunday → Sunday. '.Format::calendar($date).' is not a Sunday.';
     }
 
     public static function duplicateMessage(string $yachtCode, DateTimeInterface $date, ?string $reference): string

@@ -13,7 +13,7 @@ test('create-admin invites an admin and prints the panel link', function (): voi
     $this->seed(RolesSeeder::class);
     Notification::fake();
 
-    $this->artisan('anakata:create-admin', [
+    $this->artisan('iconic:create-admin', [
         'email' => 'You@Example.com',
         'name' => 'You',
     ])
@@ -42,7 +42,7 @@ test('create-admin refuses a duplicate email', function (): void {
 
     User::factory()->create(['email' => 'you@example.com']);
 
-    $this->artisan('anakata:create-admin', [
+    $this->artisan('iconic:create-admin', [
         'email' => 'you@example.com',
         'name' => 'You',
     ])

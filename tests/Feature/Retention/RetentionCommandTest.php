@@ -73,17 +73,17 @@ test('passports are purged the day after the 29 February overflow boundary', fun
     ]);
 
     $this->travelTo(CarbonImmutable::parse('2030-02-27 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
     $guest->refresh();
     expect($guest->passport_no)->toBe('C4F7K2L9M');
 
     $this->travelTo(CarbonImmutable::parse('2030-02-28 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
     $guest->refresh();
     expect($guest->passport_no)->toBe('C4F7K2L9M');
 
     $this->travelTo(CarbonImmutable::parse('2030-03-01 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
     $guest->refresh();
     expect($guest->passport_no)->toBeNull();
     expect($guest->passport_expiry)->toBeNull();
@@ -107,17 +107,17 @@ test('notes are purged the day after the 90-day boundary', function (): void {
     ]);
 
     $this->travelTo(CarbonImmutable::parse('2028-05-28 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
     $guest->refresh();
     expect($guest->medical_note)->toBe('penicillin');
 
     $this->travelTo(CarbonImmutable::parse('2028-05-29 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
     $guest->refresh();
     expect($guest->medical_note)->toBe('penicillin');
 
     $this->travelTo(CarbonImmutable::parse('2028-05-30 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
     $guest->refresh();
     expect($guest->medical_note)->toBeNull();
     expect($guest->dietary_note)->toBeNull();
@@ -136,8 +136,8 @@ test('a second run the same day writes nothing', function (): void {
     retentionGuest($booking);
 
     $this->travelTo(CarbonImmutable::parse('2030-03-01 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
+    Artisan::call('iconic:retention');
 
     expect(ChangeHistory::query()->where('event', 'retention.applied')->where('subject_id', $booking->id)->count())->toBe(1);
 });
@@ -147,7 +147,7 @@ test('dry-run prints counts and writes nothing', function (): void {
     $guest = retentionGuest($booking);
 
     $this->travelTo(CarbonImmutable::parse('2030-03-01 12:00:00', BusinessTime::zone()));
-    $this->artisan('anakata:retention', ['--dry-run' => true])
+    $this->artisan('iconic:retention', ['--dry-run' => true])
         ->assertSuccessful()
         ->expectsOutputToContain('Would change');
 
@@ -163,7 +163,7 @@ test('a soft-deleted booking is still purged', function (): void {
     $booking->delete();
 
     $this->travelTo(CarbonImmutable::parse('2030-03-01 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
 
     $guest->refresh();
     expect($guest->passport_no)->toBeNull();
@@ -192,7 +192,7 @@ test('preferences are purged on the medical date and leave no answer text', func
     );
 
     $this->travelTo(CarbonImmutable::parse('2028-05-29 12:00:00', BusinessTime::zone()));
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
 
     $row = GuestPreference::query()->where('guest_id', $guest->id)->first();
     expect($row)->not->toBeNull();
@@ -201,13 +201,13 @@ test('preferences are purged on the medical date and leave no answer text', func
     expect($row?->purged_at)->toBeNull();
 
     $this->travelTo(CarbonImmutable::parse('2028-05-30 12:00:00', BusinessTime::zone()));
-    $this->artisan('anakata:retention', ['--dry-run' => true])->assertSuccessful();
+    $this->artisan('iconic:retention', ['--dry-run' => true])->assertSuccessful();
 
     $row = GuestPreference::query()->where('guest_id', $guest->id)->first();
     expect($row?->answers['diet'] ?? null)->toBe($diet);
     expect($row?->purged_at)->toBeNull();
 
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
 
     $row = GuestPreference::query()->where('guest_id', $guest->id)->first();
     expect($row)->not->toBeNull();
@@ -233,7 +233,7 @@ test('preferences are purged on the medical date and leave no answer text', func
 test('the retention command is scheduled daily in Galapagos time', function (): void {
     $events = collect(app(Schedule::class)->events());
     $event = $events->first(
-        fn ($scheduled): bool => str_contains((string) ($scheduled->command ?? ''), 'anakata:retention'),
+        fn ($scheduled): bool => str_contains((string) ($scheduled->command ?? ''), 'iconic:retention'),
     );
 
     expect($event)->not->toBeNull();

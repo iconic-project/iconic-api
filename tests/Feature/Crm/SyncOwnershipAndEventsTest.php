@@ -77,8 +77,8 @@ test('the event catalogue lists every domain event and behavioural name', functi
 
 test('identity lists the merge log', function (): void {
     $actor = managerUser();
-    $survivor = Contact::factory()->create(['email' => 'keep@anakata.test']);
-    $loser = Contact::factory()->create(['email' => 'drop@anakata.test']);
+    $survivor = Contact::factory()->create(['email' => 'keep@iconic.test']);
+    $loser = Contact::factory()->create(['email' => 'drop@iconic.test']);
 
     $this->actingAs($actor)
         ->postJson('/api/crm/contacts/'.$survivor->id.'/merge', [

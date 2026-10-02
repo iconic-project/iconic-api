@@ -9,7 +9,7 @@ The waitlist is its own table (G7), FIFO per departure + category. Notify is man
 
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/rms/operations/holds`. Date range **All dates**. Read **Waitlist**.
-2. `＋ Add to waitlist`. Departure `19 Dec 2027` · ANAMARA (festive / FULL). Cabin type **Suite**. Contact `E2E Waitlist`, email `e2e.bkg11@anakata.test`. `Add to waitlist`.
+2. `＋ Add to waitlist`. Departure `19 Dec 2027` · ANAMARA (festive / FULL). Cabin type **Suite**. Contact `E2E Waitlist`, email `e2e.bkg11@iconic.test`. `Add to waitlist`.
 3. On Anna Whitfield click `Mark notified`. Channel **EMAIL**. Submit `Mark notified`.
 4. On the new Suite row click `Remove`. Confirm `Remove from waitlist`.
 

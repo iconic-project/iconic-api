@@ -10,16 +10,16 @@ Forgot-password must not enumerate emails, and the new password (D1a: 8+ charact
 
 ## Steps
 1. Open `http://localhost:3001/forgot-password`.
-2. Enter `nobody@anakata.test`. Click `Send reset link`. Note the confirmation.
-3. Enter `carolina@anakata.test`. Click `Send reset link`. Note the confirmation (must match step 2).
-4. Run `tests/e2e/bin/mail-latest.sh carolina@anakata.test`. Open the `http://localhost:3001/reset-password?…` link in a fresh context.
+2. Enter `nobody@iconic.test`. Click `Send reset link`. Note the confirmation.
+3. Enter `carolina@iconic.test`. Click `Send reset link`. Note the confirmation (must match step 2).
+4. Run `tests/e2e/bin/mail-latest.sh carolina@iconic.test`. Open the `http://localhost:3001/reset-password?…` link in a fresh context.
 5. Set password `Newpass1` and confirm. Click `Reset password`.
-6. On `/login`, sign in as `carolina@anakata.test` / `password` (the old one).
-7. Sign in as `carolina@anakata.test` / `Newpass1`.
+6. On `/login`, sign in as `carolina@iconic.test` / `password` (the old one).
+7. Sign in as `carolina@iconic.test` / `Newpass1`.
 
 ## Expected
 - [ ] E1 · After every submit the notice is `If that email is on an account, we sent a reset link.` (unknown and known emails identical). Title is `Forgot password`. Link `Back to sign in` is present.
-- [ ] E2 · Mailpit subject is `Reset your Anakata password`. The reset URL is `/reset-password` with `token` and `email` query params.
+- [ ] E2 · Mailpit subject is `Reset your Iconic password`. The reset URL is `/reset-password` with `token` and `email` query params.
 - [ ] E3 · Reset page title is `Reset password`. Hint reads `At least 8 characters.` Fields: `Password`, `Confirm password`. Button: `Reset password`.
 - [ ] E4 · After reset, URL is `/login?notice=password-changed` and the notice is `Password changed`. You are signed out.
 - [ ] E5 · Old password `password` shows `These credentials do not match our records.`

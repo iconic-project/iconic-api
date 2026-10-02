@@ -40,14 +40,14 @@ test('a fully paid booking boards on the galapagos departure date and not before
     Carbon::setTestNow(Carbon::parse('2026-06-07 05:30:00', 'UTC'));
     expect(BusinessTime::now()->toDateString())->toBe('2026-06-06');
 
-    Artisan::call('anakata:voyage-status');
+    Artisan::call('iconic:voyage-status');
     expect($booking->fresh()?->status)->toBe(BookingStatus::FullyPaid);
 
     Carbon::setTestNow(Carbon::parse('2026-06-07 06:30:00', 'UTC'));
     expect(BusinessTime::now()->toDateString())->toBe('2026-06-07');
 
-    Artisan::call('anakata:voyage-status');
-    Artisan::call('anakata:voyage-status');
+    Artisan::call('iconic:voyage-status');
+    Artisan::call('iconic:voyage-status');
 
     expect($booking->fresh()?->status)->toBe(BookingStatus::OnBoard);
     expect(statusHistory($booking))->toHaveCount(1)
@@ -70,7 +70,7 @@ test('a charter follows the same departure-date move', function (): void {
         'reference' => 'ANK-2026-6112',
     ]);
 
-    Artisan::call('anakata:voyage-status');
+    Artisan::call('iconic:voyage-status');
 
     expect($booking->fresh()?->status)->toBe(BookingStatus::OnBoard)
         ->and(statusHistory($booking)->first()?->actor_label)->toBe(VoyageStatus::ACTOR);
@@ -85,8 +85,8 @@ test('a missed stretch catches up to completed in one run', function (): void {
         'reference' => 'ANK-2026-0104',
     ]);
 
-    Artisan::call('anakata:voyage-status');
-    Artisan::call('anakata:voyage-status');
+    Artisan::call('iconic:voyage-status');
+    Artisan::call('iconic:voyage-status');
 
     $history = statusHistory($booking);
 
@@ -113,8 +113,8 @@ test('confirmed and on hold agency bookings at departure are not moved', functio
         'reference' => 'ANK-2026-'.$status->value,
     ]);
 
-    Artisan::call('anakata:voyage-status');
-    Artisan::call('anakata:voyage-status');
+    Artisan::call('iconic:voyage-status');
+    Artisan::call('iconic:voyage-status');
 
     $alert = Alert::query()->where('base_key', AlertKeys::confirmedAtDeparture($booking->id))->first();
 

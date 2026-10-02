@@ -113,6 +113,6 @@ final class DemoDocumentsSeeder extends Seeder
             }
         }
 
-        return ['seed@anakata.test'];
+        return ['seed@iconic.test'];
     }
 }

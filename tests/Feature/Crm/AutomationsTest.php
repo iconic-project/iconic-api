@@ -196,8 +196,8 @@ test('a disabled balance reminder is not sent and the overdue flag alert and tas
         'cabin_code' => 'S3',
         'departure' => ReservationFixtures::anamaraDeparture('2029-01-07'),
     ]);
-    Artisan::call('anakata:flag-overdue');
-    Artisan::call('anakata:crm-tasks');
+    Artisan::call('iconic:flag-overdue');
+    Artisan::call('iconic:crm-tasks');
 
     expect(ChangeHistory::query()->where('subject_id', $overdue->id)->where('event', 'booking.overdue_flagged')->exists())->toBeTrue()
         ->and(Alert::query()->where('kind', AlertKind::OverdueBalance)->where('booking_id', $overdue->id)->exists())->toBeTrue()
@@ -221,7 +221,7 @@ test('a disabled balance reminder is not sent and the overdue flag alert and tas
     ]);
 
     CarbonImmutable::setTestNow(BusinessTime::calendarDay('2028-05-11')->setTime(12, 0));
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
 
     $blocked = Delivery::query()->where('booking_id', $booking->id)->where('kind', DeliveryKind::Reminder)->first();
 
@@ -235,13 +235,13 @@ test('a disabled balance reminder is not sent and the overdue flag alert and tas
     expect(ChangeHistory::query()->where('event', 'automation.disabled')->where('reason', $reason)->exists())->toBeTrue()
         ->and(ChangeHistory::query()->where('subject_type', 'booking')->where('subject_id', $booking->id)->where('event', 'automation.skipped')->where('reason', $reason)->exists())->toBeTrue();
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('kind', AlertKind::DeliveryFailed)->count())->toBe(0)
         ->and(Alert::query()->where('kind', AlertKind::OverdueBalance)->where('booking_id', $overdue->id)->exists())->toBeTrue();
 
     CarbonImmutable::setTestNow(BusinessTime::calendarDay('2028-05-25')->setTime(12, 0));
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
 
     Mail::assertSent(ReminderMail::class, fn (ReminderMail $mail): bool => $mail->days === 7);
     expect(Delivery::query()->where('booking_id', $booking->id)->where('kind', DeliveryKind::Reminder)->where('status', DeliveryStatus::Sent)->count())->toBe(1);
@@ -264,7 +264,7 @@ test('switching off the pre-trip email still issues the document', function (): 
     ]);
 
     CarbonImmutable::setTestNow(BusinessTime::calendarDay('2028-07-21')->setTime(12, 0));
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
 
     $delivery = Delivery::query()->where('booking_id', $booking->id)->where('kind', DeliveryKind::Pretrip)->first();
 
@@ -340,7 +340,7 @@ test('a forced-off data chaser and a forced-off critical alert still send', func
     expect(Delivery::query()->where('kind', DeliveryKind::DataChaser)->value('status'))->toBe(DeliveryStatus::Sent);
     Mail::assertSent(DataChaserMail::class);
 
-    $recipient = adminUser(['email' => 'automation-alert@anakata.test']);
+    $recipient = adminUser(['email' => 'automation-alert@iconic.test']);
     $overdue = overdueCabin([
         'reference' => 'ANK-2026-1418',
         'cabin_code' => 'S1',
@@ -356,7 +356,7 @@ test('a forced-off data chaser and a forced-off critical alert still send', func
         'sentence' => 'Still emailed.',
     ]);
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     Mail::assertSent(AlertMail::class, fn (AlertMail $mail): bool => $mail->hasTo($recipient->email));
     expect($alert->fresh()?->emailed_at)->not->toBeNull();

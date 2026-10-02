@@ -8,7 +8,7 @@
 Cancel-per-policy on an overdue booking that has a settled deposit must free the cabin and queue a refund at the right band. Automation never cancels (OPS-007).
 
 ## Steps
-1. From `anakata-api`: `docker compose exec app sh -c "php artisan anakata:set-overdue-fixture"`.
+1. From `iconic-api`: `docker compose exec app sh -c "php artisan iconic:set-overdue-fixture"`.
 2. Sign in as Carolina. Open `http://localhost:3001/rms/reservations/bookings`. Open ANK-2026-0018. Confirm it is OVERDUE.
 3. Click `Cancel per policy`. Modal title `Cancel per policy (OPS-007)`. The hint is `Penalty computed, refund request queued for Director approval, cabin released.` Reason `E2E OPS-007 cancel 0018`. `Record`.
 4. Open Calendar Year 2027, ANAMARA Suite 02 on `12 Dec 2027`. Open `/rms/operations/refunds`.

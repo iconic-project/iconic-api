@@ -61,7 +61,7 @@ final class FakeStripeGateway implements StripeGateway
         $this->checkoutSequence++;
         $id = 'cs_test_'.str_pad((string) $this->checkoutSequence, 3, '0', STR_PAD_LEFT);
         $expires = CarbonImmutable::instance($expiresAt)->utc();
-        $engineUrl = rtrim((string) config('anakata.engine_url'), '/');
+        $engineUrl = rtrim((string) config('iconic.engine_url'), '/');
         $this->lastSuccessUrl = $engineUrl.'/book/confirmation?session_id={CHECKOUT_SESSION_ID}';
         $this->lastCancelUrl = $engineUrl.'/book/details?cancelled=1';
         $created = new CreatedCheckoutSession($id, 'https://checkout.stripe.com/c/pay/'.$id, $expires);

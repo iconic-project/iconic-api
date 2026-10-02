@@ -20,4 +20,4 @@ One list of every automatic message. A row that does not send yet must say so.
 - [ ] E4 · Welcome — partner approved shows `The rule behind this message must not depend on a switch.` and has no toggle.
 
 ## Notes
-Section headings come from `section_label` (`a · Lead capture & welcome` through `g · Internal alerts — Anakata team`). Do not invent a section that is not on the page.
+Section headings come from `section_label` (`a · Lead capture & welcome` through `g · Internal alerts — Iconic team`). Do not invent a section that is not on the page.

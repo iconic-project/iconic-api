@@ -97,7 +97,7 @@ test('a promo code applies only when the code is given and is case-insensitive',
     $departure->save();
 
     Offer::factory()->live()->promo()->create([
-        'code' => 'ANAKATA10',
+        'code' => 'ICONIC10',
         'type' => OfferType::Percent,
         'value' => 10,
         'itinerary_codes' => ['WEST'],
@@ -106,9 +106,9 @@ test('a promo code applies only when the code is given and is case-insensitive',
 
     expect(Offer::applicableTo($departure, CabinCategory::Suite, BookingSegment::D2C, '2027-06-15'))->toBeEmpty();
 
-    $hits = Offer::applicableTo($departure, CabinCategory::Suite, BookingSegment::D2C, '2027-06-15', 'anakata10');
+    $hits = Offer::applicableTo($departure, CabinCategory::Suite, BookingSegment::D2C, '2027-06-15', 'iconic10');
 
-    expect($hits->pluck('code')->all())->toBe(['ANAKATA10']);
+    expect($hits->pluck('code')->all())->toBe(['ICONIC10']);
 });
 
 test('all-channel offers match both d2c and b2b', function (): void {

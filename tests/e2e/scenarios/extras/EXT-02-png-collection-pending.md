@@ -9,7 +9,7 @@ Fee collection is a per-booking choice (I10). Pending PNG (missing DOB or nation
 
 ## Steps
 1. Sign in as Carolina. Open ANK-2026-0014. **Extras** tab. Read the PNG checkbox sentence (unchecked).
-2. Tick `Guest pays the PNG park entry fee to Anakata …`. Wait for toast. The panel lands on Overview — read Galápagos fees, Charges total, Balance, Deposit, extras-due line.
+2. Tick `Guest pays the PNG park entry fee to Iconic …`. Wait for toast. The panel lands on Overview — read Galápagos fees, Charges total, Balance, Deposit, extras-due line.
 
 ## Expected
 - [ ] E1 · Unchecked sentence includes `USD 200` (Robert’s stored foreign-adult fee), `Unchecked = paid directly at SCY airport on arrival`, and `1 guests pending data` (empty Guest 2). ⚠ UNVERIFIED — task 08 browser (`feeLabel` wording).

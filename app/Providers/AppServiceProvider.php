@@ -101,7 +101,7 @@ use App\Support\Iso;
 use App\Support\Mail\GraphMailbox;
 use App\Support\Mail\MailboxReader;
 use App\Support\Mail\MailpitMailbox;
-use App\Support\Schedule\AnakataSchedule;
+use App\Support\Schedule\IconicSchedule;
 use App\Support\Stripe\StripeGatewayBinding;
 use DateTimeInterface;
 use Illuminate\Auth\Notifications\ResetPassword;
@@ -130,7 +130,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(CurrentConfig::class);
         $this->app->bind(MailboxReader::class, function (Application $app): MailboxReader {
-            if (config('anakata.inbox.driver') === 'graph') {
+            if (config('iconic.inbox.driver') === 'graph') {
                 return $app->make(GraphMailbox::class);
             }
 
@@ -223,7 +223,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         ResetPassword::createUrlUsing(function (User $notifiable, string $token): string {
-            return rtrim((string) config('anakata.panel_url'), '/').'/reset-password?'.http_build_query([
+            return rtrim((string) config('iconic.panel_url'), '/').'/reset-password?'.http_build_query([
                 'token' => $token,
                 'email' => $notifiable->getEmailForPasswordReset(),
             ]);
@@ -349,11 +349,11 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(BookingChargesChanged::class, SendOnBookingChargesChanged::class);
 
         $this->app->afterResolving(Schedule::class, function (Schedule $schedule): void {
-            AnakataSchedule::register($schedule);
+            IconicSchedule::register($schedule);
         });
 
         if ($this->app->resolved(Schedule::class)) {
-            AnakataSchedule::register($this->app->make(Schedule::class));
+            IconicSchedule::register($this->app->make(Schedule::class));
         }
 
         if ($this->app->runningUnitTests()) {

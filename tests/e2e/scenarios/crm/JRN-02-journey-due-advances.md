@@ -23,4 +23,4 @@ The runner sends a step only when it is due. The send stores the published templ
 - `bin/db-check.sh 'App\Models\JourneySend::query()->where("template_key","deposit_link")->where("journey_enrolment_id", <id>)->value("template_version")'` → `1`. Approval on that published version is `Sprint 14: initial journey template`.
 
 ## Notes
-One `journey-due` runs `anakata:journeys` once. The day-1 send is not due after the task until the helper moves `next_due_at` again.
+One `journey-due` runs `iconic:journeys` once. The day-1 send is not due after the task until the helper moves `next_due_at` again.

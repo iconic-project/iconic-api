@@ -9,7 +9,7 @@
 The panel must look like `prototype/rms_index.html`. Deliberate deviations already listed in sprint reports are notes, not failures.
 
 ## Steps
-1. From `anakata-api`, serve the prototype:
+1. From `iconic-api`, serve the prototype:
    `python3 -m http.server 8090 --directory docs/requirements/prototype`
 2. Open `http://localhost:8090/rms_index.html` (screens `v-rates`, `v-eset`, `v-rules`, and the permissions/matrix views if present).
 3. As Carolina, open in the panel: `/rms/commercial/rates`, `/rms/booking-engine/settings`, `/rms/admin/business-rules`, `/rms/admin/permissions`.

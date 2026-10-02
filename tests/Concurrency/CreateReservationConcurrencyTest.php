@@ -118,7 +118,7 @@ test('two creates on the same cabin: second is 409 after the first commits', fun
     try {
         app(CreateReservation::class)->handle(
             ReservationFixtures::createPayload($departure, [
-                'client' => ['name' => 'Second', 'email' => 'second@anakata.test'],
+                'client' => ['name' => 'Second', 'email' => 'second@iconic.test'],
             ]),
             $actor,
         );

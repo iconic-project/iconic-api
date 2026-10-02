@@ -25,10 +25,10 @@ class MessageTemplatesSeeder extends Seeder
      * @var array<string, string>
      */
     private const SUBJECTS = [
-        'welcome_web_lead' => 'Your Galápagos adventure begins here — Anakata',
+        'welcome_web_lead' => 'Your Galápagos adventure begins here — Iconic',
         'request_acknowledgement' => 'We have received your booking — {{booking_reference}}',
         'deposit_link' => 'Complete your reservation — {{booking_reference}}',
-        'extras_offer' => 'Curated additions to your Galápagos expedition — Anakata',
+        'extras_offer' => 'Curated additions to your Galápagos expedition — Iconic',
         'extras_closing' => 'Last call for additions — {{booking_reference}}',
         'questionnaire_reminder' => '14 days to go — complete your questionnaire',
         'arrival_instructions' => 'Almost time! Final instructions for your arrival in San Cristóbal',

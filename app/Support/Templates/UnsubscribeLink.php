@@ -15,6 +15,6 @@ final class UnsubscribeLink
 
     public static function for(Contact $contact): string
     {
-        return rtrim((string) config('anakata.engine_url'), '/').'/unsubscribe/'.self::token($contact);
+        return rtrim((string) config('iconic.engine_url'), '/').'/unsubscribe/'.self::token($contact);
     }
 }

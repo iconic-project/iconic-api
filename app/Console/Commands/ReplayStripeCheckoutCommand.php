@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 
 final class ReplayStripeCheckoutCommand extends Command
 {
-    protected $signature = 'anakata:replay-stripe-checkout
+    protected $signature = 'iconic:replay-stripe-checkout
         {reference : Booking or request reference}
         {--expired : Replay checkout.session.expired for an engine Checkout Session}';
 
@@ -30,7 +30,7 @@ final class ReplayStripeCheckoutCommand extends Command
     public function handle(): int
     {
         if (! app()->environment(['local', 'testing'])) {
-            $this->error('anakata:replay-stripe-checkout only runs in local and testing.');
+            $this->error('iconic:replay-stripe-checkout only runs in local and testing.');
 
             return self::FAILURE;
         }

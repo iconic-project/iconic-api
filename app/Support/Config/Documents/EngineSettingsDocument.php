@@ -97,7 +97,7 @@ final class EngineSettingsDocument extends ConfigDocument
                 'traveling_with_children' => 'A 15% discount applies to children aged 6–17. One discount per adult, maximum two per couple. Not available on festive departures.',
                 'solo_and_triple' => 'Single occupancy +75% ppdo · triple sharing −10% ppdo. Shown live in the next step.',
                 'pay_today' => 'We will hold your cabins for you, obligation-free. Our team confirms availability and sends your deposit link (10%) — nothing is charged until you decide.',
-                'details_note' => 'Full guest details (passports, dietary preferences) and payment are arranged after we confirm your cabins — no card is required today. Travel insurance is the sole responsibility of the passenger. Anakata does not sell or intermediate travel insurance.',
+                'details_note' => 'Full guest details (passports, dietary preferences) and payment are arranged after we confirm your cabins — no card is required today. Travel insurance is the sole responsibility of the passenger. Iconic does not sell or intermediate travel insurance.',
                 'confirmation_steps' => [
                     'Within 24 hours a member of our team confirms your cabins and answers any questions — by your preferred channel.',
                     'You receive your booking confirmation and deposit link (10%). Your cabins stay held while you decide, per our hold policy.',

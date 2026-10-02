@@ -12,7 +12,7 @@ Portal lists are already this agency's rows, so the pay button is not offered fo
 1. Sign in as Ada at `http://localhost:3002/login`.
 2. Open `http://localhost:3002/bookings` and `http://localhost:3002/requests`. Search the page for `ANK-2026-0021`.
 3. With Ada's portal session, `POST /api/portal/bookings/{id}/payment-link` with body `{ "kind": "DEPOSIT" }`, where `{id}` is the booking id of `ANK-2026-0021`.
-4. From `anakata-api` run `tests/e2e/bin/setup.sh portal-pay ANK-2026-0021 DEPOSIT`.
+4. From `iconic-api` run `tests/e2e/bin/setup.sh portal-pay ANK-2026-0021 DEPOSIT`.
 
 ## Expected
 - [ ] E1 · Neither list shows `ANK-2026-0021`. No **Pay deposit** and no **Pay balance** control exists for that booking.

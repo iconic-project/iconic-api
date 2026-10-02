@@ -8,6 +8,6 @@
         <tr><td>Transfer</td><td>{{ $snapshot['transfer'] ?? '' }}</td></tr>
         <tr><td>Services</td><td>{{ implode(' · ', $snapshot['services'] ?? []) }}</td></tr>
     </table>
-    <div class="dnote" style="margin-top:12px">Present this voucher to the Anakata ground team on arrival.</div>
-    <div class="dfoot">ANAKATA · {{ $snapshot['footer']['email'] ?? '' }}</div>
+    <div class="dnote" style="margin-top:12px">Present this voucher to the Iconic ground team on arrival.</div>
+    <div class="dfoot">ICONIC · {{ $snapshot['footer']['email'] ?? '' }}</div>
 @endsection

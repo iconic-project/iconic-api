@@ -58,18 +58,18 @@ function engineLivePercent(array $overrides = []): Offer
     ], $overrides));
 }
 
-function engineAnakata10(): Offer
+function engineIconic10(): Offer
 {
     return Offer::factory()->live()->promo()->create([
-        'code' => 'ANAKATA10',
-        'name' => 'Anakata welcome',
+        'code' => 'ICONIC10',
+        'name' => 'Iconic welcome',
         'type' => OfferType::Percent,
         'value' => 10,
         'channel' => OfferChannel::D2C,
         'cabin_types' => [CabinCategory::Suite->value],
         'itinerary_codes' => ['WEST'],
         'combinable' => true,
-        'price_line' => 'Anakata welcome −10%',
+        'price_line' => 'Iconic welcome −10%',
     ]);
 }
 
@@ -93,23 +93,23 @@ function promoPayload(Departure $departure, string $code, array $cabins): array
 test('a valid promo returns the line and applies_to from the quote', function (): void {
     $departure = engineWestDeparture();
     engineLivePercent();
-    engineAnakata10();
+    engineIconic10();
 
-    $this->postJson('/api/engine/promo/check', promoPayload($departure, 'ANAKATA10', [
+    $this->postJson('/api/engine/promo/check', promoPayload($departure, 'ICONIC10', [
         ['cabin_code' => 'Suite 01', 'adults' => 2, 'children' => 0],
     ]))
         ->assertOk()
         ->assertJsonPath('valid', true)
         ->assertJsonPath('reason', null)
-        ->assertJsonPath('line', 'Anakata welcome −10%')
+        ->assertJsonPath('line', 'Iconic welcome −10%')
         ->assertJsonPath('applies_to', ['Suite 01']);
 });
 
 test('a suite-only code on suite plus owner is valid only for the suite', function (): void {
     $departure = engineWestDeparture();
-    engineAnakata10();
+    engineIconic10();
 
-    $this->postJson('/api/engine/promo/check', promoPayload($departure, 'ANAKATA10', [
+    $this->postJson('/api/engine/promo/check', promoPayload($departure, 'ICONIC10', [
         ['cabin_code' => 'Suite 01', 'adults' => 2, 'children' => 0],
         ['cabin_code' => "Owner's Suite", 'adults' => 2, 'children' => 0],
     ]))
@@ -123,20 +123,20 @@ test('a suite-only code on suite plus owner is valid only for the suite', functi
             ['cabin_code' => 'Suite 01', 'adults' => 2, 'children' => 0],
             ['cabin_code' => "Owner's Suite", 'adults' => 2, 'children' => 0],
         ],
-        'promo_code' => 'ANAKATA10',
+        'promo_code' => 'ICONIC10',
     ])->assertOk()->json();
 
     $suiteLines = collect($quote['cabins'][0]['quote']['lines'] ?? [])->pluck('code');
     $ownerLines = collect($quote['cabins'][1]['quote']['lines'] ?? [])->pluck('code');
 
-    expect($suiteLines)->toContain('ANAKATA10');
-    expect($ownerLines)->not->toContain('ANAKATA10');
+    expect($suiteLines)->toContain('ICONIC10');
+    expect($ownerLines)->not->toContain('ICONIC10');
 });
 
 test('an unknown code and a festive departure use the prototype reasons', function (): void {
     $departure = engineWestDeparture();
     $festive = engineWestDeparture('2027-12-19', true);
-    engineAnakata10();
+    engineIconic10();
 
     Log::spy();
 
@@ -159,7 +159,7 @@ test('an unknown code and a festive departure use the prototype reasons', functi
             && ! in_array('NOPE', $context, true);
     });
 
-    $this->postJson('/api/engine/promo/check', promoPayload($festive, 'ANAKATA10', [
+    $this->postJson('/api/engine/promo/check', promoPayload($festive, 'ICONIC10', [
         ['cabin_code' => 'S1', 'adults' => 2, 'children' => 0],
     ]))
         ->assertOk()
@@ -170,12 +170,12 @@ test('an unknown code and a festive departure use the prototype reasons', functi
 test('the engine quote matches the walkthrough totals', function (): void {
     $departure = engineWestDeparture();
     engineLivePercent();
-    engineAnakata10();
+    engineIconic10();
 
     $later = $this->postJson('/api/engine/quote', [
         'departure_id' => $departure->id,
         'cabins' => [['cabin_code' => 'S1', 'adults' => 2, 'children' => 0]],
-        'promo_code' => 'ANAKATA10',
+        'promo_code' => 'ICONIC10',
     ])->assertOk()->json();
 
     expect($later['total'])->toBe(21067);
@@ -184,7 +184,7 @@ test('the engine quote matches the walkthrough totals', function (): void {
     $online = $this->postJson('/api/engine/quote', [
         'departure_id' => $departure->id,
         'cabins' => [['cabin_code' => 'Suite 01', 'adults' => 2, 'children' => 0]],
-        'promo_code' => 'ANAKATA10',
+        'promo_code' => 'ICONIC10',
         'online_deposit' => true,
     ])->assertOk()->json();
 

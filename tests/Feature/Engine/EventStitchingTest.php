@@ -76,7 +76,7 @@ test('a second contact on the same session does not rewrite the first', function
     $departure = checkoutWestDeparture();
     $first = engineWaitlistPayload($departure->id, [
         'session_id' => $session,
-        'contact' => ['name' => 'First Guest', 'email' => 'first-'.uniqid().'@anakata.test'],
+        'contact' => ['name' => 'First Guest', 'email' => 'first-'.uniqid().'@iconic.test'],
     ]);
     $this->postJson('/api/engine/waitlist', $first)->assertCreated();
     $firstContact = Contact::query()->where('email', $first['contact']['email'])->firstOrFail();
@@ -88,7 +88,7 @@ test('a second contact on the same session does not rewrite the first', function
 
     $second = engineWaitlistPayload($departure->id, [
         'session_id' => $session,
-        'contact' => ['name' => 'Second Guest', 'email' => 'second-'.uniqid().'@anakata.test'],
+        'contact' => ['name' => 'Second Guest', 'email' => 'second-'.uniqid().'@iconic.test'],
     ]);
     $this->postJson('/api/engine/waitlist', $second)->assertCreated();
     $secondContact = Contact::query()->where('email', $second['contact']['email'])->firstOrFail();

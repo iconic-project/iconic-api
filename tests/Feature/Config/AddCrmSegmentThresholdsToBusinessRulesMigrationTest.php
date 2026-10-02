@@ -48,7 +48,7 @@ test('config-verify fails on a latest document missing crm segments, then the mi
     $v1 = insertPreChangeCrmSegments();
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('business_rules v1: crm.segment_high_ltv')
         ->expectsOutputToContain('business_rules v1: crm.segment_mid_ltv');
@@ -73,7 +73,7 @@ test('config-verify fails on a latest document missing crm segments, then the mi
     expect($history)->not->toBeNull();
     expect($history?->actor_label)->toBe('System');
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('business_rules v2: valid');
 });

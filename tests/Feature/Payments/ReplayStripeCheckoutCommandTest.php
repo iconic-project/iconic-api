@@ -26,7 +26,7 @@ test('replay-stripe-checkout settles an open link exactly once when posted twice
         ])
         ->assertCreated();
 
-    $this->artisan('anakata:replay-stripe-checkout', ['reference' => 'ANK-2026-0600'])
+    $this->artisan('iconic:replay-stripe-checkout', ['reference' => 'ANK-2026-0600'])
         ->assertSuccessful();
 
     expect(Payment::query()->where('booking_id', $booking->id)->count())->toBe(1);
@@ -44,7 +44,7 @@ test('replay-stripe-checkout --expired refuses a payment-link booking', function
         ])
         ->assertCreated();
 
-    $this->artisan('anakata:replay-stripe-checkout', [
+    $this->artisan('iconic:replay-stripe-checkout', [
         'reference' => 'ANK-2026-0601',
         '--expired' => true,
     ])->assertFailed();
@@ -55,7 +55,7 @@ test('replay-stripe-checkout refuses in production', function (): void {
     $this->app['env'] = 'production';
 
     try {
-        $this->artisan('anakata:replay-stripe-checkout', ['reference' => 'ANK-2026-0600'])
+        $this->artisan('iconic:replay-stripe-checkout', ['reference' => 'ANK-2026-0600'])
             ->assertFailed();
     } finally {
         $this->app['env'] = $previous;

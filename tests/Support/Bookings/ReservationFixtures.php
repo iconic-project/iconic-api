@@ -65,7 +65,7 @@ final class ReservationFixtures
             ],
             'client' => [
                 'name' => 'Test Guest',
-                'email' => 'guest-'.uniqid().'@anakata.test',
+                'email' => 'guest-'.uniqid().'@iconic.test',
             ],
             'main_channel' => 'D2C',
             'channel_of_origin' => 'Hotel Booking Engine',

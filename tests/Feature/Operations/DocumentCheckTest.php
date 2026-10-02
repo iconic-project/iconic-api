@@ -34,7 +34,7 @@ test('a failed automatic send is re-queued once and a second failure stays faile
         'idempotency_key' => 'invoice:'.$invoice->id,
     ]);
 
-    Artisan::call('anakata:document-check');
+    Artisan::call('iconic:document-check');
 
     expect($delivery->fresh()?->status)->toBe(DeliveryStatus::Queued)
         ->and(Document::query()->count())->toBe(2)
@@ -46,7 +46,7 @@ test('a failed automatic send is re-queued once and a second failure stays faile
     $delivery->error = 'Graph rejection';
     $delivery->save();
 
-    Artisan::call('anakata:document-check');
+    Artisan::call('iconic:document-check');
 
     expect($delivery->fresh()?->status)->toBe(DeliveryStatus::Failed)
         ->and(Document::query()->count())->toBe(2)
@@ -62,7 +62,7 @@ test('a document with no recipient raises delivery failed and does not issue ano
     ]);
     issued($booking, DocumentKind::Invoice, 1);
 
-    Artisan::call('anakata:document-check');
+    Artisan::call('iconic:document-check');
 
     expect(Document::query()->where('booking_id', $booking->id)->count())->toBe(1)
         ->and(Delivery::query()->where('booking_id', $booking->id)->where('status', DeliveryStatus::Blocked)->count())->toBe(1)

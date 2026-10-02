@@ -1,13 +1,13 @@
 services:
   app:
     image: webdevops/php-nginx:8.4-alpine
-    container_name: anakata-api
+    container_name: iconic-api
     environment:
         - WEB_DOCUMENT_ROOT=/app/public
     networks:
       - traefik-network
       - mysql-network
-      - anakata-net
+      - iconic-net
     working_dir: /app
     depends_on:
       mysql:
@@ -23,18 +23,18 @@ services:
       - .docker/nginx-vhost-common.d/sse.conf:/opt/docker/etc/nginx/vhost.common.d/sse.conf
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.anakata-api.rule=Host(`anakata-rms-api.engine-c.com`)"
-      - "traefik.http.routers.anakata-api.entrypoints=web,websecure"
-      - "traefik.http.routers.anakata-api.tls=true"
-      - "traefik.http.routers.anakata-api.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.anakata-api.service=anakata-api"
-      - "traefik.http.services.anakata-api.loadbalancer.server.port=80"
-      - "traefik.http.routers.anakata-ws.rule=Host(`ws.anakata-rms-api.engine-c.com`)"
-      - "traefik.http.routers.anakata-ws.entrypoints=web,websecure"
-      - "traefik.http.routers.anakata-ws.tls=true"
-      - "traefik.http.routers.anakata-ws.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.anakata-ws.service=anakata-ws"
-      - "traefik.http.services.anakata-ws.loadbalancer.server.port=8080"
+      - "traefik.http.routers.iconic-api.rule=Host(`iconic-rms-api.engine-c.com`)"
+      - "traefik.http.routers.iconic-api.entrypoints=web,websecure"
+      - "traefik.http.routers.iconic-api.tls=true"
+      - "traefik.http.routers.iconic-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.iconic-api.service=iconic-api"
+      - "traefik.http.services.iconic-api.loadbalancer.server.port=80"
+      - "traefik.http.routers.iconic-ws.rule=Host(`ws.iconic-rms-api.engine-c.com`)"
+      - "traefik.http.routers.iconic-ws.entrypoints=web,websecure"
+      - "traefik.http.routers.iconic-ws.tls=true"
+      - "traefik.http.routers.iconic-ws.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.iconic-ws.service=iconic-ws"
+      - "traefik.http.services.iconic-ws.loadbalancer.server.port=8080"
       - "traefik.docker.network=traefik-network"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:80"]
@@ -49,7 +49,7 @@ services:
 
   mysql:
     image: mysql:8.4
-    container_name: anakata-mysql
+    container_name: iconic-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_USER: ${MYSQL_USER}
@@ -68,7 +68,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: anakata-redis
+    container_name: iconic-redis
     command: redis-server --save 60 1 --loglevel warning
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -76,11 +76,11 @@ services:
       timeout: 3s
       retries: 10
     networks:
-      - anakata-net
+      - iconic-net
 
   mailpit:
     image: axllent/mailpit:latest
-    container_name: anakata-mailpit
+    container_name: iconic-mailpit
     ports:
       - "8025:8025"
       - "1025:1025"
@@ -91,14 +91,14 @@ services:
       retries: 10
     networks:
       - traefik-network
-      - anakata-net
+      - iconic-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.anakata-mailpit.rule=Host(`anakata-rms-mail.engine-c.com`)"
-      - "traefik.http.routers.anakata-mailpit.entrypoints=web,websecure"
-      - "traefik.http.routers.anakata-mailpit.tls=true"
-      - "traefik.http.routers.anakata-mailpit.tls.certresolver=letsencrypt"
-      - "traefik.http.services.anakata-mailpit.loadbalancer.server.port=8025"
+      - "traefik.http.routers.iconic-mailpit.rule=Host(`iconic-rms-mail.engine-c.com`)"
+      - "traefik.http.routers.iconic-mailpit.entrypoints=web,websecure"
+      - "traefik.http.routers.iconic-mailpit.tls=true"
+      - "traefik.http.routers.iconic-mailpit.tls.certresolver=letsencrypt"
+      - "traefik.http.services.iconic-mailpit.loadbalancer.server.port=8025"
       - "traefik.docker.network=traefik-network"
 
 networks:
@@ -106,7 +106,7 @@ networks:
     external: true
   mysql-network:
     external: true
-  anakata-net:
+  iconic-net:
 
 volumes:
   mysql-data:

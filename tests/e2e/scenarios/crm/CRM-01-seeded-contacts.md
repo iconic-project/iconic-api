@@ -8,7 +8,7 @@
 The CRM list is the people record. If lifecycle, lifetime value, segment or consent are typed by hand or missing after a reset, every later CRM scenario is reading a lie.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/crm/sales/contacts`.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/crm/sales/contacts`.
 2. Read the notice, the column headers, the filter row and the hint under the table.
 3. Confirm **Possible duplicates** is not on the page.
 4. Find **A. Fontaine**. Read lifecycle, LTV, segment, consent and NPS.

@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class DocumentCheckCommand extends Command
 {
-    protected $signature = 'anakata:document-check';
+    protected $signature = 'iconic:document-check';
 
     protected $description = 'Re-queue one failed automatic document send and never issue a new version';
 

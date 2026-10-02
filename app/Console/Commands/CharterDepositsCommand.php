@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class CharterDepositsCommand extends Command
 {
-    protected $signature = 'anakata:charter-deposits';
+    protected $signature = 'iconic:charter-deposits';
 
     protected $description = 'Raise a task and a warning when a charter deposit is past its due date';
 

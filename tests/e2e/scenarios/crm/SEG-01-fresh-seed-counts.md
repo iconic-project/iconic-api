@@ -9,7 +9,7 @@
 A segment is a rule. The number on the card is the same query as the list. Nothing stores a member list.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/crm/marketing/segments`.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/crm/marketing/segments`.
 2. Read the nine cards, in order. Open each card and read the list total.
 
 ## Expected

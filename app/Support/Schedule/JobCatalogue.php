@@ -16,12 +16,12 @@ final class JobCatalogue
         return [
             [
                 'job' => 'Ledger reconcile',
-                'command' => 'anakata:ledger-check',
+                'command' => 'iconic:ledger-check',
                 'sentence' => 'Drift is reported and never corrected.',
             ],
             [
                 'job' => 'Commission leakage scan',
-                'command' => 'anakata:commission-scan',
+                'command' => 'iconic:commission-scan',
                 'sentence' => 'Raises a warning for a trade booking with no agency, an over-cap booking that escaped the hold, or an approved agency with no payment terms.',
             ],
             [
@@ -31,12 +31,12 @@ final class JobCatalogue
             ],
             [
                 'job' => 'Occupancy check',
-                'command' => 'anakata:occupancy-check',
+                'command' => 'iconic:occupancy-check',
                 'sentence' => 'Raises a low-occupancy alert for open departures inside the configured window.',
             ],
             [
                 'job' => 'Document version check',
-                'command' => 'anakata:document-check',
+                'command' => 'iconic:document-check',
                 'sentence' => 'Re-queues one failed automatic send and never issues a new version.',
             ],
             [

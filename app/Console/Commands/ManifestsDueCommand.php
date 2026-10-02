@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class ManifestsDueCommand extends Command
 {
-    protected $signature = 'anakata:manifests-due';
+    protected $signature = 'iconic:manifests-due';
 
     protected $description = 'Issue due manifests, warn on missing passenger data, and chase it once before sailing';
 

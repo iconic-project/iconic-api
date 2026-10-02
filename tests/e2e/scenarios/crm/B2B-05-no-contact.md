@@ -20,8 +20,8 @@ An agency email that matches no contact stays on the list. The page must say why
 - [ ] E4 · The drawer repeats the no-contact sentence. Status stays `PENDING`. Revenue and commission accrued render as money, not empty cells.
 
 ## Cross-checks
-- `bin/db-check.sh 'App\Models\Contact::query()->where("email","nobody-b2b@anakata.test")->exists()'` → false.
-- `bin/db-check.sh 'App\Models\Agency::query()->where("reference","AG-004")->value("email")'` → `nobody-b2b@anakata.test`.
+- `bin/db-check.sh 'App\Models\Contact::query()->where("email","nobody-b2b@iconic.test")->exists()'` → false.
+- `bin/db-check.sh 'App\Models\Agency::query()->where("reference","AG-004")->value("email")'` → `nobody-b2b@iconic.test`.
 
 ## Notes
 `seedUnmatchedAgency()` inserts AG-004 outside the `ResolveContact` loop and does not dispatch `AgencyApproved`. AG-001, AG-002, and AG-003 are the matched-but-not-enrolled rows. This scenario is the other state.

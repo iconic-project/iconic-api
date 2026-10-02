@@ -32,7 +32,7 @@ test('a checkout tick stores the lead, the form consent, the stitch and the lead
     ]);
 
     $payload = [
-        'email' => 'Ada.Guest@anakata.test',
+        'email' => 'Ada.Guest@iconic.test',
         'first_name' => 'Ada',
         'consent' => true,
         'version' => 'v1 (pending LEG-002)',
@@ -44,10 +44,10 @@ test('a checkout tick stores the lead, the form consent, the stitch and the lead
 
     expect($first->json())->toBe(['accepted' => true])
         ->and($second->json())->toBe(['accepted' => true])
-        ->and(Contact::query()->whereRaw('LOWER(email) = ?', ['ada.guest@anakata.test'])->count())->toBe(1)
+        ->and(Contact::query()->whereRaw('LOWER(email) = ?', ['ada.guest@iconic.test'])->count())->toBe(1)
         ->and(Delivery::query()->count())->toBe(0);
 
-    $contact = Contact::query()->whereRaw('LOWER(email) = ?', ['ada.guest@anakata.test'])->firstOrFail();
+    $contact = Contact::query()->whereRaw('LOWER(email) = ?', ['ada.guest@iconic.test'])->firstOrFail();
 
     $marketing = ContactConsent::query()
         ->where('contact_id', $contact->id)
@@ -84,14 +84,14 @@ test('a missing tick or the wrong consent version stores nothing', function (): 
     $before = Contact::query()->count();
 
     $this->postJson('/api/engine/marketing-leads', [
-        'email' => 'no-tick@anakata.test',
+        'email' => 'no-tick@iconic.test',
         'first_name' => 'No',
         'consent' => false,
         'version' => 'v1 (pending LEG-002)',
     ])->assertStatus(422);
 
     $this->postJson('/api/engine/marketing-leads', [
-        'email' => 'wrong-version@anakata.test',
+        'email' => 'wrong-version@iconic.test',
         'first_name' => 'Wrong',
         'consent' => true,
         'version' => 'v0',
@@ -104,19 +104,19 @@ test('a missing tick or the wrong consent version stores nothing', function (): 
 
 test('unsubscribe withdraws marketing consent, exits marketing enrolments, and exposes nothing personal', function (): void {
     $this->postJson('/api/engine/marketing-leads', [
-        'email' => 'leave@anakata.test',
+        'email' => 'leave@iconic.test',
         'first_name' => 'Lea',
         'consent' => true,
         'version' => 'v1 (pending LEG-002)',
     ])->assertOk();
 
-    $contact = Contact::query()->whereRaw('LOWER(email) = ?', ['leave@anakata.test'])->firstOrFail();
+    $contact = Contact::query()->whereRaw('LOWER(email) = ?', ['leave@iconic.test'])->firstOrFail();
     $token = (string) $contact->unsubscribe_token;
 
     $preview = $this->getJson('/api/engine/unsubscribe/'.$token)->assertOk();
     expect(array_keys($preview->json()))->toBe(['valid', 'already_unsubscribed'])
         ->and($preview->json())->toBe(['valid' => true, 'already_unsubscribed' => false]);
-    expect(json_encode($preview->json()))->not->toContain('leave@anakata.test')
+    expect(json_encode($preview->json()))->not->toContain('leave@iconic.test')
         ->and(json_encode($preview->json()))->not->toContain('Lea');
 
     $this->postJson('/api/engine/unsubscribe/'.$token)->assertOk()

@@ -9,11 +9,11 @@
 A disabled account must not keep working until they refresh. The next API call must 401 and return them to login.
 
 ## Steps
-1. Context A: sign in as `carolina@anakata.test` / `password`. Stay on `/rms/admin/permissions`.
-2. Context B: sign in as `lucia@anakata.test` / `password`. Stay on `/rms/reservations/calendar`.
+1. Context A: sign in as `carolina@iconic.test` / `password`. Stay on `/rms/admin/permissions`.
+2. Context B: sign in as `lucia@iconic.test` / `password`. Stay on `/rms/reservations/calendar`.
 3. Context A: find Lucía B. Click `Disable`. Confirm (`They're signed out on their next action.`). Optional reason can be left empty. Click `Disable`.
 4. Context B: navigate to `/rms/reservations/bookings` (any page that hits an authenticated API — not `/api/health`).
-5. Context B: try to sign in again as `lucia@anakata.test` / `password`.
+5. Context B: try to sign in again as `lucia@iconic.test` / `password`.
 
 ## Expected
 - [ ] E1 · After disable, toast `User disabled`. Lucía’s pill is `Disabled`.

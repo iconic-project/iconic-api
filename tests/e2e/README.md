@@ -45,10 +45,10 @@ Example prompts: “Run the e2e smoke suite” → tag `smoke`. “Run all sprin
 Helpers:
 
 ```bash
-tests/e2e/bin/mail-latest.sh carolina@anakata.test
-tests/e2e/bin/mail-find.sh --to e2e.doc03@anakata.test --subject "Booking confirmation & invoice" --sha256
+tests/e2e/bin/mail-latest.sh carolina@iconic.test
+tests/e2e/bin/mail-find.sh --to e2e.doc03@iconic.test --subject "Booking confirmation & invoice" --sha256
 tests/e2e/bin/db-check.sh 'App\Models\ChangeHistory::latest("id")->first()'
-tests/e2e/bin/db-check.sh 'App\Models\User::query()->where("email","lucia@anakata.test")->first()->hasPermission(\App\Enums\Permission::BookingsDelete)'
+tests/e2e/bin/db-check.sh 'App\Models\User::query()->where("email","lucia@iconic.test")->first()->hasPermission(\App\Enums\Permission::BookingsDelete)'
 tests/e2e/bin/status.sh
 tests/e2e/bin/replay-stripe-checkout.sh ANK-2026-0022
 tests/e2e/bin/replay-stripe-checkout.sh ANK-R-2026-0043
@@ -59,9 +59,9 @@ tests/e2e/bin/setup.sh portal-suspend AG-001
 tests/e2e/bin/setup.sh portal-resume AG-001
 tests/e2e/bin/setup.sh agency-over-cap AG-002
 tests/e2e/bin/setup.sh journey-due 1
-tests/e2e/bin/setup.sh abandoned-checkout e2e.cart@anakata.test
+tests/e2e/bin/setup.sh abandoned-checkout e2e.cart@iconic.test
 tests/e2e/bin/setup.sh hard-bounce ANK-2026-0018
-tests/e2e/bin/setup.sh inject-inbound-email whitfield.anna@anakata.test "Cabin question" "Is the master cabin free?"
+tests/e2e/bin/setup.sh inject-inbound-email whitfield.anna@iconic.test "Cabin question" "Is the master cabin free?"
 tests/e2e/bin/setup.sh portal-pay ANK-R-2026-0043 DEPOSIT
 ```
 
@@ -69,9 +69,9 @@ tests/e2e/bin/setup.sh portal-pay ANK-R-2026-0043 DEPOSIT
 
 `setup.sh` calls existing agency and portal actions inside the `app` container. `portal-user` prints an accepted login (`password`). `portal-invite` prints the Mailpit accept URL and does not store the token in a scenario. `portal-suspend` and `portal-resume` use the reasons `E2E portal suspend` and `E2E portal resume`. `agency-over-cap` reads the commission cap and raises the agency only when it is not already above it. The invite mail is queued: Horizon must be running.
 
-`journey-due` sets that enrolment's `next_due_at` one minute in the past, runs `php artisan anakata:journeys` once, and prints status, position, branch, and the latest `template_version`. One call advances only steps that are already due after the move. `abandoned-checkout` accepts only `@anakata.test`. It turns Nurture on, captures the lead (which stitches the session and enrols the `lead` branch), records one `abandon_cart`, then runs `anakata:journeys` so the `abandoned_checkout` branch enrols. It refuses an address that already has a booking. `hard-bounce` takes that contact's email or an `ANK-` booking reference. Seeded A. Fontaine has no email, so pass `ANK-2026-0018`. It issues or reuses the invoice, queues a resend with the queue faked, and calls `SendDeliveryJob::handle` while `Mail::send` throws `550 5.1.1 user unknown`. Nothing is delivered. Horizon must not also send that delivery.
+`journey-due` sets that enrolment's `next_due_at` one minute in the past, runs `php artisan iconic:journeys` once, and prints status, position, branch, and the latest `template_version`. One call advances only steps that are already due after the move. `abandoned-checkout` accepts only `@iconic.test`. It turns Nurture on, captures the lead (which stitches the session and enrols the `lead` branch), records one `abandon_cart`, then runs `iconic:journeys` so the `abandoned_checkout` branch enrols. It refuses an address that already has a booking. `hard-bounce` takes that contact's email or an `ANK-` booking reference. Seeded A. Fontaine has no email, so pass `ANK-2026-0018`. It issues or reuses the invoice, queues a resend with the queue faked, and calls `SendDeliveryJob::handle` while `Mail::send` throws `550 5.1.1 user unknown`. Nothing is delivered. Horizon must not also send that delivery.
 
-`inject-inbound-email` accepts only `@anakata.test`. It posts the message to Mailpit, then runs `PollInboxJob` once. It does not wait for the scheduler and it does not call Graph. It prints `conversation_id`, `contact_id` (null when unmatched), `unread`, and `message_id`. `portal-pay` calls `CreatePortalPaymentLink` as Ada (`ada@portal.test`) and prints `url` and `status`. A booking that is not AG-001 makes the helper die and creates no link. The reply mail from the inbox is queued: Horizon must be running before `mail-find.sh` can see it.
+`inject-inbound-email` accepts only `@iconic.test`. It posts the message to Mailpit, then runs `PollInboxJob` once. It does not wait for the scheduler and it does not call Graph. It prints `conversation_id`, `contact_id` (null when unmatched), `unread`, and `message_id`. `portal-pay` calls `CreatePortalPaymentLink` as Ada (`ada@portal.test`) and prints `url` and `status`. A booking that is not AG-001 makes the helper die and creates no link. The reply mail from the inbox is queued: Horizon must be running before `mail-find.sh` can see it.
 
 ## 5. Agent rules
 
@@ -92,7 +92,7 @@ tests/e2e/bin/setup.sh portal-pay ANK-R-2026-0043 DEPOSIT
 - **Time:** timestamps are shown in Galápagos time (UTC−6). Compare with that, not the machine's time zone.
 - **Don't wait blindly.** Wait for a visible condition (the text, the toast, the row), at most 15 s, then fail the step.
 - **Labels.** RMS fields use `label[for]` + control `id` (or `aria-label` on unlabeled table cells). Prefer `getByLabel` on Code, Max guests per cabin, Embark date, Child discounts per cabin, group-context, reason, and the new-reservation fields. Status pills are CSS-uppercase (`INVITED`); match case-insensitively.
-- **Engine analytics banner.** The engine shows a fixed bar at the bottom whenever analytics consent is unset, including when no GA measurement id is configured. It covers the lower edge of the page. On a fresh engine context, before any click, either click `Analytics off` or set `localStorage['anakata-engine-analytics']` to `refused` and reload. Use `accepted` only when the scenario is about behavioural events. Do not leave the bar up over footer actions.
+- **Engine analytics banner.** The engine shows a fixed bar at the bottom whenever analytics consent is unset, including when no GA measurement id is configured. It covers the lower edge of the page. On a fresh engine context, before any click, either click `Analytics off` or set `localStorage['iconic-engine-analytics']` to `refused` and reload. Use `accepted` only when the scenario is about behavioural events. Do not leave the bar up over footer actions.
 - **`/api/auth/me`.** Call `http://localhost:8000/api/auth/me` (JSON, 401 when signed out). Do not open `/api/auth/me` as a panel URL — that is HTML from Nuxt, not the API.
 - **Reports:**
   - write them to `runs/YYYY-MM-DD-HHMM-<slug>.md`
@@ -109,12 +109,12 @@ Copy [`runs/_RUN_TEMPLATE.md`](runs/_RUN_TEMPLATE.md). Name the file `runs/YYYY-
 tests/e2e/bin/down.sh
 ```
 
-Volumes stay. `down.sh --wipe` deletes the `anakata-e2e` volumes only (refuses any other compose project).
+Volumes stay. `down.sh --wipe` deletes the `iconic-e2e` volumes only (refuses any other compose project).
 
 ## Cloud machine fallback
 
 If `.cursor/environment.json` + the Dockerfile do not produce a usable Build, use **agent-driven setup** in the Cursor Cloud Agents dashboard. Tell the setup agent:
 
-> Clone the five anakata repos as siblings, run `tests/e2e/bin/install.sh`, then `tests/e2e/bin/up.sh`, and confirm `tests/e2e/bin/status.sh` passes.
+> Clone the five iconic repos as siblings, run `tests/e2e/bin/install.sh`, then `tests/e2e/bin/up.sh`, and confirm `tests/e2e/bin/status.sh` passes.
 
-The only secret is `GH_TOKEN` (read access to `github.com/anakata-project`) if the repos are private. `api.env` holds test-only MySQL passwords. `APP_KEY` is generated at `up.sh` time.
+The only secret is `GH_TOKEN` (read access to `github.com/iconic-project`) if the repos are private. `api.env` holds test-only MySQL passwords. `APP_KEY` is generated at `up.sh` time.

@@ -21,8 +21,8 @@ test('flag overdue writes one marker per episode and never changes status', func
     $booking = overdueCabin(['reference' => 'ANK-2026-0520', 'cabin_code' => 'S7']);
     $status = $booking->status;
 
-    Artisan::call('anakata:flag-overdue');
-    Artisan::call('anakata:flag-overdue');
+    Artisan::call('iconic:flag-overdue');
+    Artisan::call('iconic:flag-overdue');
 
     expect($booking->fresh()?->status)->toBe($status);
     expect(ChangeHistory::query()
@@ -43,7 +43,7 @@ test('flag overdue writes one marker per episode and never changes status', func
 
     $this->travelTo(CarbonImmutable::parse($newDue.' 12:00:00', 'Pacific/Galapagos')->addDay());
 
-    Artisan::call('anakata:flag-overdue');
+    Artisan::call('iconic:flag-overdue');
 
     expect(ChangeHistory::query()
         ->where('subject_id', $booking->id)
@@ -59,7 +59,7 @@ test('the overdue fixture command only runs locally and sets an override', funct
         'balance_due_date_override' => null,
     ]);
 
-    Artisan::call('anakata:set-overdue-fixture', ['reference' => 'ANK-2026-0018']);
+    Artisan::call('iconic:set-overdue-fixture', ['reference' => 'ANK-2026-0018']);
 
     expect($booking->fresh()?->balance_due_date_override?->toDateString())
         ->toBe(BusinessTime::now()->subDay()->toDateString());

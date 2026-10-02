@@ -24,18 +24,18 @@ function failedLoginBody(): array
 test('login returns the me payload and sets last_login_at', function (): void {
     $user = User::factory()->withRole(SystemRole::Admin)->create([
         'name' => 'Carolina M.',
-        'email' => 'carolina@anakata.test',
+        'email' => 'carolina@iconic.test',
     ]);
 
     $response = withPanelCsrf()->postJson('/api/auth/login', [
-        'email' => 'Carolina@Anakata.test',
+        'email' => 'Carolina@Iconic.test',
         'password' => 'password',
     ]);
 
     $response->assertOk()
         ->assertJsonPath('id', $user->id)
         ->assertJsonPath('name', 'Carolina M.')
-        ->assertJsonPath('email', 'carolina@anakata.test')
+        ->assertJsonPath('email', 'carolina@iconic.test')
         ->assertJsonPath('role.slug', 'admin')
         ->assertJsonPath('sections', ['rms', 'crm'])
         ->assertJsonPath('time_zone', 'Pacific/Galapagos');
@@ -50,13 +50,13 @@ test('login returns the me payload and sets last_login_at', function (): void {
 
 test('the four login failures return the same body', function (string $email, string $password): void {
     User::factory()->invited()->withRole(SystemRole::Admin)->create([
-        'email' => 'invited@anakata.test',
+        'email' => 'invited@iconic.test',
     ]);
     User::factory()->disabled()->withRole(SystemRole::Admin)->create([
-        'email' => 'disabled@anakata.test',
+        'email' => 'disabled@iconic.test',
     ]);
     User::factory()->withRole(SystemRole::Admin)->create([
-        'email' => 'active@anakata.test',
+        'email' => 'active@iconic.test',
     ]);
 
     withPanelCsrf()->postJson('/api/auth/login', [
@@ -66,15 +66,15 @@ test('the four login failures return the same body', function (string $email, st
         ->assertStatus(422)
         ->assertExactJson(failedLoginBody());
 })->with([
-    'unknown email' => ['missing@anakata.test', 'password'],
-    'wrong password' => ['active@anakata.test', 'not-the-password'],
-    'invited' => ['invited@anakata.test', 'password'],
-    'disabled' => ['disabled@anakata.test', 'password'],
+    'unknown email' => ['missing@iconic.test', 'password'],
+    'wrong password' => ['active@iconic.test', 'not-the-password'],
+    'invited' => ['invited@iconic.test', 'password'],
+    'disabled' => ['disabled@iconic.test', 'password'],
 ]);
 
 test('login is rate limited after five attempts per email and ip', function (): void {
     $user = User::factory()->withRole(SystemRole::Admin)->create([
-        'email' => 'limited@anakata.test',
+        'email' => 'limited@iconic.test',
     ]);
 
     for ($i = 0; $i < 5; $i++) {
@@ -92,10 +92,10 @@ test('login is rate limited after five attempts per email and ip', function (): 
 
 test('login while already signed in switches the session', function (): void {
     $carolina = User::factory()->withRole(SystemRole::Admin)->create([
-        'email' => 'carolina@anakata.test',
+        'email' => 'carolina@iconic.test',
     ]);
     $mateo = User::factory()->withRole(SystemRole::Manager)->create([
-        'email' => 'mateo@anakata.test',
+        'email' => 'mateo@iconic.test',
     ]);
 
     withPanelCsrf()->postJson('/api/auth/login', [
@@ -118,7 +118,7 @@ test('login while already signed in switches the session', function (): void {
 
 test('the dummy login hash uses the same bcrypt cost as real passwords', function (): void {
     withPanelCsrf()->postJson('/api/auth/login', [
-        'email' => 'missing@anakata.test',
+        'email' => 'missing@iconic.test',
         'password' => 'password',
     ])->assertStatus(422);
 
@@ -142,7 +142,7 @@ test('cfo me payload lists only the rms section', function (): void {
     ]);
     $user = User::factory()->create([
         'name' => 'CFO (external)',
-        'email' => 'cfo@anakata.test',
+        'email' => 'cfo@iconic.test',
         'role_id' => $role->id,
         'status' => UserStatus::Active,
     ]);

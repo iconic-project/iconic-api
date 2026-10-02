@@ -76,8 +76,8 @@ Source: `BusinessRulesDocument::initial()`.
 | legal.consent_versions.checkout_marketing | v1 (pending LEG-002) |
 | legal_entity.name | PONTOS LLC (a limited liability company) |
 | legal_entity.address_lines | 430 Grand Bay Drive, Apt 1108 · Key Biscayne, FL 33149, United States |
-| legal_entity.email | info@anakata.co |
-| legal_entity.website | anakata.co |
+| legal_entity.email | info@iconic.co |
+| legal_entity.website | iconic.co |
 | legal_entity.ein | 42-4742064 |
 | legal_entity.bank.* | [TBD] (LEG-004) |
 | cancellation.bands | ≥120 d / 5% · ≥90 d / 50% · ≥0 d / 100% |
@@ -203,7 +203,7 @@ Source: `seed-data.json` → `departures`. Upserted by `(yacht_id, date)` so ref
 
 On-screen dates use `j M Y` (`7 Nov 2027`). After INV-06 from a reset (2 Jan–26 Mar 2028, both yachts, ALT, festive window off): 26 created, newest reference `DEP-042` (016 + 26).
 
-Sunday 422: `Anakata sails Sunday → Sunday. {date} is not a Sunday.`
+Sunday 422: `Iconic sails Sunday → Sunday. {date} is not a Sunday.`
 Duplicate 422: `{YACHT} already has a departure on {date} ({DEP-NNN}).`
 
 Engine labels (`App\Support\Inventory\EngineLabel`): `CLOSED — ENQUIRE`, `NOT SHOWN`, `ONLY N CABINS LEFT` (or `ONLY 1 CABIN LEFT`).
@@ -281,7 +281,7 @@ Read on the Bookings list and Payments & Revenue after `reset.sh` on 2026-09-21 
 | ANK-2026-0016 | CONFIRMED | USD 26,600 | 2,660 | 2,660 | 0 | USD 23,940 | `…-D01` Wire transfer SETTLED · GRP-007 |
 | ANK-2026-0017 | CONFIRMED | USD 26,600 | 2,660 | 2,660 | 0 | USD 23,940 | `…-D01` Wire transfer SETTLED · GRP-007 |
 | ANK-2026-0019 | CONFIRMED | USD 26,600 | 2,660 | 2,660 | 0 | USD 23,940 | `…-D01` Wire transfer SETTLED · GRP-007 |
-| ANK-2026-0018 | CONFIRMED | USD 26,600 | 2,660 | 2,660 | 0 | USD 23,940 | `…-D01` Card (Stripe) SETTLED. **Not OVERDUE after reset.** Due 14 Aug 2027. Run `php artisan anakata:set-overdue-fixture` (not in `reset.sh`) for PAY-08. |
+| ANK-2026-0018 | CONFIRMED | USD 26,600 | 2,660 | 2,660 | 0 | USD 23,940 | `…-D01` Card (Stripe) SETTLED. **Not OVERDUE after reset.** Due 14 Aug 2027. Run `php artisan iconic:set-overdue-fixture` (not in `reset.sh`) for PAY-08. |
 | ANK-2026-0021 | ON HOLD AGENCY | USD 26,600 | 2,660 (no row) | 0 | 0 | USD 26,600 | No ledger. Meridian Voyages 15 % above the 12 % cap. |
 | ANK-R-2026-0041 | REQUESTED | USD 26,600 | — | 0 | 0 | USD 26,600 | No ledger |
 | ANK-R-2026-0042 | REQUESTED | USD 37,905 | — | 0 | 0 | USD 37,905 | No ledger |
@@ -324,8 +324,8 @@ Both on 19 Dec 2027 ANAMARA festive (DEP-013). Position is FIFO per departure + 
 
 | Contact | Category | Email |
 |---|---|---|
-| Anna Whitfield | Suite | whitfield.anna@anakata.test |
-| K. Osei | Owner | k.osei@anakata.test |
+| Anna Whitfield | Suite | whitfield.anna@iconic.test |
+| K. Osei | Owner | k.osei@iconic.test |
 
 ### Bookings list count
 
@@ -341,7 +341,7 @@ Source: `DemoOffersSeeder`. Placeholder seed — must not reach production (Spri
 |---|---|---|---|---|---|---|---|
 | OF-001 | OPENING-27 | CREDIT 500 | D2C | no | OPENING OFFER · Opening season credit — on-board ancillaries | 2027-11-01 – 2027-12-31 · WEST+NORTH · Suite | no |
 | OF-002 | VIRTUOSO-EARLY | COMM 2 | B2B | no | (not public) | booking Q1 2027 · WEST+NORTH | no |
-| OF-003 | ANAKATA10 | PCT 10 | D2C | yes | Anakata welcome −10% | any · WEST+NORTH | yes |
+| OF-003 | ICONIC10 | PCT 10 | D2C | yes | Iconic welcome −10% | any · WEST+NORTH | yes |
 | OF-004 | ADVISOR5 | PCT 5 | D2C | yes | Travel advisor −5% | any · WEST+NORTH | yes |
 | OF-005 | EARLY500 | AMT 500 | D2C | yes | Early booking −USD 500 pp | any · WEST+NORTH | yes |
 | OF-006 | SHOULDER15 | PCT 15 | D2C | no | SHOULDER SEASON · Shoulder season −15% | 2027-11-14 NORTH | yes |
@@ -349,11 +349,11 @@ Source: `DemoOffersSeeder`. Placeholder seed — must not reach production (Spri
 | OF-008 | LAST12 | PCT 12 | D2C | no | LAST CABINS · Last cabins −12% | 2028-01-02 WEST (no seeded departure) | yes |
 | OF-009 | EARLY10-0116 | PCT 10 | D2C | no | EARLY BOOKING · Early booking −10% | 2028-01-16 WEST (no seeded departure) | yes |
 
-Promo codes (`ANAKATA10`, `ADVISOR5`, `EARLY500`) and B2B `VIRTUOSO-EARLY` must never appear in `GET /api/engine/feed` or on any public engine page.
+Promo codes (`ICONIC10`, `ADVISOR5`, `EARLY500`) and B2B `VIRTUOSO-EARLY` must never appear in `GET /api/engine/feed` or on any public engine page.
 
 Public badge offers after reset (feed `offers[]` + departure `offers[]`): OPENING-27 on Nov–Dec WEST/NORTH, SHOULDER15 on 14 Nov NORTH, EARLY10-1205 on 5 Dec WEST. ⚠ UNVERIFIED — task 08/09 browser once saw `offers: []`; a later reset must confirm the badges.
 
-## Engine walkthrough (2 adults · 7 Nov 2027 ANAMARA WEST · Suite 03 · ANAKATA10)
+## Engine walkthrough (2 adults · 7 Nov 2027 ANAMARA WEST · Suite 03 · ICONIC10)
 
 Walkthrough cabin after reset: **7 Nov 2027 ANAMARA · Suite 03** (S01/S02 taken). Next request `ANK-R-2026-0043`.
 
@@ -361,8 +361,8 @@ Do **not** copy Pest LAST12 totals (21,067 / 20,014). Those used a factory −12
 
 | Path | Expected lines and totals |
 |---|---|
-| Option 1 · pay later + `ANAKATA10` | ⚠ UNVERIFIED — read off step 5 and `POST /api/engine/quote`, then the RMS booking. Never compute by hand. |
-| Option 2 · pay deposit + `ANAKATA10` | ⚠ UNVERIFIED — same sources. Online-advantage line uses `copy.online_deposit_advantage` + live `discounts.online_deposit_discount_pct` (seed 5 %). |
+| Option 1 · pay later + `ICONIC10` | ⚠ UNVERIFIED — read off step 5 and `POST /api/engine/quote`, then the RMS booking. Never compute by hand. |
+| Option 2 · pay deposit + `ICONIC10` | ⚠ UNVERIFIED — same sources. Online-advantage line uses `copy.online_deposit_advantage` + live `discounts.online_deposit_discount_pct` (seed 5 %). |
 
 ## Engine labels after reset (November 2027–January 2028 window)
 
@@ -402,19 +402,19 @@ Source: `routes/console.php` and `tests/Feature/Crm/SyncJobsTest.php`. On-screen
 |---|---|---|
 | `inventory:release-expired-holds` | every minute (`* * * * *`) | — |
 | `engine:expire-stripe-checkouts` | every minute (`* * * * *`) | — |
-| `anakata:crm-tasks` | every five minutes (`*/5 * * * *`) | — |
-| `anakata:journeys` | every fifteen minutes (`*/15 * * * *`) | `Pacific/Galapagos` |
-| `anakata:alerts` | every five minutes (`*/5 * * * *`) | — |
-| `anakata:flag-overdue` | daily (`0 0 * * *`) | `Pacific/Galapagos` |
-| `anakata:retention` | daily | `Pacific/Galapagos` |
-| `anakata:events-retention` | daily | `Pacific/Galapagos` |
-| `anakata:documents-due` | daily | `Pacific/Galapagos` |
-| `anakata:voyage-status` | daily at 00:15 (`15 0 * * *`) | `Pacific/Galapagos` |
-| `anakata:ledger-check` | nightly 02:00 (`0 2 * * *`) | `Pacific/Galapagos` |
-| `anakata:commission-scan` | nightly 02:30 (`30 2 * * *`) | `Pacific/Galapagos` |
-| `anakata:manifests-due` | daily at 06:00 (`0 6 * * *`) | `Pacific/Galapagos` |
-| `anakata:occupancy-check` | daily at 07:00 (`0 7 * * *`) | `Pacific/Galapagos` |
-| `anakata:document-check` | hourly (`0 * * * *`) | `Pacific/Galapagos` |
+| `iconic:crm-tasks` | every five minutes (`*/5 * * * *`) | — |
+| `iconic:journeys` | every fifteen minutes (`*/15 * * * *`) | `Pacific/Galapagos` |
+| `iconic:alerts` | every five minutes (`*/5 * * * *`) | — |
+| `iconic:flag-overdue` | daily (`0 0 * * *`) | `Pacific/Galapagos` |
+| `iconic:retention` | daily | `Pacific/Galapagos` |
+| `iconic:events-retention` | daily | `Pacific/Galapagos` |
+| `iconic:documents-due` | daily | `Pacific/Galapagos` |
+| `iconic:voyage-status` | daily at 00:15 (`15 0 * * *`) | `Pacific/Galapagos` |
+| `iconic:ledger-check` | nightly 02:00 (`0 2 * * *`) | `Pacific/Galapagos` |
+| `iconic:commission-scan` | nightly 02:30 (`30 2 * * *`) | `Pacific/Galapagos` |
+| `iconic:manifests-due` | daily at 06:00 (`0 6 * * *`) | `Pacific/Galapagos` |
+| `iconic:occupancy-check` | daily at 07:00 (`0 7 * * *`) | `Pacific/Galapagos` |
+| `iconic:document-check` | hourly (`0 * * * *`) | `Pacific/Galapagos` |
 | `telescope:prune --hours=48` | daily | — (only when Telescope is installed) |
 
 Fresh seed: `last_outcome` is null so the Outcome / Last run cells are `—`; `next_run_at` is set. KPIs start at jobs failing **0**, failures open **0**, merges this month **0**. ⚠ UNVERIFIED
@@ -540,17 +540,17 @@ Nothing in this section was read off a reset screen. Heads when this section was
 
 | Repo | HEAD |
 |---|---|
-| anakata-api | `911e87f88be3d69ba03c8cdca9b7cbead2a6f17f` |
-| anakata-ui | `275a80c4e17e46b0af0855bfd97304e4b5b4efd5` |
-| anakata-panel | `f38d2a53cc8929f40f875dfd5db598cc1641029d` |
-| anakata-engine | `ac37c6d9a853f155257719c134e669c3a6b09614` |
-| anakata-portal | `16db30c96b78d6e6de18bd3ed0912a3b6cfb78c6` |
+| iconic-api | `911e87f88be3d69ba03c8cdca9b7cbead2a6f17f` |
+| iconic-ui | `275a80c4e17e46b0af0855bfd97304e4b5b4efd5` |
+| iconic-panel | `f38d2a53cc8929f40f875dfd5db598cc1641029d` |
+| iconic-engine | `ac37c6d9a853f155257719c134e669c3a6b09614` |
+| iconic-portal | `16db30c96b78d6e6de18bd3ed0912a3b6cfb78c6` |
 
 ### Inbox
 
 No seeder inserts `conversations` or `messages`. A fresh reset has an empty inbox.
 
-Matched sender: Anna Whitfield, `whitfield.anna@anakata.test` (`DemoRequestsSeeder::seedWaitlist`). Unlinked sender used by the scenarios: `unlinked.inbox@anakata.test`. That address is not in the seed. `inject-inbound-email` refuses any from-address that does not end `@anakata.test`.
+Matched sender: Anna Whitfield, `whitfield.anna@iconic.test` (`DemoRequestsSeeder::seedWaitlist`). Unlinked sender used by the scenarios: `unlinked.inbox@iconic.test`. That address is not in the seed. `inject-inbound-email` refuses any from-address that does not end `@iconic.test`.
 
 Opening a thread marks it read. Timeline kind is `conversation.message`. Title is `Email received` for `IN` and `Reply sent` for `OUT`. Detail is the subject (`ContactTimeline`).
 
@@ -562,7 +562,7 @@ A reply sets `In-Reply-To` to the inbound `message_id`, subject `Re: ` plus the 
 
 `DemoAgenciesSeeder` calls `ResolveContact` for every `seed-data.json` agency and does not dispatch `AgencyApproved`. After reset, AG-001, AG-002, and AG-003 have a CRM contact and no enrolment. The journey cell is `CRM contact matched. b2b_partner_activation is not enrolled.` (`crmB2b.notEnrolled`).
 
-AG-004 `Unmatched B2B`, email `nobody-b2b@anakata.test`, status `PENDING`, is inserted by `seedUnmatchedAgency()` with no `ResolveContact` and no `AgencyApproved`. Commission `10` and payment terms `30 days post-cruise · wire` are copied from AG-001 so the non-null columns are filled. The CRM row must show `B2bPartnerResource::NO_CONTACT_NOTE`: `No CRM contact matches this agency, so b2b_partner_activation was not enrolled.`
+AG-004 `Unmatched B2B`, email `nobody-b2b@iconic.test`, status `PENDING`, is inserted by `seedUnmatchedAgency()` with no `ResolveContact` and no `AgencyApproved`. Commission `10` and payment terms `30 days post-cruise · wire` are copied from AG-001 so the non-null columns are filled. The CRM row must show `B2bPartnerResource::NO_CONTACT_NOTE`: `No CRM contact matches this agency, so b2b_partner_activation was not enrolled.`
 
 Approving AG-003 (Andes Luxe Travel, PENDING, contact P. Ibáñez) after the journey is on dispatches `AgencyApproved` and enrols. That enrolment is not in the fresh seed.
 
@@ -578,7 +578,7 @@ The next request reference on a fresh reset, when this scenario is the first new
 
 ### Spanish
 
-Cookie `anakata_panel_locale`. Default locale stays `en`. Dates and money stay en-US (`useDates`, `useMoney`). `crmPrivacy.notice` and `crmPrivacy.pending` stay the English legal text in `es.json`. Status pills that print an API code stay that code.
+Cookie `iconic_panel_locale`. Default locale stays `en`. Dates and money stay en-US (`useDates`, `useMoney`). `crmPrivacy.notice` and `crmPrivacy.pending` stay the English legal text in `es.json`. Status pills that print an API code stay that code.
 
 Spot-check strings from `es.json`: nav `Bandeja — Correo · WhatsApp`, `Socios B2B`, inbox title `Bandeja de entrada`, B2B title `Socios B2B`, RMS nav `Calendario`, calendar empty state `No hay salidas en este intervalo de fechas.`, sign-out `Cerrar sesión`.
 

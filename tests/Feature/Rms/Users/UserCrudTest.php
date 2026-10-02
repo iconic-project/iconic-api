@@ -20,9 +20,9 @@ beforeEach(function (): void {
 });
 
 test('an admin can list users with filters and default pagination', function (): void {
-    $carolina = adminUser(['name' => 'Carolina M.', 'email' => 'carolina@anakata.test']);
-    $mateo = managerUser(['name' => 'Mateo R.', 'email' => 'mateo@anakata.test']);
-    salesExecUser(['name' => 'Lucia B.', 'email' => 'lucia@anakata.test']);
+    $carolina = adminUser(['name' => 'Carolina M.', 'email' => 'carolina@iconic.test']);
+    $mateo = managerUser(['name' => 'Mateo R.', 'email' => 'mateo@iconic.test']);
+    salesExecUser(['name' => 'Lucia B.', 'email' => 'lucia@iconic.test']);
 
     $response = $this->actingAs($carolina)->getJson('/api/rms/users');
     $response->assertOk()
@@ -35,7 +35,7 @@ test('an admin can list users with filters and default pagination', function ():
     $this->actingAs($carolina)
         ->getJson('/api/rms/users?status=active&role_id='.$mateo->role_id.'&q=mateo')
         ->assertOk()
-        ->assertJsonPath('data.0.email', 'mateo@anakata.test');
+        ->assertJsonPath('data.0.email', 'mateo@iconic.test');
 
     $this->actingAs($carolina)
         ->getJson('/api/rms/users?per_page=101')
@@ -72,15 +72,15 @@ test('inviting a user sends mail, writes history and can be accepted', function 
 
     $this->postJson('/api/rms/users', [
         'name' => 'New hire',
-        'email' => 'New@Anakata.test',
+        'email' => 'New@Iconic.test',
         'role_id' => $manager->id,
     ])
         ->assertCreated()
-        ->assertJsonPath('email', 'new@anakata.test')
+        ->assertJsonPath('email', 'new@iconic.test')
         ->assertJsonPath('status', UserStatus::Invited->value)
         ->assertJsonPath('role.slug', 'manager');
 
-    $invitee = User::query()->where('email', 'new@anakata.test')->first();
+    $invitee = User::query()->where('email', 'new@iconic.test')->first();
     expect($invitee)->not->toBeNull();
 
     $token = null;
@@ -93,7 +93,7 @@ test('inviting a user sends mail, writes history and can be accepted', function 
         expect($mail->actionUrl)->toBe($url);
         expect($url)->toContain('/accept-invitation');
         expect($url)->toContain('token=');
-        expect($url)->toContain('email=new%40anakata.test');
+        expect($url)->toContain('email=new%40iconic.test');
         expect(collect($mail->introLines)->implode(' '))->toContain('Manager');
         expect(collect($mail->outroLines)->implode(' '))->toContain('7 days');
 
@@ -109,7 +109,7 @@ test('inviting a user sends mail, writes history and can be accepted', function 
 
     withPanelCsrf()->postJson('/api/auth/accept-invitation', [
         'token' => $token,
-        'email' => 'new@anakata.test',
+        'email' => 'new@iconic.test',
         'password' => 'new-password-12',
         'password_confirmation' => 'new-password-12',
     ])->assertOk();
@@ -129,13 +129,13 @@ test('inviting a user sends mail, writes history and can be accepted', function 
 });
 
 test('invite validation rejects missing role, unknown role and duplicate email', function (): void {
-    $admin = adminUser(['email' => 'carolina@anakata.test']);
+    $admin = adminUser(['email' => 'carolina@iconic.test']);
     $manager = Role::query()->where('slug', SystemRole::Manager->value)->firstOrFail();
 
     $this->actingAs($admin)
         ->postJson('/api/rms/users', [
             'name' => 'X',
-            'email' => 'x@anakata.test',
+            'email' => 'x@iconic.test',
         ])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['role_id']);
@@ -143,7 +143,7 @@ test('invite validation rejects missing role, unknown role and duplicate email',
     $this->actingAs($admin)
         ->postJson('/api/rms/users', [
             'name' => 'X',
-            'email' => 'x@anakata.test',
+            'email' => 'x@iconic.test',
             'role_id' => 999999,
         ])
         ->assertStatus(422)
@@ -152,7 +152,7 @@ test('invite validation rejects missing role, unknown role and duplicate email',
     $this->actingAs($admin)
         ->postJson('/api/rms/users', [
             'name' => 'X',
-            'email' => 'Carolina@Anakata.test',
+            'email' => 'Carolina@Iconic.test',
             'role_id' => $manager->id,
         ])
         ->assertStatus(422)

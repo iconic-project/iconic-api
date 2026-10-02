@@ -14,7 +14,7 @@ final class MailpitMailbox implements MailboxReader
 {
     public function page(int $page, int $pageSize): array
     {
-        $base = rtrim((string) config('anakata.inbox.mailpit_url'), '/');
+        $base = rtrim((string) config('iconic.inbox.mailpit_url'), '/');
         $list = Http::acceptJson()
             ->baseUrl($base)
             ->get('/api/v1/messages', [

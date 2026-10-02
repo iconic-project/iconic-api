@@ -62,8 +62,8 @@ test('each journey trigger enrols once', function (): void {
         'contact_id' => $nurture->id,
         'name' => BehaviouralEventName::AbandonCart,
     ]);
-    $this->artisan('anakata:journeys')->assertSuccessful();
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(enrolmentCount('nurture_to_request', $nurture))->toBe(1);
 
     activate('request_to_deposit');
@@ -131,22 +131,22 @@ test('a send step waits, sends once, and completes', function (): void {
     $enrolment = enrolment('winback', $contact);
     expect($enrolment->status)->toBe(JourneyEnrolmentStatus::Active);
 
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Journey)->count())->toBe(0)
         ->and($enrolment->fresh()?->position)->toBe(1);
 
     travelToDue($enrolment);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Journey)->count())->toBe(1)
         ->and($enrolment->fresh()?->position)->toBe(2);
 
     travelToDue($enrolment);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Journey)->count())->toBe(2);
 
     travelToDue($enrolment);
-    $this->artisan('anakata:journeys')->assertSuccessful();
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     expect(Delivery::query()->where('kind', DeliveryKind::Journey)->count())->toBe(3)
         ->and($enrolment->fresh()?->status)->toBe(JourneyEnrolmentStatus::Completed);
@@ -156,13 +156,13 @@ test('withdrawing marketing consent stops the next nurture step and not a transa
     activate('nurture_to_request');
     $contact = journeyContact();
     JourneyEnrolment::onLeadCaptured($contact);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Journey)->count())->toBe(1);
 
     grantMarketing($contact, false);
     $nurture = enrolment('nurture_to_request', $contact);
     travelToDue($nurture);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     expect($nurture->fresh()?->status)->toBe(JourneyEnrolmentStatus::Suppressed)
         ->and($nurture->fresh()?->exit_reason)->toBe('Marketing consent withdrawn.')
@@ -173,7 +173,7 @@ test('withdrawing marketing consent stops the next nurture step and not a transa
     grantMarketing($buyer, false);
     $booking = journeyBooking($buyer, salesExecUser(), BookingStatus::Requested, '2027-12-19');
     BookingCreated::dispatch($booking);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     expect(enrolment('request_to_deposit', $buyer)->status)->toBe(JourneyEnrolmentStatus::Active)
         ->and(Delivery::query()->where('booking_id', $booking->id)->where('kind', DeliveryKind::Journey)->count())->toBe(1);
@@ -186,7 +186,7 @@ test('a new booking exits nurture before a due step is sent', function (): void 
     $booking = journeyBooking($contact, salesExecUser(), BookingStatus::Requested, '2027-12-26');
     BookingCreated::dispatch($booking);
 
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     expect(enrolment('nurture_to_request', $contact)->status)->toBe(JourneyEnrolmentStatus::Exited)
         ->and(enrolment('nurture_to_request', $contact)->exit_reason)->toBe('booking.created')
@@ -203,8 +203,8 @@ test('a switched-off journey send stays put and a pointer still advances', funct
     ]);
     $contact = journeyContact();
     JourneyEnrolment::onLeadCaptured($contact);
-    $this->artisan('anakata:journeys')->assertSuccessful();
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     $nurture = enrolment('nurture_to_request', $contact);
     expect($nurture->status)->toBe(JourneyEnrolmentStatus::Active)
@@ -226,7 +226,7 @@ test('a switched-off journey send stays put and a pointer still advances', funct
     $calendar->next_due_at = now()->subMinute();
     $calendar->save();
 
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     $calendar->refresh();
     expect($calendar->status)->toBe(JourneyEnrolmentStatus::Active)
@@ -249,7 +249,7 @@ test('an inactive journey refuses enrolment and does not send', function (): voi
     $pending->save();
     Journey::query()->where('key', 'winback')->update(['active' => false]);
 
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     $row = enrolment('winback', $contact);
     expect($row->status)->toBe(JourneyEnrolmentStatus::Active)
@@ -265,7 +265,7 @@ test('a runner pass does not change bookings, payments, guests or documents', fu
     BookingCreated::dispatch($booking);
 
     $before = ledgerStamp();
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Journey)->count())->toBe(1)
         ->and(ledgerStamp())->toBe($before);
 });
@@ -277,8 +277,8 @@ test('the request handover task is raised once', function (): void {
     $enrolment = JourneyEnrolment::query()->where('booking_id', $booking->id)->firstOrFail();
 
     Carbon::setTestNow($enrolment->enrolled_at->copy()->addHours(4));
-    $this->artisan('anakata:journeys')->assertSuccessful();
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     expect(CrmTask::query()->where('kind', TaskKind::JourneyHandover)->count())->toBe(1)
         ->and(CrmTask::query()->where('kind', TaskKind::JourneyHandover)->value('idempotency_key'))
@@ -334,7 +334,7 @@ test('the abandoned checkout branch sends at 24 hours, 48 hours and day 7', func
         'contact_id' => $started->id,
         'name' => BehaviouralEventName::BeginCheckout,
     ]);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(JourneyEnrolment::query()->where('contact_id', $started->id)->where('branch', 'abandoned_checkout')->count())->toBe(0);
 
     $unticked = Contact::factory()->create();
@@ -342,7 +342,7 @@ test('the abandoned checkout branch sends at 24 hours, 48 hours and day 7', func
         'contact_id' => $unticked->id,
         'name' => BehaviouralEventName::AbandonCart,
     ]);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(enrolmentCount('nurture_to_request', $unticked))->toBe(0);
 
     $contact = journeyContact();
@@ -350,8 +350,8 @@ test('the abandoned checkout branch sends at 24 hours, 48 hours and day 7', func
         'contact_id' => $contact->id,
         'name' => BehaviouralEventName::AbandonCart,
     ]);
-    $this->artisan('anakata:journeys')->assertSuccessful();
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     $enrolment = JourneyEnrolment::query()
         ->where('contact_id', $contact->id)
@@ -363,21 +363,21 @@ test('the abandoned checkout branch sends at 24 hours, 48 hours and day 7', func
         ->and(Delivery::query()->count())->toBe(0);
 
     travelToDue($enrolment);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(Delivery::query()->count())->toBe(1)
         ->and(Delivery::query()->value('subject'))->toBe('Can we help you plan your Galápagos expedition?')
         ->and($enrolment->fresh()?->position)->toBe(2);
 
     travelToDue($enrolment);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     expect(Delivery::query()->orderBy('id')->pluck('subject')->all())->toBe([
         'Can we help you plan your Galápagos expedition?',
         'Still dreaming of Galápagos? We are here to help.',
     ])->and($enrolment->fresh()?->position)->toBe(3);
 
     travelToDue($enrolment);
-    $this->artisan('anakata:journeys')->assertSuccessful();
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     expect(Delivery::query()->orderBy('id')->pluck('subject')->all())->toBe([
         'Can we help you plan your Galápagos expedition?',
@@ -390,18 +390,18 @@ test('the abandoned checkout branch sends at 24 hours, 48 hours and day 7', func
         'contact_id' => $stopped->id,
         'name' => BehaviouralEventName::AbandonCart,
     ]);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     $row = JourneyEnrolment::query()
         ->where('contact_id', $stopped->id)
         ->where('branch', 'abandoned_checkout')
         ->firstOrFail();
     travelToDue($row);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
     $sent = Delivery::query()->count();
 
     grantMarketing($stopped, false);
     travelToDue($row);
-    $this->artisan('anakata:journeys')->assertSuccessful();
+    $this->artisan('iconic:journeys')->assertSuccessful();
 
     expect($row->fresh()?->status)->toBe(JourneyEnrolmentStatus::Suppressed)
         ->and($row->fresh()?->exit_reason)->toBe('Marketing consent withdrawn.')
@@ -409,7 +409,7 @@ test('the abandoned checkout branch sends at 24 hours, 48 hours and day 7', func
 });
 
 test('an erased email is not enrolled on a marketing journey and a transactional journey still enrols', function (): void {
-    $email = 'erased-again@anakata.test';
+    $email = 'erased-again@iconic.test';
     $gone = Contact::factory()->create(['email' => $email]);
     ErasureLog::query()->create([
         'contact_id' => $gone->id,

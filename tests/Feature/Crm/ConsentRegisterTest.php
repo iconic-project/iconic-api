@@ -70,8 +70,8 @@ test('the gate is false until the latest row for that purpose is granted', funct
 
 test('a merge keeps both registers and the latest row wins, and unmerge restores them', function (): void {
     $actor = managerUser();
-    $survivor = Contact::factory()->create(['email' => 'survivor-'.uniqid().'@anakata.test']);
-    $loser = Contact::factory()->create(['email' => 'loser-'.uniqid().'@anakata.test']);
+    $survivor = Contact::factory()->create(['email' => 'survivor-'.uniqid().'@iconic.test']);
+    $loser = Contact::factory()->create(['email' => 'loser-'.uniqid().'@iconic.test']);
 
     app(RecordContactConsent::class)->handle(
         $survivor,

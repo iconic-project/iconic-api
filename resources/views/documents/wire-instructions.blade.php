@@ -10,5 +10,5 @@
         <tr><td>Wire window</td><td>{{ $snapshot['wire_window_hours'] ?? '' }} hours</td></tr>
     </table>
     @include('documents.partials.wire')
-    <div class="dfoot">ANAKATA · {{ $snapshot['footer']['email'] ?? '' }} · {{ $snapshot['footer']['website'] ?? '' }}</div>
+    <div class="dfoot">ICONIC · {{ $snapshot['footer']['email'] ?? '' }} · {{ $snapshot['footer']['website'] ?? '' }}</div>
 @endsection

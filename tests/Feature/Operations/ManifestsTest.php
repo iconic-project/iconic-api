@@ -158,8 +158,8 @@ test('the daily job issues first once until the departure date and then only res
     manifestGuest($booking, ['passport_no' => null, 'email' => 'ada@example.com']);
 
     galapagos('2026-06-20');
-    Artisan::call('anakata:manifests-due');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     expect(manifestCount($departure, ManifestKind::Dpng))->toBe(1)
         ->and(manifestCount($departure, ManifestKind::Captain))->toBe(0)
@@ -178,7 +178,7 @@ test('the daily job issues first once until the departure date and then only res
         ->and($history?->after['passport_no'] ?? null)->toBeNull();
 
     galapagos('2026-07-05');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     expect($alert?->fresh()?->resolution)->toBe('Departure sailed')
         ->and(manifestCount($departure, ManifestKind::Captain))->toBe(1)
@@ -186,7 +186,7 @@ test('the daily job issues first once until the departure date and then only res
 
     $versions = Manifest::query()->where('departure_id', $departure->id)->count();
     galapagos('2026-07-06');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     expect(Manifest::query()->where('departure_id', $departure->id)->count())->toBe($versions)
         ->and(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(1)
@@ -199,8 +199,8 @@ test('a missed day before sailing still issues first once', function (): void {
     manifestGuest($booking);
 
     galapagos('2026-06-25');
-    Artisan::call('anakata:manifests-due');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     expect(manifestCount($departure, ManifestKind::Dpng))->toBe(1)
         ->and(Manifest::query()->where('departure_id', $departure->id)->where('kind', ManifestKind::Dpng)->value('reason'))
@@ -213,7 +213,7 @@ test('a sailed departure gets no first, no alert and no chaser', function (): vo
     manifestGuest($booking, ['passport_no' => null, 'email' => 'late@example.com']);
 
     galapagos('2026-07-06');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     expect(Manifest::query()->where('departure_id', $departure->id)->count())->toBe(0)
         ->and(Alert::query()->where('base_key', AlertKeys::manifestData($departure->id))->count())->toBe(0)
@@ -226,7 +226,7 @@ test('the job on the departure date issues a missed first without an alert or a 
     manifestGuest($booking, ['passport_no' => null, 'email' => 'sail@example.com']);
 
     galapagos('2026-07-05');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     expect(manifestCount($departure, ManifestKind::Dpng))->toBe(1)
         ->and(Alert::query()->where('kind', AlertKind::ManifestDataOverdue)->count())->toBe(0)
@@ -369,17 +369,17 @@ test('a chaser is sent once per booking and not on or after the departure date',
     manifestGuest($complete, ['email' => 'done@example.com']);
 
     galapagos('2026-06-10');
-    Artisan::call('anakata:manifests-due');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     expect(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(1)
         ->and(Delivery::query()->where('idempotency_key', 'chase:'.$booking->id.':'.$departure->id)->count())->toBe(1)
         ->and(Delivery::query()->where('booking_id', $complete->id)->where('kind', DeliveryKind::DataChaser)->count())->toBe(0);
 
     galapagos('2026-07-05');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
     galapagos('2026-07-06');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     expect(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(1);
 });
@@ -393,11 +393,11 @@ test('a booking with no address records one blocked chaser and is not sent later
     $guest->forceFill(['email' => null])->save();
 
     galapagos('2026-06-10');
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     $guest->email = 'later@example.com';
     $guest->save();
-    Artisan::call('anakata:manifests-due');
+    Artisan::call('iconic:manifests-due');
 
     $delivery = Delivery::query()->where('idempotency_key', 'chase:'.$booking->id.':'.$departure->id)->get();
     expect($delivery)->toHaveCount(1)
@@ -421,11 +421,11 @@ test('captain files purge at the medical date and dpng files at the passport dat
     expect(fn () => $captain->forceFill(['passengers' => 9])->save())->toThrow(LogicException::class);
 
     galapagos('2026-09-07');
-    Artisan::call('anakata:retention', ['--dry-run' => true]);
+    Artisan::call('iconic:retention', ['--dry-run' => true]);
     expect(Artisan::output())->toContain('Would purge 1 CAPTAIN file(s) and 0 DPNG file(s).');
     expect($captain->fresh()?->pdf_path)->not->toBeNull();
 
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
     $captain->refresh();
     $dpng = Manifest::query()->where('kind', ManifestKind::Dpng)->firstOrFail();
 
@@ -439,10 +439,10 @@ test('captain files purge at the medical date and dpng files at the passport dat
         ->and(Manifest::query()->count())->toBe(2);
 
     galapagos('2028-06-09');
-    Artisan::call('anakata:retention', ['--dry-run' => true]);
+    Artisan::call('iconic:retention', ['--dry-run' => true]);
     expect(Artisan::output())->toContain('Would purge 0 CAPTAIN file(s) and 3 DPNG file(s).');
 
-    Artisan::call('anakata:retention');
+    Artisan::call('iconic:retention');
     $dpng->refresh();
 
     expect($dpng->purged_at)->not->toBeNull()

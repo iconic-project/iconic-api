@@ -4,11 +4,11 @@
 @endphp
 <div class="dsec">Galápagos fees &amp; transit card</div>
 @if(($fees['collected'] ?? []) === [])
-    <div class="dnote">No Galápagos fees collected by Anakata for this booking.</div>
+    <div class="dnote">No Galápagos fees collected by Iconic for this booking.</div>
 @else
     @include('documents.partials.lines', [
         'rows' => $fees['collected'],
-        'headers' => ['Fee collected by Anakata', '# PAX', 'Rate (USD)', 'Amount (USD)'],
+        'headers' => ['Fee collected by Iconic', '# PAX', 'Rate (USD)', 'Amount (USD)'],
     ])
 @endif
 <table class="dsubt"><tr><td>FEES SUBTOTAL (COLLECTED)</td><td>{{ \App\Support\Money::formatDocument((int) ($totals['fees_collected'] ?? 0)) }}</td></tr></table>

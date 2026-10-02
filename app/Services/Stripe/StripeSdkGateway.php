@@ -49,7 +49,7 @@ final class StripeSdkGateway implements StripeGateway
             ];
         }
 
-        $engineUrl = rtrim((string) config('anakata.engine_url'), '/');
+        $engineUrl = rtrim((string) config('iconic.engine_url'), '/');
         $session = $this->client()->checkout->sessions->create([
             'mode' => 'payment',
             'line_items' => $lineItems,

@@ -8,7 +8,7 @@
 The Documents tab is the plan the client-documents list also reads (J9). If a seeded CONFIRMED booking shows the wrong trigger, date or status, every later send and resend is reading a lie.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
 2. Open ANK-2026-0003 (Harrison & Whitfield). **Documents** tab.
 3. Read every row: Document, `to {recipient}` or the BLOCKED reason, Trigger, Date, Status pill, and which of `Preview` / `Resend` / `Issue` / `Re-issue` are shown.
 

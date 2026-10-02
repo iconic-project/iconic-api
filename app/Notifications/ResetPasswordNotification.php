@@ -38,13 +38,13 @@ final class ResetPasswordNotification extends Notification implements ShouldQueu
 
         $url = is_callable($callback)
             ? $callback($notifiable, $this->token)
-            : rtrim((string) config('anakata.panel_url'), '/').'/reset-password?'.http_build_query([
+            : rtrim((string) config('iconic.panel_url'), '/').'/reset-password?'.http_build_query([
                 'token' => $this->token,
                 'email' => $email,
             ]);
 
         return (new MailMessage)
-            ->subject('Reset your Anakata password')
+            ->subject('Reset your Iconic password')
             ->line('You are receiving this email because we received a password reset request for your account.')
             ->action('Reset password', $url)
             ->line('This password reset link expires in 60 minutes.');

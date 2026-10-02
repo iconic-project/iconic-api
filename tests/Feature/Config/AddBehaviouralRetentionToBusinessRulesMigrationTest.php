@@ -48,7 +48,7 @@ test('config-verify fails on a latest document missing behavioural retention, th
     $v1 = insertPreChangeBehaviouralRetention();
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('business_rules v1: retention.behavioural_raw_months')
         ->expectsOutputToContain('business_rules v1: retention.behavioural_unstitched_days');
@@ -73,7 +73,7 @@ test('config-verify fails on a latest document missing behavioural retention, th
     expect($history)->not->toBeNull();
     expect($history?->actor_label)->toBe('System');
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('business_rules v2: valid');
 });

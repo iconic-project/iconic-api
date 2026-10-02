@@ -35,7 +35,7 @@ test('each definition runs in every format, repeats, and carries no personal dat
     $agency = Agency::factory()->create([
         'name' => 'QX Agency Co',
         'contact' => 'QX-PERSON-CONTACT',
-        'email' => 'qx-person@anakata.test',
+        'email' => 'qx-person@iconic.test',
         'status' => AgencyStatus::Approved,
     ]);
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
@@ -90,7 +90,7 @@ test('each definition runs in every format, repeats, and carries no personal dat
         'QX-GUEST-FIRST',
         'QX-GUEST-LAST',
         'QX-PERSON-CONTACT',
-        'qx-person@anakata.test',
+        'qx-person@iconic.test',
     ];
 
     $firstCsv = null;
@@ -201,7 +201,7 @@ test('report permissions follow the definition, and a purged file is gone', func
     $run = ReportRun::query()->findOrFail($summary['id']);
     $run->forceFill(['generated_at' => BusinessTime::now()->subDays(100)])->save();
 
-    test()->artisan('anakata:retention')->assertSuccessful();
+    test()->artisan('iconic:retention')->assertSuccessful();
 
     $run->refresh();
     expect($run->purged_at)->not->toBeNull()

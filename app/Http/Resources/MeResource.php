@@ -44,7 +44,7 @@ class MeResource extends JsonResource
             ],
             'permissions' => $this->permissions()->map(fn (Permission $permission): string => $permission->value)->values()->all(),
             'sections' => $this->sections(),
-            'time_zone' => (string) config('anakata.business_timezone'),
+            'time_zone' => (string) config('iconic.business_timezone'),
         ];
     }
 }

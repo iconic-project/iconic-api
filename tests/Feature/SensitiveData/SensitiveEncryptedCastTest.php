@@ -37,7 +37,7 @@ test('a different sensitive data key cannot decrypt', function (): void {
     $host = SensitiveProofHost::query()->create(['secret' => 'AB1234567']);
 
     SensitiveEncrypted::flushEncrypter();
-    config(['sensitive.key' => 'base64:'.base64_encode('anakata-other-sensitive-key-32!!')]);
+    config(['sensitive.key' => 'base64:'.base64_encode('iconic-other-sensitive-key-32!!')]);
 
     expect(fn () => $host->fresh()?->secret)->toThrow(DecryptException::class);
 });
@@ -45,7 +45,7 @@ test('a different sensitive data key cannot decrypt', function (): void {
 test('rotating APP_KEY leaves the ciphertext readable', function (): void {
     $host = SensitiveProofHost::query()->create(['secret' => 'AB1234567']);
 
-    config(['app.key' => 'base64:'.base64_encode('anakata-rotated-app-key-32bytes!')]);
+    config(['app.key' => 'base64:'.base64_encode('iconic-rotated-app-key-32bytes!')]);
 
     expect($host->fresh()?->secret)->toBe('AB1234567');
 });

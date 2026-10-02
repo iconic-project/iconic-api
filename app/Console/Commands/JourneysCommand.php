@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class JourneysCommand extends Command
 {
-    protected $signature = 'anakata:journeys';
+    protected $signature = 'iconic:journeys';
 
     protected $description = 'Enrol, exit and advance CRM journeys that are due';
 

@@ -8,7 +8,7 @@
 Paid, Balance and the deposit tick must come from the ledger. If Overview still shows the cabin total as Paid, every later payment scenario is reading a lie.
 
 ## Steps
-1. Sign in as `carolina@anakata.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
+1. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Date range **All dates**.
 2. Open ANK-2026-0003 (Harrison & Whitfield). Overview tab.
 3. Open the **Payments** tab.
 

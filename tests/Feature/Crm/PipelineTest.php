@@ -64,7 +64,7 @@ test('a request, a reservation, a group and a charter each open one deal', funct
     $request = app(CreateBookingRequest::class)->handle(
         ReservationFixtures::requestPayload($departure, [
             'cabins' => [['cabin_code' => 'S1', 'adults' => 2, 'children' => 0]],
-            'client' => ['email' => 'request@anakata.test'],
+            'client' => ['email' => 'request@iconic.test'],
         ]),
         $actor,
     );
@@ -72,7 +72,7 @@ test('a request, a reservation, a group and a charter each open one deal', funct
     $reservation = app(CreateReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S2', 'adults' => 2, 'children' => 0]],
-            'client' => ['email' => 'reservation@anakata.test'],
+            'client' => ['email' => 'reservation@iconic.test'],
         ]),
         $actor,
     )->bookings->firstOrFail();
@@ -83,7 +83,7 @@ test('a request, a reservation, a group and a charter each open one deal', funct
                 ['cabin_code' => 'S3', 'adults' => 2, 'children' => 0],
                 ['cabin_code' => 'S4', 'adults' => 2, 'children' => 0],
             ],
-            'client' => ['email' => 'group@anakata.test'],
+            'client' => ['email' => 'group@iconic.test'],
             'group' => ['name' => 'Two cabins'],
         ]),
         $actor,
@@ -93,7 +93,7 @@ test('a request, a reservation, a group and a charter each open one deal', funct
         ReservationFixtures::createPayload(ReservationFixtures::anamaraDeparture('2027-11-14'), [
             'type' => 'CHARTER',
             'cabins' => [['adults' => 8, 'children' => 0]],
-            'client' => ['email' => 'charter@anakata.test'],
+            'client' => ['email' => 'charter@iconic.test'],
         ]),
         $actor,
     )->bookings->firstOrFail();
@@ -112,7 +112,7 @@ test('one open deal is bound and none or several open a new bound deal', functio
     $actor = managerUser();
     $owner = salesExecUser();
     $departure = ReservationFixtures::anamaraDeparture('2027-11-21');
-    $contact = Contact::factory()->create(['email' => 'open-one@anakata.test', 'name' => 'One Open']);
+    $contact = Contact::factory()->create(['email' => 'open-one@iconic.test', 'name' => 'One Open']);
 
     $open = app(CreateUnboundDeal::class)->handle(
         $contact,
@@ -127,7 +127,7 @@ test('one open deal is bound and none or several open a new bound deal', functio
     app(CreateReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S1', 'adults' => 2, 'children' => 0]],
-            'client' => ['name' => 'One Open', 'email' => 'open-one@anakata.test'],
+            'client' => ['name' => 'One Open', 'email' => 'open-one@iconic.test'],
         ]),
         $actor,
     );
@@ -136,23 +136,23 @@ test('one open deal is bound and none or several open a new bound deal', functio
     expect($open->fresh()?->stage)->toBeNull();
     expect(Deal::query()->where('contact_id', $contact->id)->count())->toBe(1);
 
-    $none = Contact::factory()->create(['email' => 'open-none@anakata.test']);
+    $none = Contact::factory()->create(['email' => 'open-none@iconic.test']);
     app(CreateReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S2', 'adults' => 2, 'children' => 0]],
-            'client' => ['name' => 'None', 'email' => 'open-none@anakata.test'],
+            'client' => ['name' => 'None', 'email' => 'open-none@iconic.test'],
         ]),
         $actor,
     );
     expect(Deal::query()->where('contact_id', $none->id)->whereNotNull('booking_id')->count())->toBe(1);
 
-    $several = Contact::factory()->create(['email' => 'open-several@anakata.test']);
+    $several = Contact::factory()->create(['email' => 'open-several@iconic.test']);
     app(CreateUnboundDeal::class)->handle($several, $owner, 'A', DealType::Fit, DealStage::NewLead, 1000, null);
     app(CreateUnboundDeal::class)->handle($several, $owner, 'B', DealType::Fit, DealStage::Quoted, 2000, null);
     app(CreateReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S3', 'adults' => 2, 'children' => 0]],
-            'client' => ['name' => 'Several', 'email' => 'open-several@anakata.test'],
+            'client' => ['name' => 'Several', 'email' => 'open-several@iconic.test'],
         ]),
         $actor,
     );
@@ -395,7 +395,7 @@ test('pipeline cash matches payments and revenue and the query count stays flat'
 
 test('merge and unmerge move the deal', function (): void {
     $survivor = Contact::factory()->create(['name' => 'Older', 'email' => null]);
-    $loser = Contact::factory()->create(['name' => 'Newer', 'email' => 'deal-merge@anakata.test']);
+    $loser = Contact::factory()->create(['name' => 'Newer', 'email' => 'deal-merge@iconic.test']);
     $owner = salesExecUser();
     $deal = app(CreateUnboundDeal::class)->handle($loser, $owner, 'Merge me', DealType::Fit, DealStage::NewLead, 1000, null);
     $actor = managerUser();

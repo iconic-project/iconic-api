@@ -346,7 +346,7 @@ function rmsManagementRequests(User $target, Role $role): array
         ['getJson', '/api/rms/users', []],
         ['postJson', '/api/rms/users', [
             'name' => 'Invitee',
-            'email' => 'invitee-'.uniqid().'@anakata.test',
+            'email' => 'invitee-'.uniqid().'@iconic.test',
             'role_id' => $role->id,
         ]],
         ['patchJson', "/api/rms/users/{$target->id}", ['name' => 'Renamed']],

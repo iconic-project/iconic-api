@@ -8,7 +8,7 @@
 Sales Exec has neither `engine_settings.manage` nor `engine_copy.manage`.
 
 ## Steps
-1. Sign in as `lucia@anakata.test` / `password`. Open `/rms/booking-engine/settings`.
+1. Sign in as `lucia@iconic.test` / `password`. Open `/rms/booking-engine/settings`.
 
 ## Expected
 - [ ] E1 · State line is `VIEW ONLY — SALES EXEC` (role name from the signed-in user, uppercased).

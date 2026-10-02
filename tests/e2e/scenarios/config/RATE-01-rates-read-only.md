@@ -8,7 +8,7 @@
 Sales Exec must not be able to edit prices. The page is still useful for the price check.
 
 ## Steps
-1. Sign in as `lucia@anakata.test` / `password`. Open `http://localhost:3001/rms/commercial/rates`.
+1. Sign in as `lucia@iconic.test` / `password`. Open `http://localhost:3001/rms/commercial/rates`.
 2. Scroll the base-rates table, helper area, approval row, and **Price check — published vs your draft**.
 
 ## Expected

@@ -20,7 +20,7 @@ Approving a user from the drawer sends a single-use invitation. Accepting sets t
 
 ## Expected
 - [ ] E1 · After Add user the row is `Not invited` and offers `Invite`. After Invite the toast is `Invitation sent` and the row is `Invited` with `sent` and `expires` times (Galápagos). The expiry is 14 days after the sent time.
-- [ ] E2 · Mailpit subject is `Set your Anakata portal password`. The link is `http://localhost:3002/accept` with `token` and `email`.
+- [ ] E2 · Mailpit subject is `Set your Iconic portal password`. The link is `http://localhost:3002/accept` with `token` and `email`.
 - [ ] E3 · Accept title is `Set your password`. Fields are `Password` and `Confirm password`. Button is `Set password`. There is no static “at least 8 characters” hint. After submit the URL is `/rates`, the header shows `Blue Latitude Travel` and `Signed in as` `E2E Invite`.
 - [ ] E4 · Before the login in step 6, the drawer line is `Active` and has no `last sign-in` clause.
 - [ ] E5 · After step 6 the line is `Active · last sign-in` plus a Galápagos date and time.

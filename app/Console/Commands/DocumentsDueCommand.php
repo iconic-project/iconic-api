@@ -21,7 +21,7 @@ use Illuminate\Console\Command;
 
 final class DocumentsDueCommand extends Command
 {
-    protected $signature = 'anakata:documents-due {--dry-run : List what would be sent and write nothing}';
+    protected $signature = 'iconic:documents-due {--dry-run : List what would be sent and write nothing}';
 
     protected $description = 'Send due balance reminders, pre-trip itineraries, preference questionnaires and transfer vouchers (J7)';
 

@@ -65,11 +65,11 @@ test('the commission cap is raised by its listener and by the sweep', function (
     expect(Alert::query()->where('base_key', AlertKeys::cap($heard->id))->count())->toBe(1)
         ->and(Alert::query()->where('base_key', AlertKeys::cap($quiet->id))->count())->toBe(0);
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('kind', AlertKind::CommissionCap)->whereNull('resolved_at')->count())->toBe(2);
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('kind', AlertKind::CommissionCap)->count())->toBe(2);
 
@@ -81,7 +81,7 @@ test('the commission cap is raised by its listener and by the sweep', function (
         ->and($resolved?->resolved_at)->not->toBeNull();
 
     $quiet->forceFill(['status' => BookingStatus::Confirmed])->save();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('base_key', AlertKeys::cap($quiet->id))->first()?->resolution)
         ->toBe('the booking left ON_HOLD_AGENCY');
@@ -95,14 +95,14 @@ test('an overdue balance is raised by the flag listener and by the sweep', funct
 
     expect(Alert::query()->where('base_key', AlertKeys::overdue($heard->id, '2026-09-01'))->whereNull('resolved_at')->count())->toBe(1);
 
-    Artisan::call('anakata:flag-overdue');
+    Artisan::call('iconic:flag-overdue');
 
     expect(Alert::query()->where('base_key', AlertKeys::overdue($quiet->id, '2026-09-01'))->count())->toBe(1)
         ->and($quiet->fresh()?->status)->toBe(BookingStatus::Confirmed)
         ->and(ChangeHistory::query()->where('event', 'booking.overdue_flagged')->where('subject_id', $quiet->id)->exists())->toBeTrue();
 
     $heard->forceFill(['status' => BookingStatus::Cancelled])->save();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('base_key', AlertKeys::overdue($heard->id, '2026-09-01'))->first()?->resolution)
         ->toBe('the overdue flag cleared');
@@ -121,7 +121,7 @@ test('a wire is raised by its listener only once the window is past and resolved
     expect(Alert::query()->where('base_key', AlertKeys::wire($waiting->id))->count())->toBe(1);
 
     $quiet = wirePayment($booking, now()->subHours($hours)->subHour());
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('kind', AlertKind::WireNotReceived)->whereNull('resolved_at')->count())->toBe(2);
 
@@ -132,7 +132,7 @@ test('a wire is raised by its listener only once the window is past and resolved
         ->toBe('the wire was received or released');
 
     $quiet->forceFill(['status' => PaymentStatus::Settled])->save();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('base_key', AlertKeys::wire($quiet->id))->first()?->resolution)
         ->toBe('the wire was received or released');
@@ -147,7 +147,7 @@ test('a failed delivery is raised by its listener and resolved when a later one 
 
     $other = alertBooking(['reference' => 'ANK-DEL-QUIET']);
     delivery($other, DeliveryStatus::Failed);
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('kind', AlertKind::DeliveryFailed)->whereNull('resolved_at')->count())->toBe(2);
 
@@ -158,7 +158,7 @@ test('a failed delivery is raised by its listener and resolved when a later one 
         ->toBe('a later delivery was sent');
 
     delivery($other, DeliveryStatus::Sent);
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('booking_id', $other->id)->where('kind', AlertKind::DeliveryFailed)->first()?->resolution)
         ->toBe('a later delivery was sent');
@@ -168,17 +168,17 @@ test('an sla breach is sweep only and records why the task left the predicate', 
     $closed = slaTask('Respond', now()->subHour());
     $moved = slaTask('Call back', now()->subHour());
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('kind', AlertKind::SlaBreach)->whereNull('resolved_at')->count())->toBe(2)
         ->and(Alert::query()->where('crm_task_id', $closed->id)->first()?->crm_task_id)->toBe($closed->id);
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
     expect(Alert::query()->where('kind', AlertKind::SlaBreach)->count())->toBe(2);
 
     $closed->forceFill(['status' => TaskStatus::Done, 'closed_at' => now()])->save();
     $moved->forceFill(['due_at' => now()->addHour()])->save();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('crm_task_id', $closed->id)->first()?->resolution)->toBe('the task closed')
         ->and(Alert::query()->where('crm_task_id', $moved->id)->first()?->resolution)->toBe('the task is no longer past its due time');
@@ -187,8 +187,8 @@ test('an sla breach is sweep only and records why the task left the predicate', 
 test('acknowledging an open alert leaves it unresolved and removes it from the open list', function (): void {
     $this->seed(DemoUsersSeeder::class);
     overdueBooking('ANK-ACK');
-    Artisan::call('anakata:alerts');
-    $carolina = User::query()->where('email', 'carolina@anakata.test')->firstOrFail();
+    Artisan::call('iconic:alerts');
+    $carolina = User::query()->where('email', 'carolina@iconic.test')->firstOrFail();
     $alert = Alert::query()->firstOrFail();
 
     $response = $this->actingAs($carolina)->postJson('/api/alerts/'.$alert->id.'/acknowledge')->assertOk();
@@ -207,10 +207,10 @@ test('carolina mateo lucia and the cfo see only their kinds', function (): void 
     $this->seed(DemoUsersSeeder::class);
     seedEveryKind();
 
-    $carolina = User::query()->where('email', 'carolina@anakata.test')->firstOrFail();
-    $mateo = User::query()->where('email', 'mateo@anakata.test')->firstOrFail();
-    $lucia = User::query()->where('email', 'lucia@anakata.test')->firstOrFail();
-    $cfo = User::query()->where('email', 'cfo@anakata.test')->firstOrFail();
+    $carolina = User::query()->where('email', 'carolina@iconic.test')->firstOrFail();
+    $mateo = User::query()->where('email', 'mateo@iconic.test')->firstOrFail();
+    $lucia = User::query()->where('email', 'lucia@iconic.test')->firstOrFail();
+    $cfo = User::query()->where('email', 'cfo@iconic.test')->firstOrFail();
 
     expect(listedKinds($carolina))->toBe([
         AlertKind::CommissionCap->value,
@@ -236,13 +236,13 @@ test('a user with neither panel section cannot read the inbox', function (): voi
 
 test('resolving and restoring a condition inserts one hash suffix row', function (): void {
     $booking = alertBooking(['status' => BookingStatus::OnHoldAgency]);
-    Artisan::call('anakata:alerts');
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(Alert::query()->where('base_key', AlertKeys::cap($booking->id))->count())->toBe(1);
 
     $booking->forceFill(['status' => BookingStatus::Confirmed])->save();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
     $booking->forceFill(['status' => BookingStatus::OnHoldAgency])->save();
 
     $raise = app(RaiseAlert::class);
@@ -354,10 +354,10 @@ test('the wire sql predicate matches endsAtFor and skips a window that ends now'
 
 test('a still past due date closes the old overdue key and opens the new one', function (): void {
     $booking = overdueBooking('ANK-DUE');
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     $booking->forceFill(['balance_due_date_override' => '2026-09-10'])->save();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     $rows = Alert::query()->where('booking_id', $booking->id)->where('kind', AlertKind::OverdueBalance)->get();
     $open = $rows->whereNull('resolved_at');
@@ -371,10 +371,10 @@ test('a still past due date closes the old overdue key and opens the new one', f
 
 test('a future due date clears the overdue alert and raises nothing', function (): void {
     $booking = overdueBooking('ANK-FUTURE-DUE');
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     $booking->forceFill(['balance_due_date_override' => '2026-10-01'])->save();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     $rows = Alert::query()->where('booking_id', $booking->id)->where('kind', AlertKind::OverdueBalance)->get();
 
@@ -385,11 +385,11 @@ test('a future due date clears the overdue alert and raises nothing', function (
 
 test('the sweep query count stays flat when extra bookings match no predicate', function (): void {
     overdueBooking('ANK-FLAT');
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     DB::flushQueryLog();
     DB::enableQueryLog();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
     $before = count(DB::getQueryLog());
 
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
@@ -400,22 +400,22 @@ test('the sweep query count stays flat when extra bookings match no predicate', 
     ]);
 
     DB::flushQueryLog();
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect(count(DB::getQueryLog()))->toBe($before);
 });
 
 test('a critical alert emails each audience user once and freezes that list', function (): void {
     Mail::fake();
-    $first = adminUser(['email' => 'alerts-first@anakata.test']);
+    $first = adminUser(['email' => 'alerts-first@iconic.test']);
     $disabled = adminUser([
-        'email' => 'alerts-disabled@anakata.test',
+        'email' => 'alerts-disabled@iconic.test',
         'status' => UserStatus::Disabled,
         'disabled_at' => now(),
     ]);
     $alert = criticalOverdue('Critical balance', 'ANK-MAIL is overdue.');
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     Mail::assertSent(AlertMail::class, function (AlertMail $mail) use ($first): bool {
         return $mail->hasTo($first->email)
@@ -429,11 +429,11 @@ test('a critical alert emails each audience user once and freezes that list', fu
         ->and(AlertNotification::query()->where('user_id', $first->id)->first()?->status)->toBe(AlertNotificationStatus::Sent)
         ->and($alert->fresh()?->emailed_at)->not->toBeNull();
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
     Mail::assertSentCount(1);
 
-    adminUser(['email' => 'alerts-later@anakata.test']);
-    Artisan::call('anakata:alerts');
+    adminUser(['email' => 'alerts-later@iconic.test']);
+    Artisan::call('iconic:alerts');
 
     Mail::assertSentCount(1);
     expect(AlertNotification::query()->where('alert_id', $alert->id)->count())->toBe(1);
@@ -446,7 +446,7 @@ test('a resolved critical alert and a warn alert send nothing', function (): voi
     app(ResolveAlert::class)->handle($critical, 'cleared before mail');
     Alert::factory()->create();
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     Mail::assertNothingSent();
     expect(AlertNotification::query()->count())->toBe(0);
@@ -462,10 +462,10 @@ test('a failed critical send is retried once and then left failed', function ():
         return $pending;
     });
 
-    adminUser(['email' => 'alerts-retry@anakata.test']);
+    adminUser(['email' => 'alerts-retry@iconic.test']);
     $alert = criticalOverdue('Retry', 'Retry the critical alert.');
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
     $row = AlertNotification::query()->where('alert_id', $alert->id)->first();
 
     expect($sends)->toBe(1)
@@ -473,7 +473,7 @@ test('a failed critical send is retried once and then left failed', function ():
         ->and($row?->attempts)->toBe(1)
         ->and($alert->fresh()?->emailed_at)->toBeNull();
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
     $row = $row?->fresh();
 
     expect($sends)->toBe(2)
@@ -482,7 +482,7 @@ test('a failed critical send is retried once and then left failed', function ():
         ->and($alert->fresh()?->emailed_at)->not->toBeNull()
         ->and(AlertNotification::query()->where('alert_id', $alert->id)->count())->toBe(1);
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
     expect($sends)->toBe(2);
 });
 
@@ -498,9 +498,9 @@ test('a resolved critical alert is not retried', function (): void {
 
     adminUser();
     $alert = criticalOverdue('Resolved before retry', 'Do not retry this.');
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
     app(ResolveAlert::class)->handle($alert, 'cleared before the retry');
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect($sends)->toBe(1)
         ->and(AlertNotification::query()->first()?->attempts)->toBe(1);
@@ -523,7 +523,7 @@ test('the sweep does not change bookings payments tasks or deliveries', function
         $row->status->value,
     ];
 
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
     expect([
         Booking::query()->count(),
@@ -543,9 +543,9 @@ test('the crm section response has no sensitive fields', function (): void {
     $this->seed(DemoUsersSeeder::class);
     $booking = alertBooking();
     delivery($booking, DeliveryStatus::Failed);
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 
-    $carolina = User::query()->where('email', 'carolina@anakata.test')->firstOrFail();
+    $carolina = User::query()->where('email', 'carolina@iconic.test')->firstOrFail();
     $response = $this->actingAs($carolina)->getJson('/api/alerts?section=crm');
 
     $response->assertOk();
@@ -556,7 +556,7 @@ test('the crm section response has no sensitive fields', function (): void {
 test('meta counts ignore section and equal the sum of the open section lists', function (): void {
     $this->seed(DemoUsersSeeder::class);
     seedEveryKind();
-    $carolina = User::query()->where('email', 'carolina@anakata.test')->firstOrFail();
+    $carolina = User::query()->where('email', 'carolina@iconic.test')->firstOrFail();
 
     $plain = $this->actingAs($carolina)->getJson('/api/alerts?state=acknowledged')->assertOk();
     $rms = $this->actingAs($carolina)->getJson('/api/alerts?section=rms&state=resolved')->assertOk();
@@ -696,7 +696,7 @@ function seedEveryKind(): void
     wirePayment(alertBooking(['reference' => 'ANK-ALL-WIRE']), now()->subDays(5));
     slaTask('All sla', now()->subHour());
     delivery(alertBooking(['reference' => 'ANK-ALL-DEL']), DeliveryStatus::Failed);
-    Artisan::call('anakata:alerts');
+    Artisan::call('iconic:alerts');
 }
 
 /**

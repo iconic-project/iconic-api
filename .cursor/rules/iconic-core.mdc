@@ -1,14 +1,14 @@
 ---
-description: Anakata project core rules — applies to every repo (api, ui, rms, crm, engine)
+description: Iconic project core rules — applies to every repo (api, ui, rms, crm, engine)
 alwaysApply: true
 ---
 
-# Anakata — core rules
+# Iconic — core rules
 
 ## What we are building
-Three products for Anakata (Galápagos yacht expeditions, yachts ANAMARA and ANATIVA) that behave as one sales pipeline:
+Three products for Iconic (Galápagos yacht expeditions, yachts ANAMARA and ANATIVA) that behave as one sales pipeline:
 - **RMS** (reservations) — the ledger: inventory, departures, rates, offers, bookings, payments, commissions, documents, guest personal data, policies.
-- **Booking Engine** (anakata.co) — the shop window: renders only what the RMS publishes, captures behaviour and requests.
+- **Booking Engine** (iconic.co) — the shop window: renders only what the RMS publishes, captures behaviour and requests.
 - **CRM** — the relationship: contacts, identity, attribution, consent, lifecycle, segments, journeys, deals, tasks, conversations. **The CRM has no write path to money.**
 
 **RMS and CRM are two sections of one app** (one Laravel API, one staff panel). The engine stays a separate public frontend.
@@ -17,28 +17,28 @@ Repos (all open in one Cursor multi-root workspace):
 
 | Repo | What | Port |
 |---|---|---|
-| `anakata-api` | Laravel 13 + MySQL 8 + Redis. Conventional Laravel; route sections `/api/rms`, `/api/crm`, `/api/engine` | 8000 |
-| `anakata-ui` | Shared Nuxt layer: design tokens, Nuxt UI theme, shared components, composables, API types | — |
-| `anakata-panel` | Nuxt 4 + Nuxt UI, SPA, staff panel containing **both the RMS and the CRM** (header switch between them) | 3001 |
-| `anakata-engine` | Nuxt 4 + Nuxt UI, SSR, public booking engine | 3000 |
+| `iconic-api` | Laravel 13 + MySQL 8 + Redis. Conventional Laravel; route sections `/api/rms`, `/api/crm`, `/api/engine` | 8000 |
+| `iconic-ui` | Shared Nuxt layer: design tokens, Nuxt UI theme, shared components, composables, API types | — |
+| `iconic-panel` | Nuxt 4 + Nuxt UI, SPA, staff panel containing **both the RMS and the CRM** (header switch between them) | 3001 |
+| `iconic-engine` | Nuxt 4 + Nuxt UI, SSR, public booking engine | 3000 |
 
 ## Where the requirements live
-All requirements are in `anakata-api/docs/requirements/` (from other repos: `../anakata-api/docs/requirements/`).
-Sprints are in `anakata-api/docs/sprints/sprint-NN/` — a `README.md` (context for the whole sprint) and ordered task files (`01-….md`, `02-….md`), handed to you **one at a time**. Read `docs/requirements/08-dev-decisions.md` first — it records architecture choices and resolves contradictions between the documents.
+All requirements are in `iconic-api/docs/requirements/` (from other repos: `../iconic-api/docs/requirements/`).
+Sprints are in `iconic-api/docs/sprints/sprint-NN/` — a `README.md` (context for the whole sprint) and ordered task files (`01-….md`, `02-….md`), handed to you **one at a time**. Read `docs/requirements/08-dev-decisions.md` first — it records architecture choices and resolves contradictions between the documents.
 
 **Order of authority when documents disagree** (highest first):
 1. `08-dev-decisions.md` (development decisions + resolved contradictions)
-2. `05-decisions-and-open-questions.md` (Anakata's decisions of 12 Sep 2026)
+2. `05-decisions-and-open-questions.md` (Iconic's decisions of 12 Sep 2026)
 3. `07-three-system-integration-contract.md` (field ownership, events)
 4. `01`–`04` (functional spec, data model, business rules, engine contract)
-5. The RMS and CRM prototypes (HTML) — both implemented in `anakata-panel` — behaviour and design reference
+5. The RMS and CRM prototypes (HTML) — both implemented in `iconic-panel` — behaviour and design reference
 6. The booking-engine `booking_engine_SPEC.md` (with `booking_engine_README.md`) and its prototype `prototype/booking_engine_index.html` — **v3, written before the 12 Sep decisions**; its design is the reference, but its business rules lose to everything above.
 
 `examples/seed-data.json` = fixtures. `examples/booking-engine-feed.json` = feed shape. `screenshots/` = visual acceptance reference.
 
 ## Non-negotiable rules
 1. **Single write path.** Every field has one write path: every mutation is one Action. The CRM section never writes money or booking data. No read-only mirrors, no internal sync events.
-2. **Server-side enforcement.** Every permission, status transition, price, discount, commission cap and availability check is enforced in `anakata-api`. The frontends are convenience only — never the source of truth.
+2. **Server-side enforcement.** Every permission, status transition, price, discount, commission cap and availability check is enforced in `iconic-api`. The frontends are convenience only — never the source of truth.
 3. **Rules are data, not code.** Rates, business rules and engine settings live in the database with their source code (FIN-001, OPS-004…). Never hard-code a business value (a price, a percentage, a number of days) anywhere. If you need one, read it from the rules/rates/settings store.
 4. **Money** is USD integers (no cents) in the RMS and API. Cents only on rendered documents. Never floats.
 5. **Dates** are ISO `YYYY-MM-DD`, stored UTC. Departures are Sundays; cruises are 7 nights, Sunday → Sunday.
@@ -53,7 +53,7 @@ Sprints are in `anakata-api/docs/sprints/sprint-NN/` — a `README.md` (context 
 - Never invent business values, copy, enums or statuses. Enums come from doc 02 and the prototypes (e.g. `main_channel` has 8 values, `channel_of_origin` 40 — take them from the prototype source, do not make them up).
 
 ## Design fidelity
-The visual system is the HILO brand book (`anakata-api/docs/brand/hilo-brand-book.html`; from other repos, `../anakata-api/docs/brand/hilo-brand-book.html`). Light is the default theme. Dark uses the brand book's dark tokens. Satoshi is the only typeface. Cobalt (`--hilo-blue-500`) is for primary actions, focus, and brand moments. Ink and paper carry everything else. Cards use a 16px radius, a hairline border, and the xs shadow. Controls use an 8px radius. Eyebrows are 11px, regular weight, uppercase, tracked 0.06em. Headlines are regular weight, sentence case, tracking 0. The wordmark is HILO: Satoshi Bold, uppercase, tracking 0. Legacy token names (`--forest`, `--coral`, `--ivory`, `--hair`, `--sand`) still resolve to these brand tokens.
+The visual system is the HILO brand book (`iconic-api/docs/brand/hilo-brand-book.html`; from other repos, `../iconic-api/docs/brand/hilo-brand-book.html`). Light is the default theme. Dark uses the brand book's dark tokens. Satoshi is the only typeface. Cobalt (`--hilo-blue-500`) is for primary actions, focus, and brand moments. Ink and paper carry everything else. Cards use a 16px radius, a hairline border, and the xs shadow. Controls use an 8px radius. Eyebrows are 11px, regular weight, uppercase, tracked 0.06em. Headlines are regular weight, sentence case, tracking 0. The wordmark is HILO: Satoshi Bold, uppercase, tracking 0. Legacy token names (`--forest`, `--coral`, `--ivory`, `--hair`, `--sand`) still resolve to these brand tokens.
 
 ## Git: read-only
 Never run git commands that change anything: no commit, add, stash, reset, checkout/switch, branch create/delete, merge, rebase, tag, push, pull, fetch, or config changes. Read-only commands are allowed when useful: status, log, diff, show, branch --list, tag --list, remote -v.
@@ -63,8 +63,8 @@ When a task mentions committing, tagging or pushing, don't do it. Finish the wor
 1. You receive **one task file** at a time. Read the sprint's `README.md` first, then the task, then every document the task lists under "Read first" — before writing code.
 2. Do **only that task**. Do not start the next task, even if it looks obvious. If something outside the task is needed, write it under "Notes for later" in the report instead of building it.
 3. Write tests for every rule and calculation you implement.
-4. The task's checks (lint, typecheck, tests) must pass before you say you are done. In anakata-api, run them inside Docker (see `laravel.mdc`).
-5. Finish by **appending a section** to the sprint's `REPORT.md` (`anakata-api/docs/sprints/sprint-NN/REPORT.md`): task number and title, what was built, files touched, deviations from the task and why, open questions, notes for later.
+4. The task's checks (lint, typecheck, tests) must pass before you say you are done. In iconic-api, run them inside Docker (see `laravel.mdc`).
+5. Finish by **appending a section** to the sprint's `REPORT.md` (`iconic-api/docs/sprints/sprint-NN/REPORT.md`): task number and title, what was built, files touched, deviations from the task and why, open questions, notes for later.
 
 ## E2E scenarios
-Every sprint **adds or updates** its browser scenarios in `anakata-api/tests/e2e/scenarios/` and lists the ids on an **E2E scenarios** line in that sprint's README. The sprint's last task runs the P1 set. [`tests/e2e/scenarios/INDEX.md`](../../tests/e2e/scenarios/INDEX.md) is the single catalogue. If a product change makes a scenario wrong, update the scenario in the **same** task that changed the product. Agent rules and how to run the stack: `anakata-api/tests/e2e/README.md`.
+Every sprint **adds or updates** its browser scenarios in `iconic-api/tests/e2e/scenarios/` and lists the ids on an **E2E scenarios** line in that sprint's README. The sprint's last task runs the P1 set. [`tests/e2e/scenarios/INDEX.md`](../../tests/e2e/scenarios/INDEX.md) is the single catalogue. If a product change makes a scenario wrong, update the scenario in the **same** task that changed the product. Agent rules and how to run the stack: `iconic-api/tests/e2e/README.md`.

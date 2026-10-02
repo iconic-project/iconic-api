@@ -10,7 +10,7 @@ A Suite · 2 adults quote must match the rates price-check total, freeze at sale
 ## Steps
 1. Run `tests/e2e/bin/reset.sh`. Sign in as Carolina. Open `http://localhost:3001/rms/reservations/calendar`. Date range **Year 2027**. Confirm ANATIVA Suite 01 on `7 Nov 2027` shows `·` (Available). If it does not, **stop** — the reset did not apply.
 2. Open `/rms/reservations/bookings`. Click `＋ New reservation` (toolbar) or `＋ New Reservation` (header).
-3. Type **CABIN (FIT / Group)**. Guest `E2E One Cabin`, email `e2e.bkg02@anakata.test`, phone `+1 555 0202`, preferred **EMAIL**. Main channel **D2C**, origin **Hotel Booking Engine**.
+3. Type **CABIN (FIT / Group)**. Guest `E2E One Cabin`, email `e2e.bkg02@iconic.test`, phone `+1 555 0202`, preferred **EMAIL**. Main channel **D2C**, origin **Hotel Booking Engine**.
 4. Departure `7 Nov 2027` · ANATIVA. Adults `2`, children `0`. Cabin **Suite 01**. Payment method for deposit stays **Card — payment link** (default). D2C must not show Agent / Agency or Commission %.
 5. Read the price box. Click `Create reservation`.
 6. Success pane: `Reservation ANK-2026-0022 created.` Carolina has `payments.record`, so the pane then shows a copyable deposit link or the warning that the link failed (booking stays). Click `Done` — the toast fires here, then the panel opens.

@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class LedgerCheckCommand extends Command
 {
-    protected $signature = 'anakata:ledger-check';
+    protected $signature = 'iconic:ledger-check';
 
     protected $description = 'Compare settled card payments and refunds with Stripe events and report drift';
 

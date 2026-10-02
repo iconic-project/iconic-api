@@ -6,10 +6,10 @@ use App\Models\RateVersion;
 use App\Support\Config\Documents\RatesDocument;
 use Database\Seeders\ConfigSeeder;
 
-test('anakata config-verify accepts the seeded current documents', function (): void {
+test('iconic config-verify accepts the seeded current documents', function (): void {
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('rates v1: valid')
         ->expectsOutputToContain('business_rules v1: valid')
@@ -17,7 +17,7 @@ test('anakata config-verify accepts the seeded current documents', function (): 
         ->expectsOutputToContain('extras v1: valid');
 });
 
-test('anakata config-verify fails naming kind, version and path when a required field is missing', function (): void {
+test('iconic config-verify fails naming kind, version and path when a required field is missing', function (): void {
     $this->seed(ConfigSeeder::class);
 
     $document = RatesDocument::initial();
@@ -33,13 +33,13 @@ test('anakata config-verify fails naming kind, version and path when a required 
         'updated_by' => null,
     ]);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('rates v2: terms.cabin_deposit_pct');
 });
 
-test('anakata config-verify fails when a kind has no published version', function (): void {
-    $this->artisan('anakata:config-verify')
+test('iconic config-verify fails when a kind has no published version', function (): void {
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('rates: No published rates — run the seeders')
         ->expectsOutputToContain('business_rules: No published business rules — run the seeders')

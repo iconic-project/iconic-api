@@ -57,11 +57,11 @@ test('at T-45 guests with email get their own link and the rest go to the lead, 
     ]);
 
     $this->travelTo(CarbonImmutable::parse('2028-07-19 12:00:00', BusinessTime::zone()));
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Questionnaire)->count())->toBe(0);
 
     $this->travelTo(CarbonImmutable::parse('2028-07-20 12:00:00', BusinessTime::zone()));
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
 
     $own = Delivery::query()->where('idempotency_key', 'questionnaire:'.$booking->id.':'.$lead->id)->first();
     $shared = Delivery::query()->where('idempotency_key', 'questionnaire:'.$booking->id.':lead')->first();
@@ -85,7 +85,7 @@ test('at T-45 guests with email get their own link and the rest go to the lead, 
 
     Mail::assertSent(QuestionnaireMail::class, 2);
 
-    $this->artisan('anakata:documents-due')->assertSuccessful();
+    $this->artisan('iconic:documents-due')->assertSuccessful();
     expect(Delivery::query()->where('kind', DeliveryKind::Questionnaire)->count())->toBe(2);
 });
 
@@ -106,7 +106,7 @@ test('a dry run lists the questionnaire and writes nothing', function (): void {
     ]);
 
     $this->travelTo(CarbonImmutable::parse('2028-07-20 12:00:00', BusinessTime::zone()));
-    $this->artisan('anakata:documents-due', ['--dry-run' => true])
+    $this->artisan('iconic:documents-due', ['--dry-run' => true])
         ->assertSuccessful()
         ->expectsOutputToContain('questionnaire for ANK-2026-6303');
 

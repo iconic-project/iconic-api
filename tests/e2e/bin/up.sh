@@ -5,7 +5,7 @@ set -euo pipefail
 # shellcheck source=./_lib.sh
 . "$(cd "$(dirname "$0")" && pwd)/_lib.sh"
 
-say "up.sh  ANAKATA_ROOT=${ANAKATA_ROOT}  COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
+say "up.sh  ICONIC_ROOT=${ICONIC_ROOT}  COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
 
 check_memory
 ensure_docker

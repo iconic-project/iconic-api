@@ -48,9 +48,9 @@ test('two merges sharing a contact wait 1205 never 1213', function (): void {
     $actor = managerUser();
     Auth::login($actor);
 
-    $shared = Contact::factory()->create(['email' => 'shared@anakata.test']);
-    $left = Contact::factory()->create(['email' => 'left@anakata.test']);
-    $right = Contact::factory()->create(['email' => 'right@anakata.test']);
+    $shared = Contact::factory()->create(['email' => 'shared@iconic.test']);
+    $left = Contact::factory()->create(['email' => 'left@iconic.test']);
+    $right = Contact::factory()->create(['email' => 'right@iconic.test']);
     $observed = 'none';
 
     onContactMergeConnection('mysql', function () use ($shared, $left, $actor): void {

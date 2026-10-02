@@ -20,7 +20,7 @@ test('laravel mysql does not set CLIENT_FOUND_ROWS so created is affected === 1'
     expect($options)->not->toHaveKey(PDO::MYSQL_ATTR_FOUND_ROWS);
     expect($options)->not->toHaveKey(Mysql::ATTR_FOUND_ROWS);
 
-    $email = 'found-rows@anakata.test';
+    $email = 'found-rows@iconic.test';
     $now = now()->format('Y-m-d H:i:s');
 
     $created = (int) DB::affectingStatement(
@@ -77,15 +77,15 @@ test('a second upsert of the same new email does not 500', function (): void {
 
     $a = app(ResolveContact::class)->handle([
         'name' => 'One',
-        'email' => 'same@anakata.test',
+        'email' => 'same@iconic.test',
     ]);
     $b = app(ResolveContact::class)->handle([
         'name' => 'Two',
-        'email' => 'SAME@anakata.test',
+        'email' => 'SAME@iconic.test',
     ]);
 
     expect($b->id)->toBe($a->id);
-    expect(Contact::query()->where('email', 'same@anakata.test')->count())->toBe(1);
+    expect(Contact::query()->where('email', 'same@iconic.test')->count())->toBe(1);
     expect(ChangeHistory::query()->where('event', 'contact.updated')->count())->toBe(0);
 });
 
@@ -94,14 +94,14 @@ test('resolve contact applies type on create and never downgrades', function ():
 
     $passenger = app(ResolveContact::class)->handle([
         'name' => 'Passenger',
-        'email' => 'type@anakata.test',
+        'email' => 'type@iconic.test',
     ]);
     expect($passenger->type)->toBe(ContactType::DirectPassenger);
     expect($passenger->language)->toBe('en');
 
     $upgraded = app(ResolveContact::class)->handle([
         'name' => 'Passenger',
-        'email' => 'type@anakata.test',
+        'email' => 'type@iconic.test',
         'type' => ContactType::TravelAgent,
     ]);
     expect($upgraded->id)->toBe($passenger->id);
@@ -109,21 +109,21 @@ test('resolve contact applies type on create and never downgrades', function ():
 
     $unchanged = app(ResolveContact::class)->handle([
         'name' => 'Passenger',
-        'email' => 'type@anakata.test',
+        'email' => 'type@iconic.test',
         'type' => ContactType::CorporateCharter,
     ]);
     expect($unchanged->fresh()?->type)->toBe(ContactType::TravelAgent);
 
     $charter = app(ResolveContact::class)->handle([
         'name' => 'Charter',
-        'email' => 'charter-type@anakata.test',
+        'email' => 'charter-type@iconic.test',
         'type' => ContactType::CorporateCharter,
     ]);
     expect($charter->type)->toBe(ContactType::CorporateCharter);
 
     app(ResolveContact::class)->handle([
         'name' => 'Charter',
-        'email' => 'charter-type@anakata.test',
+        'email' => 'charter-type@iconic.test',
         'type' => ContactType::DirectPassenger,
     ]);
     expect($charter->fresh()?->type)->toBe(ContactType::CorporateCharter);

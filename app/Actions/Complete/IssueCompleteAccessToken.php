@@ -36,7 +36,7 @@ final class IssueCompleteAccessToken extends Action
             $this->revoke->handle($booking);
 
             $token = bin2hex(random_bytes(32));
-            $pageUrl = rtrim((string) config('anakata.engine_url'), '/').'/complete/'.$token;
+            $pageUrl = rtrim((string) config('iconic.engine_url'), '/').'/complete/'.$token;
             $departureDate = $booking->departure->date->toDateString();
 
             BookingAccessToken::query()->create([

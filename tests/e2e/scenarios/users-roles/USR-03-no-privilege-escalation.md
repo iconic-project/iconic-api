@@ -11,9 +11,9 @@
 ## Steps
 1. As Carolina on `/rms/admin/permissions`, click `＋ New role`. Name `Limited ops`. Description empty. `Copy permissions from` = `None`. `Create`.
 2. In the matrix, grant only `panel.rms` (Sections) and `users.manage` (Admin). Save (`Save` on the sticky bar). Confirm any access-loss dialog if it appears.
-3. Invite `limited@anakata.test`, name `Limited Op`, role `Limited ops`.
-4. `mail-latest.sh limited@anakata.test`. Context B: accept, password `Limited1`.
-5. Context B: open `/rms/admin/permissions`. `＋ Invite user`, try role **Admin**, name `Nope`, email `nope@anakata.test`. `Invite`.
+3. Invite `limited@iconic.test`, name `Limited Op`, role `Limited ops`.
+4. `mail-latest.sh limited@iconic.test`. Context B: accept, password `Limited1`.
+5. Context B: open `/rms/admin/permissions`. `＋ Invite user`, try role **Admin**, name `Nope`, email `nope@iconic.test`. `Invite`.
 6. Still context B: on Carolina’s row, try `Disable` (if the action is shown) and confirm.
 
 ## Expected

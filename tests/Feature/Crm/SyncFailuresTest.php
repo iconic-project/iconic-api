@@ -53,7 +53,7 @@ test('failed jobs and failed deliveries appear and retry', function (): void {
         'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-7701',
-        'billing_email' => 'guest@anakata.test',
+        'billing_email' => 'guest@iconic.test',
     ]);
     $document = app(PrepareIssueDocument::class)->handle($booking, DocumentKind::Invoice, actor: $admin);
     $delivery = app(SendDocument::class)->handle($booking, $document, $admin);

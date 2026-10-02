@@ -20,13 +20,13 @@ final class PollInboxJob implements ShouldQueue
 
     public function handle(MailboxReader $reader, CaptureInboundMessage $capture): void
     {
-        if (config('anakata.inbox.driver') === 'graph' && ! GraphMailbox::credentialsPresent()) {
+        if (config('iconic.inbox.driver') === 'graph' && ! GraphMailbox::credentialsPresent()) {
             Log::warning('Inbox poll skipped: Microsoft Graph keys are empty.');
 
             return;
         }
 
-        $pageSize = max(1, (int) config('anakata.inbox.page_size', 50));
+        $pageSize = max(1, (int) config('iconic.inbox.page_size', 50));
 
         for ($page = 0; $page < self::MAX_PAGES; $page++) {
             $batch = $reader->page($page, $pageSize);

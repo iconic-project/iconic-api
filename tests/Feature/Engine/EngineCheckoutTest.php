@@ -90,7 +90,7 @@ function checkoutSubmitPayload(array $cabins, int $expectedTotal, array $overrid
     return array_merge([
         'first_name' => 'Ada',
         'last_name' => 'Lovelace',
-        'email' => 'ada-'.uniqid().'@anakata.test',
+        'email' => 'ada-'.uniqid().'@iconic.test',
         'phone' => '+15551212',
         'preferred_channel' => PreferredChannel::Email->value,
         'travel_advisor' => false,
@@ -308,7 +308,7 @@ test('pay later creates requested bookings, a group, guests, consents and conver
         ['cabin_code' => 'S2', 'adults' => 1, 'children' => 1],
     ];
     $created = createCheckoutHold($departure, $cabins);
-    $email = 'party-'.uniqid().'@anakata.test';
+    $email = 'party-'.uniqid().'@iconic.test';
 
     $this->postJson(
         '/api/engine/checkout/'.$created['token'].'/submit',
@@ -417,7 +417,7 @@ test('an unknown or expired token is 404 on extend and submit', function (): voi
 test('checkout status is read from the database and never calls stripe', function (): void {
     $departure = checkoutWestDeparture();
     $created = createCheckoutHold($departure);
-    $email = 'status-'.uniqid().'@anakata.test';
+    $email = 'status-'.uniqid().'@iconic.test';
 
     $this->postJson(
         '/api/engine/checkout/'.$created['token'].'/submit',

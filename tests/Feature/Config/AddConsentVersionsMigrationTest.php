@@ -48,7 +48,7 @@ test('config-verify fails on a latest document missing consent versions, then th
     $v1 = insertPreChangeConsentVersions();
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('business_rules v1: legal.consent_versions.terms')
         ->expectsOutputToContain('business_rules v1: legal.consent_versions.marketing');
@@ -80,7 +80,7 @@ test('config-verify fails on a latest document missing consent versions, then th
     expect($history?->actor_label)->toBe('System');
     expect($history?->reason)->toBe(CONSENT_VERSIONS_APPROVAL);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('business_rules v2: valid');
 });

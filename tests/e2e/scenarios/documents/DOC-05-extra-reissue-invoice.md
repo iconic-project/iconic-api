@@ -9,14 +9,14 @@
 An issued invoice is immutable (J2). Adding a charge after issue must create version 2 with a reason and leave v1 downloadable as it was issued.
 
 ## Steps
-1. Sign in as Carolina. Open ANK-2026-0003. **Overview** → **Billing** → `Edit billing`. Set Email `e2e.doc05@anakata.test`. Save.
+1. Sign in as Carolina. Open ANK-2026-0003. **Overview** → **Billing** → `Edit billing`. Set Email `e2e.doc05@iconic.test`. Save.
 2. **Documents**: note invoice `v1`. **Preview** it and record Vessel charges / Ancillary / INVOICE TOTAL (expect `26,600.00` / `0.00` / `USD 26,600.00`). Close.
 3. **Extras** tab. Confirm the notice `This booking already has an invoice — changes here re-issue an updated invoice to the client.`
 4. Clear Mailpit: `curl -sS -X DELETE http://localhost:8025/api/v1/messages`.
 5. Under **Add a service**, Service `Domestic flights GYE/UIO ↔ SCY (round-trip)`. Qty `2`. Rate (USD) `420`. `Add to booking`.
 6. Re-open **Documents**. Preview **v2**. Open the earlier-version link for **v1**.
 7. ```
-   tests/e2e/bin/mail-find.sh --to e2e.doc05@anakata.test --subject "Booking confirmation & invoice — ANK-2026-0003"
+   tests/e2e/bin/mail-find.sh --to e2e.doc05@iconic.test --subject "Booking confirmation & invoice — ANK-2026-0003"
    ```
 
 ## Expected

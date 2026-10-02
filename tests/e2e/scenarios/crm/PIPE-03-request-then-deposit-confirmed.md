@@ -9,7 +9,7 @@
 Stages 5–7 are the booking. Sales does not drag them.
 
 ## Steps
-1. **Guest.** Pay later on a free cabin (WEB-07), email `e2e.pipe03@anakata.test`. Read the request reference.
+1. **Guest.** Pay later on a free cabin (WEB-07), email `e2e.pipe03@iconic.test`. Read the request reference.
 2. **Carolina.** Open `http://localhost:3001/crm/sales/pipeline`. Find the deal for that contact. It is opened by the queued `OpenDealOnBookingCreated` listener. If Horizon is down, that is **ENV**.
 3. In the RMS, confirm the request and record the deposit the way WEB-08 does, until the booking is **CONFIRMED**.
 4. Reload the pipeline. Open the same deal.

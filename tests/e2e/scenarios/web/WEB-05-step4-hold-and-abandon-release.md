@@ -21,4 +21,4 @@ Web checkout holds take real inventory (K5). Abandoning must free the cabin or t
 - [ ] E3 · After the guest leaves, the cell is `·` (Available) again. ⚠ UNVERIFIED — DELETE checkout on back / pagehide.
 
 ## Notes
-Do not wait 20 minutes — abandon must release now. If Back does not release, classify **BUG**. Guest context has no staff cookies. Target cabin is Suite 03 so this does not collide with seeded S01/S02. Before any other click, click `Analytics off` (or set `localStorage['anakata-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.
+Do not wait 20 minutes — abandon must release now. If Back does not release, classify **BUG**. Guest context has no staff cookies. Target cabin is Suite 03 so this does not collide with seeded S01/S02. Before any other click, click `Analytics off` (or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.

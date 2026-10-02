@@ -6,15 +6,15 @@ set -euo pipefail
 # shellcheck source=./_lib.sh
 . "$(cd "$(dirname "$0")" && pwd)/_lib.sh"
 
-say "install.sh  ANAKATA_ROOT=${ANAKATA_ROOT}  COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
+say "install.sh  ICONIC_ROOT=${ICONIC_ROOT}  COMPOSE_PROJECT_NAME=${COMPOSE_PROJECT_NAME}"
 
 ensure_docker
 ensure_pnpm
 
-ensure_sibling anakata-ui "${E2E_UI_REF:-dev}"
-ensure_sibling anakata-panel "${E2E_PANEL_REF:-dev}"
-ensure_sibling anakata-engine "${E2E_ENGINE_REF:-dev}"
-ensure_sibling anakata-portal "${E2E_PORTAL_REF:-dev}"
+ensure_sibling iconic-ui "${E2E_UI_REF:-dev}"
+ensure_sibling iconic-panel "${E2E_PANEL_REF:-dev}"
+ensure_sibling iconic-engine "${E2E_ENGINE_REF:-dev}"
+ensure_sibling iconic-portal "${E2E_PORTAL_REF:-dev}"
 
 pnpm_frozen "${UI_DIR}"
 pnpm_frozen "${PANEL_DIR}"

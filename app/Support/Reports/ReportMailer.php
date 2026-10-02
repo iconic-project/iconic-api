@@ -81,7 +81,7 @@ final class ReportMailer
     {
         $attempts = $existing instanceof ReportRunNotification ? 2 : 1;
         $definition = ReportDefinitions::get($run->definition_key);
-        $url = rtrim((string) config('anakata.panel_url'), '/').'/rms/reports/runs/'.$run->id;
+        $url = rtrim((string) config('iconic.panel_url'), '/').'/rms/reports/runs/'.$run->id;
         [$path, $name] = $this->attachment($run);
 
         try {
@@ -103,7 +103,7 @@ final class ReportMailer
      */
     private function attachment(ReportRun $run): array
     {
-        $limit = (int) config('anakata.report_attachment_bytes');
+        $limit = (int) config('iconic.report_attachment_bytes');
 
         foreach (ReportFormat::cases() as $format) {
             $path = $run->getAttribute($format->column());

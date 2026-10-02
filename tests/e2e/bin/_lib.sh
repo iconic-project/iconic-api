@@ -6,9 +6,9 @@ set -euo pipefail
 E2E_BIN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 E2E_DIR="$(cd "${E2E_BIN_DIR}/.." && pwd)"
 API_ROOT="$(cd "${E2E_DIR}/../.." && pwd)"
-ANAKATA_ROOT="${ANAKATA_ROOT:-$(cd "${API_ROOT}/.." && pwd)}"
+ICONIC_ROOT="${ICONIC_ROOT:-$(cd "${API_ROOT}/.." && pwd)}"
 
-export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-anakata-e2e}"
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-iconic-e2e}"
 
 E2E_LOG_DIR="${E2E_DIR}/runs/.logs"
 E2E_ENV_DIR="${E2E_DIR}/environment"
@@ -16,10 +16,10 @@ E2E_MIN_MEM_GB="${E2E_MIN_MEM_GB:-6}"
 E2E_FAIL_MEM_GB=3
 E2E_WAIT_SECS="${E2E_WAIT_SECS:-180}"
 
-PANEL_DIR="${ANAKATA_ROOT}/anakata-panel"
-ENGINE_DIR="${ANAKATA_ROOT}/anakata-engine"
-UI_DIR="${ANAKATA_ROOT}/anakata-ui"
-PORTAL_DIR="${ANAKATA_ROOT}/anakata-portal"
+PANEL_DIR="${ICONIC_ROOT}/iconic-panel"
+ENGINE_DIR="${ICONIC_ROOT}/iconic-engine"
+UI_DIR="${ICONIC_ROOT}/iconic-ui"
+PORTAL_DIR="${ICONIC_ROOT}/iconic-portal"
 
 PNPM_VERSION="12.4.1"
 
@@ -59,10 +59,10 @@ ensure_log_dir() {
 # Refuse migrate:fresh / down --wipe unless this is the isolated e2e project.
 require_destructive_ok() {
   local action="$1"
-  if [ "${COMPOSE_PROJECT_NAME}" = "anakata-e2e" ] || [ "${E2E_ALLOW_RESET:-}" = "1" ]; then
+  if [ "${COMPOSE_PROJECT_NAME}" = "iconic-e2e" ] || [ "${E2E_ALLOW_RESET:-}" = "1" ]; then
     return 0
   fi
-  die "${action} would erase the '${COMPOSE_PROJECT_NAME}' project's database. Refusing unless COMPOSE_PROJECT_NAME=anakata-e2e or E2E_ALLOW_RESET=1."
+  die "${action} would erase the '${COMPOSE_PROJECT_NAME}' project's database. Refusing unless COMPOSE_PROJECT_NAME=iconic-e2e or E2E_ALLOW_RESET=1."
 }
 
 mem_available_gb() {
@@ -228,16 +228,16 @@ print_heads() {
 git_clone_url() {
   local repo="$1"
   if [ -n "${GH_TOKEN:-}" ]; then
-    printf 'https://x-access-token:%s@github.com/anakata-project/%s.git' "${GH_TOKEN}" "${repo}"
+    printf 'https://x-access-token:%s@github.com/iconic-project/%s.git' "${GH_TOKEN}" "${repo}"
   else
-    printf 'https://github.com/anakata-project/%s.git' "${repo}"
+    printf 'https://github.com/iconic-project/%s.git' "${repo}"
   fi
 }
 
 ensure_sibling() {
   local name="$1"
   local ref="$2"
-  local dest="${ANAKATA_ROOT}/${name}"
+  local dest="${ICONIC_ROOT}/${name}"
   if [ -d "${dest}/.git" ]; then
     if [ -n "$(git -C "${dest}" status --porcelain)" ]; then
       die "Sibling ${name} at ${dest} has a dirty working tree. Commit, stash, or discard it before checking out ${ref}."

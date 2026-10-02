@@ -84,7 +84,7 @@ final class DemoExtrasSeeder extends Seeder
             'png_collected' => false,
         ], after: [
             'png_collected' => true,
-            'what' => 'PNG park entry fee — collected by Anakata (invoiced, due with the balance)',
+            'what' => 'PNG park entry fee — collected by Iconic (invoiced, due with the balance)',
         ], system: true);
     }
 }

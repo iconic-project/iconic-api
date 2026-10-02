@@ -115,6 +115,6 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
-    'reservations' => env('MAIL_RESERVATIONS', 'reservations@anakata.co'),
+    'reservations' => env('MAIL_RESERVATIONS', 'reservations@iconic.co'),
 
 ];

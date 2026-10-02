@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 
 class ConfigSeeder extends Seeder
 {
-    public const APPROVAL_REFERENCE = 'Initial values — Procesos Comerciales v5 and Anakata decisions of 12 Sep 2026';
+    public const APPROVAL_REFERENCE = 'Initial values — Procesos Comerciales v5 and Iconic decisions of 12 Sep 2026';
 
     public function __construct(private readonly ConfigRegistry $registry) {}
 

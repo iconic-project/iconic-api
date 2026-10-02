@@ -1,7 +1,7 @@
 # DOC-03 · Mark wire received → invoice, summary and receipt in Mailpit
 - **Tags:** sprint-7, documents
 - **Priority:** P1
-- **Users:** Carolina then cfo@anakata.test
+- **Users:** Carolina then cfo@iconic.test
 - **Start:** reset
 - **Needs:** Mailpit
 
@@ -9,15 +9,15 @@
 Reaching CONFIRMED must issue and send the invoice and booking summary, and the settled deposit must send one receipt (J7). A replayed mark-received must not send twice.
 
 ## Steps
-1. Sign in as Carolina. Open ANK-2026-0014 (R. Ellison). **Overview** → **Billing** → `Edit billing`. Set Email `e2e.doc03@anakata.test`. Save. Toast `Billing details updated`.
+1. Sign in as Carolina. Open ANK-2026-0014 (R. Ellison). **Overview** → **Billing** → `Edit billing`. Set Email `e2e.doc03@iconic.test`. Save. Toast `Billing details updated`.
 2. Clear Mailpit: `curl -sS -X DELETE http://localhost:8025/api/v1/messages`.
-3. Sign out. Sign in as `cfo@anakata.test` / `password`. Open 0014 → **Payments** (or `/rms/commercial/payments`). On `ANK-2026-0014-D01` click `Mark received`. Title `Wire received — bank reference`. Bank reference `SWIFT-PAY03`. Submit.
+3. Sign out. Sign in as `cfo@iconic.test` / `password`. Open 0014 → **Payments** (or `/rms/commercial/payments`). On `ANK-2026-0014-D01` click `Mark received`. Title `Wire received — bank reference`. Bank reference `SWIFT-PAY03`. Submit.
 4. Wait for the header `CONFIRMED`. Open **Documents**.
 5. Run:
    ```
-   tests/e2e/bin/mail-find.sh --to e2e.doc03@anakata.test --subject "Booking confirmation & invoice — ANK-2026-0014" --sha256
-   tests/e2e/bin/mail-find.sh --to e2e.doc03@anakata.test --subject "Your Anakata booking summary — ANK-2026-0014"
-   tests/e2e/bin/mail-find.sh --to e2e.doc03@anakata.test --subject "Payment confirmation — ANK-2026-0014"
+   tests/e2e/bin/mail-find.sh --to e2e.doc03@iconic.test --subject "Booking confirmation & invoice — ANK-2026-0014" --sha256
+   tests/e2e/bin/mail-find.sh --to e2e.doc03@iconic.test --subject "Your Iconic booking summary — ANK-2026-0014"
+   tests/e2e/bin/mail-find.sh --to e2e.doc03@iconic.test --subject "Payment confirmation — ANK-2026-0014"
    ```
 6. Cross-check the invoice attachment sha256:
    ```

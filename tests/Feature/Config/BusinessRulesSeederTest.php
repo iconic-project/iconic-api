@@ -54,8 +54,8 @@ test('the seeded business rules document matches seed-data.json plus the new fie
         '430 Grand Bay Drive, Apt 1108',
         'Key Biscayne, FL 33149, United States',
     ]);
-    expect($document['legal_entity']['email'])->toBe('info@anakata.co');
-    expect($document['legal_entity']['website'])->toBe('anakata.co');
+    expect($document['legal_entity']['email'])->toBe('info@iconic.co');
+    expect($document['legal_entity']['website'])->toBe('iconic.co');
     expect($document['legal_entity']['ein'])->toBe('42-4742064');
     expect($document['legal_entity']['bank'])->toBe([
         'bank_name' => '[TBD]',

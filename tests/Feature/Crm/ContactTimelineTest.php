@@ -101,7 +101,7 @@ test('the timeline merges every allowed source newest first and hides sensitive 
         'booking_id' => $booking->id,
         'kind' => DeliveryKind::Invoice,
         'status' => DeliveryStatus::Sent,
-        'to' => ['guest@anakata.test'],
+        'to' => ['guest@iconic.test'],
         'created_at' => now()->addMinutes(2),
     ]);
 
@@ -158,7 +158,7 @@ test('the timeline merges every allowed source newest first and hides sensitive 
 
     $delivery = $items->firstWhere('kind', 'delivery');
     expect($delivery['detail'])->toContain('Sent');
-    expect($delivery['detail'])->toContain('guest@anakata.test');
+    expect($delivery['detail'])->toContain('guest@iconic.test');
 
     $consent = $items->firstWhere('kind', 'consent');
     expect($consent['detail'])->toContain('accepted');
@@ -177,8 +177,8 @@ test('the timeline merges every allowed source newest first and hides sensitive 
 
 test('a merged contact timeline includes the loser booking and events', function (): void {
     $actor = managerUser();
-    $survivor = Contact::factory()->create(['name' => 'Older', 'email' => 'older@anakata.test']);
-    $loser = Contact::factory()->create(['name' => 'Newer', 'email' => 'newer@anakata.test']);
+    $survivor = Contact::factory()->create(['name' => 'Older', 'email' => 'older@iconic.test']);
+    $loser = Contact::factory()->create(['name' => 'Newer', 'email' => 'newer@iconic.test']);
     $booking = timelineBooking($loser, $actor);
 
     DB::transaction(fn () => History::record($booking, 'booking.created', after: [

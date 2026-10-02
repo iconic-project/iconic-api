@@ -138,7 +138,7 @@ test('cfo can read holds remaining minutes and business-day rules', function ():
         managerUser(),
     );
 
-    $response = $this->actingAs(externalFinanceUser(['email' => 'cfo@anakata.test']))
+    $response = $this->actingAs(externalFinanceUser(['email' => 'cfo@iconic.test']))
         ->getJson('/api/rms/holds')
         ->assertOk()
         ->assertJsonPath('data.0.booking_id', $booking->id)

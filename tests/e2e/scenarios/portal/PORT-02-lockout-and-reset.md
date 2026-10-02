@@ -22,7 +22,7 @@ A wrong password, an unknown address, a disabled account and a suspended agency 
 - [ ] E1 · Wrong password shows one message: `These credentials do not match our records.`
 - [ ] E2 · The unknown address shows that same sentence, in the same place.
 - [ ] E3 · Both forgot submits show `We have emailed your password reset link.` Title is `Forgot password`. Link `Back to sign in` is present. Only `ada@portal.test` receives mail.
-- [ ] E4 · Mailpit subject is `Reset your Anakata portal password`. The URL is `http://localhost:3002/reset-password` with `token` and `email`.
+- [ ] E4 · Mailpit subject is `Reset your Iconic portal password`. The URL is `http://localhost:3002/reset-password` with `token` and `email`.
 - [ ] E5 · Reset title is `Reset password`. Fields `Password` and `Confirm password`. Button `Reset password`. After submit the notice is `Your password has been reset.` and `Back to sign in` is shown. You are not on the rates page.
 - [ ] E6 · `password` shows `These credentials do not match our records.` `Newpass1` lands on `/rates` with `Signed in as` `Ada Agent` and agency `Blue Latitude Travel`.
 - [ ] E7 · The 6th rapid failure shows `Too Many Attempts.` (the API 429 body). It is not the credentials sentence, and it is not the panel's `Too many attempts. Try again in a minute.`

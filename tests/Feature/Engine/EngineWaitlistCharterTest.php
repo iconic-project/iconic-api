@@ -35,7 +35,7 @@ function engineWaitlistPayload(int $departureId, array $overrides = []): array
         'cabin_category' => CabinCategory::Suite->value,
         'contact' => [
             'name' => 'Wait Guest',
-            'email' => 'wait-'.uniqid().'@anakata.test',
+            'email' => 'wait-'.uniqid().'@iconic.test',
         ],
         'adults' => 2,
         'children' => 0,
@@ -56,7 +56,7 @@ function engineCharterPayload(array $overrides = []): array
         'contact' => [
             'first_name' => 'Charter',
             'last_name' => 'Guest',
-            'email' => 'charter-'.uniqid().'@anakata.test',
+            'email' => 'charter-'.uniqid().'@iconic.test',
             'phone' => '+15550000',
         ],
         'message' => 'We would like the yacht for a week in November.',

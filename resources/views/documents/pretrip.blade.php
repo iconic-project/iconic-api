@@ -19,5 +19,5 @@
     @endforeach
     <div class="dsec">Before you travel</div>
     <div class="dnote">{{ $snapshot['before_you_travel'] ?? '' }}</div>
-    <div class="dfoot">ANAKATA · {{ $snapshot['reference'] ?? '' }}</div>
+    <div class="dfoot">ICONIC · {{ $snapshot['reference'] ?? '' }}</div>
 @endsection

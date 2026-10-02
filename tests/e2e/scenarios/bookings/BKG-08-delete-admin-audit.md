@@ -8,7 +8,7 @@
 `bookings.delete` is Admin. Soft-delete needs a reason and appears on Deleted & released.
 
 ## Steps
-1. Sign in as `mateo@anakata.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Open ANK-2026-0003. Read Delete.
+1. Sign in as `mateo@iconic.test` / `password`. Open `http://localhost:3001/rms/reservations/bookings`. Open ANK-2026-0003. Read Delete.
 2. Sign out. Sign in as Carolina in a fresh context. Open ANK-2026-0003. Click `Delete (admin only)`.
 3. Modal title `Delete reservation ANK-2026-0003`. Leave Reason empty — `Record` stays disabled. Type `E2E delete 0003`. `Record`.
 4. Scroll to **Deleted & released — audit**.

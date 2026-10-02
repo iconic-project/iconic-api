@@ -12,7 +12,7 @@ final class BusinessTime
 {
     public static function zone(): string
     {
-        return (string) config('anakata.business_timezone');
+        return (string) config('iconic.business_timezone');
     }
 
     public static function now(): CarbonImmutable

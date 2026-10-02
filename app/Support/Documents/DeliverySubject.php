@@ -18,7 +18,7 @@ final class DeliverySubject
         return match ($kind) {
             DeliveryKind::Invoice => 'Booking confirmation & invoice — '.$ref,
             DeliveryKind::FinalInvoice => 'Final invoice — '.$ref,
-            DeliveryKind::Summary => 'Your Anakata booking summary — '.$ref,
+            DeliveryKind::Summary => 'Your Iconic booking summary — '.$ref,
             DeliveryKind::Receipt => 'Payment confirmation — '.$ref,
             DeliveryKind::Voucher => 'Transfer voucher — '.$ref,
             DeliveryKind::Pretrip => 'Your expedition itinerary — '.$ref,
@@ -29,15 +29,15 @@ final class DeliverySubject
             DeliveryKind::Survey => 'Your post-trip survey — '.$ref,
             DeliveryKind::ReviewRequest => 'Would you share a review? — '.$ref,
             DeliveryKind::WaitlistOffer => 'A cabin is free',
-            DeliveryKind::CharterProposal => 'Your Anakata charter proposal',
-            DeliveryKind::PortalInvite => 'Set your Anakata portal password',
-            DeliveryKind::Journey => 'A note from Anakata — '.$ref,
+            DeliveryKind::CharterProposal => 'Your Iconic charter proposal',
+            DeliveryKind::PortalInvite => 'Set your Iconic portal password',
+            DeliveryKind::Journey => 'A note from Iconic — '.$ref,
         };
     }
 
     public static function forReminder(Booking $booking): string
     {
-        return 'Your Anakata balance — due '.$booking->balanceDueDate()->toDateString();
+        return 'Your Iconic balance — due '.$booking->balanceDueDate()->toDateString();
     }
 
     public static function forPaymentLink(Booking $booking, PaymentLink $link): string
@@ -45,9 +45,9 @@ final class DeliverySubject
         $ref = $booking->displayReference() ?? 'booking';
 
         return match ($link->kind) {
-            PaymentKind::Deposit => 'Complete your Anakata reservation — '.$ref,
-            PaymentKind::Balance => 'Pay your Anakata balance — '.$ref,
-            default => 'Anakata payment link — '.$ref,
+            PaymentKind::Deposit => 'Complete your Iconic reservation — '.$ref,
+            PaymentKind::Balance => 'Pay your Iconic balance — '.$ref,
+            default => 'Iconic payment link — '.$ref,
         };
     }
 }

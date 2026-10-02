@@ -8,7 +8,7 @@
 Open-redirect on `?redirect=` would send a staff session off-site.
 
 ## Steps
-For each URL, use a signed-out context, then sign in as `mateo@anakata.test` / `password`.
+For each URL, use a signed-out context, then sign in as `mateo@iconic.test` / `password`.
 
 1. Open `http://localhost:3001/login?redirect=//evil.com`.
 2. Sign out. Open `http://localhost:3001/login?redirect=/\evil.com`. Sign in as Mateo.

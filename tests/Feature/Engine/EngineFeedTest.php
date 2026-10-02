@@ -128,7 +128,7 @@ test('the feed excludes drafts, hidden departures, paused pending b2b and promo 
     expect($encoded)->not->toContain('PENDLEAK');
     expect($encoded)->not->toContain('B2BLEAK');
     expect($encoded)->not->toContain('PROMOLEAK');
-    expect($encoded)->not->toContain('ANAKATA10');
+    expect($encoded)->not->toContain('ICONIC10');
     expect($json['offers'][0]['code'] ?? null)->toBe('OPENING-27');
     expect($json['settings']['policies'])->not->toHaveKey('max_commission_pct');
     expect($json['settings']['policies'])->not->toHaveKey('cancellation_bands');

@@ -24,7 +24,7 @@ test('a limited manager cannot escalate privileges', function (): void {
     $this->actingAs($actor)
         ->postJson('/api/rms/users', [
             'name' => 'Nope',
-            'email' => 'nope@anakata.test',
+            'email' => 'nope@iconic.test',
             'role_id' => $adminRole->id,
         ])
         ->assertForbidden();
@@ -79,7 +79,7 @@ test('a limited manager can manage a user or role within its own permissions', f
     $this->actingAs($actor)
         ->postJson('/api/rms/users', [
             'name' => 'Inside',
-            'email' => 'inside@anakata.test',
+            'email' => 'inside@iconic.test',
             'role_id' => $subset->id,
         ])
         ->assertCreated()
@@ -137,7 +137,7 @@ test('an admin can perform the privilege changes a limited manager cannot', func
     $this->actingAs($admin)
         ->postJson('/api/rms/users', [
             'name' => 'Another admin',
-            'email' => 'another-admin@anakata.test',
+            'email' => 'another-admin@iconic.test',
             'role_id' => $adminRole->id,
         ])
         ->assertCreated();

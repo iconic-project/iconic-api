@@ -21,7 +21,7 @@
     <table class="dh">
         <tr>
             <td>
-                <div class="dlogo">ANAKATA</div>
+                <div class="dlogo">ICONIC</div>
                 <div class="dtag">Intimate Yacht Expeditions · Galápagos, Ecuador</div>
             </td>
             <td>

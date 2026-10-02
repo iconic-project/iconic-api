@@ -70,7 +70,7 @@ test('a subject request is due thirty calendar days later and raises one task', 
 
 test('an access export lists the relationship and no passenger data', function (): void {
     $admin = adminUser();
-    $contact = Contact::factory()->create(['email' => 'export@anakata.test']);
+    $contact = Contact::factory()->create(['email' => 'export@iconic.test']);
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
@@ -161,7 +161,7 @@ test('an objection withdraws marketing profiling and remarketing', function (): 
 
 test('erasure waits for the cruise and an open refund, then keeps the ledger', function (): void {
     $admin = adminUser();
-    $contact = Contact::factory()->create(['email' => 'erase-me@anakata.test', 'language' => 'en']);
+    $contact = Contact::factory()->create(['email' => 'erase-me@iconic.test', 'language' => 'en']);
     $language = $contact->language;
     $type = $contact->type;
     $future = ReservationFixtures::anamaraDeparture('2027-11-07');
@@ -181,7 +181,7 @@ test('erasure waits for the cruise and an open refund, then keeps the ledger', f
 
     $this->actingAs($admin)->postJson('/api/privacy/requests/'.$created->json('id').'/erase', [
         'verified_how' => 'Letter matched the booking email',
-        'confirmation' => 'erase-me@anakata.test',
+        'confirmation' => 'erase-me@iconic.test',
     ])->assertStatus(409);
 
     $futureBooking->forceFill(['contact_id' => Contact::factory()->create()->id])->save();
@@ -200,7 +200,7 @@ test('erasure waits for the cruise and an open refund, then keeps the ledger', f
 
     $this->actingAs($admin)->postJson('/api/privacy/requests/'.$created->json('id').'/erase', [
         'verified_how' => 'Letter matched the booking email',
-        'confirmation' => 'erase-me@anakata.test',
+        'confirmation' => 'erase-me@iconic.test',
     ])->assertStatus(409);
 
     $refund->forceFill(['status' => 'REJECTED'])->save();
@@ -212,7 +212,7 @@ test('erasure waits for the cruise and an open refund, then keeps the ledger', f
 
     $this->actingAs($admin)->postJson('/api/privacy/requests/'.$created->json('id').'/erase', [
         'verified_how' => 'Letter matched the booking email',
-        'confirmation' => 'Erase-Me@anakata.test',
+        'confirmation' => 'Erase-Me@iconic.test',
     ])->assertOk();
 
     $contact->refresh();
@@ -232,11 +232,11 @@ test('erasure waits for the cruise and an open refund, then keeps the ledger', f
     expect(ContactActivity::query()->where('contact_id', $contact->id)->count())->toBe(1);
     expect(ContactActivity::query()->where('contact_id', $contact->id)->value('body'))->toStartWith('Erased on ');
     expect(ErasureLog::query()->where('contact_id', $contact->id)->count())->toBe(1);
-    expect(ErasureLog::query()->value('email_sha256'))->toBe(hash('sha256', 'erase-me@anakata.test'));
+    expect(ErasureLog::query()->value('email_sha256'))->toBe(hash('sha256', 'erase-me@iconic.test'));
 
     $again = app(ResolveContact::class)->handle([
         'name' => 'Same person',
-        'email' => 'erase-me@anakata.test',
+        'email' => 'erase-me@iconic.test',
     ]);
     expect($again->id)->not->toBe($contact->id);
     expect(ContactConsent::query()->where('contact_id', $again->id)->count())->toBe(0);

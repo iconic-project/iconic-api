@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class WaitlistNotifyCommand extends Command
 {
-    protected $signature = 'anakata:waitlist-notify';
+    protected $signature = 'iconic:waitlist-notify';
 
     protected $description = 'Email the next waitlist entries when a cabin in their category is free';
 

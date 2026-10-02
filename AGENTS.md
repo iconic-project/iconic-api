@@ -1,4 +1,4 @@
-# anakata-api — agent notes
+# iconic-api — agent notes
 
 All PHP, Composer, Artisan, Pest, Pint and Larastan commands run **inside Docker**. Never install PHP or Laravel Boost on the host.
 

@@ -8,7 +8,7 @@
 An internal block is the first real claim holder. Calendar and layout must show the cabins as blocked, and release must free them and move the row.
 
 ## Steps
-1. Sign in as `mateo@anakata.test` / `password`. Header `MATEO R. — MANAGER`. Open `http://localhost:3001/rms/operations/blocks`. Active list shows `BLK-001` (ANAMARA · Suite 07–08 · 14 Nov 2027, Created by `System`).
+1. Sign in as `mateo@iconic.test` / `password`. Header `MATEO R. — MANAGER`. Open `http://localhost:3001/rms/operations/blocks`. Active list shows `BLK-001` (ANAMARA · Suite 07–08 · 14 Nov 2027, Created by `System`).
 2. Click `＋ New block`. Yacht **ANATIVA**. Tick departures `7 Nov 2027 · Northern Passage` and `14 Nov 2027 · Western Realm` (each shows `9 free`). Tick Suite 01, Suite 02, Suite 03. Reason **Fam trip**. `Create block`.
 3. Open `/rms/reservations/calendar`. Set Date range to **Year 2027**. Read ANATIVA Suite 01–03 on 7 Nov and 14 Nov.
 4. Open `/rms/reservations/yacht-layout`, Year 2027, pick `7 Nov 2027`, then `14 Nov 2027`.

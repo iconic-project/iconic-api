@@ -9,11 +9,11 @@ An expired HOLD frees the cabin and never cancels the request (G9). Confirm afte
 
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/rms/reservations/booking-requests`. Confirm ANK-R-2026-0041 is in the queue and its hold is not expired.
-2. From the anakata-api root, with the e2e compose project, run the documented command (not a `db-check` write):
+2. From the iconic-api root, with the e2e compose project, run the documented command (not a `db-check` write):
 
-   `COMPOSE_PROJECT_NAME=anakata-e2e docker compose exec app sh -c "php artisan inventory:expire-hold ANK-R-2026-0041"`
+   `COMPOSE_PROJECT_NAME=iconic-e2e docker compose exec app sh -c "php artisan inventory:expire-hold ANK-R-2026-0041"`
 
-   (Same as `docker compose exec app sh -c "php artisan inventory:expire-hold ANK-R-2026-0041"` when `COMPOSE_PROJECT_NAME` is already `anakata-e2e`.)
+   (Same as `docker compose exec app sh -c "php artisan inventory:expire-hold ANK-R-2026-0041"` when `COMPOSE_PROJECT_NAME` is already `iconic-e2e`.)
 3. Reload Booking Requests. Read the 0041 hold cell. Open Calendar Year 2027, ANAMARA Suite 04 on `21 Nov 2027`.
 4. On 0041 click `Confirm · send deposit link` and confirm.
 

@@ -1,4 +1,4 @@
-# Cloud-agent machine for the Anakata e2e harness.
+# Cloud-agent machine for the Iconic e2e harness.
 # Debian/Ubuntu base is required for Cursor computer-use (browser).
 # No PHP on this image — PHP, Composer and Artisan run inside Docker.
 

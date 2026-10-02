@@ -701,7 +701,7 @@ final class Registry
                 RuleStatus::Confirmed,
                 RuleWhere::Rates,
                 [],
-                '−5% · cabin bookings only (Anakata 12 Sep 2026)',
+                '−5% · cabin bookings only (Iconic 12 Sep 2026)',
                 null,
                 'Cabin quotes',
                 link: self::LINK_RATES,
@@ -766,7 +766,7 @@ final class Registry
             self::here(
                 'extras-due-hours',
                 $g,
-                'Anakata',
+                'Iconic',
                 'Extras & collected fees — due before departure',
                 RuleStatus::Confirmed,
                 ['payments.extras_due_hours'],
@@ -1090,7 +1090,7 @@ final class Registry
             new RuleDefinition(
                 'guests-per-cabin',
                 $g,
-                'Anakata',
+                'Iconic',
                 'Guests per cabin',
                 RuleStatus::Confirmed,
                 RuleWhere::EngineSettings,
@@ -1116,7 +1116,7 @@ final class Registry
             new RuleDefinition(
                 'language',
                 $g,
-                'Anakata',
+                'Iconic',
                 'Language',
                 RuleStatus::Confirmed,
                 RuleWhere::EngineSettings,
@@ -1137,7 +1137,7 @@ final class Registry
                 'Sales open 1 Nov 2026 · first cruise 7 Nov 2027',
                 null,
                 'Engine calendar',
-                note: 'Anakata 12 Sep 2026: keep OPS-006 — sales open 1 Nov 2026, first cruise 7 Nov 2027. The rest of the 2027 itinerary calendar is still pending (PRO-001).',
+                note: 'Iconic 12 Sep 2026: keep OPS-006 — sales open 1 Nov 2026, first cruise 7 Nov 2027. The rest of the 2027 itinerary calendar is still pending (PRO-001).',
                 link: self::LINK_DEPARTURES,
             ),
             self::here(
@@ -1524,7 +1524,7 @@ final class Registry
                 'OPS-002',
                 'Cabins per yacht',
                 '9 cabins',
-                'Physical inventory — fixed by the yacht. Both yachts share the same hull, layout, cabin numbering and rates (Anakata 12 Sep 2026).',
+                'Physical inventory — fixed by the yacht. Both yachts share the same hull, layout, cabin numbering and rates (Iconic 12 Sep 2026).',
                 'Calendar, Yacht Layout, engine deck plan',
             ),
             self::locked(

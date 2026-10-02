@@ -21,4 +21,4 @@ Step 3 is feed-driven. NORTH and FEST must not show the Western map mislabelled.
 - [ ] E4 · NORTH and FEST have **no** Route map tab.
 
 ## Notes
-Confirm slugs from the feed if they differ. `prefers-reduced-motion` may skip map motion — the tab and SVG must still exist on WEST. Before any other click, click `Analytics off` (or set `localStorage['anakata-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.
+Confirm slugs from the feed if they differ. `prefers-reduced-motion` may skip map motion — the tab and SVG must still exist on WEST. Before any other click, click `Analytics off` (or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Accepting analytics now also posts `POST /api/engine/events`. CRM-05 and CRM-06 own that behaviour.

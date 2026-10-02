@@ -103,7 +103,7 @@ final class AlertMailer
         }
 
         $attempts = $existing instanceof AlertNotification ? 2 : 1;
-        $url = rtrim((string) config('anakata.panel_url'), '/').AlertSubject::href($alert);
+        $url = rtrim((string) config('iconic.panel_url'), '/').AlertSubject::href($alert);
 
         try {
             Mail::to($user->email)->send(new AlertMail($alert->title, $alert->sentence, $url));

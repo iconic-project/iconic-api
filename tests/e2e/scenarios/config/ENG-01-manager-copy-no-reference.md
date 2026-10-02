@@ -8,7 +8,7 @@
 E3: copy-only engine changes may leave the approval empty. Managers must be able to publish notes.
 
 ## Steps
-1. Sign in as `mateo@anakata.test` / `password`. Open `http://localhost:3001/rms/booking-engine/settings`.
+1. Sign in as `mateo@iconic.test` / `password`. Open `http://localhost:3001/rms/booking-engine/settings`.
 2. In **Booking notes & messages**, edit `Book now, pay later — trip details sidebar` (append ` (e2e)`).
 3. Leave **Approval ref / reason (optional)** empty. `Save & publish`. Confirm `Publish these changes?`
 

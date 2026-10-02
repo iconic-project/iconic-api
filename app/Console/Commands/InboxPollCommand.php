@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\Log;
 
 final class InboxPollCommand extends Command
 {
-    protected $signature = 'anakata:inbox-poll';
+    protected $signature = 'iconic:inbox-poll';
 
     protected $description = 'Poll the configured mailbox for inbound CRM mail';
 
     public function handle(): int
     {
-        if (config('anakata.inbox.driver') === 'graph' && ! GraphMailbox::credentialsPresent()) {
+        if (config('iconic.inbox.driver') === 'graph' && ! GraphMailbox::credentialsPresent()) {
             Log::warning('Inbox poll skipped: Microsoft Graph keys are empty.');
             $this->warn('Inbox poll skipped: Microsoft Graph keys are empty.');
 

@@ -48,7 +48,7 @@ test('config-verify fails on a latest document missing legal_entity, then the mi
     $v1 = insertPreChangeLegalEntity();
     $this->seed(ConfigSeeder::class);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertFailed()
         ->expectsOutputToContain('business_rules v1: legal_entity.name')
         ->expectsOutputToContain('business_rules v1: legal_entity.bank.swift');
@@ -78,7 +78,7 @@ test('config-verify fails on a latest document missing legal_entity, then the mi
     expect($history?->actor_label)->toBe('System');
     expect($history?->reason)->toBe(LEGAL_ENTITY_APPROVAL);
 
-    $this->artisan('anakata:config-verify')
+    $this->artisan('iconic:config-verify')
         ->assertSuccessful()
         ->expectsOutputToContain('business_rules v2: valid');
 });
@@ -106,7 +106,7 @@ test('the migration adds only the missing legal_entity keys', function (): void 
     $v2 = BusinessRuleVersion::query()->orderByDesc('version')->firstOrFail();
     expect($v2->version)->toBe(2);
     expect($v2->document['legal_entity']['name'])->toBe('Custom Entity');
-    expect($v2->document['legal_entity']['email'])->toBe('info@anakata.co');
+    expect($v2->document['legal_entity']['email'])->toBe('info@iconic.co');
     expect($v2->document['legal_entity']['bank']['bank_name'])->toBe('Existing Bank');
     expect($v2->document['legal_entity']['bank']['swift'])->toBe('[TBD]');
 });

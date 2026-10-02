@@ -10,15 +10,15 @@ Doc 07 rule 6 / J5: a replayed `payment.received` must not send a second receipt
 
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/rms/reservations/calendar`. Date range **Year 2027**. Confirm ANATIVA Suite 01 on `7 Nov 2027` shows `·`. If it does not, **stop**.
-2. Open `/rms/reservations/bookings`. `＋ New reservation`. Type **CABIN (FIT / Group)**. Guest `E2E Doc04`, email `e2e.doc04@anakata.test`, phone `+1 555 0404`, preferred **EMAIL**. Main channel **D2C**, origin **Hotel Booking Engine**. Departure `7 Nov 2027` · ANATIVA. Adults `2`. Cabin **Suite 01**. Payment method for deposit stays **Card — payment link**. `Create reservation`. `Done`.
+2. Open `/rms/reservations/bookings`. `＋ New reservation`. Type **CABIN (FIT / Group)**. Guest `E2E Doc04`, email `e2e.doc04@iconic.test`, phone `+1 555 0404`, preferred **EMAIL**. Main channel **D2C**, origin **Hotel Booking Engine**. Departure `7 Nov 2027` · ANATIVA. Adults `2`. Cabin **Suite 01**. Payment method for deposit stays **Card — payment link**. `Create reservation`. `Done`.
 3. On the new booking (ANK-2026-0022) open **Payments**. If no OPEN deposit link, click `Create deposit link`.
 4. Clear Mailpit: `curl -sS -X DELETE http://localhost:8025/api/v1/messages`.
-5. From `anakata-api` run `tests/e2e/bin/replay-stripe-checkout.sh ANK-2026-0022` (posts `checkout.session.completed` twice, same event id). If Stripe test keys are configured, pay once with a test card instead and do **not** use live mode — then still do not expect a second receipt from a replay of the same event.
+5. From `iconic-api` run `tests/e2e/bin/replay-stripe-checkout.sh ANK-2026-0022` (posts `checkout.session.completed` twice, same event id). If Stripe test keys are configured, pay once with a test card instead and do **not** use live mode — then still do not expect a second receipt from a replay of the same event.
 6. Refresh the booking. Read Overview, **Documents**, and Mailpit:
    ```
-   tests/e2e/bin/mail-find.sh --to e2e.doc04@anakata.test --subject "Payment confirmation — ANK-2026-0022"
-   tests/e2e/bin/mail-find.sh --to e2e.doc04@anakata.test --subject "Booking confirmation & invoice — ANK-2026-0022"
-   tests/e2e/bin/mail-find.sh --to e2e.doc04@anakata.test --subject "Your Anakata booking summary — ANK-2026-0022"
+   tests/e2e/bin/mail-find.sh --to e2e.doc04@iconic.test --subject "Payment confirmation — ANK-2026-0022"
+   tests/e2e/bin/mail-find.sh --to e2e.doc04@iconic.test --subject "Booking confirmation & invoice — ANK-2026-0022"
+   tests/e2e/bin/mail-find.sh --to e2e.doc04@iconic.test --subject "Your Iconic booking summary — ANK-2026-0022"
    ```
 
 ## Expected

@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 
 final class VerifyConfigCommand extends Command
 {
-    protected $signature = 'anakata:config-verify';
+    protected $signature = 'iconic:config-verify';
 
     protected $description = 'Validate the current published configuration documents against their rules';
 

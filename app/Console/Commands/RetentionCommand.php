@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Storage;
 
 final class RetentionCommand extends Command
 {
-    protected $signature = 'anakata:retention {--dry-run : Print counts and write nothing}';
+    protected $signature = 'iconic:retention {--dry-run : Print counts and write nothing}';
 
     protected $description = 'Anonymise passport data and purge medical notes on the published retention schedule (B4)';
 

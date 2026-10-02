@@ -1,6 +1,6 @@
-# anakata-api
+# iconic-api
 
-Laravel 13 API for Anakata (Galápagos yacht expeditions). RMS and CRM are two sections of this one app. The public booking engine is a separate frontend.
+Laravel 13 API for Iconic (Galápagos yacht expeditions). RMS and CRM are two sections of this one app. The public booking engine is a separate frontend.
 
 PHP, Composer, Artisan, Pest, Pint and Larastan run **inside Docker**. Do not run them on the host.
 
@@ -72,7 +72,7 @@ docker compose stop
 docker compose down
 ```
 
-`docker compose down -v` also deletes the MySQL volume. The next start recreates `anakata` and `anakata_test` via `docker/mysql/init/01-databases.sh`; you must migrate again.
+`docker compose down -v` also deletes the MySQL volume. The next start recreates `iconic` and `iconic_test` via `docker/mysql/init/01-databases.sh`; you must migrate again.
 
 ## Artisan and Composer
 
@@ -85,7 +85,7 @@ docker compose exec app sh -c "composer require package/name"
 
 Do not run `docker compose exec app sh` on its own (an interactive shell). Composer may print a `safe.directory` warning for `/app`; it is harmless and the command still runs.
 
-`anakata:retention` anonymises passport data and purges medical, dietary and accessibility notes on the published schedule (B4). **Do not run it in production until the client confirms those periods** (sprint 6 README, client question 1). `--dry-run` prints the counts and writes nothing.
+`iconic:retention` anonymises passport data and purges medical, dietary and accessibility notes on the published schedule (B4). **Do not run it in production until the client confirms those periods** (sprint 6 README, client question 1). `--dry-run` prints the counts and writes nothing.
 
 ## Tests, lint, static analysis
 
@@ -101,7 +101,7 @@ docker compose exec app sh -c "composer lint"
 docker compose exec app sh -c "composer analyse"
 ```
 
-Tests use the `anakata_test` database (pinned in `phpunit.xml`). Credentials come from `.env.testing`.
+Tests use the `iconic_test` database (pinned in `phpunit.xml`). Credentials come from `.env.testing`.
 
 ## URLs
 
@@ -118,7 +118,7 @@ Horizon runs inside the `app` container (supervisor). Telescope records requests
 
 ## Stripe
 
-The RMS creates Stripe Payment Links; Stripe's webhook (`POST /api/stripe/webhook`) settles them. Anakata stores Stripe ids only — never card numbers or last four digits (TEC-001).
+The RMS creates Stripe Payment Links; Stripe's webhook (`POST /api/stripe/webhook`) settles them. Iconic stores Stripe ids only — never card numbers or last four digits (TEC-001).
 
 Set these in `.env` (empty in `.env.example`; the client still owes test and live keys):
 
@@ -145,12 +145,12 @@ Local demo users (seeded only in `local` and `testing`, password `password`):
 
 | Name | Email | Role |
 |---|---|---|
-| Carolina M. | carolina@anakata.test | Admin |
-| Mateo R. | mateo@anakata.test | Manager |
-| Lucía B. | lucia@anakata.test | Sales Exec |
-| CFO (external) | cfo@anakata.test | External finance (RMS only) |
+| Carolina M. | carolina@iconic.test | Admin |
+| Mateo R. | mateo@iconic.test | Manager |
+| Lucía B. | lucia@iconic.test | Sales Exec |
+| CFO (external) | cfo@iconic.test | External finance (RMS only) |
 
-The first admin in a non-demo environment: `php artisan anakata:create-admin you@example.com "You"`. The invitation email appears in Mailpit (`http://localhost:8025`); the command also prints the link.
+The first admin in a non-demo environment: `php artisan iconic:create-admin you@example.com "You"`. The invitation email appears in Mailpit (`http://localhost:8025`); the command also prints the link.
 
 ## Requirements and sprints
 

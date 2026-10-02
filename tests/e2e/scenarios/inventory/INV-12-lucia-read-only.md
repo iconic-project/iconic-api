@@ -8,7 +8,7 @@
 Sales Exec can read inventory and must not see write controls. The API also refuses writes; this scenario checks the panel.
 
 ## Steps
-1. Sign in as `lucia@anakata.test` / `password` in a fresh context (sign out first if another user is signed in). Header `LUCÍA B. — SALES EXEC`.
+1. Sign in as `lucia@iconic.test` / `password` in a fresh context (sign out first if another user is signed in). Header `LUCÍA B. — SALES EXEC`.
 2. Open `http://localhost:3001/rms/booking-engine/itineraries`. Open the WEST card.
 3. Open `http://localhost:3001/rms/booking-engine/departures`. Read the toolbar and a status select. Open DEP-001.
 4. Open `http://localhost:3001/rms/operations/blocks`. Read the toolbar and BLK-001.
