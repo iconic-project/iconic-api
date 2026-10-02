@@ -43,13 +43,13 @@ test('the departure picker lists sold departures with passengers and is open to 
     expect($rows)->toHaveCount(2)
         ->and($rows[0]['departure_id'])->toBe($early['departure']->id)
         ->and($rows[0]['date'])->toBe('2028-06-04')
-        ->and($rows[0]['yacht'])->toBe($early['departure']->yacht->name)
+        ->and($rows[0]['property'])->toBe($early['departure']->property->name)
         ->and($rows[0]['passengers'])->toBe(1)
         ->and($rows[1]['departure_id'])->toBe($later['departure']->id)
         ->and($rows[1]['passengers'])->toBe(2)
         ->and(collect($rows)->pluck('departure_id'))->not->toContain($empty->id, $cancelled['departure']->id);
 
-    expect(array_keys($rows[0]))->toBe(['departure_id', 'date', 'yacht', 'passengers']);
+    expect(array_keys($rows[0]))->toBe(['departure_id', 'date', 'property', 'passengers']);
 
     $crm = pickerUser([Permission::PanelCrm]);
     $this->actingAs($crm)->getJson('/api/rms/guest-experience/departures')->assertForbidden();
@@ -136,7 +136,7 @@ function pickerDeparture(string $date, string $first, string $last, BookingStatu
     $departure = ReservationFixtures::anamaraDeparture($date);
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'status' => $status,
         'owner_id' => managerUser()->id,
     ]);

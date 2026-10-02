@@ -37,7 +37,7 @@ final class CabinPricer
         $lines = [
             new QuoteLine(
                 'base',
-                'Charter — full yacht, 7 nights ('.$input->year.' rate)',
+                'Charter — full property, 7 nights ('.$input->year.' rate)',
                 $base,
             ),
         ];

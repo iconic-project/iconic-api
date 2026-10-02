@@ -408,11 +408,11 @@ function stitchedEvent(Contact $contact, BehaviouralEventName $name, array $para
 
 function booked(Contact $contact, User $owner, int $departureId, string $cabin, BookingStatus $status): Booking
 {
-    $departure = Departure::query()->with('yacht.cabins')->findOrFail($departureId);
+    $departure = Departure::query()->with('property.cabins')->findOrFail($departureId);
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', $cabin)?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => $status,

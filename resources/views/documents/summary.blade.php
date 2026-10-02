@@ -8,10 +8,10 @@
         $footer = $snapshot['footer'] ?? [];
     @endphp
     <p style="margin:18px 0">Dear {{ $snapshot['lead_name'] ?? '' }},</p>
-    <p>We are delighted to confirm your expedition aboard {{ $cruise['yacht'] ?? '' }}. Everything is in place for an unforgettable journey through the Galápagos.</p>
+    <p>We are delighted to confirm your expedition aboard {{ $cruise['property'] ?? '' }}. Everything is in place for an unforgettable journey through the Galápagos.</p>
     <div class="dsec">Your expedition</div>
     <table class="dkv">
-        <tr><td>Vessel</td><td>{{ $cruise['yacht'] ?? '' }} — Intimate Yacht Expedition</td></tr>
+        <tr><td>Vessel</td><td>{{ $cruise['property'] ?? '' }} — Intimate Yacht Expedition</td></tr>
         <tr><td>Itinerary</td><td>{{ $cruise['itinerary'] ?? '' }}</td></tr>
         <tr><td>Embarkation</td><td>{{ $cruise['embark'] ?? '' }} · {{ $cruise['departure_date'] ?? '' }}</td></tr>
         <tr><td>Disembarkation</td><td>{{ $cruise['disembark'] ?? '' }} · {{ $cruise['return_date'] ?? '' }}</td></tr>
@@ -21,7 +21,7 @@
             <td>Accommodation</td>
             <td>
                 @if(! empty($cruise['charter']))
-                    Full yacht — private charter
+                    Full property — private charter
                 @else
                     {{ $cruise['cabin_label'] ?? '' }} — {{ $cruise['occupancy'] ?? '' }}
                 @endif

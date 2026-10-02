@@ -69,7 +69,7 @@ final class MoveBooking extends Action
      */
     public function preview(Booking $booking, array $data): array
     {
-        $booking->load(['departure.yacht', 'cabin', 'group', 'claims']);
+        $booking->load(['departure.property', 'cabin', 'group', 'claims']);
         $target = $this->targetDeparture((int) $data['departure_id']);
         $cabinCode = $this->cabinCode($booking, $data);
 
@@ -94,9 +94,9 @@ final class MoveBooking extends Action
                 $oldDepartureId,
                 [$oldDepartureId, $newDepartureId],
             );
-            $booking->load(['departure.yacht', 'cabin', 'group', 'claims', 'contact']);
+            $booking->load(['departure.property', 'cabin', 'group', 'claims', 'contact']);
 
-            $target = Departure::query()->with(['yacht.cabins', 'itinerary'])->findOrFail($newDepartureId);
+            $target = Departure::query()->with(['property.cabins', 'itinerary'])->findOrFail($newDepartureId);
             $cabinCode = $this->cabinCode($booking, $data);
 
             $this->assertMoveAllowed($booking, $target, $cabinCode);
@@ -125,7 +125,7 @@ final class MoveBooking extends Action
 
             $cabin = $booking->type === BookingType::Charter
                 ? null
-                : $target->yacht->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
+                : $target->property->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
 
             $booking->departure_id = $target->id;
             $booking->cabin_id = $cabin?->id;
@@ -134,7 +134,7 @@ final class MoveBooking extends Action
             $booking->total = $quoted['new_total'];
             $booking->save();
 
-            $booking->load(['departure.yacht', 'cabin']);
+            $booking->load(['departure.property', 'cabin']);
             $this->png->toBooking($booking);
 
             History::record($booking, 'booking.moved', before: $before, after: $this->historySnapshot($booking), actor: $actor);
@@ -142,7 +142,7 @@ final class MoveBooking extends Action
             BookingChargesChanged::dispatch($booking, 'Moved — reprice');
 
             return $booking->refresh()->load([
-                'departure.yacht',
+                'departure.property',
                 'cabin',
                 'contact',
                 'group.coordinator',
@@ -174,7 +174,7 @@ final class MoveBooking extends Action
 
     private function targetDeparture(int $id): Departure
     {
-        return Departure::query()->with(['yacht.cabins', 'itinerary'])->findOrFail($id);
+        return Departure::query()->with(['property.cabins', 'itinerary'])->findOrFail($id);
     }
 
     private function assertMoveAllowed(Booking $booking, Departure $target, ?string $cabinCode): void
@@ -218,11 +218,11 @@ final class MoveBooking extends Action
         }
 
         if ($booking->type === BookingType::Cabin) {
-            $cabin = $target->yacht->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
+            $cabin = $target->property->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
 
             if (! $cabin instanceof Cabin) {
                 throw ValidationException::withMessages([
-                    'cabin_code' => ['Pick a cabin on this departure\'s yacht.'],
+                    'cabin_code' => ['Pick a cabin on this departure\'s property.'],
                 ]);
             }
         }
@@ -382,14 +382,14 @@ final class MoveBooking extends Action
     private function targetCabins(Booking $booking, Departure $target, ?string $cabinCode): Collection
     {
         if ($booking->type === BookingType::Charter) {
-            return $target->yacht->cabins->sortBy('sort')->values();
+            return $target->property->cabins->sortBy('sort')->values();
         }
 
-        $cabin = $target->yacht->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
+        $cabin = $target->property->cabins->first(fn (Cabin $item): bool => $item->code === $cabinCode);
 
         if (! $cabin instanceof Cabin) {
             throw ValidationException::withMessages([
-                'cabin_code' => ['Pick a cabin on this departure\'s yacht.'],
+                'cabin_code' => ['Pick a cabin on this departure\'s property.'],
             ]);
         }
 
@@ -408,10 +408,10 @@ final class MoveBooking extends Action
      */
     private function historySnapshot(Booking $booking): array
     {
-        $booking->loadMissing(['departure.yacht', 'cabin']);
+        $booking->loadMissing(['departure.property', 'cabin']);
 
         return [
-            'departure' => Format::calendar($booking->departure->date).' · '.$booking->departure->yacht->code,
+            'departure' => Format::calendar($booking->departure->date).' · '.$booking->departure->property->code,
             'cabin' => $booking->cabinLabel(),
             'total' => $booking->total,
         ];

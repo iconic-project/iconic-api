@@ -20,7 +20,7 @@ class CompleteBookingResource extends JsonResource
      * @return array{
      *     id: int,
      *     reference: string|null,
-     *     yacht: string,
+     *     property: string,
      *     departure_date: string,
      *     return_date: string,
      *     itinerary_name: string,
@@ -31,7 +31,7 @@ class CompleteBookingResource extends JsonResource
      * @phpstan-return array{
      *     id: int,
      *     reference: string|null,
-     *     yacht: string,
+     *     property: string,
      *     departure_date: string,
      *     return_date: string,
      *     itinerary_name: string,
@@ -41,12 +41,12 @@ class CompleteBookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing(['departure.yacht', 'departure.itinerary', 'cabin', 'guests']);
+        $this->resource->loadMissing(['departure.property', 'departure.itinerary', 'cabin', 'guests']);
 
         return [
             'id' => $this->id,
             'reference' => $this->displayReference(),
-            'yacht' => $this->departure->yacht->name,
+            'property' => $this->departure->property->name,
             'departure_date' => $this->departure->date->toDateString(),
             'return_date' => $this->departure->returnDate()->toDateString(),
             'itinerary_name' => $this->departure->itinerary->name,

@@ -15,7 +15,7 @@ final class GuestCabin
         $booking = $guest->booking;
 
         if ($booking->type === BookingType::Charter && $booking->cabin_id === null) {
-            return 'Full yacht';
+            return 'Full property';
         }
 
         return $booking->cabin->label;

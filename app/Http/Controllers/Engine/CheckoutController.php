@@ -44,7 +44,7 @@ final class CheckoutController extends Controller
     ): JsonResponse {
         $validated = $request->validated();
         $departure = Departure::query()
-            ->with(['yacht.cabins', 'itinerary'])
+            ->with(['property.cabins', 'itinerary'])
             ->findOrFail((int) $validated['departure_id']);
 
         abort_unless($feed->isVisible($departure), HttpResponse::HTTP_NOT_FOUND);

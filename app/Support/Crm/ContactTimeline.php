@@ -187,7 +187,7 @@ final class ContactTimeline
         return DB::table('behavioural_events')
             ->leftJoin('itineraries', 'itineraries.code', '=', DB::raw("JSON_UNQUOTE(JSON_EXTRACT(behavioural_events.params, '$.itinerary_code'))"))
             ->leftJoin('departures', 'departures.id', '=', DB::raw("CAST(JSON_UNQUOTE(JSON_EXTRACT(behavioural_events.params, '$.departure_id')) AS UNSIGNED)"))
-            ->leftJoin('yachts', 'yachts.id', '=', 'departures.yacht_id')
+            ->leftJoin('properties', 'properties.id', '=', 'departures.property_id')
             ->where('behavioural_events.contact_id', $contactId)
             ->select([
                 DB::raw('behavioural_events.occurred_at as `at`'),
@@ -197,7 +197,7 @@ final class ContactTimeline
                         'name', behavioural_events.name,
                         'itinerary_name', itineraries.name,
                         'departure_date', DATE_FORMAT(departures.date, '%Y-%m-%d'),
-                        'yacht_name', yachts.name
+                        'property_name', properties.name
                     ),
                     '$.params', CAST(behavioural_events.params AS JSON)
                 ) as payload"),
@@ -704,7 +704,7 @@ final class ContactTimeline
                 $params,
                 is_string($payload['itinerary_name'] ?? null) ? $payload['itinerary_name'] : null,
                 is_string($payload['departure_date'] ?? null) ? $payload['departure_date'] : null,
-                is_string($payload['yacht_name'] ?? null) ? $payload['yacht_name'] : null,
+                is_string($payload['property_name'] ?? null) ? $payload['property_name'] : null,
             ),
         ];
     }

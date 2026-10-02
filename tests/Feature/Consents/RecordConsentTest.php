@@ -26,7 +26,7 @@ function recordConsentCabin(): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => managerUser()->id,
         'status' => BookingStatus::Confirmed,
     ]);

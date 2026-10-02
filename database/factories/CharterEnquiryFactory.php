@@ -26,7 +26,7 @@ class CharterEnquiryFactory extends Factory
             'departure_id' => null,
             'guests' => 12,
             'contact_id' => Contact::factory(),
-            'message' => 'We would like the yacht for a week.',
+            'message' => 'We would like the property for a week.',
             'source' => CharterEnquirySource::Engine,
             'status' => CharterEnquiryStatus::New,
         ];

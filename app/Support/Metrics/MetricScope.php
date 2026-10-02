@@ -12,7 +12,7 @@ use App\Enums\ChannelOfOriginGroup;
 final readonly class MetricScope
 {
     public function __construct(
-        public ?int $yachtId = null,
+        public ?int $propertyId = null,
         public ?int $itineraryId = null,
         public ?ChannelOfOriginGroup $channel = null,
         public ?int $agencyId = null,
@@ -20,19 +20,19 @@ final readonly class MetricScope
 
     public function restrictsBookings(): bool
     {
-        return $this->yachtId !== null
+        return $this->propertyId !== null
             || $this->itineraryId !== null
             || $this->channel !== null
             || $this->agencyId !== null;
     }
 
     /**
-     * @return array{yacht: int|null, itinerary: int|null, channel: string|null, agency: int|null}
+     * @return array{property: int|null, itinerary: int|null, channel: string|null, agency: int|null}
      */
     public function toArray(): array
     {
         return [
-            'yacht' => $this->yachtId,
+            'property' => $this->propertyId,
             'itinerary' => $this->itineraryId,
             'channel' => $this->channel?->value,
             'agency' => $this->agencyId,

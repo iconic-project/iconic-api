@@ -62,7 +62,7 @@ final class EngineSettingsDocument extends ConfigDocument
         return [
             'guests' => [
                 'max_per_cabin' => 3,
-                'max_per_yacht' => 16,
+                'max_per_property' => 16,
                 'child_min_age' => 6,
                 'child_max_age' => 17,
                 'adult_required_with_children' => true,
@@ -107,8 +107,8 @@ final class EngineSettingsDocument extends ConfigDocument
                 'online_deposit_perk' => 'Complimentary spa access aboard',
             ],
             'charter' => [
-                'headline' => 'The yacht, entirely yours',
-                'intro' => 'One yacht, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.',
+                'headline' => 'The property, entirely yours',
+                'intro' => 'One property, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.',
                 'itinerary_label' => 'Customizable',
                 'response_sla_hours' => 24,
                 'group_contexts' => [
@@ -159,7 +159,7 @@ final class EngineSettingsDocument extends ConfigDocument
         return new self(
             new GuestsSettings(
                 (int) ($guests['max_per_cabin'] ?? 0),
-                (int) ($guests['max_per_yacht'] ?? 0),
+                (int) ($guests['max_per_property'] ?? 0),
                 (int) ($guests['child_min_age'] ?? 0),
                 (int) ($guests['child_max_age'] ?? 0),
                 (bool) ($guests['adult_required_with_children'] ?? false),
@@ -214,7 +214,7 @@ final class EngineSettingsDocument extends ConfigDocument
      * @return array{
      *     guests: array{
      *         max_per_cabin: int,
-     *         max_per_yacht: int,
+     *         max_per_property: int,
      *         child_min_age: int,
      *         child_max_age: int,
      *         adult_required_with_children: bool,
@@ -282,7 +282,7 @@ final class EngineSettingsDocument extends ConfigDocument
         return [
             'guests' => ['required', 'array'],
             'guests.max_per_cabin' => ['required', 'integer', 'min:1', 'max:4'],
-            'guests.max_per_yacht' => ['required', 'integer', 'min:1', 'max:36', new EngineSettingsConstraint('yacht_fits_cabins')],
+            'guests.max_per_property' => ['required', 'integer', 'min:1', 'max:36', new EngineSettingsConstraint('property_fits_cabins')],
             'guests.child_min_age' => ['required', 'integer', 'min:0', 'max:17'],
             'guests.child_max_age' => ['required', 'integer', 'min:0', 'max:17', new EngineSettingsConstraint('child_ages_ordered')],
             'guests.adult_required_with_children' => ['required', 'boolean'],
@@ -336,7 +336,7 @@ final class EngineSettingsDocument extends ConfigDocument
     {
         return [
             'guests.max_per_cabin' => 'Max guests per cabin',
-            'guests.max_per_yacht' => 'Max guests per yacht',
+            'guests.max_per_property' => 'Max guests per property',
             'guests.child_min_age' => 'Child minimum age',
             'guests.child_max_age' => 'Child maximum age',
             'guests.adult_required_with_children' => 'Adult required with children',
@@ -400,10 +400,10 @@ final class EngineSettingsDocument extends ConfigDocument
     {
         $warnings = [];
 
-        if ($this->guests->maxPerYacht !== 16) {
+        if ($this->guests->maxPerProperty !== 16) {
             $warnings[] = new Warning(
-                'guests.max_per_yacht',
-                'Charter capacity will show '.$this->guests->maxPerYacht.' guests (follows max per yacht).',
+                'guests.max_per_property',
+                'Charter capacity will show '.$this->guests->maxPerProperty.' guests (follows max per property).',
             );
         }
 

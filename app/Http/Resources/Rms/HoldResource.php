@@ -27,7 +27,7 @@ class HoldResource extends JsonResource
      * @return array{
      *     type: string,
      *     client: string,
-     *     departure: array{date: string, yacht: array{code: string, name: string}},
+     *     departure: array{date: string, property: array{code: string, name: string}},
      *     cabin: string,
      *     expires_at: string|null,
      *     remaining_business_minutes: int,
@@ -57,7 +57,7 @@ class HoldResource extends JsonResource
      * @return array{
      *     type: string,
      *     client: string,
-     *     departure: array{date: string, yacht: array{code: string, name: string}},
+     *     departure: array{date: string, property: array{code: string, name: string}},
      *     cabin: string,
      *     expires_at: DateTimeInterface|null,
      *     remaining_business_minutes: int,
@@ -68,7 +68,7 @@ class HoldResource extends JsonResource
      */
     public static function fromBooking(Booking $booking): array
     {
-        $booking->loadMissing(['departure.yacht', 'cabin', 'contact', 'bookingRequest', 'claims']);
+        $booking->loadMissing(['departure.property', 'cabin', 'contact', 'bookingRequest', 'claims']);
         $rules = app(CurrentConfig::class)->businessRules();
         $hours = BusinessHours::fromDocument($rules);
         $hold = $booking->claims
@@ -84,9 +84,9 @@ class HoldResource extends JsonResource
             'client' => $booking->contact->name,
             'departure' => [
                 'date' => $booking->departure->date->toDateString(),
-                'yacht' => [
-                    'code' => $booking->departure->yacht->code,
-                    'name' => $booking->departure->yacht->name,
+                'property' => [
+                    'code' => $booking->departure->property->code,
+                    'name' => $booking->departure->property->name,
                 ],
             ],
             'cabin' => $booking->cabinLabel(),

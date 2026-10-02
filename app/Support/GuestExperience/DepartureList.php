@@ -16,7 +16,7 @@ final class DepartureList
     /**
      * Departures that have passengers on sold bookings, earliest first.
      *
-     * @return Collection<int, array{departure_id: int, date: string, yacht: string, passengers: int}>
+     * @return Collection<int, array{departure_id: int, date: string, property: string, passengers: int}>
      */
     public static function withPassengers(): Collection
     {
@@ -42,7 +42,7 @@ final class DepartureList
         }
 
         return Departure::query()
-            ->with('yacht')
+            ->with('property')
             ->whereIn('id', $counts->keys())
             ->orderBy('date')
             ->orderBy('id')
@@ -51,7 +51,7 @@ final class DepartureList
                 return [
                     'departure_id' => $departure->id,
                     'date' => $departure->date->toDateString(),
-                    'yacht' => $departure->yacht->name,
+                    'property' => $departure->property->name,
                     'passengers' => $counts->get($departure->id, 0),
                 ];
             })

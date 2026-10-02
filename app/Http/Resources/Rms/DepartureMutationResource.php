@@ -19,14 +19,14 @@ class DepartureMutationResource extends DepartureResource
      *     reference: string,
      *     date: string,
      *     return_date: string,
-     *     yacht_id: int,
+     *     property_id: int,
      *     itinerary_id: int,
      *     status: string,
      *     urgency_threshold: int,
      *     waitlist_enabled: bool,
      *     public_note: string|null,
      *     festive: bool,
-     *     yacht: array{id: int, code: string, name: string},
+     *     property: array{id: int, code: string, name: string},
      *     itinerary: array{id: int, code: string, name: string, status: string, festive: bool},
      *     rates: array{year: int, suite_from: int|null},
      *     availability: array{
@@ -49,7 +49,7 @@ class DepartureMutationResource extends DepartureResource
      *             }|null
      *         }>
      *     },
-     *     locks?: array{date_and_yacht: bool, delete: bool, reason: string|null},
+     *     locks?: array{date_and_property: bool, delete: bool, reason: string|null},
      *     warnings: list<string>
      * }
      */

@@ -12,9 +12,9 @@ use App\Enums\MainChannel;
 use App\Enums\ReferenceType;
 use App\Models\Booking;
 use App\Models\Departure;
+use App\Models\Property;
 use App\Models\User;
 use App\Models\WaitlistEntry;
-use App\Models\Yacht;
 use App\Services\References\ReferenceService;
 use App\Support\Bookings\ChannelSeedMap;
 use App\Support\BusinessTime;
@@ -196,18 +196,18 @@ final class DemoRequestsSeeder extends Seeder
      */
     private function anamaraByDateIndex(array $rows): array
     {
-        $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+        $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
         $mapped = [];
 
         foreach ($rows as $row) {
-            if (($row['yacht'] ?? '') !== 'ANAMARA') {
+            if (($row['property'] ?? '') !== 'ANAMARA') {
                 continue;
             }
 
             $departure = Departure::query()
-                ->where('yacht_id', $yacht->id)
+                ->where('property_id', $property->id)
                 ->whereDate('date', (string) $row['date'])
-                ->with('yacht.cabins')
+                ->with('property.cabins')
                 ->first();
 
             if (! $departure instanceof Departure) {

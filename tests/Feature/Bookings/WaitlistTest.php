@@ -100,7 +100,7 @@ test('positions compact after a removal and cabin_available flips when a block i
         ->assertOk()
         ->assertJsonCount(2, 'data');
 
-    $owner = $departure->yacht->cabins->firstWhere('code', 'OWNER');
+    $owner = $departure->property->cabins->firstWhere('code', 'OWNER');
     $holder = ClaimHolder::query()->create(['reference' => 'BLK-W', 'name' => 'Block']);
     DB::transaction(function () use ($departure, $owner, $holder): void {
         app(ClaimService::class)->claim($departure, collect([$owner]), $holder, ClaimKind::Block);

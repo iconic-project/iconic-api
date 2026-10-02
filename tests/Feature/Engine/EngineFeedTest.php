@@ -14,7 +14,7 @@ use App\Enums\OfferType;
 use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Offer;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Engine\EngineFeedVersion;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\ConfigSeeder;
@@ -66,7 +66,7 @@ test('the feed excludes drafts, hidden departures, paused pending b2b and promo 
 
     $hidden = Departure::factory()->create([
         'reference' => 'DEP-HIDDEN-LEAK',
-        'yacht_id' => Yacht::query()->where('code', 'ANAMARA')->value('id'),
+        'property_id' => Property::query()->where('code', 'ANAMARA')->value('id'),
         'itinerary_id' => OfferFixtures::west()->id,
         'status' => DepartureStatus::Hidden,
         'date' => '2028-05-07',
@@ -147,11 +147,11 @@ test('the feed excludes drafts, hidden departures, paused pending b2b and promo 
 });
 
 test('engine labels follow availability including LIMITED AVAILABILITY', function (): void {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $itinerary = OfferFixtures::west();
 
     $available = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-02',
         'status' => DepartureStatus::OnSale,
@@ -160,7 +160,7 @@ test('engine labels follow availability including LIMITED AVAILABILITY', functio
     ]);
 
     $urgent = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-09',
         'status' => DepartureStatus::OnSale,
@@ -169,7 +169,7 @@ test('engine labels follow availability including LIMITED AVAILABILITY', functio
     ]);
 
     $limited = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-16',
         'status' => DepartureStatus::OnSale,
@@ -177,7 +177,7 @@ test('engine labels follow availability including LIMITED AVAILABILITY', functio
     ]);
 
     $full = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-23',
         'status' => DepartureStatus::OnSale,
@@ -187,12 +187,12 @@ test('engine labels follow availability including LIMITED AVAILABILITY', functio
     $holder = ClaimHolder::query()->create(['reference' => 'HLD-ENG', 'name' => 'Engine']);
     $other = ClaimHolder::query()->create(['reference' => 'HLD-ENG-2', 'name' => 'Other']);
 
-    DB::transaction(function () use ($urgent, $limited, $full, $yacht, $holder, $other): void {
+    DB::transaction(function () use ($urgent, $limited, $full, $property, $holder, $other): void {
         $service = app(ClaimService::class);
-        $service->claim($urgent, $yacht->cabins->take(6), $holder, ClaimKind::Booking);
-        $service->claim($limited, $yacht->cabins, $holder, ClaimKind::Hold, HoldType::Agency, now()->addDay());
-        $service->claim($full, $yacht->cabins->take(8), $holder, ClaimKind::Booking);
-        $service->claim($full, $yacht->cabins->slice(8), $other, ClaimKind::Booking);
+        $service->claim($urgent, $property->cabins->take(6), $holder, ClaimKind::Booking);
+        $service->claim($limited, $property->cabins, $holder, ClaimKind::Hold, HoldType::Agency, now()->addDay());
+        $service->claim($full, $property->cabins->take(8), $holder, ClaimKind::Booking);
+        $service->claim($full, $property->cabins->slice(8), $other, ClaimKind::Booking);
     });
 
     $feed = $this->getJson('/api/engine/feed')->assertOk()->json('departures');
@@ -205,9 +205,9 @@ test('engine labels follow availability including LIMITED AVAILABILITY', functio
 });
 
 test('a claim updates the next feed and cabins response', function (): void {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $departure = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => OfferFixtures::west()->id,
         'date' => '2028-04-02',
         'status' => DepartureStatus::OnSale,
@@ -226,7 +226,7 @@ test('a claim updates the next feed and cabins response', function (): void {
     expect(engineKeys($cabins))->not->toContain('reference');
 
     $holder = ClaimHolder::query()->create(['reference' => 'HLD-S1', 'name' => 'Taken']);
-    $suite = $yacht->cabins->firstWhere('code', 'S1');
+    $suite = $property->cabins->firstWhere('code', 'S1');
 
     DB::transaction(function () use ($departure, $suite, $holder): void {
         app(ClaimService::class)->claim($departure, collect([$suite]), $holder, ClaimKind::Booking);
@@ -295,12 +295,12 @@ test('the feed query count stays flat as departures are added', function (): voi
     $first = count(DB::getQueryLog());
     DB::disableQueryLog();
 
-    $yacht = Yacht::query()->where('code', 'ANATIVA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANATIVA')->firstOrFail();
     $itinerary = OfferFixtures::west();
 
     foreach (['2028-06-04', '2028-06-11', '2028-06-18', '2028-06-25'] as $date) {
         Departure::factory()->create([
-            'yacht_id' => $yacht->id,
+            'property_id' => $property->id,
             'itinerary_id' => $itinerary->id,
             'date' => $date,
             'status' => DepartureStatus::OnSale,
@@ -320,7 +320,7 @@ test('the feed query count stays flat as departures are added', function (): voi
 
 test('hidden departures are 404 on the cabins endpoint', function (): void {
     $departure = Departure::factory()->create([
-        'yacht_id' => Yacht::query()->where('code', 'ANAMARA')->value('id'),
+        'property_id' => Property::query()->where('code', 'ANAMARA')->value('id'),
         'itinerary_id' => OfferFixtures::west()->id,
         'status' => DepartureStatus::Hidden,
         'date' => '2028-05-07',

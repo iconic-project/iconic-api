@@ -14,7 +14,7 @@ final class ScopeSummary
     public const ALL_CABIN_CODES = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'OWNER'];
 
     /**
-     * @param  list<array{yacht_code: string, date: string|DateTimeInterface, cabin_codes: list<string>}>  $scopes
+     * @param  list<array{property_code: string, date: string|DateTimeInterface, cabin_codes: list<string>}>  $scopes
      */
     public static function format(array $scopes): string
     {
@@ -22,11 +22,11 @@ final class ScopeSummary
 
         foreach ($scopes as $scope) {
             $date = self::dateString($scope['date']);
-            $key = $date.'|'.$scope['yacht_code'];
+            $key = $date.'|'.$scope['property_code'];
 
             if (! isset($groups[$key])) {
                 $groups[$key] = [
-                    'yacht_code' => $scope['yacht_code'],
+                    'property_code' => $scope['property_code'],
                     'date' => $date,
                     'cabin_codes' => [],
                 ];
@@ -38,16 +38,16 @@ final class ScopeSummary
         }
 
         uksort($groups, function (string $left, string $right): int {
-            [$leftDate, $leftYacht] = explode('|', $left, 2);
-            [$rightDate, $rightYacht] = explode('|', $right, 2);
+            [$leftDate, $leftProperty] = explode('|', $left, 2);
+            [$rightDate, $rightProperty] = explode('|', $right, 2);
 
-            return [$leftDate, $leftYacht] <=> [$rightDate, $rightYacht];
+            return [$leftDate, $leftProperty] <=> [$rightDate, $rightProperty];
         });
 
         $parts = [];
 
         foreach ($groups as $group) {
-            $parts[] = $group['yacht_code']
+            $parts[] = $group['property_code']
                 .' · '
                 .self::cabinsLabel($group['cabin_codes'])
                 .' · '
@@ -66,7 +66,7 @@ final class ScopeSummary
 
         if (count($unique) === count(self::ALL_CABIN_CODES)
             && array_diff(self::ALL_CABIN_CODES, $unique) === []) {
-            return 'Full yacht';
+            return 'Full property';
         }
 
         $suites = [];

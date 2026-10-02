@@ -52,7 +52,7 @@ test('a proposal is accepted into a frozen charter booking and an old version ca
             'last_name' => 'Lovelace',
             'email' => 'ada-'.uniqid().'@iconic.test',
         ],
-        'message' => 'The whole yacht, please.',
+        'message' => 'The whole property, please.',
     ])->assertCreated();
 
     $enquiry = CharterEnquiry::query()->firstOrFail();

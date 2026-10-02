@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Rms\IndexCalendarRequest;
 use App\Http\Resources\Rms\CalendarGridResource;
 use App\Models\Departure;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Support\Inventory\Snapshots;
 
 final class CalendarController extends Controller
@@ -19,20 +19,20 @@ final class CalendarController extends Controller
 
         [$from, $to] = $request->range();
 
-        $yachts = Yacht::query()
+        $properties = Property::query()
             ->with('cabins')
-            ->when($request->filled('yacht_id'), fn ($query) => $query->whereKey($request->validated('yacht_id')))
+            ->when($request->filled('property_id'), fn ($query) => $query->whereKey($request->validated('property_id')))
             ->orderBy('code')
             ->get();
 
         $departures = Departure::query()
-            ->with(['yacht', 'itinerary'])
+            ->with(['property', 'itinerary'])
             ->whereDate('date', '>=', $from->toDateString())
             ->whereDate('date', '<=', $to->toDateString())
-            ->when($request->filled('yacht_id'), fn ($query) => $query->where('yacht_id', $request->validated('yacht_id')))
+            ->when($request->filled('property_id'), fn ($query) => $query->where('property_id', $request->validated('property_id')))
             ->orderBy('date')
             ->orderBy(
-                Yacht::query()->select('code')->whereColumn('yachts.id', 'departures.yacht_id'),
+                Property::query()->select('code')->whereColumn('properties.id', 'departures.property_id'),
             )
             ->get();
 
@@ -40,12 +40,12 @@ final class CalendarController extends Controller
 
         $rows = [];
 
-        foreach ($yachts as $yacht) {
-            foreach ($yacht->cabins as $cabin) {
+        foreach ($properties as $property) {
+            foreach ($property->cabins as $cabin) {
                 $cells = [];
 
                 foreach ($departures as $departure) {
-                    if ($departure->yacht_id !== $yacht->id) {
+                    if ($departure->property_id !== $property->id) {
                         continue;
                     }
 
@@ -59,10 +59,10 @@ final class CalendarController extends Controller
                 }
 
                 $rows[] = [
-                    'yacht' => [
-                        'id' => $yacht->id,
-                        'code' => $yacht->code,
-                        'name' => $yacht->name,
+                    'property' => [
+                        'id' => $property->id,
+                        'code' => $property->code,
+                        'name' => $property->name,
                     ],
                     'cabin' => [
                         'id' => $cabin->id,
@@ -81,10 +81,10 @@ final class CalendarController extends Controller
                 'id' => $departure->id,
                 'reference' => $departure->reference,
                 'date' => $departure->date->toDateString(),
-                'yacht' => [
-                    'id' => $departure->yacht->id,
-                    'code' => $departure->yacht->code,
-                    'name' => $departure->yacht->name,
+                'property' => [
+                    'id' => $departure->property->id,
+                    'code' => $departure->property->code,
+                    'name' => $departure->property->name,
                 ],
                 'itinerary' => [
                     'id' => $departure->itinerary->id,

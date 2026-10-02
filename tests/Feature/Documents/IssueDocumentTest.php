@@ -26,7 +26,7 @@ function documentBooking(): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-0701',
         'total' => 26600,

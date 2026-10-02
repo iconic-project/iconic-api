@@ -6,7 +6,7 @@ namespace App\Http\Requests\Rms\Concerns;
 
 use App\Actions\Departures\CreateDeparture;
 use App\Models\Departure;
-use App\Support\Departures\YachtDateConflict;
+use App\Support\Departures\PropertyDateConflict;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\Validator;
 
@@ -16,14 +16,14 @@ trait ValidatesDepartureDate
         Validator $validator,
         ?int $ignoreId = null,
         mixed $dateInput = null,
-        mixed $yachtId = null,
+        mixed $propertyId = null,
     ): void {
         if ($validator->errors()->isNotEmpty()) {
             return;
         }
 
         $dateInput ??= $this->input('date');
-        $yachtId ??= $this->input('yacht_id');
+        $propertyId ??= $this->input('property_id');
 
         if (! is_string($dateInput) || $dateInput === '') {
             return;
@@ -32,18 +32,18 @@ trait ValidatesDepartureDate
         $date = CreateDeparture::calendarDate($dateInput);
 
         if ($date->dayOfWeek !== CarbonInterface::SUNDAY) {
-            $validator->errors()->add('date', YachtDateConflict::sundayMessage($date));
+            $validator->errors()->add('date', PropertyDateConflict::sundayMessage($date));
 
             return;
         }
 
-        if (! is_numeric($yachtId)) {
+        if (! is_numeric($propertyId)) {
             return;
         }
 
         $existing = Departure::query()
-            ->with('yacht')
-            ->where('yacht_id', (int) $yachtId)
+            ->with('property')
+            ->where('property_id', (int) $propertyId)
             ->whereDate('date', $date->toDateString())
             ->when($ignoreId !== null, fn ($query) => $query->where('id', '!=', $ignoreId))
             ->first();
@@ -51,7 +51,7 @@ trait ValidatesDepartureDate
         if ($existing instanceof Departure) {
             $validator->errors()->add(
                 'date',
-                YachtDateConflict::duplicateMessage($existing->yacht->code, $date, $existing->reference),
+                PropertyDateConflict::duplicateMessage($existing->property->code, $date, $existing->reference),
             );
         }
     }

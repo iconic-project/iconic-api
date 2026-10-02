@@ -38,7 +38,7 @@ final class Snapshots
 
         $departures = Departure::query()
             ->whereIn('itinerary_id', $itineraries->pluck('id'))
-            ->with(['yacht.cabins', 'itinerary'])
+            ->with(['property.cabins', 'itinerary'])
             ->get();
 
         $snapshots = app(Availability::class)->forDepartures($departures);

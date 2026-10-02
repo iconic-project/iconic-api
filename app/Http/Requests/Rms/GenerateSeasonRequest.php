@@ -26,8 +26,8 @@ class GenerateSeasonRequest extends FormRequest
         return [
             'from' => ['required', 'date_format:Y-m-d'],
             'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
-            'yacht_ids' => ['required', 'array', 'min:1'],
-            'yacht_ids.*' => ['integer', 'distinct', 'exists:yachts,id'],
+            'property_ids' => ['required', 'array', 'min:1'],
+            'property_ids.*' => ['integer', 'distinct', 'exists:properties,id'],
             'pattern' => ['required', Rule::enum(SeasonPattern::class)],
             'festive_window' => ['required', 'boolean'],
             'status' => ['required', Rule::in([DepartureStatus::Closed->value, DepartureStatus::OnSale->value])],

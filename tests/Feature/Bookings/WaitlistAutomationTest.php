@@ -184,7 +184,7 @@ test('a missing address is one blocked delivery and removal closes the follow-up
 function blockSuitesExcept(Departure $departure, string $keep): array
 {
     $holders = [];
-    $cabins = $departure->yacht->cabins->filter(
+    $cabins = $departure->property->cabins->filter(
         fn (Cabin $cabin): bool => $cabin->category === CabinCategory::Suite && $cabin->code !== $keep,
     );
 

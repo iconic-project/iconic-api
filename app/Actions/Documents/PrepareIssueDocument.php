@@ -31,7 +31,7 @@ final class PrepareIssueDocument extends Action
         return $this->transaction(function () use ($booking, $kind, $reason, $payment, $actor, $system): Document {
             $locked = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
             $locked->load([
-                'departure.yacht',
+                'departure.property',
                 'departure.itinerary',
                 'cabin',
                 'contact',

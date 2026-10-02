@@ -26,7 +26,7 @@ class StoreDepartureRequest extends FormRequest
     {
         return [
             'date' => ['required', 'date_format:Y-m-d'],
-            'yacht_id' => ['required', 'integer', 'exists:yachts,id'],
+            'property_id' => ['required', 'integer', 'exists:properties,id'],
             'itinerary_id' => ['required', 'integer', 'exists:itineraries,id'],
             'status' => ['required', Rule::enum(DepartureStatus::class)],
             'urgency_threshold' => ['sometimes', 'integer', 'min:0', 'max:9'],

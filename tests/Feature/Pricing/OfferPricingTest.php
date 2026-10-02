@@ -48,7 +48,7 @@ function westDeparture(string $date = '2027-11-07', bool $festive = false): Depa
         'festive' => $festive,
     ]);
 
-    return $departure->fresh(['yacht.cabins', 'itinerary']);
+    return $departure->fresh(['property.cabins', 'itinerary']);
 }
 
 /**

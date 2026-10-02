@@ -10,7 +10,7 @@ use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Console\Scheduling\Schedule;
@@ -22,16 +22,16 @@ beforeEach(function (): void {
 });
 
 test('the job releases expired holds in batches and writes hold.expired', function (): void {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $departure = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
         'date' => '2028-04-02',
     ]);
     $expired = ClaimHolder::query()->create(['reference' => 'EXP-1', 'name' => 'Expired']);
     $live = ClaimHolder::query()->create(['reference' => 'LIVE-1', 'name' => 'Live']);
-    $s1 = $yacht->cabins()->where('code', 'S1')->firstOrFail();
-    $s2 = $yacht->cabins()->where('code', 'S2')->firstOrFail();
+    $s1 = $property->cabins()->where('code', 'S1')->firstOrFail();
+    $s2 = $property->cabins()->where('code', 'S2')->firstOrFail();
 
     DB::transaction(function () use ($departure, $s1, $s2, $expired, $live): void {
         $service = app(ClaimService::class);

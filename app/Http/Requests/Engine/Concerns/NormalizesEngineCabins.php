@@ -19,7 +19,7 @@ trait NormalizesEngineCabins
             return null;
         }
 
-        return Departure::query()->with(['yacht.cabins', 'itinerary'])->find((int) $id);
+        return Departure::query()->with(['property.cabins', 'itinerary'])->find((int) $id);
     }
 
     protected function prepareForValidation(): void

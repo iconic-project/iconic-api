@@ -51,7 +51,7 @@ final class ManifestIndex
         );
 
         $query = Departure::query()
-            ->with(['yacht', 'itinerary']);
+            ->with(['property', 'itinerary']);
 
         if ($from !== null) {
             $query->where('date', '>=', $from);

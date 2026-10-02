@@ -276,7 +276,7 @@ function pendingCabin(array $overrides = []): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::PendingPayment,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -298,7 +298,7 @@ function overdueCabin(array $overrides = []): Booking
 
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', $cabin)?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
         'deposit_pct' => 10,

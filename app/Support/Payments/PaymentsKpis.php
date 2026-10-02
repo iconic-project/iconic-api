@@ -292,13 +292,13 @@ final class PaymentsKpis
             return;
         }
 
-        $yachtId = $scope->yachtId;
+        $propertyId = $scope->propertyId;
         $itineraryId = $scope->itineraryId;
 
-        if ($yachtId !== null || $itineraryId !== null) {
-            $booking->whereHas('departure', function (Builder $departure) use ($yachtId, $itineraryId): void {
-                if ($yachtId !== null) {
-                    $departure->where('yacht_id', $yachtId);
+        if ($propertyId !== null || $itineraryId !== null) {
+            $booking->whereHas('departure', function (Builder $departure) use ($propertyId, $itineraryId): void {
+                if ($propertyId !== null) {
+                    $departure->where('property_id', $propertyId);
                 }
 
                 if ($itineraryId !== null) {

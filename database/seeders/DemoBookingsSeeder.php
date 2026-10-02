@@ -18,8 +18,8 @@ use App\Models\Booking;
 use App\Models\Cabin;
 use App\Models\Departure;
 use App\Models\Group;
+use App\Models\Property;
 use App\Models\User;
-use App\Models\Yacht;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\CabinPricer;
@@ -204,7 +204,7 @@ final class DemoBookingsSeeder extends Seeder
         }
 
         $cabins = $type === BookingType::Charter
-            ? $departure->yacht->cabins->sortBy('sort')->values()
+            ? $departure->property->cabins->sortBy('sort')->values()
             : collect([$cabin]);
 
         app(ClaimService::class)->claim($departure, $cabins, $booking, ClaimKind::Booking);
@@ -243,7 +243,7 @@ final class DemoBookingsSeeder extends Seeder
             return null;
         }
 
-        $cabin = $departure->yacht->cabins->first(
+        $cabin = $departure->property->cabins->first(
             fn (Cabin $item): bool => $item->code === (string) $row['cab'],
         );
 
@@ -274,18 +274,18 @@ final class DemoBookingsSeeder extends Seeder
      */
     private function anamaraByDateIndex(array $rows): array
     {
-        $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+        $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
         $mapped = [];
 
         foreach ($rows as $row) {
-            if (($row['yacht'] ?? '') !== 'ANAMARA') {
+            if (($row['property'] ?? '') !== 'ANAMARA') {
                 continue;
             }
 
             $departure = Departure::query()
-                ->where('yacht_id', $yacht->id)
+                ->where('property_id', $property->id)
                 ->whereDate('date', (string) $row['date'])
-                ->with('yacht.cabins')
+                ->with('property.cabins')
                 ->first();
 
             if (! $departure instanceof Departure) {

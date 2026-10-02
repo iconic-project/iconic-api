@@ -277,7 +277,7 @@ class ReportQueries
         foreach ($this->metrics->occupancy($window, $scope)['departures'] as $departure) {
             $rows[] = [
                 $departure['date'],
-                $departure['yacht_code'],
+                $departure['property_code'],
                 $departure['sold_berths'],
                 $departure['sellable_berths'],
                 (string) ($departure['occupancy'] ?? ''),
@@ -285,7 +285,7 @@ class ReportQueries
         }
 
         return [
-            'headers' => ['departure_date', 'yacht', 'sold_berths', 'sellable_berths', 'occupancy'],
+            'headers' => ['departure_date', 'property', 'sold_berths', 'sellable_berths', 'occupancy'],
             'rows' => $rows,
         ];
     }
@@ -393,9 +393,9 @@ class ReportQueries
         $sql = '';
         $bindings = [];
 
-        if ($scope->yachtId !== null) {
-            $sql .= ' AND EXISTS (SELECT 1 FROM departures scope_departures WHERE scope_departures.id = '.$alias.'.departure_id AND scope_departures.yacht_id = ?)';
-            $bindings[] = $scope->yachtId;
+        if ($scope->propertyId !== null) {
+            $sql .= ' AND EXISTS (SELECT 1 FROM departures scope_departures WHERE scope_departures.id = '.$alias.'.departure_id AND scope_departures.property_id = ?)';
+            $bindings[] = $scope->propertyId;
         }
 
         if ($scope->itineraryId !== null) {

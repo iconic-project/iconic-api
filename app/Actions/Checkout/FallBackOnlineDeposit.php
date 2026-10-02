@@ -31,7 +31,7 @@ final class FallBackOnlineDeposit extends Action
                 return 0;
             }
 
-            $session->load(['bookings.departure.yacht.cabins', 'bookings.ratesVersion']);
+            $session->load(['bookings.departure.property.cabins', 'bookings.ratesVersion']);
             $changed = 0;
 
             foreach ($session->bookings as $booking) {
@@ -52,7 +52,7 @@ final class FallBackOnlineDeposit extends Action
 
         DepartureLocks::lock((int) $booking->departure_id);
         $booking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
-        $booking->load(['departure.yacht.cabins', 'ratesVersion', 'cabin']);
+        $booking->load(['departure.property.cabins', 'ratesVersion', 'cabin']);
 
         if ($booking->status !== BookingStatus::Requested || ! $booking->online_deposit) {
             return false;

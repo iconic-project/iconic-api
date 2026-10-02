@@ -418,7 +418,7 @@ test('panel-read OpenAPI schemas have properties', function (): void {
     expect($hold['properties'])->toHaveKeys(['booking_id', 'departure', 'remaining_business_minutes']);
     $holdDeparture = $hold['properties']['departure'] ?? [];
     expect($holdDeparture['type'] ?? $holdDeparture['properties'] ?? null)->not->toBe('string');
-    expect($holdDeparture['properties'] ?? [])->toHaveKeys(['date', 'yacht']);
+    expect($holdDeparture['properties'] ?? [])->toHaveKeys(['date', 'property']);
     expect($hold['properties']['remaining_business_minutes']['type'] ?? null)->toBe('integer');
     $holdRequest = $booking['properties']['request']['properties']['hold']['properties']
         ?? $booking['properties']['request']['properties']['hold']
@@ -901,7 +901,7 @@ test('sprint 11 response schemas name their enums and optional preference fields
     expect(sprint11SchemaRef($staff['properties']['source']))->toContain('GuestResponseSource');
 
     $picker = openApiSchema($spec, 'GuestExperienceDepartureResource');
-    expect($picker['properties'])->toHaveKeys(['departure_id', 'date', 'yacht', 'passengers']);
+    expect($picker['properties'])->toHaveKeys(['departure_id', 'date', 'property', 'passengers']);
 
     $surveyGuest = openApiSchema($spec, 'SurveyGuestResource');
     expect($surveyGuest['properties'])->toHaveKeys(['guest_id', 'name', 'cabin', 'responded']);

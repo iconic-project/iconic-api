@@ -55,7 +55,7 @@ final class IssueCharterProposal extends Action
         try {
             return $this->transaction(function () use ($enquiry, $actor, $reason, $disk, &$path): Document {
                 $enquiry = CharterEnquiry::query()->whereKey($enquiry->id)->lockForUpdate()->firstOrFail();
-                $enquiry->load(['contact', 'departure.yacht']);
+                $enquiry->load(['contact', 'departure.property']);
 
                 if (! in_array($enquiry->status, [
                     CharterEnquiryStatus::New,
@@ -124,7 +124,7 @@ final class IssueCharterProposal extends Action
                 $snapshot = [
                     'number' => $number,
                     'version' => $version,
-                    'yacht' => $enquiry->departure->yacht->name,
+                    'property' => $enquiry->departure->property->name,
                     'departure' => $enquiry->departure->date->toDateString(),
                     'return' => $enquiry->departure->returnDate()->toDateString(),
                     'guests' => $enquiry->guests,

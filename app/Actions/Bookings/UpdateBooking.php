@@ -46,7 +46,7 @@ final class UpdateBooking extends Action
             }
 
             return $booking->refresh()->load([
-                'departure.yacht',
+                'departure.property',
                 'cabin',
                 'contact',
                 'group.coordinator',

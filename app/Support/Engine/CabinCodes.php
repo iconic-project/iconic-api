@@ -11,14 +11,14 @@ final class CabinCodes
 {
     public static function resolve(Departure $departure, string $input): ?Cabin
     {
-        $departure->loadMissing('yacht.cabins');
+        $departure->loadMissing('property.cabins');
         $needle = trim($input);
 
         if ($needle === '') {
             return null;
         }
 
-        return $departure->yacht->cabins->first(
+        return $departure->property->cabins->first(
             fn (Cabin $cabin): bool => $cabin->code === $needle
                 || strcasecmp($cabin->code, $needle) === 0
                 || $cabin->label === $needle,

@@ -86,7 +86,7 @@ final class DecideOverdue extends Action
         ], reason: $reason, actor: $actor);
 
         return $booking->refresh()->load([
-            'departure.yacht',
+            'departure.property',
             'cabin',
             'contact',
             'group.coordinator',

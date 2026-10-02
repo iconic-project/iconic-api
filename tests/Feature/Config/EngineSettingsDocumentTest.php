@@ -6,11 +6,11 @@ use App\Support\Config\Documents\EngineSettingsDocument;
 use Database\Seeders\ConfigSeeder;
 use Illuminate\Support\Facades\Validator;
 
-test('rules reject cabin, yacht, ages, search months, locale and copy shape', function (): void {
+test('rules reject cabin, property, ages, search months, locale and copy shape', function (): void {
     $invalid = engineSettingsDocument([
         'guests' => [
             'max_per_cabin' => 5,
-            'max_per_yacht' => 0,
+            'max_per_property' => 0,
             'child_min_age' => 18,
             'child_max_age' => 18,
             'under_age_message' => '',
@@ -42,7 +42,7 @@ test('rules reject cabin, yacht, ages, search months, locale and copy shape', fu
     $errors = Validator::make($invalid, EngineSettingsDocument::rules())->errors();
 
     expect($errors->has('guests.max_per_cabin'))->toBeTrue();
-    expect($errors->has('guests.max_per_yacht'))->toBeTrue();
+    expect($errors->has('guests.max_per_property'))->toBeTrue();
     expect($errors->has('guests.child_min_age'))->toBeTrue();
     expect($errors->has('guests.child_max_age'))->toBeTrue();
     expect($errors->has('guests.under_age_message'))->toBeTrue();
@@ -72,11 +72,11 @@ test('the locale pins reject es', function (): void {
     expect($errors->has('locale.live.0'))->toBeTrue();
 });
 
-test('rules reject yacht over nine cabins, reversed child ages and search range', function (): void {
+test('rules reject property over nine cabins, reversed child ages and search range', function (): void {
     $document = engineSettingsDocument([
         'guests' => [
             'max_per_cabin' => 1,
-            'max_per_yacht' => 16,
+            'max_per_property' => 16,
             'child_min_age' => 12,
             'child_max_age' => 6,
         ],
@@ -89,7 +89,7 @@ test('rules reject yacht over nine cabins, reversed child ages and search range'
 
     $errors = Validator::make($document, EngineSettingsDocument::rules())->errors();
 
-    expect($errors->has('guests.max_per_yacht'))->toBeTrue();
+    expect($errors->has('guests.max_per_property'))->toBeTrue();
     expect($errors->has('guests.child_max_age'))->toBeTrue();
     expect($errors->has('calendar.default_search_to'))->toBeTrue();
     expect($errors->has('calendar.default_adults'))->toBeTrue();
@@ -114,12 +114,12 @@ test('copyPaths classifies footnote and group contexts as copy', function (): vo
     expect(EngineSettingsDocument::isCopyPath('guests'))->toBeFalse();
 });
 
-test('warnings flag yacht capacity, under-age message and copy versus sla', function (): void {
+test('warnings flag property capacity, under-age message and copy versus sla', function (): void {
     $this->seed(ConfigSeeder::class);
 
     $draft = engineSettingsDocument([
         'guests' => [
-            'max_per_yacht' => 14,
+            'max_per_property' => 14,
             'under_age_message' => 'Under 5 not accommodated',
         ],
         'copy' => [
@@ -135,7 +135,7 @@ test('warnings flag yacht capacity, under-age message and copy versus sla', func
         EngineSettingsDocument::fromArray($draft)->warnings(null),
     );
 
-    expect($messages)->toContain('Charter capacity will show 14 guests (follows max per yacht).');
+    expect($messages)->toContain('Charter capacity will show 14 guests (follows max per property).');
     expect($messages)->toContain('Under-age message says 5 but children are accepted from age 6.');
     expect($messages)->toContain('"Traveling with children" mentions different ages than the guest rules (6–17).');
     expect($messages)->toContain('Charter intro says "within 24 hours" but the SLA is 12 h.');
@@ -202,7 +202,7 @@ test('copy with no numbers produces no copy-versus-rates or copy-versus-sla warn
             ],
         ],
         'charter' => [
-            'intro' => 'One yacht, yours for the week, shaped around your group.',
+            'intro' => 'One property, yours for the week, shaped around your group.',
             'thank_you' => 'Thank you — your charter enquiry has been received. Our team will contact you.',
         ],
     ]);

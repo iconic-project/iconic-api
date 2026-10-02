@@ -3,7 +3,7 @@
 <head><meta charset="utf-8"><title>Charter proposal {{ $snapshot['number'] ?? '' }}</title></head>
 <body>
 <h1>Charter proposal {{ $snapshot['number'] ?? '' }} · v{{ $snapshot['version'] ?? '' }}</h1>
-<p>{{ $snapshot['yacht'] ?? '' }} · {{ $snapshot['departure'] ?? '' }} to {{ $snapshot['return'] ?? '' }} · {{ $snapshot['guests'] ?? '' }} guests</p>
+<p>{{ $snapshot['property'] ?? '' }} · {{ $snapshot['departure'] ?? '' }} to {{ $snapshot['return'] ?? '' }} · {{ $snapshot['guests'] ?? '' }} guests</p>
 <h2>Price</h2>
 <ul>
 @foreach (($snapshot['lines'] ?? []) as $line)

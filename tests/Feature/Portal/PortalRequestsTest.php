@@ -221,14 +221,14 @@ test('a sold-out, closed, hidden, or out-of-calendar departure is refused and wr
     $user = agencyUser();
 
     $full = ReservationFixtures::anamaraDeparture('2027-11-21');
-    $full->load('yacht.cabins');
+    $full->load('property.cabins');
     $holder = ClaimHolder::query()->create(['reference' => 'BLK', 'name' => 'Taken']);
 
     DB::transaction(function () use ($full, $holder): void {
-        app(ClaimService::class)->claim($full, $full->yacht->cabins, $holder, ClaimKind::Block);
+        app(ClaimService::class)->claim($full, $full->property->cabins, $holder, ClaimKind::Block);
     });
 
-    $label = app(Availability::class)->forDepartures(collect([$full->fresh(['yacht.cabins', 'itinerary'])]))[$full->id]->engineLabel['text'];
+    $label = app(Availability::class)->forDepartures(collect([$full->fresh(['property.cabins', 'itinerary'])]))[$full->id]->engineLabel['text'];
 
     $closed = ReservationFixtures::anamaraDeparture('2027-11-28');
     $closed->update(['status' => DepartureStatus::Closed]);
@@ -239,8 +239,8 @@ test('a sold-out, closed, hidden, or out-of-calendar departure is refused and wr
     $early = ReservationFixtures::anamaraDeparture('2026-06-07');
 
     $ownerTaken = ReservationFixtures::anamaraDeparture('2027-12-12');
-    $ownerTaken->load('yacht.cabins');
-    $owner = $ownerTaken->yacht->cabins->first(fn ($cabin) => $cabin->category === CabinCategory::Owner);
+    $ownerTaken->load('property.cabins');
+    $owner = $ownerTaken->property->cabins->first(fn ($cabin) => $cabin->category === CabinCategory::Owner);
     $ownerHolder = ClaimHolder::query()->create(['reference' => 'OWN', 'name' => 'Owner taken']);
 
     DB::transaction(function () use ($ownerTaken, $owner, $ownerHolder): void {

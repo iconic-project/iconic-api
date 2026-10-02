@@ -7,16 +7,16 @@ namespace Tests\Support\Bookings;
 use App\Enums\ItineraryStatus;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 
 final class ReservationFixtures
 {
     public static function anamaraDeparture(string $date = '2027-11-07', bool $festive = false): Departure
     {
-        $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+        $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
 
         $existing = Departure::query()
-            ->where('yacht_id', $yacht->id)
+            ->where('property_id', $property->id)
             ->whereDate('date', $date)
             ->first();
 
@@ -25,11 +25,11 @@ final class ReservationFixtures
                 $existing->update(['festive' => true]);
             }
 
-            return $existing->load(['yacht.cabins']);
+            return $existing->load(['property.cabins']);
         }
 
         return Departure::factory()->create([
-            'yacht_id' => $yacht->id,
+            'property_id' => $property->id,
             'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
             'date' => $date,
             'festive' => $festive,

@@ -6,7 +6,7 @@ use App\Enums\DepartureStatus;
 use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 
@@ -18,7 +18,7 @@ beforeEach(function (): void {
 test('a content-only patch writes departure.updated', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => Yacht::query()->where('code', 'ANAMARA')->value('id'),
+        'property_id' => Property::query()->where('code', 'ANAMARA')->value('id'),
         'itinerary_id' => $itinerary->id,
         'public_note' => 'Old',
     ]);
@@ -42,7 +42,7 @@ test('a content-only patch writes departure.updated', function (): void {
 test('a status-only patch writes departure.status_changed', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => Yacht::query()->where('code', 'ANAMARA')->value('id'),
+        'property_id' => Property::query()->where('code', 'ANAMARA')->value('id'),
         'itinerary_id' => $itinerary->id,
         'status' => DepartureStatus::OnSale,
     ]);
@@ -65,7 +65,7 @@ test('a status-only patch writes departure.status_changed', function (): void {
 test('a patch that changes content and status writes two history entries', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => Yacht::query()->where('code', 'ANAMARA')->value('id'),
+        'property_id' => Property::query()->where('code', 'ANAMARA')->value('id'),
         'itinerary_id' => $itinerary->id,
         'public_note' => 'Old',
         'status' => DepartureStatus::OnSale,
@@ -96,7 +96,7 @@ test('a patch that changes content and status writes two history entries', funct
 test('a no-op patch writes no history', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => Yacht::query()->where('code', 'ANAMARA')->value('id'),
+        'property_id' => Property::query()->where('code', 'ANAMARA')->value('id'),
         'itinerary_id' => $itinerary->id,
         'public_note' => 'Same',
     ]);
@@ -112,7 +112,7 @@ test('a no-op patch writes no history', function (): void {
 test('departure history is listed', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => Yacht::query()->where('code', 'ANAMARA')->value('id'),
+        'property_id' => Property::query()->where('code', 'ANAMARA')->value('id'),
         'itinerary_id' => $itinerary->id,
     ]);
     $mateo = managerUser();

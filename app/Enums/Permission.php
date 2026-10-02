@@ -29,6 +29,7 @@ enum Permission: string
     case RequestsRelease = 'requests.release';
 
     case DeparturesManage = 'departures.manage';
+    case PropertiesManage = 'properties.manage';
     case ItinerariesManage = 'itineraries.manage';
     case BlocksManage = 'blocks.manage';
 
@@ -79,6 +80,7 @@ enum Permission: string
             self::RequestsConfirm => 'Confirm requests',
             self::RequestsRelease => 'Release requests',
             self::DeparturesManage => 'Manage departures',
+            self::PropertiesManage => 'Manage properties',
             self::ItinerariesManage => 'Manage itineraries',
             self::BlocksManage => 'Manage internal blocks',
             self::RatesManage => 'Edit rates, deposit terms and discount rules',
@@ -125,6 +127,7 @@ enum Permission: string
             self::RequestsConfirm,
             self::RequestsRelease => 'requests',
             self::DeparturesManage,
+            self::PropertiesManage,
             self::ItinerariesManage,
             self::BlocksManage => 'inventory',
             self::RatesManage,

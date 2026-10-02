@@ -137,7 +137,7 @@ test('backfill copies every marketing log row once and leaves other documents al
     $departure = ReservationFixtures::anamaraDeparture('2027-12-05');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::Confirmed,
@@ -305,7 +305,7 @@ test('the timeline shows a register line and hides the marketing booking-log lin
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,

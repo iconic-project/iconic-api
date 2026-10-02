@@ -22,7 +22,7 @@ test('a cabin booking cannot exceed guests.max_per_cabin', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
     $max = app(CurrentConfig::class)->engineSettings()->guests->maxPerCabin;
@@ -45,7 +45,7 @@ test('a cabin booking cannot exceed guests.max_per_cabin', function (): void {
         ->assertJsonPath('errors.guests.0', 'A suite takes up to '.$max.' guests.');
 });
 
-test('a charter cannot exceed guests.max_per_yacht', function (): void {
+test('a charter cannot exceed guests.max_per_property', function (): void {
     $actor = managerUser();
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
@@ -54,7 +54,7 @@ test('a charter cannot exceed guests.max_per_yacht', function (): void {
         'type' => BookingType::Charter,
         'owner_id' => $actor->id,
     ]);
-    $max = app(CurrentConfig::class)->engineSettings()->guests->maxPerYacht;
+    $max = app(CurrentConfig::class)->engineSettings()->guests->maxPerProperty;
 
     for ($i = 0; $i < $max; $i++) {
         $this->actingAs($actor)
@@ -73,7 +73,7 @@ test('only an empty non-lead guest can be removed', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 

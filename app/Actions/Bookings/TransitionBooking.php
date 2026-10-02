@@ -46,7 +46,7 @@ final class TransitionBooking extends Action
         return $this->transaction(function () use ($booking, $data, $actor, $system, $actorLabel): Booking {
             $expectedDepartureId = (int) $booking->departure_id;
             $booking = BookingMutationLock::acquire($booking, $expectedDepartureId);
-            $booking->load(['departure.yacht.cabins', 'cabin', 'contact', 'claims']);
+            $booking->load(['departure.property.cabins', 'cabin', 'contact', 'claims']);
 
             $to = $data['to'] instanceof BookingStatus
                 ? $data['to']
@@ -90,7 +90,7 @@ final class TransitionBooking extends Action
             }
 
             return $booking->refresh()->load([
-                'departure.yacht',
+                'departure.property',
                 'cabin',
                 'contact',
                 'group.coordinator',
@@ -216,6 +216,6 @@ final class TransitionBooking extends Action
             return collect([$booking->cabin]);
         }
 
-        return $booking->departure->yacht->cabins->sortBy('sort')->values();
+        return $booking->departure->property->cabins->sortBy('sort')->values();
     }
 }

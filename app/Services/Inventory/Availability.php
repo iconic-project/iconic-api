@@ -38,7 +38,7 @@ final class Availability
             ? $departures
             : new EloquentCollection($departures->all());
 
-        $models->loadMissing(['yacht.cabins', 'itinerary']);
+        $models->loadMissing(['property.cabins', 'itinerary']);
 
         $claims = CabinClaim::query()
             ->whereIn('departure_id', $models->modelKeys())
@@ -111,7 +111,7 @@ final class Availability
      */
     private function forOne(Departure $departure, Collection $claims): DepartureSnapshot
     {
-        $cabins = $departure->yacht->cabins;
+        $cabins = $departure->property->cabins;
         $activeByCabin = $claims
             ->filter(fn (CabinClaim $claim): bool => $claim->released_at === null)
             ->filter(fn (CabinClaim $claim): bool => ! $this->isExpiredHold($claim))

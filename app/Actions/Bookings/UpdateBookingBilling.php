@@ -43,7 +43,7 @@ final class UpdateBookingBilling extends Action
 
             if ($after === []) {
                 return $booking->refresh()->load([
-                    'departure.yacht',
+                    'departure.property',
                     'departure.itinerary',
                     'cabin',
                     'contact',
@@ -59,7 +59,7 @@ final class UpdateBookingBilling extends Action
             History::record($booking, 'booking.billing_changed', before: $before, after: $after, actor: $actor, actorLabel: $actorLabel);
 
             return $booking->refresh()->load([
-                'departure.yacht',
+                'departure.property',
                 'departure.itinerary',
                 'cabin',
                 'contact',

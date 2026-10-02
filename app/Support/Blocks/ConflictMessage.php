@@ -18,13 +18,13 @@ final class ConflictMessage
             ClaimKind::Booking => 'sold',
         };
 
-        $departure->loadMissing('yacht');
+        $departure->loadMissing('property');
 
         return $cabinLabel
             .' on '
             .Format::calendar($departure->date)
             .' · '
-            .$departure->yacht->code
+            .$departure->property->code
             .' is '
             .$verb
             .'.';

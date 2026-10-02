@@ -39,7 +39,7 @@ function timelineBooking(Contact $contact, User $owner): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::Confirmed,

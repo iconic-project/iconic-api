@@ -133,7 +133,7 @@ final class EngineActivity
 
     /**
      * @param  list<BehaviouralEvent>  $events
-     * @return array{itineraries: array<string, string>, departures: array<int, array{date: string, yacht: string}>}
+     * @return array{itineraries: array<string, string>, departures: array<int, array{date: string, property: string}>}
      */
     private static function resolveNames(array $events): array
     {
@@ -164,14 +164,14 @@ final class EngineActivity
 
         if ($departureIds !== []) {
             $rows = Departure::query()
-                ->with('yacht')
+                ->with('property')
                 ->whereIn('id', array_values(array_unique($departureIds)))
                 ->get();
 
             foreach ($rows as $departure) {
                 $departures[$departure->id] = [
                     'date' => $departure->date->toDateString(),
-                    'yacht' => $departure->yacht->name,
+                    'property' => $departure->property->name,
                 ];
             }
         }
@@ -183,7 +183,7 @@ final class EngineActivity
     }
 
     /**
-     * @param  array{itineraries: array<string, string>, departures: array<int, array{date: string, yacht: string}>}  $names
+     * @param  array{itineraries: array<string, string>, departures: array<int, array{date: string, property: string}>}  $names
      * @return array{at: string, name: string, contact: string, contact_id: int|null, detail: string, side: string}
      */
     private static function format(BehaviouralEvent $event, array $names): array
@@ -202,7 +202,7 @@ final class EngineActivity
                 $event->params,
                 is_string($code) ? ($names['itineraries'][$code] ?? null) : null,
                 is_array($departure) ? $departure['date'] : null,
-                is_array($departure) ? $departure['yacht'] : null,
+                is_array($departure) ? $departure['property'] : null,
             ),
             'side' => $event->name->side(),
         ];

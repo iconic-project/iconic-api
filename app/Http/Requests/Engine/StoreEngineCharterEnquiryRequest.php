@@ -58,11 +58,11 @@ class StoreEngineCharterEnquiryRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $after): void {
-            $max = app(CurrentConfig::class)->engineSettings()->guests->maxPerYacht;
+            $max = app(CurrentConfig::class)->engineSettings()->guests->maxPerProperty;
             $guests = (int) $this->input('guests');
 
             if ($guests > $max) {
-                $after->errors()->add('guests', 'A yacht takes up to '.$max.' guests.');
+                $after->errors()->add('guests', 'A property takes up to '.$max.' guests.');
             }
         });
     }

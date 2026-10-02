@@ -33,7 +33,7 @@ function engineWestDeparture(string $date = '2027-11-07', bool $festive = false)
         'status' => DepartureStatus::OnSale,
     ]);
 
-    return $departure->fresh(['yacht.cabins', 'itinerary']);
+    return $departure->fresh(['property.cabins', 'itinerary']);
 }
 
 /**

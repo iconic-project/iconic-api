@@ -27,7 +27,7 @@ class UpdateDepartureRequest extends FormRequest
     {
         return [
             'date' => ['sometimes', 'required', 'date_format:Y-m-d'],
-            'yacht_id' => ['sometimes', 'required', 'integer', 'exists:yachts,id'],
+            'property_id' => ['sometimes', 'required', 'integer', 'exists:properties,id'],
             'itinerary_id' => ['sometimes', 'required', 'integer', 'exists:itineraries,id'],
             'status' => ['sometimes', 'required', Rule::enum(DepartureStatus::class)],
             'urgency_threshold' => ['sometimes', 'integer', 'min:0', 'max:9'],
@@ -42,22 +42,22 @@ class UpdateDepartureRequest extends FormRequest
         $departure = $this->route('departure');
         $ignoreId = $departure instanceof Departure ? $departure->id : null;
 
-        if (! $this->exists('date') && ! $this->exists('yacht_id')) {
+        if (! $this->exists('date') && ! $this->exists('property_id')) {
             return;
         }
 
         $dateInput = $this->exists('date')
             ? $this->input('date')
             : ($departure instanceof Departure ? $departure->date->toDateString() : null);
-        $yachtId = $this->exists('yacht_id')
-            ? $this->input('yacht_id')
-            : ($departure instanceof Departure ? $departure->yacht_id : null);
+        $propertyId = $this->exists('property_id')
+            ? $this->input('property_id')
+            : ($departure instanceof Departure ? $departure->property_id : null);
 
         $validator->after(fn (Validator $after) => $this->validateSundayAndUniqueness(
             $after,
             $ignoreId,
             $dateInput,
-            $yachtId,
+            $propertyId,
         ));
     }
 

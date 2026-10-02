@@ -10,8 +10,8 @@ use App\Models\Booking;
 use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\Itinerary;
+use App\Models\Property;
 use App\Models\User;
-use App\Models\Yacht;
 use App\Support\Inventory\DepartureLocks;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -59,9 +59,9 @@ beforeEach(function (): void {
  */
 function reservationConcurrencySetup(): array
 {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $departure = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
         'date' => '2028-04-02',
     ]);

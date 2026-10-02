@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 
@@ -24,9 +24,9 @@ test('delete succeeds when no departure uses the itinerary', function (): void {
 
 test('delete is refused while one departure uses the itinerary', function (): void {
     $itinerary = Itinerary::factory()->create();
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-02',
     ]);
@@ -40,21 +40,21 @@ test('delete is refused while one departure uses the itinerary', function (): vo
 
 test('delete is refused while several departures use the itinerary', function (): void {
     $itinerary = Itinerary::factory()->create();
-    $anamara = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
-    $anativa = Yacht::query()->where('code', 'ANATIVA')->firstOrFail();
+    $anamara = Property::query()->where('code', 'ANAMARA')->firstOrFail();
+    $anativa = Property::query()->where('code', 'ANATIVA')->firstOrFail();
 
     Departure::factory()->create([
-        'yacht_id' => $anamara->id,
+        'property_id' => $anamara->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-02',
     ]);
     Departure::factory()->create([
-        'yacht_id' => $anativa->id,
+        'property_id' => $anativa->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-02',
     ]);
     Departure::factory()->create([
-        'yacht_id' => $anamara->id,
+        'property_id' => $anamara->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-09',
     ]);

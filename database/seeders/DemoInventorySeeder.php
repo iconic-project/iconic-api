@@ -11,7 +11,7 @@ use App\Models\Cabin;
 use App\Models\Departure;
 use App\Models\InternalBlock;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Inventory\ClaimService;
 use App\Services\References\ReferenceService;
 use App\Support\Departures\SeedMapper as DepartureSeedMapper;
@@ -41,23 +41,23 @@ final class DemoInventorySeeder extends Seeder
             );
         }
 
-        $yachts = Yacht::query()->get()->keyBy('code');
+        $properties = Property::query()->get()->keyBy('code');
         $itineraries = Itinerary::query()->get()->keyBy('code');
 
         foreach ($this->departureRows() as $row) {
             $mapped = DepartureSeedMapper::fromPrototype($row);
-            $yacht = $yachts->get($mapped['yacht_code']);
+            $property = $properties->get($mapped['property_code']);
             $itinerary = $itineraries->get($mapped['itinerary_code']);
 
-            if (! $yacht instanceof Yacht || ! $itinerary instanceof Itinerary) {
+            if (! $property instanceof Property || ! $itinerary instanceof Itinerary) {
                 throw new RuntimeException(
-                    "Demo departure {$mapped['reference']} is missing yacht {$mapped['yacht_code']} or itinerary {$mapped['itinerary_code']}.",
+                    "Demo departure {$mapped['reference']} is missing property {$mapped['property_code']} or itinerary {$mapped['itinerary_code']}.",
                 );
             }
 
             Departure::query()->firstOrCreate(
                 [
-                    'yacht_id' => $yacht->id,
+                    'property_id' => $property->id,
                     'date' => $mapped['date'],
                 ],
                 [
@@ -81,14 +81,14 @@ final class DemoInventorySeeder extends Seeder
     {
         $departure = Departure::query()
             ->where('reference', 'DEP-003')
-            ->with('yacht.cabins')
+            ->with('property.cabins')
             ->first();
 
         if (! $departure instanceof Departure) {
             return;
         }
 
-        $cabins = $departure->yacht->cabins
+        $cabins = $departure->property->cabins
             ->filter(fn (Cabin $cabin): bool => in_array($cabin->code, ['S7', 'S8'], true))
             ->sortBy('sort')
             ->values();

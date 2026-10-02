@@ -11,9 +11,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @property array{
  *     window: array{from: string, to: string},
- *     scope: array{yacht: int|null, itinerary: int|null, channel: string|null, agency: int|null},
+ *     scope: array{property: int|null, itinerary: int|null, channel: string|null, agency: int|null},
  *     metrics: array{
- *         occupancy: array{sold_berths: int, sellable_berths: int, occupancy: string|null, departures: list<array{id: int, date: string, yacht_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>, definition: array{sentence: string, filters_on: string, excludes: string}},
+ *         occupancy: array{sold_berths: int, sellable_berths: int, occupancy: string|null, departures: list<array{id: int, date: string, property_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>, definition: array{sentence: string, filters_on: string, excludes: string}},
  *         revpab: array{cruise_revenue: int, sellable_berths: int, revpab: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
  *         adr: array{cruise_revenue: int, berths_sold: int, adr: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
  *         lead_time: array{average_days: string|null, median_days: string|null, bookings: int, definition: array{sentence: string, filters_on: string, excludes: string}},
@@ -33,9 +33,9 @@ class MetricsResource extends JsonResource
     /**
      * @return array{
      *     window: array{from: string, to: string},
-     *     scope: array{yacht: int|null, itinerary: int|null, channel: string|null, agency: int|null},
+     *     scope: array{property: int|null, itinerary: int|null, channel: string|null, agency: int|null},
      *     metrics: array{
-     *         occupancy: array{sold_berths: int, sellable_berths: int, occupancy: string|null, departures: list<array{id: int, date: string, yacht_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>, definition: array{sentence: string, filters_on: string, excludes: string}},
+     *         occupancy: array{sold_berths: int, sellable_berths: int, occupancy: string|null, departures: list<array{id: int, date: string, property_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         revpab: array{cruise_revenue: int, sellable_berths: int, revpab: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         adr: array{cruise_revenue: int, berths_sold: int, adr: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         lead_time: array{average_days: string|null, median_days: string|null, bookings: int, definition: array{sentence: string, filters_on: string, excludes: string}},

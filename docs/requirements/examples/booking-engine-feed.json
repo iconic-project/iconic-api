@@ -42,7 +42,7 @@
             "Sustainable, locally sourced — expedition gastronomy"
           ],
           [
-            "Yacht",
+            "Property",
             "Sundeck, jacuzzi & Wi-Fi · 16 guests"
           ],
           [
@@ -163,7 +163,7 @@
             "Sustainable, locally sourced — expedition gastronomy"
           ],
           [
-            "Yacht",
+            "Property",
             "Sundeck, jacuzzi & Wi-Fi · 16 guests"
           ],
           [
@@ -282,7 +282,7 @@
             "Sustainable, locally sourced — expedition gastronomy"
           ],
           [
-            "Yacht",
+            "Property",
             "Sundeck, jacuzzi & Wi-Fi · 16 guests"
           ],
           [
@@ -351,7 +351,7 @@
     {
       "id": "DEP-001",
       "itinerary": "WEST",
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "embark": "2027-11-07",
       "disembark": "2027-11-14",
       "festive": false,
@@ -370,7 +370,7 @@
     {
       "id": "DEP-002",
       "itinerary": "NORTH",
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "embark": "2027-11-07",
       "disembark": "2027-11-14",
       "festive": false,
@@ -389,7 +389,7 @@
     {
       "id": "DEP-003",
       "itinerary": "NORTH",
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "embark": "2027-11-14",
       "disembark": "2027-11-21",
       "festive": false,
@@ -408,7 +408,7 @@
     {
       "id": "DEP-004",
       "itinerary": "WEST",
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "embark": "2027-11-14",
       "disembark": "2027-11-21",
       "festive": false,
@@ -427,7 +427,7 @@
     {
       "id": "DEP-005",
       "itinerary": "WEST",
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "embark": "2027-11-21",
       "disembark": "2027-11-28",
       "festive": false,
@@ -446,7 +446,7 @@
     {
       "id": "DEP-006",
       "itinerary": "NORTH",
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "embark": "2027-11-21",
       "disembark": "2027-11-28",
       "festive": false,
@@ -465,7 +465,7 @@
     {
       "id": "DEP-007",
       "itinerary": "NORTH",
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "embark": "2027-11-28",
       "disembark": "2027-12-05",
       "festive": false,
@@ -484,7 +484,7 @@
     {
       "id": "DEP-008",
       "itinerary": "WEST",
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "embark": "2027-11-28",
       "disembark": "2027-12-05",
       "festive": false,
@@ -503,7 +503,7 @@
     {
       "id": "DEP-009",
       "itinerary": "WEST",
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "embark": "2027-12-05",
       "disembark": "2027-12-12",
       "festive": false,
@@ -522,7 +522,7 @@
     {
       "id": "DEP-010",
       "itinerary": "NORTH",
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "embark": "2027-12-05",
       "disembark": "2027-12-12",
       "festive": false,
@@ -541,7 +541,7 @@
     {
       "id": "DEP-011",
       "itinerary": "NORTH",
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "embark": "2027-12-12",
       "disembark": "2027-12-19",
       "festive": false,
@@ -560,7 +560,7 @@
     {
       "id": "DEP-012",
       "itinerary": "WEST",
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "embark": "2027-12-12",
       "disembark": "2027-12-19",
       "festive": false,
@@ -579,7 +579,7 @@
     {
       "id": "DEP-014",
       "itinerary": "FEST",
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "embark": "2027-12-19",
       "disembark": "2027-12-26",
       "festive": true,
@@ -596,7 +596,7 @@
     {
       "id": "DEP-015",
       "itinerary": "FEST",
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "embark": "2027-12-26",
       "disembark": "2028-01-02",
       "festive": true,
@@ -613,7 +613,7 @@
     {
       "id": "DEP-016",
       "itinerary": "FEST",
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "embark": "2027-12-26",
       "disembark": "2028-01-02",
       "festive": true,
@@ -671,7 +671,7 @@
   "settings": {
     "guests": {
       "max_per_cabin": 3,
-      "max_per_yacht": 16,
+      "max_per_property": 16,
       "child_age": [
         6,
         17
@@ -740,8 +740,8 @@
       "footnote": "Informational — regulatory Galápagos fees, not charged today. PNG is paid at SCY airport; TCT is arranged with our team."
     },
     "charter": {
-      "headline": "The yacht, entirely yours",
-      "intro": "One yacht, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.",
+      "headline": "The property, entirely yours",
+      "intro": "One property, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.",
       "capacity": 16,
       "itinerary_label": "Customizable",
       "response_sla_hours": 24,

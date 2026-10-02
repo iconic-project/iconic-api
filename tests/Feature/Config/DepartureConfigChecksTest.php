@@ -6,8 +6,8 @@ use App\Enums\DepartureStatus;
 use App\Enums\ItineraryStatus;
 use App\Models\Departure;
 use App\Models\Itinerary;
+use App\Models\Property;
 use App\Models\RateVersion;
-use App\Models\Yacht;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessRules\Registry;
 use Database\Seeders\ConfigSeeder;
@@ -65,9 +65,9 @@ test('removing a year with no departures is allowed', function (): void {
 
 test('departures in a year with no rates warn', function (): void {
     $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2031-01-05',
         'status' => DepartureStatus::OnSale,
@@ -128,9 +128,9 @@ test('OPS-006 shows the first cruise and differs only when the date is not 7 Nov
         ]);
 
     $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
-    $yacht = Yacht::query()->where('code', 'ANATIVA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANATIVA')->firstOrFail();
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2027-10-31',
         'status' => DepartureStatus::OnSale,

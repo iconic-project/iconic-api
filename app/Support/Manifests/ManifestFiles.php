@@ -29,7 +29,7 @@ final class ManifestFiles
         Collection $passengers,
         ManifestDue $due,
     ): array {
-        $departure->loadMissing(['yacht', 'itinerary']);
+        $departure->loadMissing(['property', 'itinerary']);
         $stem = $departure->id.'/'.$kind->value.'/v'.$version;
         $disk = Storage::disk('manifests');
         $written = [];
@@ -72,7 +72,7 @@ final class ManifestFiles
      */
     public function html(Departure $departure, ManifestKind $kind, Collection $passengers, ManifestDue $due): string
     {
-        $departure->loadMissing(['yacht', 'itinerary']);
+        $departure->loadMissing(['property', 'itinerary']);
         $view = $kind === ManifestKind::Dpng ? 'manifests.dpng' : 'manifests.captain';
         $complete = $passengers->filter(fn (ManifestPassenger $passenger): bool => $passenger->complete())->count();
 

@@ -12,7 +12,7 @@ final class GuestCapacity
     public static function max(BookingType $type, GuestsSettings $guests): int
     {
         return $type === BookingType::Charter
-            ? $guests->maxPerYacht
+            ? $guests->maxPerProperty
             : $guests->maxPerCabin;
     }
 }

@@ -36,7 +36,7 @@ test('the audit lists deleted and released rows newest first', function (): void
     $this->actingAs($admin)
         ->deleteJson('/api/rms/bookings/'.$keep, ['reason' => 'Wrong date']);
 
-    $cabin = $departure->yacht->cabins->firstWhere('code', 'S2');
+    $cabin = $departure->property->cabins->firstWhere('code', 'S2');
     $request = Booking::factory()->create([
         'status' => BookingStatus::Requested,
         'reference' => null,

@@ -20,7 +20,7 @@ use App\Http\Resources\Rms\DepartureMutationResource;
 use App\Http\Resources\Rms\DepartureResource;
 use App\Http\Resources\Rms\GenerateSeasonResource;
 use App\Models\Departure;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Inventory\Availability;
 use App\Support\Inventory\Snapshots;
 use Dedoc\Scramble\Attributes\Response as DocumentedResponse;
@@ -44,14 +44,14 @@ final class DepartureController extends Controller
         $page = $request->integer('page', 1);
 
         $query = Departure::query()
-            ->with(['yacht', 'itinerary'])
+            ->with(['property', 'itinerary'])
             ->when($request->filled('from'), fn (Builder $query) => $query->whereDate('date', '>=', (string) $request->validated('from')))
             ->when($request->filled('to'), fn (Builder $query) => $query->whereDate('date', '<=', (string) $request->validated('to')))
-            ->when($request->filled('yacht_id'), fn (Builder $query) => $query->where('yacht_id', $request->validated('yacht_id')))
+            ->when($request->filled('property_id'), fn (Builder $query) => $query->where('property_id', $request->validated('property_id')))
             ->when($request->filled('status'), fn (Builder $query) => $query->where('status', $request->validated('status')))
             ->orderBy('date')
             ->orderBy(
-                Yacht::query()->select('code')->whereColumn('yachts.id', 'departures.yacht_id'),
+                Property::query()->select('code')->whereColumn('properties.id', 'departures.property_id'),
             );
 
         $all = $query->get();
@@ -129,7 +129,7 @@ final class DepartureController extends Controller
         $result = $action->handle(
             CreateDeparture::calendarDate($validated['from']),
             CreateDeparture::calendarDate($validated['to']),
-            array_map(intval(...), $validated['yacht_ids']),
+            array_map(intval(...), $validated['property_ids']),
             SeasonPattern::from((string) $validated['pattern']),
             (bool) $validated['festive_window'],
             DepartureStatus::from((string) $validated['status']),

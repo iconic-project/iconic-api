@@ -21,7 +21,7 @@ class IndexPortalAvailabilityRequest extends FormRequest
         return [
             'from' => ['sometimes', 'date_format:Y-m-d'],
             'to' => ['sometimes', 'date_format:Y-m-d'],
-            'yacht' => ['sometimes', 'string', 'exists:yachts,code'],
+            'property' => ['sometimes', 'string', 'exists:properties,code'],
             'itinerary' => ['sometimes', 'string', 'exists:itineraries,code'],
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:500'],
         ];

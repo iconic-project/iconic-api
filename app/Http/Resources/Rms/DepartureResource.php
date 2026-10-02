@@ -25,14 +25,14 @@ class DepartureResource extends JsonResource
      *     reference: string,
      *     date: string,
      *     return_date: string,
-     *     yacht_id: int,
+     *     property_id: int,
      *     itinerary_id: int,
      *     status: string,
      *     urgency_threshold: int,
      *     waitlist_enabled: bool,
      *     public_note: string|null,
      *     festive: bool,
-     *     yacht: array{id: int, code: string, name: string},
+     *     property: array{id: int, code: string, name: string},
      *     itinerary: array{id: int, code: string, name: string, status: string, festive: bool},
      *     rates: array{year: int, suite_from: int|null},
      *     availability: array{
@@ -55,12 +55,12 @@ class DepartureResource extends JsonResource
      *             }|null
      *         }>
      *     },
-     *     locks?: array{date_and_yacht: bool, delete: bool, reason: string|null}
+     *     locks?: array{date_and_property: bool, delete: bool, reason: string|null}
      * }
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing(['yacht', 'itinerary']);
+        $this->resource->loadMissing(['property', 'itinerary']);
 
         $year = (int) $this->date->format('Y');
         $method = $request->route()?->getActionMethod();
@@ -74,17 +74,17 @@ class DepartureResource extends JsonResource
             'reference' => $this->reference,
             'date' => $this->date->toDateString(),
             'return_date' => $this->returnDate()->toDateString(),
-            'yacht_id' => $this->yacht_id,
+            'property_id' => $this->property_id,
             'itinerary_id' => $this->itinerary_id,
             'status' => $this->status->value,
             'urgency_threshold' => $this->urgency_threshold,
             'waitlist_enabled' => $this->waitlist_enabled,
             'public_note' => $this->public_note,
             'festive' => $this->festive,
-            'yacht' => [
-                'id' => $this->yacht->id,
-                'code' => $this->yacht->code,
-                'name' => $this->yacht->name,
+            'property' => [
+                'id' => $this->property->id,
+                'code' => $this->property->code,
+                'name' => $this->property->name,
             ],
             'itinerary' => [
                 'id' => $this->itinerary->id,

@@ -146,7 +146,7 @@ final class PaymentController extends Controller
         $recorded = new RecordedPayment(
             $recorded->payment->load(['booking', 'recordedBy']),
             Booking::query()->withLedgerAggregates()->with([
-                'departure.yacht',
+                'departure.property',
                 'departure.itinerary',
                 'cabin',
                 'contact',

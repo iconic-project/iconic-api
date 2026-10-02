@@ -9,7 +9,7 @@ use App\Enums\OfferStatus;
 use App\Enums\OfferType;
 use App\Models\Departure;
 use App\Models\Offer;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Support\BusinessTime;
 use Carbon\CarbonImmutable;
 use Database\Seeders\InventorySeeder;
@@ -48,7 +48,7 @@ test('applicableTo matches channel cabin itinerary and both windows', function (
     expect(Offer::applicableTo($west, CabinCategory::Suite, BookingSegment::D2C, '2026-12-31'))->toBeEmpty();
 
     $north = Departure::factory()->create([
-        'yacht_id' => Yacht::query()->where('code', 'ANATIVA')->firstOrFail()->id,
+        'property_id' => Property::query()->where('code', 'ANATIVA')->firstOrFail()->id,
         'itinerary_id' => OfferFixtures::north()->id,
         'date' => '2027-11-14',
     ]);

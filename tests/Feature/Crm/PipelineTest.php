@@ -164,7 +164,7 @@ test('one open deal is bound and none or several open a new bound deal', functio
 
 test('the stage projection follows the booking and a mixed group uses the furthest live status', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-12-05');
-    $cabins = $departure->yacht->cabins;
+    $cabins = $departure->property->cabins;
     $contact = Contact::factory()->create();
 
     $make = function (BookingStatus $status, string $cabin) use ($departure, $cabins, $contact): Deal {
@@ -207,7 +207,7 @@ test('the stage projection follows the booking and a mixed group uses the furthe
     $releasedDeparture = ReservationFixtures::anamaraDeparture('2027-12-12');
     $releasedBooking = Booking::factory()->create([
         'departure_id' => $releasedDeparture->id,
-        'cabin_id' => $releasedDeparture->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $releasedDeparture->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'status' => BookingStatus::Released,
         'reference' => 'ANK-REL-RELEASED',
@@ -308,7 +308,7 @@ test('moves follow ownership and a bound deal names the booking', function (): v
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'reference' => 'ANK-2027-0099',
         'status' => BookingStatus::PendingPayment,
@@ -355,7 +355,7 @@ test('pipeline cash matches payments and revenue and the query count stays flat'
     $departure = ReservationFixtures::anamaraDeparture('2027-12-19');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
     ]);

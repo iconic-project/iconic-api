@@ -231,7 +231,7 @@ function b2bContact(): Contact
 function b2bBooking(Contact $contact, User $owner, BookingStatus $status, string $date, int $total): Booking
 {
     $departure = ReservationFixtures::anamaraDeparture($date);
-    $cabin = $departure->yacht->cabins->firstOrFail();
+    $cabin = $departure->property->cabins->firstOrFail();
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,

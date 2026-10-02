@@ -28,7 +28,7 @@ function referenceBooking(string $reference = 'ANK-2026-0003'): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'reference' => $reference,
         'request_reference' => null,
     ]);
@@ -65,7 +65,7 @@ test('a request still on its request reference uses that prefix', function (): v
     $departure = ReservationFixtures::anamaraDeparture();
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'reference' => null,
         'request_reference' => 'ANK-R-2026-0041',
     ]);

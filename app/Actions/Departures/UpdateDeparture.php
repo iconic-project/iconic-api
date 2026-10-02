@@ -7,9 +7,9 @@ namespace App\Actions\Departures;
 use App\Actions\Action;
 use App\Exceptions\ConflictException;
 use App\Models\Departure;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Engine\EngineFeedVersion;
-use App\Support\Departures\YachtDateConflict;
+use App\Support\Departures\PropertyDateConflict;
 use App\Support\History\History;
 use App\Support\Inventory\DepartureLocks;
 use Carbon\CarbonInterface;
@@ -30,36 +30,36 @@ final class UpdateDeparture extends Action
      */
     public function handle(Departure $departure, array $data): Departure
     {
-        $yachtId = (int) ($data['yacht_id'] ?? $departure->yacht_id);
+        $propertyId = (int) ($data['property_id'] ?? $departure->property_id);
         $date = array_key_exists('date', $data)
             ? CreateDeparture::calendarDate($data['date'])
             : $departure->date;
 
         if ($date->dayOfWeek !== CarbonInterface::SUNDAY) {
             throw ValidationException::withMessages([
-                'date' => [YachtDateConflict::sundayMessage($date)],
+                'date' => [PropertyDateConflict::sundayMessage($date)],
             ]);
         }
 
-        $yacht = Yacht::query()->findOrFail($yachtId);
+        $property = Property::query()->findOrFail($propertyId);
 
-        return YachtDateConflict::guard($yacht, $date, function () use ($departure, $data, $date): Departure {
+        return PropertyDateConflict::guard($property, $date, function () use ($departure, $data, $date): Departure {
             $changed = false;
 
             $departure = $this->transaction(function () use ($departure, $data, $date, &$changed): Departure {
                 $departure = DepartureLocks::lock((int) $departure->id);
 
-                $yachtId = (int) ($data['yacht_id'] ?? $departure->yacht_id);
+                $propertyId = (int) ($data['property_id'] ?? $departure->property_id);
                 $dateChanging = array_key_exists('date', $data)
                     && $date->toDateString() !== $departure->date->toDateString();
-                $yachtChanging = array_key_exists('yacht_id', $data)
-                    && $yachtId !== $departure->yacht_id;
+                $propertyChanging = array_key_exists('property_id', $data)
+                    && $propertyId !== $departure->property_id;
 
-                if ($dateChanging || $yachtChanging) {
-                    $locked = DepartureLocks::dateAndYachtCount(DepartureLocks::claimsFor($departure));
+                if ($dateChanging || $propertyChanging) {
+                    $locked = DepartureLocks::dateAndPropertyCount(DepartureLocks::claimsFor($departure));
 
                     if ($locked > 0) {
-                        throw new ConflictException(DepartureLocks::dateAndYachtMessage($locked));
+                        throw new ConflictException(DepartureLocks::dateAndPropertyMessage($locked));
                     }
                 }
 

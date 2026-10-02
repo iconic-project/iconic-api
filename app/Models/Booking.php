@@ -809,7 +809,7 @@ class Booking extends Model
     public function cabinLabel(): string
     {
         if ($this->type === BookingType::Charter) {
-            return 'Full yacht';
+            return 'Full property';
         }
 
         $this->loadMissing('cabin');

@@ -8,10 +8,10 @@ use App\Actions\Action;
 use App\Enums\DepartureStatus;
 use App\Enums\ReferenceType;
 use App\Models\Departure;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Engine\EngineFeedVersion;
 use App\Services\References\ReferenceService;
-use App\Support\Departures\YachtDateConflict;
+use App\Support\Departures\PropertyDateConflict;
 use App\Support\History\History;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -26,21 +26,21 @@ final class CreateDeparture extends Action
      */
     public function handle(array $data, array $historyContext = []): Departure
     {
-        $yacht = Yacht::query()->findOrFail((int) $data['yacht_id']);
+        $property = Property::query()->findOrFail((int) $data['property_id']);
         $date = self::calendarDate($data['date']);
 
         if ($date->dayOfWeek !== CarbonInterface::SUNDAY) {
             throw ValidationException::withMessages([
-                'date' => [YachtDateConflict::sundayMessage($date)],
+                'date' => [PropertyDateConflict::sundayMessage($date)],
             ]);
         }
 
-        return YachtDateConflict::guard($yacht, $date, function () use ($data, $historyContext, $date): Departure {
+        return PropertyDateConflict::guard($property, $date, function () use ($data, $historyContext, $date): Departure {
             $departure = $this->transaction(function () use ($data, $historyContext, $date): Departure {
                 $departure = Departure::query()->create([
                     'reference' => app(ReferenceService::class)->next(ReferenceType::Departure),
                     'date' => $date->toDateString(),
-                    'yacht_id' => $data['yacht_id'],
+                    'property_id' => $data['property_id'],
                     'itinerary_id' => $data['itinerary_id'],
                     'status' => $data['status'] ?? DepartureStatus::Closed,
                     'urgency_threshold' => $data['urgency_threshold'] ?? 3,

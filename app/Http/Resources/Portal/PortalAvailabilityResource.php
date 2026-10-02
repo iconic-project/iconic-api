@@ -17,7 +17,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property array{
  *     id: int,
  *     itinerary: string,
- *     yacht: string,
+ *     property: string,
  *     embark: string,
  *     disembark: string,
  *     festive: bool,
@@ -45,7 +45,7 @@ class PortalAvailabilityResource extends JsonResource
      * @return array{
      *     id: int,
      *     itinerary: string,
-     *     yacht: string,
+     *     property: string,
      *     embark: string,
      *     disembark: string,
      *     festive: bool,
@@ -65,7 +65,7 @@ class PortalAvailabilityResource extends JsonResource
      * @return array{
      *     id: int,
      *     itinerary: string,
-     *     yacht: string,
+     *     property: string,
      *     embark: string,
      *     disembark: string,
      *     festive: bool,
@@ -88,7 +88,7 @@ class PortalAvailabilityResource extends JsonResource
         return [
             'id' => (int) $departure->id,
             'itinerary' => $departure->itinerary->code,
-            'yacht' => $departure->yacht->code,
+            'property' => $departure->property->code,
             'embark' => $departure->date->toDateString(),
             'disembark' => $departure->returnDate()->toDateString(),
             'festive' => $festive,

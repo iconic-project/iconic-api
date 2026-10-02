@@ -30,9 +30,9 @@ final class CommercialMetrics
     /**
      * @return array{
      *     window: array{from: string, to: string},
-     *     scope: array{yacht: int|null, itinerary: int|null, channel: string|null, agency: int|null},
+     *     scope: array{property: int|null, itinerary: int|null, channel: string|null, agency: int|null},
      *     metrics: array{
-     *         occupancy: array{sold_berths: int, sellable_berths: int, occupancy: string|null, departures: list<array{id: int, date: string, yacht_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>, definition: array{sentence: string, filters_on: string, excludes: string}},
+     *         occupancy: array{sold_berths: int, sellable_berths: int, occupancy: string|null, departures: list<array{id: int, date: string, property_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         revpab: array{cruise_revenue: int, sellable_berths: int, revpab: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         adr: array{cruise_revenue: int, berths_sold: int, adr: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         lead_time: array{average_days: string|null, median_days: string|null, bookings: int, definition: array{sentence: string, filters_on: string, excludes: string}},
@@ -92,14 +92,14 @@ final class CommercialMetrics
 
     /**
      * Filters on the departure date. Sold berths follow Availability: an active booking claim.
-     * A charter (a booking claim status, not a request hold) counts as every cabin on the yacht.
+     * A charter (a booking claim status, not a request hold) counts as every cabin on the property.
      * Sellable berths are cabins that are not blocked.
      *
      * @return array{
      *     sold_berths: int,
      *     sellable_berths: int,
      *     occupancy: string|null,
-     *     departures: list<array{id: int, date: string, yacht_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>
+     *     departures: list<array{id: int, date: string, property_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>
      * }
      */
     public function occupancy(MetricWindow $window, MetricScope $scope): array
@@ -294,9 +294,9 @@ final class CommercialMetrics
         $bindings[] = BusinessTime::dayEndUtc($window->to)->toDateTimeString();
 
         if ($scope->restrictsBookings()) {
-            if ($scope->yachtId !== null) {
-                $sql .= ' AND departures.yacht_id = ?';
-                $bindings[] = $scope->yachtId;
+            if ($scope->propertyId !== null) {
+                $sql .= ' AND departures.property_id = ?';
+                $bindings[] = $scope->propertyId;
             }
 
             if ($scope->itineraryId !== null) {
@@ -359,9 +359,9 @@ final class CommercialMetrics
             $window->to,
         ];
 
-        if ($scope->yachtId !== null) {
-            $sql .= ' AND departures.yacht_id = ?';
-            $bindings[] = $scope->yachtId;
+        if ($scope->propertyId !== null) {
+            $sql .= ' AND departures.property_id = ?';
+            $bindings[] = $scope->propertyId;
         }
 
         if ($scope->itineraryId !== null) {
@@ -434,8 +434,8 @@ final class CommercialMetrics
         $statuses = $this->charterSoldStatuses();
         $statusIn = implode(', ', array_fill(0, count($statuses), '?'));
 
-        $sql = 'SELECT departures.id AS id, departures.`date` AS departure_date, yachts.code AS yacht_code,
-            (SELECT COUNT(*) FROM cabins WHERE cabins.yacht_id = departures.yacht_id) AS cabins,
+        $sql = 'SELECT departures.id AS id, departures.`date` AS departure_date, properties.code AS property_code,
+            (SELECT COUNT(*) FROM cabins WHERE cabins.property_id = departures.property_id) AS cabins,
             (SELECT COUNT(*) FROM cabin_claims blk
                 WHERE blk.departure_id = departures.id AND blk.released_at IS NULL AND blk.kind = ?) AS blocked,
             (SELECT COUNT(*) FROM cabin_claims cc
@@ -448,7 +448,7 @@ final class CommercialMetrics
                   AND cb.type = ? AND cb.status IN ('.$statusIn.')'.$charterScope.'
             ) THEN 1 ELSE 0 END) AS is_charter
             FROM departures
-            INNER JOIN yachts ON yachts.id = departures.yacht_id
+            INNER JOIN properties ON properties.id = departures.property_id
             WHERE departures.`date` >= ? AND departures.`date` <= ?';
 
         $bindings = [
@@ -463,9 +463,9 @@ final class CommercialMetrics
             $window->to,
         ];
 
-        if ($scope->yachtId !== null) {
-            $sql .= ' AND departures.yacht_id = ?';
-            $bindings[] = $scope->yachtId;
+        if ($scope->propertyId !== null) {
+            $sql .= ' AND departures.property_id = ?';
+            $bindings[] = $scope->propertyId;
         }
 
         if ($scope->itineraryId !== null) {
@@ -500,9 +500,9 @@ final class CommercialMetrics
         $sql = 'bookings.deleted_at IS NULL AND departures.`date` >= ? AND departures.`date` <= ?';
         $bindings = [$window->from, $window->to];
 
-        if ($scope->yachtId !== null) {
-            $sql .= ' AND departures.yacht_id = ?';
-            $bindings[] = $scope->yachtId;
+        if ($scope->propertyId !== null) {
+            $sql .= ' AND departures.property_id = ?';
+            $bindings[] = $scope->propertyId;
         }
 
         if ($scope->itineraryId !== null) {
@@ -528,7 +528,7 @@ final class CommercialMetrics
     }
 
     /**
-     * Agency and channel only. Yacht and itinerary filter the departure.
+     * Agency and channel only. Property and itinerary filter the departure.
      *
      * @return array{0: string, 1: list<int|string>}
      */
@@ -571,7 +571,7 @@ final class CommercialMetrics
     }
 
     /**
-     * @return array{id: int, date: string, yacht_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}
+     * @return array{id: int, date: string, property_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}
      */
     private function berthRow(object $row): array
     {
@@ -583,7 +583,7 @@ final class CommercialMetrics
         return [
             'id' => (int) $row->id,
             'date' => (string) $row->departure_date,
-            'yacht_code' => (string) $row->yacht_code,
+            'property_code' => (string) $row->property_code,
             'sold_berths' => $sold,
             'sellable_berths' => $sellable,
             'occupancy' => $this->ratio($sold, $sellable),

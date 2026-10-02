@@ -16,7 +16,7 @@ final class MetricCatalogue
     {
         return [
             'occupancy' => [
-                'sentence' => 'Sold berths divided by sellable berths, per departure and as that ratio over the window. A sellable berth is a cabin that is not blocked. A charter counts as the whole yacht.',
+                'sentence' => 'Sold berths divided by sellable berths, per departure and as that ratio over the window. A sellable berth is a cabin that is not blocked. A charter counts as the whole property.',
                 'filters_on' => 'departure date',
                 'excludes' => 'Blocked cabins are not sellable. Expired holds are free. People are not listed.',
             ],

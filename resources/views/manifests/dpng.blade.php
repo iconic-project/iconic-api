@@ -12,7 +12,7 @@
             <td>
                 <div class="dtitle">DPNG PASSENGER LIST</div>
                 <div class="dsub">
-                    {{ $departure->yacht->name }} · {{ $departureDate }} → {{ $returnDate }}<br>
+                    {{ $departure->property->name }} · {{ $departureDate }} → {{ $returnDate }}<br>
                     Due {{ \Carbon\CarbonImmutable::parse($due->dpng)->format('j M Y') }}
                     ({{ $due->charter ? 'charter' : 'FIT/groups' }} T−{{ $due->dpngDays }})
                 </div>

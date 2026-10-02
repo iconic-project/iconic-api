@@ -17,7 +17,7 @@ test('the seeded engine settings document matches seed-data.json plus the FIN-00
     $document = EngineSettingsDocument::initial();
 
     expect($document['guests']['max_per_cabin'])->toBe($source['maxCabin']);
-    expect($document['guests']['max_per_yacht'])->toBe($source['maxYacht']);
+    expect($document['guests']['max_per_property'])->toBe($source['maxProperty']);
     expect($document['guests']['child_min_age'])->toBe($source['childMin']);
     expect($document['guests']['child_max_age'])->toBe($source['childMax']);
     expect($document['guests']['adult_required_with_children'])->toBe($source['adultWithChild']);

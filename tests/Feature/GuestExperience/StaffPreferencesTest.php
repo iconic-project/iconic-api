@@ -43,7 +43,7 @@ function experienceFixture(): array
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-6410',
         'owner_id' => managerUser()->id,

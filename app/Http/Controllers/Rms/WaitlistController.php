@@ -29,7 +29,7 @@ final class WaitlistController extends Controller
         $this->authorize('viewAny', WaitlistEntry::class);
 
         $entries = WaitlistEntry::query()
-            ->with(['departure.yacht', 'contact', 'notifiedBy'])
+            ->with(['departure.property', 'contact', 'notifiedBy'])
             ->when(
                 ! $request->boolean('include_removed'),
                 fn (Builder $query) => $query->active(),

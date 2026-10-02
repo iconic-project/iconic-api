@@ -76,6 +76,7 @@ use App\Models\MessageTemplate;
 use App\Models\Offer;
 use App\Models\Payment;
 use App\Models\PaymentLink;
+use App\Models\Property;
 use App\Models\RateVersion;
 use App\Models\RefundRequest;
 use App\Models\ReportRun;
@@ -244,6 +245,7 @@ class AppServiceProvider extends ServiceProvider
             'extra_version' => ExtraVersion::class,
             'itinerary' => Itinerary::class,
             'departure' => Departure::class,
+            'property' => Property::class,
             'internal_block' => InternalBlock::class,
             'contact' => Contact::class,
             'deal' => Deal::class,

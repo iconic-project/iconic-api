@@ -85,7 +85,7 @@ final class SubmitPortalRequest extends Action
     private function submit(AgencyUser $actor, array $data): array
     {
         $departure = DepartureLocks::lock((int) $data['departure_id']);
-        $departure->load(['yacht.cabins', 'itinerary']);
+        $departure->load(['property.cabins', 'itinerary']);
 
         abort_unless($this->feed->isVisible($departure), 404);
         abort_if($this->outsideSalesCalendar($departure), 404);
@@ -275,7 +275,7 @@ final class SubmitPortalRequest extends Action
             }
         }
 
-        $cabins = $departure->yacht->cabins
+        $cabins = $departure->property->cabins
             ->filter(fn (Cabin $cabin): bool => in_array($cabin->code, $freeCodes, true))
             ->sortBy('sort')
             ->values();

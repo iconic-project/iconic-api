@@ -310,7 +310,7 @@ function journeyBookingFor(Contact $contact, User $owner): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstOrFail()->id,
+        'cabin_id' => $departure->property->cabins->firstOrFail()->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::Confirmed,

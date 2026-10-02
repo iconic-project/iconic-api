@@ -74,7 +74,7 @@ class BookingResource extends JsonResource
      *     billing_phone: string|null,
      *     can_act: bool,
      *     allowed_transitions: list<array{to: string, reason_required: bool}>,
-     *     departure: array{id: int, date: string, return_date: string, itinerary_name: string, embark: string, festive: bool, yacht: array{id: int, code: string, name: string}},
+     *     departure: array{id: int, date: string, return_date: string, itinerary_name: string, embark: string, festive: bool, property: array{id: int, code: string, name: string}},
      *     cabin: array{id: int, code: string, label: string}|null,
      *     cabin_label: string,
      *     contact: array{id: int, name: string, email: string|null, phone: string|null, country: string|null, preferred_channel: string},
@@ -97,7 +97,7 @@ class BookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         $this->resource->loadMissing([
-            'departure.yacht',
+            'departure.property',
             'departure.itinerary',
             'cabin',
             'contact',
@@ -174,10 +174,10 @@ class BookingResource extends JsonResource
                 'itinerary_name' => $this->departure->itinerary->name,
                 'embark' => $this->departure->itinerary->embark,
                 'festive' => $this->departure->festive,
-                'yacht' => [
-                    'id' => $this->departure->yacht->id,
-                    'code' => $this->departure->yacht->code,
-                    'name' => $this->departure->yacht->name,
+                'property' => [
+                    'id' => $this->departure->property->id,
+                    'code' => $this->departure->property->code,
+                    'name' => $this->departure->property->name,
                 ],
             ],
             'cabin' => $this->cabin === null ? null : [

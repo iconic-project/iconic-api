@@ -48,7 +48,7 @@ final class RemoveWaitlistEntry extends Action
                 $this->closeTask->autoClose($task, 'the waitlist entry was removed');
             }
 
-            return $entry->refresh()->load(['departure.yacht', 'contact', 'removedBy']);
+            return $entry->refresh()->load(['departure.property', 'contact', 'removedBy']);
         });
     }
 }

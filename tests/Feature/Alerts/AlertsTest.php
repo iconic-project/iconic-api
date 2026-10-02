@@ -612,7 +612,7 @@ function alertBooking(array $overrides = []): Booking
         throw new RuntimeException('departure override must be a Departure.');
     }
 
-    $cabinId = $departure->yacht->cabins->first()?->id;
+    $cabinId = $departure->property->cabins->first()?->id;
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,

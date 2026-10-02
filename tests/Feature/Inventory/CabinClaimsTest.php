@@ -12,7 +12,7 @@ use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Database\QueryException;
@@ -23,25 +23,25 @@ beforeEach(function (): void {
     $this->seed(InventorySeeder::class);
 });
 
-function claimYacht(string $code = 'ANAMARA'): Yacht
+function claimProperty(string $code = 'ANAMARA'): Property
 {
-    return Yacht::query()->where('code', $code)->firstOrFail();
+    return Property::query()->where('code', $code)->firstOrFail();
 }
 
-function futureDeparture(?Yacht $yacht = null): Departure
+function futureDeparture(?Property $property = null): Departure
 {
-    $yacht ??= claimYacht();
+    $property ??= claimProperty();
 
     return Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
         'date' => '2028-04-02',
     ]);
 }
 
-function cabinOn(Yacht $yacht, string $code): Cabin
+function cabinOn(Property $property, string $code): Cabin
 {
-    return $yacht->cabins()->where('code', $code)->firstOrFail();
+    return $property->cabins()->where('code', $code)->firstOrFail();
 }
 
 function newHolder(string $reference = 'TST-001'): ClaimHolder
@@ -65,7 +65,7 @@ function inClaimTransaction(callable $callback): mixed
 
 test('the database refuses a second active claim on the same cabin', function (): void {
     $departure = futureDeparture();
-    $cabin = cabinOn($departure->yacht, 'S1');
+    $cabin = cabinOn($departure->property, 'S1');
     $holder = newHolder();
 
     $row = [
@@ -104,8 +104,8 @@ test('the database refuses a second active claim on the same cabin', function ()
 
 test('claiming several cabins is all or nothing', function (): void {
     $departure = futureDeparture();
-    $yacht = $departure->yacht;
-    $taken = cabinOn($yacht, 'S2');
+    $property = $departure->property;
+    $taken = cabinOn($property, 'S2');
     $holder = newHolder();
 
     inClaimTransaction(fn () => app(ClaimService::class)->claim(
@@ -118,7 +118,7 @@ test('claiming several cabins is all or nothing', function (): void {
     try {
         inClaimTransaction(fn () => app(ClaimService::class)->claim(
             $departure,
-            collect([cabinOn($yacht, 'S1'), $taken, cabinOn($yacht, 'S3')]),
+            collect([cabinOn($property, 'S1'), $taken, cabinOn($property, 'S3')]),
             newHolder('TST-002'),
             ClaimKind::Block,
         ));
@@ -135,7 +135,7 @@ test('claiming several cabins is all or nothing', function (): void {
 
 test('claiming over an expired hold releases it then succeeds', function (): void {
     $departure = futureDeparture();
-    $cabin = cabinOn($departure->yacht, 'S4');
+    $cabin = cabinOn($departure->property, 'S4');
     $old = newHolder('HOLD-OLD');
 
     inClaimTransaction(fn () => app(ClaimService::class)->claim(
@@ -171,7 +171,7 @@ test('hold.expired is attributed to System when a user claims over an expired ho
     $this->actingAs($carolina);
 
     $departure = futureDeparture();
-    $cabin = cabinOn($departure->yacht, 'S5');
+    $cabin = cabinOn($departure->property, 'S5');
     $old = newHolder('HOLD-EXP');
 
     inClaimTransaction(fn () => app(ClaimService::class)->claim(
@@ -206,7 +206,7 @@ test('hold.expired is attributed to System when a user claims over an expired ho
 
 test('convert moves claims between holders atomically', function (): void {
     $departure = futureDeparture();
-    $cabins = $departure->yacht->cabins()->whereIn('code', ['S1', 'S2'])->orderBy('sort')->get();
+    $cabins = $departure->property->cabins()->whereIn('code', ['S1', 'S2'])->orderBy('sort')->get();
     $from = newHolder('FROM-1');
     $to = newHolder('TO-1');
 
@@ -232,7 +232,7 @@ test('deleting a claim through the model throws', function (): void {
     $departure = futureDeparture();
     $claim = inClaimTransaction(fn () => app(ClaimService::class)->claim(
         $departure,
-        collect([cabinOn($departure->yacht, 'S1')]),
+        collect([cabinOn($departure->property, 'S1')]),
         newHolder(),
         ClaimKind::Block,
     ))->first();
@@ -244,7 +244,7 @@ test('a raw delete on cabin_claims fails at the database', function (): void {
     $departure = futureDeparture();
     $claim = inClaimTransaction(fn () => app(ClaimService::class)->claim(
         $departure,
-        collect([cabinOn($departure->yacht, 'S1')]),
+        collect([cabinOn($departure->property, 'S1')]),
         newHolder(),
         ClaimKind::Block,
     ))->first();

@@ -22,7 +22,7 @@ class GroupResource extends JsonResource
      *     reference: string,
      *     name: string,
      *     coordinator: array{id: int, name: string, email: string|null, preferred_channel: string},
-     *     departure: array{id: int, date: string, yacht: array{id: int, code: string, name: string}},
+     *     departure: array{id: int, date: string, property: array{id: int, code: string, name: string}},
      *     cabins: list<string>,
      *     guests: int,
      *     total: int,
@@ -34,7 +34,7 @@ class GroupResource extends JsonResource
     {
         $this->resource->loadMissing([
             'coordinator',
-            'departure.yacht',
+            'departure.property',
             'bookings.cabin',
         ]);
 
@@ -53,10 +53,10 @@ class GroupResource extends JsonResource
             'departure' => [
                 'id' => $this->departure->id,
                 'date' => $this->departure->date->toDateString(),
-                'yacht' => [
-                    'id' => $this->departure->yacht->id,
-                    'code' => $this->departure->yacht->code,
-                    'name' => $this->departure->yacht->name,
+                'property' => [
+                    'id' => $this->departure->property->id,
+                    'code' => $this->departure->property->code,
+                    'name' => $this->departure->property->name,
                 ],
             ],
             'cabins' => $bookings

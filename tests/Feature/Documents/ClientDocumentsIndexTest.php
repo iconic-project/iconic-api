@@ -25,7 +25,7 @@ function indexCabin(string $date, string $cabin, string $reference): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', $cabin)?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => $reference,
         'total' => 26600,

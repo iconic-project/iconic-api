@@ -94,11 +94,11 @@ final class CreateInternalBlock extends Action
 
         foreach ($departures as $row) {
             $departure = Departure::query()
-                ->with(['yacht.cabins', 'yacht'])
+                ->with(['property.cabins', 'property'])
                 ->findOrFail((int) $row['departure_id']);
 
             $codes = $row['cabin_codes'];
-            $cabins = $departure->yacht->cabins;
+            $cabins = $departure->property->cabins;
 
             if ($codes !== 'ALL') {
                 $wanted = is_array($codes) ? $codes : [];
@@ -168,7 +168,7 @@ final class CreateInternalBlock extends Action
                     });
                 }
             })
-            ->with(['cabin', 'departure.yacht', 'holder']);
+            ->with(['cabin', 'departure.property', 'holder']);
 
         $items = [];
 

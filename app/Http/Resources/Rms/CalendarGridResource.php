@@ -20,13 +20,13 @@ class CalendarGridResource extends JsonResource
      *         id: int,
      *         reference: string,
      *         date: string,
-     *         yacht: array{id: int, code: string, name: string},
+     *         property: array{id: int, code: string, name: string},
      *         itinerary: array{id: int, code: string, name: string},
      *         festive: bool,
      *         status: string
      *     }>,
      *     rows: list<array{
-     *         yacht: array{id: int, code: string, name: string},
+     *         property: array{id: int, code: string, name: string},
      *         cabin: array{id: int, code: string, label: string, category: string, sort: int},
      *         cells: array<string, array{
      *             state: string,

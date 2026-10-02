@@ -94,14 +94,14 @@ test('an unknown sender stays unlinked and is not created as a contact', functio
         from: 'stranger@example.com',
         subject: 'Hello',
         messageId: '<s@guest.test>',
-        body: 'A question about the yacht',
+        body: 'A question about the property',
     ));
 
     expect(Contact::query()->count())->toBe($before)
         ->and(Contact::query()->where('email', 'stranger@example.com')->exists())->toBeFalse()
         ->and($message->conversation->contact_id)->toBeNull()
-        ->and($message->body_text)->toBe('A question about the yacht')
-        ->and($message->body_html)->toContain('A question about the yacht');
+        ->and($message->body_text)->toBe('A question about the property')
+        ->and($message->body_html)->toContain('A question about the property');
 });
 
 test('reprocessing the same message id does not duplicate the row', function (): void {

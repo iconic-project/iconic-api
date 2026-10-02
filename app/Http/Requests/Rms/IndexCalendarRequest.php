@@ -24,7 +24,7 @@ class IndexCalendarRequest extends FormRequest
         return [
             'from' => ['sometimes', 'date_format:Y-m-d'],
             'to' => ['sometimes', 'date_format:Y-m-d'],
-            'yacht_id' => ['sometimes', 'integer', 'exists:yachts,id'],
+            'property_id' => ['sometimes', 'integer', 'exists:properties,id'],
         ];
     }
 

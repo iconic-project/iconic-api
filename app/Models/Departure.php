@@ -24,7 +24,7 @@ use Illuminate\Support\Collection;
  * @property int $id
  * @property string $reference
  * @property CarbonImmutable $date
- * @property int $yacht_id
+ * @property int $property_id
  * @property int $itinerary_id
  * @property DepartureStatus $status
  * @property int $urgency_threshold
@@ -35,14 +35,14 @@ use Illuminate\Support\Collection;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Yacht $yacht
+ * @property-read Property $property
  * @property-read Itinerary $itinerary
  * @property-read Collection<int, CabinClaim> $claims
  */
 #[Fillable([
     'reference',
     'date',
-    'yacht_id',
+    'property_id',
     'itinerary_id',
     'status',
     'urgency_threshold',
@@ -72,11 +72,11 @@ class Departure extends Model
     }
 
     /**
-     * @return BelongsTo<Yacht, $this>
+     * @return BelongsTo<Property, $this>
      */
-    public function yacht(): BelongsTo
+    public function property(): BelongsTo
     {
-        return $this->belongsTo(Yacht::class);
+        return $this->belongsTo(Property::class);
     }
 
     /**

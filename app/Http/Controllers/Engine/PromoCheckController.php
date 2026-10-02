@@ -22,7 +22,7 @@ final class PromoCheckController extends Controller
         EnginePromoCheck $checker,
     ): PromoCheckResource {
         $departure = Departure::query()
-            ->with(['yacht.cabins', 'itinerary'])
+            ->with(['property.cabins', 'itinerary'])
             ->findOrFail((int) $request->validated('departure_id'));
 
         abort_unless($feed->isVisible($departure), Response::HTTP_NOT_FOUND);

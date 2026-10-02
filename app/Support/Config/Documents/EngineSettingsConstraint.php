@@ -27,7 +27,7 @@ final class EngineSettingsConstraint implements ValidationRule, ValidatorAwareRu
         $data = $this->validator?->getData() ?? [];
 
         match ($this->check) {
-            'yacht_fits_cabins' => $this->yachtFitsCabins($value, $data, $fail),
+            'property_fits_cabins' => $this->propertyFitsCabins($value, $data, $fail),
             'child_ages_ordered' => $this->childAgesOrdered($value, $data, $fail),
             'search_range_ordered' => $this->searchRangeOrdered($value, $data, $fail),
             'default_adults_capacity' => $this->defaultAdultsCapacity($value, $data, $fail),
@@ -38,7 +38,7 @@ final class EngineSettingsConstraint implements ValidationRule, ValidatorAwareRu
     /**
      * @param  array<string, mixed>  $data
      */
-    private function yachtFitsCabins(mixed $value, array $data, Closure $fail): void
+    private function propertyFitsCabins(mixed $value, array $data, Closure $fail): void
     {
         $cabin = data_get($data, 'guests.max_per_cabin');
 
@@ -46,11 +46,11 @@ final class EngineSettingsConstraint implements ValidationRule, ValidatorAwareRu
             return;
         }
 
-        $yacht = (int) $value;
+        $property = (int) $value;
         $perCabin = (int) $cabin;
 
-        if ($yacht > 9 * $perCabin) {
-            $fail('Max per yacht ('.$yacht.') is more than 9 cabins × '.$perCabin.' can hold.');
+        if ($property > 9 * $perCabin) {
+            $fail('Max per property ('.$property.') is more than 9 cabins × '.$perCabin.' can hold.');
         }
     }
 
@@ -96,11 +96,11 @@ final class EngineSettingsConstraint implements ValidationRule, ValidatorAwareRu
         }
 
         $adults = (int) $value;
-        $yacht = data_get($data, 'guests.max_per_yacht');
+        $property = data_get($data, 'guests.max_per_property');
         $cabin = data_get($data, 'guests.max_per_cabin');
 
-        if (is_numeric($yacht) && $adults > (int) $yacht) {
-            $fail('Default adults must be between 1 and max guests per yacht.');
+        if (is_numeric($property) && $adults > (int) $property) {
+            $fail('Default adults must be between 1 and max guests per property.');
         }
 
         if (is_numeric($cabin) && $adults > (int) $cabin * 9) {

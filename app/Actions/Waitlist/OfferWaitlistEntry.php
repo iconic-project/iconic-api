@@ -40,7 +40,7 @@ final class OfferWaitlistEntry extends Action
     {
         return $this->transaction(function () use ($entry): bool {
             $entry->refresh();
-            $entry->loadMissing(['contact', 'departure.yacht', 'departure.itinerary']);
+            $entry->loadMissing(['contact', 'departure.property', 'departure.itinerary']);
 
             if ($entry->removed_at !== null || $entry->notified_at !== null) {
                 return false;

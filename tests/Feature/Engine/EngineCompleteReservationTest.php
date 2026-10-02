@@ -40,7 +40,7 @@ function completeBooking(array $overrides = []): Booking
 
     return Booking::factory()->create(array_merge([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::PendingPayment,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -80,7 +80,7 @@ test('the token is hashed at rest and GET returns the page without a passport nu
         ->assertOk()
         ->assertHeader('X-Robots-Tag', 'noindex')
         ->assertJsonPath('bookings.0.reference', $booking->displayReference())
-        ->assertJsonPath('bookings.0.yacht', 'ANAMARA')
+        ->assertJsonPath('bookings.0.property', 'ANAMARA')
         ->assertJsonPath('amount_due', 2660)
         ->assertJsonPath('amount_due_kind', PaymentKind::Deposit->value)
         ->assertJsonPath('can_pay', false)
@@ -157,12 +157,12 @@ test('GET for a group includes every booking and guest', function (): void {
     $group = Group::factory()->create(['departure_id' => $departure->id]);
     $first = completeBooking([
         'group_id' => $group->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'reference' => 'ANK-2026-8110',
     ]);
     $second = completeBooking([
         'group_id' => $group->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'reference' => 'ANK-2026-8111',
     ]);
     Guest::factory()->create(['booking_id' => $first->id, 'first_name' => 'Ada']);

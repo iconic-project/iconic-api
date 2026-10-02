@@ -35,6 +35,7 @@ use App\Http\Controllers\Rms\OfferController;
 use App\Http\Controllers\Rms\PaymentController;
 use App\Http\Controllers\Rms\PaymentLinkController;
 use App\Http\Controllers\Rms\PermissionController;
+use App\Http\Controllers\Rms\PropertyController;
 use App\Http\Controllers\Rms\RatesController;
 use App\Http\Controllers\Rms\ReconciliationController;
 use App\Http\Controllers\Rms\RefundController;
@@ -45,7 +46,6 @@ use App\Http\Controllers\Rms\RoleController;
 use App\Http\Controllers\Rms\SalesMaterialController;
 use App\Http\Controllers\Rms\UserController;
 use App\Http\Controllers\Rms\WaitlistController;
-use App\Http\Controllers\Rms\YachtController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => response()->json(['ok' => true]));
@@ -95,7 +95,10 @@ Route::get('extras/versions', [ExtrasController::class, 'index']);
 Route::get('extras/versions/{version}', [ExtrasController::class, 'show'])
     ->whereNumber('version');
 
-Route::get('yachts', [YachtController::class, 'index']);
+Route::get('properties', [PropertyController::class, 'index']);
+Route::get('properties/{property}', [PropertyController::class, 'show'])->whereNumber('property');
+Route::patch('properties/{property}', [PropertyController::class, 'update'])->whereNumber('property');
+Route::get('yachts', [PropertyController::class, 'index']);
 
 Route::get('itineraries', [ItineraryController::class, 'index']);
 Route::get('itineraries/defaults', [ItineraryController::class, 'defaults']);

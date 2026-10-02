@@ -12,7 +12,7 @@ use App\Models\CabinClaim;
 use App\Models\CheckoutSession;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Database\QueryException;
@@ -55,16 +55,16 @@ function claimMysqlError(QueryException $e): int
  */
 function concurrencyCabin(): array
 {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $departure = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
         'date' => '2028-04-02',
     ]);
 
     return [
         'departure' => $departure,
-        'cabin' => $yacht->cabins()->where('code', 'S1')->firstOrFail(),
+        'cabin' => $property->cabins()->where('code', 'S1')->firstOrFail(),
     ];
 }
 
@@ -220,20 +220,20 @@ test('a date change holds the departure so a claim waits', function (): void {
 });
 
 test('two converts spanning two departures in opposite order never deadlock', function (): void {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
     $departureX = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-02',
     ]);
     $departureY = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-09',
     ]);
-    $s1 = $yacht->cabins()->where('code', 'S1')->firstOrFail();
-    $s2 = $yacht->cabins()->where('code', 'S2')->firstOrFail();
+    $s1 = $property->cabins()->where('code', 'S1')->firstOrFail();
+    $s2 = $property->cabins()->where('code', 'S2')->firstOrFail();
 
     $fromA = ClaimHolder::query()->create(['reference' => 'FROM-A', 'name' => 'From A']);
     $toA = ClaimHolder::query()->create(['reference' => 'TO-A', 'name' => 'To A']);

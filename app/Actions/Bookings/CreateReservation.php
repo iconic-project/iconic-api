@@ -55,7 +55,7 @@ final class CreateReservation extends Action
     {
         return $this->transaction(function () use ($data, $actor): ReservationCreated {
             $departure = DepartureLocks::lock((int) $data['departure_id']);
-            $departure->load(['yacht.cabins']);
+            $departure->load(['property.cabins']);
 
             $quote = $this->quoter->quote($data, $departure);
 
@@ -98,7 +98,7 @@ final class CreateReservation extends Action
                 );
 
                 $cabins = $quote->type === BookingType::Charter
-                    ? $departure->yacht->cabins->sortBy('sort')->values()
+                    ? $departure->property->cabins->sortBy('sort')->values()
                     : collect([$this->requireCabin($party)]);
 
                 try {

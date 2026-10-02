@@ -247,7 +247,7 @@ test('a charter moves all nine claims', function (): void {
             'confirm_total' => $preview['new_total'],
         ])
         ->assertOk()
-        ->assertJsonPath('cabin_label', 'Full yacht');
+        ->assertJsonPath('cabin_label', 'Full property');
 
     expect(CabinClaim::query()->where('holder_id', $id)->whereNull('released_at')->count())->toBe(9);
     expect(CabinClaim::query()->where('holder_id', $id)->whereNull('released_at')->where('departure_id', $target->id)->count())->toBe(9);
@@ -255,7 +255,7 @@ test('a charter moves all nine claims', function (): void {
 
 test('requested with no active claim cannot be moved', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
-    $cabin = $departure->yacht->cabins->firstWhere('code', 'S4');
+    $cabin = $departure->property->cabins->firstWhere('code', 'S4');
     $booking = Booking::factory()->create([
         'status' => BookingStatus::Requested,
         'reference' => null,
@@ -278,7 +278,7 @@ test('requested with no active claim cannot be moved', function (): void {
 
 test('a requested hold moves and keeps its expiry', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
-    $cabin = $departure->yacht->cabins->firstWhere('code', 'S5');
+    $cabin = $departure->property->cabins->firstWhere('code', 'S5');
     $booking = Booking::factory()->create([
         'status' => BookingStatus::Requested,
         'reference' => null,

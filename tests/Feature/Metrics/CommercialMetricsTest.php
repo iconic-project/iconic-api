@@ -48,7 +48,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
 
     $cabin = Booking::factory()->create([
         'departure_id' => $cabinDeparture->id,
-        'cabin_id' => $cabinDeparture->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $cabinDeparture->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $admin->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
@@ -59,7 +59,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     ]);
     $blocked = Booking::factory()->create([
         'departure_id' => $cabinDeparture->id,
-        'cabin_id' => $cabinDeparture->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => $cabinDeparture->property->cabins->firstWhere('code', 'S2')?->id,
         'owner_id' => $admin->id,
         'status' => BookingStatus::Confirmed,
         'total' => 10000,
@@ -86,17 +86,17 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
         $claims = app(ClaimService::class);
         $claims->claim(
             $cabinDeparture,
-            collect([$cabinDeparture->yacht->cabins->firstWhere('code', 'S1')]),
+            collect([$cabinDeparture->property->cabins->firstWhere('code', 'S1')]),
             $cabin,
             ClaimKind::Booking,
         );
         $claims->claim(
             $cabinDeparture,
-            collect([$cabinDeparture->yacht->cabins->firstWhere('code', 'S2')]),
+            collect([$cabinDeparture->property->cabins->firstWhere('code', 'S2')]),
             $blocked,
             ClaimKind::Booking,
         );
-        $claims->claim($charterDeparture, $charterDeparture->yacht->cabins, $charter, ClaimKind::Booking);
+        $claims->claim($charterDeparture, $charterDeparture->property->cabins, $charter, ClaimKind::Booking);
     });
 
     BookingExtra::factory()->create([
@@ -162,7 +162,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     }
 
     $departures = Departure::query()
-        ->with(['yacht.cabins', 'itinerary'])
+        ->with(['property.cabins', 'itinerary'])
         ->whereDate('date', '>=', $from)
         ->whereDate('date', '<=', $to)
         ->get();
@@ -177,7 +177,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
         $sellable = $counts['sold'] + $counts['held'] + $counts['free'];
 
         if ($departure->id === $charterDeparture->id) {
-            $sold = $departure->yacht->cabins->count();
+            $sold = $departure->property->cabins->count();
         }
 
         expect($row['sold_berths'])->toBe($sold)
@@ -269,14 +269,14 @@ test('the metrics query count stays flat as bookings grow', function (): void {
 
     $extra = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S3')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 28000,
     ]);
     DB::transaction(function () use ($departure, $extra): void {
         app(ClaimService::class)->claim(
             $departure,
-            collect([$departure->yacht->cabins->firstWhere('code', 'S3')]),
+            collect([$departure->property->cabins->firstWhere('code', 'S3')]),
             $extra,
             ClaimKind::Booking,
         );

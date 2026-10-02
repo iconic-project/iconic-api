@@ -29,7 +29,7 @@ final class GroupController extends Controller
             ->visibleTo($actor)
             ->with([
                 'coordinator',
-                'departure.yacht',
+                'departure.property',
                 'bookings' => fn ($bookings) => $bookings->withLedgerAggregates()->with('cabin'),
             ])
             ->when(

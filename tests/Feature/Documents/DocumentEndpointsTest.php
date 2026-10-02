@@ -35,7 +35,7 @@ function endpointBooking(?int $ownerId = null): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S5')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S5')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-1001',
         'total' => 26600,

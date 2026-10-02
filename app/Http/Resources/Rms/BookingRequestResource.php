@@ -26,7 +26,7 @@ class BookingRequestResource extends JsonResource
      *     contact: array{name: string, preferred_channel: string},
      *     travel_advisor: bool,
      *     party: string,
-     *     departure: array{id: int, date: string, yacht: array{id: int, code: string, name: string}},
+     *     departure: array{id: int, date: string, property: array{id: int, code: string, name: string}},
      *     cabin_label: string,
      *     estimated_value: int,
      *     hold: array{expires_at: string|null, rule: string, remaining_business_minutes: int, expired: bool},
@@ -39,7 +39,7 @@ class BookingRequestResource extends JsonResource
     public function toArray(Request $request): array
     {
         $this->resource->loadMissing([
-            'departure.yacht',
+            'departure.property',
             'cabin',
             'contact',
             'bookingRequest',
@@ -76,10 +76,10 @@ class BookingRequestResource extends JsonResource
             'departure' => [
                 'id' => $this->departure->id,
                 'date' => $this->departure->date->toDateString(),
-                'yacht' => [
-                    'id' => $this->departure->yacht->id,
-                    'code' => $this->departure->yacht->code,
-                    'name' => $this->departure->yacht->name,
+                'property' => [
+                    'id' => $this->departure->property->id,
+                    'code' => $this->departure->property->code,
+                    'name' => $this->departure->property->name,
                 ],
             ],
             'cabin_label' => $this->cabinLabel(),

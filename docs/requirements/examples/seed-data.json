@@ -83,7 +83,7 @@
   ],
   "engine_settings": {
     "maxCabin": 3,
-    "maxYacht": 16,
+    "maxProperty": 16,
     "childMin": 6,
     "childMax": 17,
     "adultWithChild": true,
@@ -105,8 +105,8 @@
     "pngCh": 100,
     "showFees": true,
     "feeNote": "Informational — regulatory Galápagos fees, not charged today. PNG is paid at SCY airport; TCT is arranged with our team.",
-    "chHead": "The yacht, entirely yours",
-    "chIntro": "One yacht, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.",
+    "chHead": "The property, entirely yours",
+    "chIntro": "One property, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.",
     "chItin": "Customizable",
     "chSla": 24,
     "chCtx": [
@@ -200,7 +200,7 @@
           "Sustainable, locally sourced — expedition gastronomy"
         ],
         [
-          "Yacht",
+          "Property",
           "Sundeck, jacuzzi & Wi-Fi · 16 guests"
         ],
         [
@@ -317,7 +317,7 @@
           "Sustainable, locally sourced — expedition gastronomy"
         ],
         [
-          "Yacht",
+          "Property",
           "Sundeck, jacuzzi & Wi-Fi · 16 guests"
         ],
         [
@@ -432,7 +432,7 @@
           "Sustainable, locally sourced — expedition gastronomy"
         ],
         [
-          "Yacht",
+          "Property",
           "Sundeck, jacuzzi & Wi-Fi · 16 guests"
         ],
         [
@@ -501,7 +501,7 @@
     {
       "id": "DEP-001",
       "di": 0,
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "itin": "WEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -513,7 +513,7 @@
     {
       "id": "DEP-002",
       "di": 0,
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "itin": "NORTH",
       "status": "ON_SALE",
       "thr": 3,
@@ -525,7 +525,7 @@
     {
       "id": "DEP-003",
       "di": 1,
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "itin": "NORTH",
       "status": "ON_SALE",
       "thr": 3,
@@ -537,7 +537,7 @@
     {
       "id": "DEP-004",
       "di": 1,
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "itin": "WEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -549,7 +549,7 @@
     {
       "id": "DEP-005",
       "di": 2,
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "itin": "WEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -561,7 +561,7 @@
     {
       "id": "DEP-006",
       "di": 2,
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "itin": "NORTH",
       "status": "ON_SALE",
       "thr": 3,
@@ -573,7 +573,7 @@
     {
       "id": "DEP-007",
       "di": 3,
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "itin": "NORTH",
       "status": "ON_SALE",
       "thr": 3,
@@ -585,7 +585,7 @@
     {
       "id": "DEP-008",
       "di": 3,
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "itin": "WEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -597,7 +597,7 @@
     {
       "id": "DEP-009",
       "di": 4,
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "itin": "WEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -609,7 +609,7 @@
     {
       "id": "DEP-010",
       "di": 4,
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "itin": "NORTH",
       "status": "ON_SALE",
       "thr": 3,
@@ -621,7 +621,7 @@
     {
       "id": "DEP-011",
       "di": 5,
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "itin": "NORTH",
       "status": "ON_SALE",
       "thr": 3,
@@ -633,7 +633,7 @@
     {
       "id": "DEP-012",
       "di": 5,
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "itin": "WEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -645,7 +645,7 @@
     {
       "id": "DEP-013",
       "di": 6,
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "itin": "FEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -657,7 +657,7 @@
     {
       "id": "DEP-014",
       "di": 6,
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "itin": "FEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -669,7 +669,7 @@
     {
       "id": "DEP-015",
       "di": 7,
-      "yacht": "ANAMARA",
+      "property": "ANAMARA",
       "itin": "FEST",
       "status": "ON_SALE",
       "thr": 3,
@@ -681,7 +681,7 @@
     {
       "id": "DEP-016",
       "di": 7,
-      "yacht": "ANATIVA",
+      "property": "ANATIVA",
       "itin": "FEST",
       "status": "ON_SALE",
       "thr": 3,

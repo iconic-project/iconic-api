@@ -24,9 +24,9 @@ final class DemoGuestsSeeder extends Seeder
 
         $png = app(ApplyPng::class);
         $settings = app(CurrentConfig::class)->engineSettings();
-        $maxPerYacht = $settings->guests->maxPerYacht;
+        $maxPerProperty = $settings->guests->maxPerProperty;
 
-        DB::transaction(function () use ($png, $maxPerYacht): void {
+        DB::transaction(function () use ($png, $maxPerProperty): void {
             foreach ($this->passengers() as $reference => $rows) {
                 $booking = Booking::query()
                     ->with('departure')
@@ -41,7 +41,7 @@ final class DemoGuestsSeeder extends Seeder
                 }
 
                 $want = $booking->type === BookingType::Charter
-                    ? $maxPerYacht
+                    ? $maxPerProperty
                     : max(1, $booking->adults + $booking->children);
 
                 while (count($rows) < $want) {
@@ -89,7 +89,7 @@ final class DemoGuestsSeeder extends Seeder
 
     /**
      * Prototype `seedOps` passengers. Empty slots are padded to the priced party
-     * (or `guests.max_per_yacht` for a charter, whose priced party is 0 adults).
+     * (or `guests.max_per_property` for a charter, whose priced party is 0 adults).
      *
      * @return array<string, list<array<string, mixed>>>
      */

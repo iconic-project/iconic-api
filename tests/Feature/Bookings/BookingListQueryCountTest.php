@@ -77,7 +77,7 @@ test('the bookings list query count does not grow when the extra bookings have p
 
     $first = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
         'reference' => 'ANK-2026-0601',
     ]);
@@ -103,7 +103,7 @@ test('the bookings list query count does not grow when the extra bookings have p
     foreach (['S2' => '0602', 'S3' => '0603', 'S4' => '0604'] as $cabin => $suffix) {
         $booking = Booking::factory()->create([
             'departure_id' => $departure->id,
-            'cabin_id' => $departure->yacht->cabins->firstWhere('code', $cabin)?->id,
+            'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
             'owner_id' => $actor->id,
             'reference' => 'ANK-2026-'.$suffix,
         ]);
@@ -132,7 +132,7 @@ test('the bookings list query count does not grow when the extra bookings have e
 
     $first = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-0701',
@@ -163,7 +163,7 @@ test('the bookings list query count does not grow when the extra bookings have e
     foreach (['S2' => '0702', 'S3' => '0703', 'S4' => '0704'] as $cabin => $suffix) {
         $booking = Booking::factory()->create([
             'departure_id' => $departure->id,
-            'cabin_id' => $departure->yacht->cabins->firstWhere('code', $cabin)?->id,
+            'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
             'owner_id' => $actor->id,
             'status' => BookingStatus::Confirmed,
             'reference' => 'ANK-2026-'.$suffix,

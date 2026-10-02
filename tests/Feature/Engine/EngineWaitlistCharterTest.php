@@ -59,7 +59,7 @@ function engineCharterPayload(array $overrides = []): array
             'email' => 'charter-'.uniqid().'@iconic.test',
             'phone' => '+15550000',
         ],
-        'message' => 'We would like the yacht for a week in November.',
+        'message' => 'We would like the property for a week in November.',
     ], $overrides);
 }
 
@@ -111,7 +111,7 @@ test('a charter enquiry is stored and mailed to the reservations mailbox', funct
     });
 });
 
-test('charter guests over the yacht cap are refused', function (): void {
+test('charter guests over the property cap are refused', function (): void {
     $this->postJson('/api/engine/charter-enquiries', engineCharterPayload([
         'guests' => 17,
     ]))

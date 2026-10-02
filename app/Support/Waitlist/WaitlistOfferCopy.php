@@ -14,17 +14,17 @@ final class WaitlistOfferCopy
 {
     public static function subject(WaitlistEntry $entry): string
     {
-        $entry->loadMissing('departure.yacht');
+        $entry->loadMissing('departure.property');
 
-        return 'A cabin is free — '.$entry->departure->yacht->name.' '.$entry->departure->date->toDateString();
+        return 'A cabin is free — '.$entry->departure->property->name.' '.$entry->departure->date->toDateString();
     }
 
     public static function sentence(WaitlistEntry $entry): string
     {
-        $entry->loadMissing('departure.yacht');
+        $entry->loadMissing('departure.property');
         $category = $entry->cabin_category === CabinCategory::Owner ? "Owner's Suite" : 'Suite';
 
-        return 'A '.$category.' is free on '.$entry->departure->yacht->name
+        return 'A '.$category.' is free on '.$entry->departure->property->name
             .' departing '.$entry->departure->date->toDateString()
             .'. Cabins are first-come and nothing is held for you.';
     }

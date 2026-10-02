@@ -56,7 +56,7 @@ function templateBooking(): Booking
     ]);
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S7')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S7')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-1101',
         'total' => 26600,
@@ -93,7 +93,7 @@ function templateBooking(): Booking
         'reference' => 'ANK-2026-1101-D01',
     ]);
 
-    return $booking->fresh(['departure.itinerary', 'departure.yacht', 'guests', 'extras', 'payments', 'contact']);
+    return $booking->fresh(['departure.itinerary', 'departure.property', 'guests', 'extras', 'payments', 'contact']);
 }
 
 /**

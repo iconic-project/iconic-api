@@ -20,7 +20,7 @@ final class Defaults
     public const FACTS = [
         ['Accommodation', "9 cabins — 8 Suites + Owner's Suite, all facing the sea"],
         ['Dining', 'Sustainable, locally sourced — expedition gastronomy'],
-        ['Yacht', 'Sundeck, jacuzzi & Wi-Fi · 16 guests'],
+        ['Property', 'Sundeck, jacuzzi & Wi-Fi · 16 guests'],
         ['Crew & Guides', 'Expert naturalist guides · full expedition crew'],
         ['Activities', 'Snorkel, kayak, guided walks, wildlife observation'],
         ['Language', 'English & Spanish'],

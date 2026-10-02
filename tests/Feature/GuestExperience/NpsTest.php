@@ -75,7 +75,7 @@ function npsBooking(
     $leadEmail = $existingContact instanceof Contact ? (string) $existingContact->email : $contactEmail;
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => $status,
@@ -171,7 +171,7 @@ test('completing a voyage raises one post-trip call and a replay does not raise 
     $departure = ReservationFixtures::anamaraDeparture('2026-06-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::FullyPaid,
         'reference' => 'ANK-NPS-CALL',

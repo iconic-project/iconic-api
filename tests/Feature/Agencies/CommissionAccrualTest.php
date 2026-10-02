@@ -55,7 +55,7 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
 
     $cancelled = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S3')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -65,7 +65,7 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
 
     $payable = Booking::factory()->create([
         'departure_id' => $past->id,
-        'cabin_id' => $past->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $past->property->cabins->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -106,7 +106,7 @@ test('the payable date is thirty days after the return date', function (): void 
     $departure = ReservationFixtures::anamaraDeparture('2027-11-14');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S4')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -138,7 +138,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
     $agency = Agency::factory()->create(['commission_pct' => 10]);
     $departure = ReservationFixtures::anamaraDeparture('2027-11-14');
     $rules = app(CurrentConfig::class)->businessRules();
-    $cabin = fn (string $code): ?int => $departure->yacht->cabins->firstWhere('code', $code)?->id;
+    $cabin = fn (string $code): ?int => $departure->property->cabins->firstWhere('code', $code)?->id;
 
     $cancelled = Booking::factory()->create([
         'departure_id' => $departure->id,

@@ -8,8 +8,8 @@ use App\Enums\DepartureStatus;
 use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
-use App\Support\Departures\YachtDateConflict;
+use App\Models\Property;
+use App\Support\Departures\PropertyDateConflict;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -23,14 +23,14 @@ beforeEach(function (): void {
     $this->seed(ConfigSeeder::class);
 });
 
-function anamara(): Yacht
+function anamara(): Property
 {
-    return Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    return Property::query()->where('code', 'ANAMARA')->firstOrFail();
 }
 
-function anativa(): Yacht
+function anativa(): Property
 {
-    return Yacht::query()->where('code', 'ANATIVA')->firstOrFail();
+    return Property::query()->where('code', 'ANATIVA')->firstOrFail();
 }
 
 /**
@@ -44,7 +44,7 @@ function departurePayload(array $overrides = []): array
 
     return [
         'date' => '2028-04-02',
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'status' => DepartureStatus::OnSale->value,
         'urgency_threshold' => 3,
         'waitlist_enabled' => true,
@@ -54,12 +54,12 @@ function departurePayload(array $overrides = []): array
     ];
 }
 
-function insertDepartureRow(Yacht $yacht, Itinerary $itinerary, string $date, string $reference = 'DEP-900'): void
+function insertDepartureRow(Property $property, Itinerary $itinerary, string $date, string $reference = 'DEP-900'): void
 {
     DB::table('departures')->insert([
         'reference' => $reference,
         'date' => $date,
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $itinerary->id,
         'status' => DepartureStatus::OnSale->value,
         'urgency_threshold' => 3,
@@ -74,7 +74,7 @@ function insertDepartureRow(Yacht $yacht, Itinerary $itinerary, string $date, st
 test('lucia can view departures and cannot write', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-02',
     ]);
@@ -109,7 +109,7 @@ test('lucia can view departures and cannot write', function (): void {
         ->postJson('/api/rms/departures/generate-season', [
             'from' => '2028-01-02',
             'to' => '2028-01-09',
-            'yacht_ids' => [anamara()->id],
+            'property_ids' => [anamara()->id],
             'pattern' => 'WEST',
             'festive_window' => false,
             'status' => 'CLOSED',
@@ -129,7 +129,7 @@ test('mateo can create a departure with return_date and empty warnings', functio
         ->assertJsonPath('return_date', '2028-04-09')
         ->assertJsonPath('status', 'ON_SALE')
         ->assertJsonPath('public_note', 'Inaugural sailing')
-        ->assertJsonPath('yacht.code', 'ANAMARA')
+        ->assertJsonPath('property.code', 'ANAMARA')
         ->assertJsonPath('itinerary.id', $payload['itinerary_id'])
         ->assertJsonPath('rates.year', 2028)
         ->assertJsonPath('rates.suite_from', 13965)
@@ -150,13 +150,13 @@ test('a monday is refused with the prototype sunday message', function (): void 
     $this->actingAs($mateo)
         ->postJson('/api/rms/departures', departurePayload(['date' => '2028-04-03']))
         ->assertUnprocessable()
-        ->assertJsonPath('errors.date.0', YachtDateConflict::sundayMessage($monday));
+        ->assertJsonPath('errors.date.0', PropertyDateConflict::sundayMessage($monday));
 });
 
-test('a duplicate yacht and date is refused with the prototype uniqueness message', function (): void {
+test('a duplicate property and date is refused with the prototype uniqueness message', function (): void {
     $itinerary = Itinerary::factory()->create();
     $existing = Departure::factory()->create([
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-02',
         'reference' => 'DEP-044',
@@ -171,11 +171,11 @@ test('a duplicate yacht and date is refused with the prototype uniqueness messag
         ->assertUnprocessable()
         ->assertJsonPath(
             'errors.date.0',
-            YachtDateConflict::duplicateMessage('ANAMARA', $existing->date, 'DEP-044'),
+            PropertyDateConflict::duplicateMessage('ANAMARA', $existing->date, 'DEP-044'),
         );
 });
 
-test('create catches a unique yacht-date violation inserted before the action', function (): void {
+test('create catches a unique property-date violation inserted before the action', function (): void {
     $itinerary = Itinerary::factory()->create();
     insertDepartureRow(anamara(), $itinerary, '2028-04-02', 'DEP-900');
     $mateo = managerUser();
@@ -183,7 +183,7 @@ test('create catches a unique yacht-date violation inserted before the action', 
 
     try {
         app(CreateDeparture::class)->handle([
-            'yacht_id' => anamara()->id,
+            'property_id' => anamara()->id,
             'date' => '2028-04-02',
             'itinerary_id' => $itinerary->id,
             'status' => DepartureStatus::OnSale,
@@ -191,7 +191,7 @@ test('create catches a unique yacht-date violation inserted before the action', 
         $this->fail('Expected a unique-violation 422.');
     } catch (ValidationException $exception) {
         expect($exception->errors()['date'][0] ?? null)->toBe(
-            YachtDateConflict::duplicateMessage(
+            PropertyDateConflict::duplicateMessage(
                 'ANAMARA',
                 CarbonImmutable::createFromFormat('!Y-m-d', '2028-04-02'),
                 'DEP-900',
@@ -200,10 +200,10 @@ test('create catches a unique yacht-date violation inserted before the action', 
     }
 });
 
-test('update catches a unique yacht-date violation inserted before the action', function (): void {
+test('update catches a unique property-date violation inserted before the action', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-09',
     ]);
@@ -216,7 +216,7 @@ test('update catches a unique yacht-date violation inserted before the action', 
         $this->fail('Expected a unique-violation 422.');
     } catch (ValidationException $exception) {
         expect($exception->errors()['date'][0] ?? null)->toBe(
-            YachtDateConflict::duplicateMessage(
+            PropertyDateConflict::duplicateMessage(
                 'ANAMARA',
                 CarbonImmutable::createFromFormat('!Y-m-d', '2028-04-02'),
                 'DEP-901',
@@ -228,7 +228,7 @@ test('update catches a unique yacht-date violation inserted before the action', 
 test('a festive twin warning is returned without blocking create', function (): void {
     $west = Itinerary::factory()->create(['code' => 'WEST', 'festive' => false]);
     Departure::factory()->create([
-        'yacht_id' => anativa()->id,
+        'property_id' => anativa()->id,
         'itinerary_id' => $west->id,
         'date' => '2027-12-19',
         'festive' => false,
@@ -250,13 +250,13 @@ test('updating a non-festive departure warns when the twin is festive', function
     $west = Itinerary::factory()->create(['code' => 'WEST', 'festive' => false]);
     $fest = Itinerary::factory()->create(['code' => 'FEST', 'festive' => true]);
     Departure::factory()->create([
-        'yacht_id' => anativa()->id,
+        'property_id' => anativa()->id,
         'itinerary_id' => $fest->id,
         'date' => '2027-12-19',
         'festive' => true,
     ]);
     $departure = Departure::factory()->create([
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'itinerary_id' => $west->id,
         'date' => '2027-12-19',
         'festive' => true,
@@ -286,26 +286,26 @@ test('a non-festive departure on a festive itinerary warns', function (): void {
         ->assertJsonPath('warnings.0', 'This departure is not festive but itinerary FEST is festive.');
 });
 
-test('the list filters by date yacht and status and paginates', function (): void {
+test('the list filters by date property and status and paginates', function (): void {
     $west = Itinerary::factory()->create(['code' => 'WEST']);
     $north = Itinerary::factory()->create(['code' => 'NORTH']);
 
     Departure::factory()->create([
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'itinerary_id' => $west->id,
         'date' => '2028-04-02',
         'status' => DepartureStatus::OnSale,
         'reference' => 'DEP-101',
     ]);
     Departure::factory()->create([
-        'yacht_id' => anativa()->id,
+        'property_id' => anativa()->id,
         'itinerary_id' => $north->id,
         'date' => '2028-04-02',
         'status' => DepartureStatus::Closed,
         'reference' => 'DEP-102',
     ]);
     Departure::factory()->create([
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'itinerary_id' => $west->id,
         'date' => '2028-04-09',
         'status' => DepartureStatus::OnSale,
@@ -317,12 +317,12 @@ test('the list filters by date yacht and status and paginates', function (): voi
     $this->actingAs($mateo)
         ->getJson('/api/rms/departures?from=2028-04-02&to=2028-04-02')
         ->assertOk()
-        ->assertJsonPath('data.0.yacht.code', 'ANAMARA')
-        ->assertJsonPath('data.1.yacht.code', 'ANATIVA')
+        ->assertJsonPath('data.0.property.code', 'ANAMARA')
+        ->assertJsonPath('data.1.property.code', 'ANATIVA')
         ->assertJsonCount(2, 'data');
 
     $this->actingAs($mateo)
-        ->getJson('/api/rms/departures?yacht_id='.anamara()->id)
+        ->getJson('/api/rms/departures?property_id='.anamara()->id)
         ->assertOk()
         ->assertJsonCount(2, 'data');
 
@@ -336,7 +336,7 @@ test('the list filters by date yacht and status and paginates', function (): voi
 test('a 2031 departure has a null rates hint', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2031-01-05',
     ]);
@@ -352,7 +352,7 @@ test('a 2031 departure has a null rates hint', function (): void {
 test('mateo can delete a departure', function (): void {
     $itinerary = Itinerary::factory()->create();
     $departure = Departure::factory()->create([
-        'yacht_id' => anamara()->id,
+        'property_id' => anamara()->id,
         'itinerary_id' => $itinerary->id,
     ]);
     $mateo = managerUser();

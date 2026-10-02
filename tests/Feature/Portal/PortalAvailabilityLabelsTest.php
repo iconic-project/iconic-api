@@ -46,8 +46,8 @@ test('a fully sold departure shows the same label the public engine feed shows',
 
     $holderA = ClaimHolder::query()->create(['reference' => 'LBL-A', 'name' => 'A']);
     $holderB = ClaimHolder::query()->create(['reference' => 'LBL-B', 'name' => 'B']);
-    $suites = $departure->yacht->cabins()->where('code', '!=', 'OWNER')->get();
-    $owner = $departure->yacht->cabins()->where('code', 'OWNER')->get();
+    $suites = $departure->property->cabins()->where('code', '!=', 'OWNER')->get();
+    $owner = $departure->property->cabins()->where('code', 'OWNER')->get();
 
     DB::transaction(function () use ($departure, $holderA, $holderB, $suites, $owner): void {
         $service = app(ClaimService::class);

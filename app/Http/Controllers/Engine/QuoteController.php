@@ -24,7 +24,7 @@ final class QuoteController extends Controller
     ): EngineQuoteResource {
         $validated = $request->validated();
         $departure = Departure::query()
-            ->with(['yacht.cabins', 'itinerary'])
+            ->with(['property.cabins', 'itinerary'])
             ->findOrFail((int) $validated['departure_id']);
 
         abort_unless($feed->isVisible($departure), Response::HTTP_NOT_FOUND);

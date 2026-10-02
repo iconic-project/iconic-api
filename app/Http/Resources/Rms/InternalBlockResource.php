@@ -42,7 +42,7 @@ class InternalBlockResource extends JsonResource
      *             id: int,
      *             reference: string,
      *             date: string,
-     *             yacht: array{id: int, code: string, name: string}
+     *             property: array{id: int, code: string, name: string}
      *         }
      *     }>
      * }
@@ -53,7 +53,7 @@ class InternalBlockResource extends JsonResource
             'createdBy',
             'releasedBy',
             'claims.cabin',
-            'claims.departure.yacht',
+            'claims.departure.property',
         ]);
 
         $claims = $this->claims;
@@ -83,10 +83,10 @@ class InternalBlockResource extends JsonResource
                     'id' => $claim->departure->id,
                     'reference' => $claim->departure->reference,
                     'date' => $claim->departure->date->toDateString(),
-                    'yacht' => [
-                        'id' => $claim->departure->yacht->id,
-                        'code' => $claim->departure->yacht->code,
-                        'name' => $claim->departure->yacht->name,
+                    'property' => [
+                        'id' => $claim->departure->property->id,
+                        'code' => $claim->departure->property->code,
+                        'name' => $claim->departure->property->name,
                     ],
                 ],
             ])->values()->all(),
@@ -99,7 +99,7 @@ class InternalBlockResource extends JsonResource
     private function scopeSummary($claims): string
     {
         $scopes = $claims->map(fn (CabinClaim $claim): array => [
-            'yacht_code' => $claim->departure->yacht->code,
+            'property_code' => $claim->departure->property->code,
             'date' => $claim->departure->date->toDateString(),
             'cabin_codes' => [$claim->cabin->code],
         ])->all();

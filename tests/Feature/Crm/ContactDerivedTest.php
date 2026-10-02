@@ -37,7 +37,7 @@ function crmBooking(Contact $contact, string $date, BookingStatus $status, int $
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', $cabin)?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
         'contact_id' => $contact->id,
         'status' => $status,
         'total' => $total,

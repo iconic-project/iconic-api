@@ -25,7 +25,7 @@ beforeEach(function (): void {
     $this->seed(DemoRequestsSeeder::class);
 });
 
-test('demo guests match seedOps and pad the charter from max_per_yacht', function (): void {
+test('demo guests match seedOps and pad the charter from max_per_property', function (): void {
     $this->seed(DemoGuestsSeeder::class);
     $this->seed(DemoGuestsSeeder::class);
 
@@ -41,7 +41,7 @@ test('demo guests match seedOps and pad the charter from max_per_yacht', functio
     expect($brandts->guests[2]->guardian_consented_at)->not->toBeNull();
 
     $charter = Booking::query()->where('reference', 'ANK-2026-0012')->firstOrFail();
-    $max = app(CurrentConfig::class)->engineSettings()->guests->maxPerYacht;
+    $max = app(CurrentConfig::class)->engineSettings()->guests->maxPerProperty;
 
     expect($charter->type)->toBe(BookingType::Charter);
     expect($charter->adults)->toBe(0);

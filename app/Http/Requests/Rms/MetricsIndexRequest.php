@@ -21,7 +21,7 @@ class MetricsIndexRequest extends FormRequest
     {
         $merged = [];
 
-        foreach (['yacht', 'itinerary', 'channel', 'agency'] as $key) {
+        foreach (['property', 'itinerary', 'channel', 'agency'] as $key) {
             if ($this->input($key) === '') {
                 $merged[$key] = null;
             }
@@ -40,7 +40,7 @@ class MetricsIndexRequest extends FormRequest
         return [
             'from' => ['required', 'date_format:Y-m-d'],
             'to' => ['required', 'date_format:Y-m-d', 'after_or_equal:from'],
-            'yacht' => ['nullable', 'integer', 'exists:yachts,id'],
+            'property' => ['nullable', 'integer', 'exists:properties,id'],
             'itinerary' => ['nullable', 'integer', 'exists:itineraries,id'],
             'channel' => ['nullable', Rule::enum(ChannelOfOriginGroup::class)],
             'agency' => ['nullable', 'integer', 'exists:agencies,id'],
@@ -60,7 +60,7 @@ class MetricsIndexRequest extends FormRequest
         $channel = $this->validated('channel');
 
         return new MetricScope(
-            yachtId: $this->filled('yacht') ? $this->integer('yacht') : null,
+            propertyId: $this->filled('property') ? $this->integer('property') : null,
             itineraryId: $this->filled('itinerary') ? $this->integer('itinerary') : null,
             channel: is_string($channel) ? ChannelOfOriginGroup::from($channel) : null,
             agencyId: $this->filled('agency') ? $this->integer('agency') : null,

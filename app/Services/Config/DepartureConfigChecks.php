@@ -145,7 +145,7 @@ final class DepartureConfigChecks
     public function firstBookableMonth(): ?string
     {
         $departures = Departure::query()
-            ->with(['yacht.cabins', 'itinerary'])
+            ->with(['property.cabins', 'itinerary'])
             ->where('status', DepartureStatus::OnSale)
             ->orderBy('date')
             ->get();

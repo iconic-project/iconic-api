@@ -32,11 +32,11 @@ final class HoldController extends Controller
             ->whereNull('released_at')
             ->with([
                 'cabin',
-                'departure.yacht',
+                'departure.property',
                 'holder' => function (Relation $morph): void {
                     if ($morph instanceof MorphTo) {
                         $morph->morphWith([
-                            Booking::class => ['contact', 'cabin', 'departure.yacht', 'bookingRequest', 'claims'],
+                            Booking::class => ['contact', 'cabin', 'departure.property', 'bookingRequest', 'claims'],
                         ]);
                     }
                 },

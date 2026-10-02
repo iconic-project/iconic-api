@@ -526,9 +526,9 @@ final class Registry
                 'display' => $engine->guests->childMinAge.' years',
                 'differs' => $engine->guests->childMinAge !== 6,
             ],
-            'ops-002-guests-per-yacht' => [
-                'display' => $engine->guests->maxPerYacht.' guests',
-                'differs' => $engine->guests->maxPerYacht !== 16,
+            'ops-002-guests-per-property' => [
+                'display' => $engine->guests->maxPerProperty.' guests',
+                'differs' => $engine->guests->maxPerProperty !== 16,
             ],
             'guests-per-cabin' => [
                 'display' => $engine->guests->maxPerCabin.' guests',
@@ -1075,10 +1075,10 @@ final class Registry
                 link: self::LINK_ENGINE,
             ),
             new RuleDefinition(
-                'ops-002-guests-per-yacht',
+                'ops-002-guests-per-property',
                 $g,
                 'OPS-002',
-                'Guests per yacht',
+                'Guests per property',
                 RuleStatus::Confirmed,
                 RuleWhere::EngineSettings,
                 [],
@@ -1522,10 +1522,10 @@ final class Registry
                 'ops-002-cabins',
                 $g,
                 'OPS-002',
-                'Cabins per yacht',
+                'Cabins per property',
                 '9 cabins',
-                'Physical inventory — fixed by the yacht. Both yachts share the same hull, layout, cabin numbering and rates (Iconic 12 Sep 2026).',
-                'Calendar, Yacht Layout, engine deck plan',
+                'Physical inventory — fixed by the property. Both properties share the same hull, layout, cabin numbering and rates (Iconic 12 Sep 2026).',
+                'Calendar, Property Layout, engine deck plan',
             ),
             self::locked(
                 'ops-003-home-port',

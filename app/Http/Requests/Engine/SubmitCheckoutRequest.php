@@ -90,7 +90,7 @@ class SubmitCheckoutRequest extends FormRequest
                 return;
             }
 
-            $session->loadMissing('departure.yacht.cabins');
+            $session->loadMissing('departure.property.cabins');
             $departure = $session->departure;
             $normalized = [];
 

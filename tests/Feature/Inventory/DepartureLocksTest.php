@@ -8,7 +8,7 @@ use App\Enums\ItineraryStatus;
 use App\Enums\ReleaseReason;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Inventory\ClaimService;
 use App\Support\Inventory\DepartureLocks;
 use Database\Seeders\ConfigSeeder;
@@ -25,21 +25,21 @@ beforeEach(function (): void {
 
 function lockDeparture(): Departure
 {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
 
     return Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
         'date' => '2028-04-02',
     ]);
 }
 
-test('date and yacht lock when a hold or booking is active but not for a block', function (): void {
+test('date and property lock when a hold or booking is active but not for a block', function (): void {
     $departure = lockDeparture();
     $block = ClaimHolder::query()->create(['reference' => 'BLK-1', 'name' => 'Block']);
     $hold = ClaimHolder::query()->create(['reference' => 'HLD-1', 'name' => 'Hold']);
-    $s1 = $departure->yacht->cabins()->where('code', 'S1')->firstOrFail();
-    $s2 = $departure->yacht->cabins()->where('code', 'S2')->firstOrFail();
+    $s1 = $departure->property->cabins()->where('code', 'S1')->firstOrFail();
+    $s2 = $departure->property->cabins()->where('code', 'S2')->firstOrFail();
     $mateo = managerUser();
 
     DB::transaction(function () use ($departure, $s1, $block): void {
@@ -67,20 +67,20 @@ test('date and yacht lock when a hold or booking is active but not for a block',
     $this->actingAs($mateo)
         ->getJson("/api/rms/departures/{$departure->id}")
         ->assertOk()
-        ->assertJsonPath('locks.date_and_yacht', true)
+        ->assertJsonPath('locks.date_and_property', true)
         ->assertJsonPath('locks.delete', true);
 
     $this->actingAs($mateo)
         ->patchJson("/api/rms/departures/{$departure->id}", ['date' => '2028-04-16'])
         ->assertStatus(409)
-        ->assertJsonPath('message', DepartureLocks::dateAndYachtMessage(1));
+        ->assertJsonPath('message', DepartureLocks::dateAndPropertyMessage(1));
 });
 
 test('delete is refused while any active claim exists', function (): void {
     $departure = lockDeparture();
     $holder = ClaimHolder::query()->create(['reference' => 'BLK-2', 'name' => 'Block']);
-    $s1 = $departure->yacht->cabins()->where('code', 'S1')->firstOrFail();
-    $s2 = $departure->yacht->cabins()->where('code', 'S2')->firstOrFail();
+    $s1 = $departure->property->cabins()->where('code', 'S1')->firstOrFail();
+    $s2 = $departure->property->cabins()->where('code', 'S2')->firstOrFail();
 
     DB::transaction(function () use ($departure, $s1, $s2, $holder): void {
         app(ClaimService::class)->claim($departure, collect([$s1, $s2]), $holder, ClaimKind::Block);
@@ -95,7 +95,7 @@ test('delete is refused while any active claim exists', function (): void {
 test('a released claim still blocks delete with the history message', function (): void {
     $departure = lockDeparture();
     $holder = ClaimHolder::query()->create(['reference' => 'BLK-3', 'name' => 'Block']);
-    $cabin = $departure->yacht->cabins()->where('code', 'S7')->firstOrFail();
+    $cabin = $departure->property->cabins()->where('code', 'S7')->firstOrFail();
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
         $service = app(ClaimService::class);
@@ -106,7 +106,7 @@ test('a released claim still blocks delete with the history message', function (
     $this->actingAs(managerUser())
         ->getJson("/api/rms/departures/{$departure->id}")
         ->assertOk()
-        ->assertJsonPath('locks.date_and_yacht', false)
+        ->assertJsonPath('locks.date_and_property', false)
         ->assertJsonPath('locks.delete', true)
         ->assertJsonPath('locks.reason', DepartureLocks::HISTORY_DELETE);
 

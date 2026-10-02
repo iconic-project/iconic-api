@@ -7,7 +7,7 @@ namespace Database\Factories;
 use App\Enums\DepartureStatus;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +23,7 @@ class DepartureFactory extends Factory
         return [
             'reference' => 'DEP-'.str_pad((string) fake()->unique()->numberBetween(100, 999), 3, '0', STR_PAD_LEFT),
             'date' => '2028-04-02',
-            'yacht_id' => Yacht::factory(),
+            'property_id' => Property::factory(),
             'itinerary_id' => Itinerary::factory(),
             'status' => DepartureStatus::OnSale,
             'urgency_threshold' => 3,

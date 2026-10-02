@@ -29,10 +29,10 @@ final class FieldOwnership
             ],
             [
                 'object' => 'Departure',
-                'field_group' => 'Date, yacht, itinerary, status, capacity',
+                'field_group' => 'Date, property, itinerary, status, capacity',
                 'system_of_record' => 'RMS',
                 'read_by' => 'Engine · CRM',
-                'rule' => 'One row per yacht per Sunday. ANAMARA and ANATIVA are twin hulls.',
+                'rule' => 'One row per property per Sunday. ANAMARA and ANATIVA are twin hulls.',
                 'code' => 'App\\Models\\Departure',
             ],
             [

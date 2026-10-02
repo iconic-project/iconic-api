@@ -18,8 +18,8 @@ use App\Models\AgencyUser;
 use App\Models\Booking;
 use App\Models\Cabin;
 use App\Models\Departure;
+use App\Models\Property;
 use App\Models\User;
-use App\Models\Yacht;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\CabinPricer;
@@ -192,11 +192,11 @@ final class DemoAgenciesSeeder extends Seeder
             throw new RuntimeException('AG-002 must exist before seeding ANK-2026-0021.');
         }
 
-        $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+        $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
         $departure = Departure::query()
-            ->where('yacht_id', $yacht->id)
+            ->where('property_id', $property->id)
             ->whereDate('date', '2027-11-14')
-            ->with('yacht.cabins')
+            ->with('property.cabins')
             ->first();
 
         if (! $departure instanceof Departure) {
@@ -205,7 +205,7 @@ final class DemoAgenciesSeeder extends Seeder
 
         DepartureLocks::lock($departure->id);
 
-        $cabin = $departure->yacht->cabins->firstWhere('code', 'S1');
+        $cabin = $departure->property->cabins->firstWhere('code', 'S1');
 
         if (! $cabin instanceof Cabin) {
             throw new RuntimeException('Suite 01 is missing on ANAMARA.');

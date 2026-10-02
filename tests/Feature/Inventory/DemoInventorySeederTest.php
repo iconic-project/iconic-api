@@ -10,7 +10,7 @@ use App\Enums\ReferenceType;
 use App\Models\Departure;
 use App\Models\InternalBlock;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\References\ReferenceService;
 use App\Support\Departures\SeedMapper as DepartureSeedMapper;
 use App\Support\Itineraries\Gradients;
@@ -87,15 +87,15 @@ test('the seeded departures match seed-data.json via the key map and stay at 16'
 
     foreach ($seed['departures'] as $row) {
         $mapped = DepartureSeedMapper::fromPrototype($row);
-        $yacht = Yacht::query()->where('code', $mapped['yacht_code'])->firstOrFail();
+        $property = Property::query()->where('code', $mapped['property_code'])->firstOrFail();
         $itinerary = Itinerary::query()->where('code', $mapped['itinerary_code'])->firstOrFail();
         $departure = Departure::query()
-            ->where('yacht_id', $yacht->id)
+            ->where('property_id', $property->id)
             ->whereDate('date', $mapped['date'])
             ->firstOrFail();
 
         expect($mapped['reference'])->toBe($row['id']);
-        expect($mapped['yacht_code'])->toBe($row['yacht']);
+        expect($mapped['property_code'])->toBe($row['property']);
         expect($mapped['itinerary_code'])->toBe($row['itin']);
         expect($mapped['urgency_threshold'])->toBe($row['thr']);
         expect($mapped['waitlist_enabled'])->toBe($row['wait']);
@@ -123,13 +123,13 @@ test('the next departure created after the demo seed is DEP-017', function (): v
     $this->seed(DemoInventorySeeder::class);
 
     $west = Itinerary::query()->where('code', 'WEST')->firstOrFail();
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $mateo = managerUser();
 
     $this->actingAs($mateo)
         ->postJson('/api/rms/departures', [
             'date' => '2028-04-02',
-            'yacht_id' => $yacht->id,
+            'property_id' => $property->id,
             'itinerary_id' => $west->id,
             'status' => DepartureStatus::OnSale->value,
         ])

@@ -43,7 +43,7 @@ test('holdsInventory is false only for released and cancelled statuses', functio
 
 test('a cancelled factory booking has no active claim and a confirmed one can', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
-    $cabin = $departure->yacht->cabins->firstWhere('code', 'S1');
+    $cabin = $departure->property->cabins->firstWhere('code', 'S1');
 
     $cancelled = Booking::factory()->cancelled()->create([
         'departure_id' => $departure->id,

@@ -19,7 +19,7 @@ final class EngineCabins
      */
     public function for(Departure $departure): array
     {
-        $departure->loadMissing(['yacht.cabins', 'itinerary']);
+        $departure->loadMissing(['property.cabins', 'itinerary']);
 
         /** @var list<array{code: string, category: string, bookable: bool}> $cabins */
         $cabins = Cache::remember(

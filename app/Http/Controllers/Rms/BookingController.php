@@ -108,7 +108,7 @@ final class BookingController extends Controller
             ->withGuestSummary()
             ->withChargesSummary()
             ->with([
-                'departure.yacht',
+                'departure.property',
                 'departure.itinerary',
                 'cabin',
                 'contact',
@@ -174,7 +174,7 @@ final class BookingController extends Controller
             ->withGuestSummary()
             ->withChargesSummary()
             ->with([
-                'departure.yacht',
+                'departure.property',
                 'departure.itinerary',
                 'cabin',
                 'contact',

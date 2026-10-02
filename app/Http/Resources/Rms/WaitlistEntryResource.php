@@ -23,7 +23,7 @@ class WaitlistEntryResource extends JsonResource
      * @return array{
      *     id: int,
      *     contact: array{name: string, email: string|null},
-     *     departure: array{id: int, date: string, yacht: array{code: string, name: string}, festive: bool},
+     *     departure: array{id: int, date: string, property: array{code: string, name: string}, festive: bool},
      *     cabin_category: CabinCategory,
      *     cabin_type: string,
      *     position: int|null,
@@ -36,7 +36,7 @@ class WaitlistEntryResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing(['departure.yacht', 'contact', 'notifiedBy']);
+        $this->resource->loadMissing(['departure.property', 'contact', 'notifiedBy']);
 
         $position = $this->queuePosition;
         $available = $this->cabinIsAvailable;
@@ -58,9 +58,9 @@ class WaitlistEntryResource extends JsonResource
             'departure' => [
                 'id' => $this->departure->id,
                 'date' => $this->departure->date->toDateString(),
-                'yacht' => [
-                    'code' => $this->departure->yacht->code,
-                    'name' => $this->departure->yacht->name,
+                'property' => [
+                    'code' => $this->departure->property->code,
+                    'name' => $this->departure->property->name,
                 ],
                 'festive' => $this->departure->festive,
             ],

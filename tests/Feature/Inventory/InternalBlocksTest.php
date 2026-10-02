@@ -11,7 +11,7 @@ use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\InternalBlock;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -31,18 +31,18 @@ beforeEach(function (): void {
  */
 function twoBlockDepartures(): array
 {
-    $anamara = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
-    $anativa = Yacht::query()->where('code', 'ANATIVA')->firstOrFail();
+    $anamara = Property::query()->where('code', 'ANAMARA')->firstOrFail();
+    $anativa = Property::query()->where('code', 'ANATIVA')->firstOrFail();
     $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
 
     $first = Departure::factory()->create([
-        'yacht_id' => $anamara->id,
+        'property_id' => $anamara->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-02',
         'reference' => 'DEP-101',
     ]);
     $second = Departure::factory()->create([
-        'yacht_id' => $anativa->id,
+        'property_id' => $anativa->id,
         'itinerary_id' => $itinerary->id,
         'date' => '2028-04-09',
         'reference' => 'DEP-102',
@@ -54,8 +54,8 @@ function twoBlockDepartures(): array
 test('creating a block across two departures is all-or-nothing and lists every collision', function (): void {
     [$first, $second] = twoBlockDepartures();
     $holder = ClaimHolder::query()->create(['reference' => 'HLD-1', 'name' => 'Hold']);
-    $s1 = $first->yacht->cabins()->where('code', 'S1')->firstOrFail();
-    $s2 = $second->yacht->cabins()->where('code', 'S2')->firstOrFail();
+    $s1 = $first->property->cabins()->where('code', 'S1')->firstOrFail();
+    $s2 = $second->property->cabins()->where('code', 'S2')->firstOrFail();
 
     DB::transaction(function () use ($first, $second, $holder, $s1, $s2): void {
         app(ClaimService::class)->claim($first, collect([$s1]), $holder, ClaimKind::Hold, HoldType::Agency, now()->addDay());
@@ -78,7 +78,7 @@ test('creating a block across two departures is all-or-nothing and lists every c
     expect(CabinClaim::query()->where('kind', ClaimKind::Block)->count())->toBe(0);
 });
 
-test('ALL claims every cabin on the yacht', function (): void {
+test('ALL claims every cabin on the property', function (): void {
     [$first] = twoBlockDepartures();
 
     $this->actingAs(managerUser())
@@ -89,7 +89,7 @@ test('ALL claims every cabin on the yacht', function (): void {
             ],
         ])
         ->assertCreated()
-        ->assertJsonPath('scope_summary', 'ANAMARA · Full yacht · 2 Apr 2028');
+        ->assertJsonPath('scope_summary', 'ANAMARA · Full property · 2 Apr 2028');
 
     $block = InternalBlock::query()->firstOrFail();
     expect($block->claims()->whereNull('released_at')->count())->toBe(9);

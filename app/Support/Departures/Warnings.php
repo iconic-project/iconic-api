@@ -14,18 +14,18 @@ final class Warnings
      */
     public static function for(Departure $departure): array
     {
-        $departure->loadMissing(['yacht', 'itinerary']);
+        $departure->loadMissing(['property', 'itinerary']);
 
         $warnings = [];
 
         $twin = Departure::query()
-            ->where('yacht_id', '!=', $departure->yacht_id)
+            ->where('property_id', '!=', $departure->property_id)
             ->whereDate('date', $departure->date->toDateString())
-            ->with('yacht')
+            ->with('property')
             ->first();
 
         if ($twin instanceof Departure && $twin->festive !== $departure->festive) {
-            $code = $twin->yacht->code;
+            $code = $twin->property->code;
             $on = Format::calendar($twin->date);
             $warnings[] = $twin->festive
                 ? "{$code}'s departure on {$on} is festive."

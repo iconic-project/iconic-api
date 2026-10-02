@@ -78,7 +78,7 @@ final class EngineFeed
 
     public function isVisible(Departure $departure): bool
     {
-        $departure->loadMissing(['yacht.cabins', 'itinerary']);
+        $departure->loadMissing(['property.cabins', 'itinerary']);
         $snapshots = $this->availability->forDepartures(collect([$departure]));
         $snapshot = $snapshots[$departure->id] ?? null;
 
@@ -108,7 +108,7 @@ final class EngineFeed
             ->get();
 
         $departures = Departure::query()
-            ->with(['yacht.cabins', 'itinerary'])
+            ->with(['property.cabins', 'itinerary'])
             ->where('status', '!=', DepartureStatus::Hidden)
             ->whereHas('itinerary', fn ($query) => $query->where('status', ItineraryStatus::Published))
             ->orderBy('date')

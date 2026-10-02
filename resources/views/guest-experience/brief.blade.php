@@ -17,7 +17,7 @@
             </td>
             <td>
                 <div class="dtitle">HOTEL MANAGER BRIEF</div>
-                <div class="dsub">{{ $yacht }} · {{ $departureDate }} · {{ $guests }} guests · {{ $answered }} questionnaires</div>
+                <div class="dsub">{{ $property }} · {{ $departureDate }} · {{ $guests }} guests · {{ $answered }} questionnaires</div>
             </td>
         </tr>
     </table>

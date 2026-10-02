@@ -42,7 +42,7 @@ final class DocumentFacts
     public static function load(Booking $booking, bool $fresh): self
     {
         $booking->loadMissing([
-            'departure.yacht',
+            'departure.property',
             'departure.itinerary',
             'cabin',
             'contact',
@@ -234,7 +234,7 @@ final class DocumentFacts
 
     /**
      * @return array{
-     *     yacht: string,
+     *     property: string,
      *     embark: string,
      *     disembark: string,
      *     departure_date: string,
@@ -262,7 +262,7 @@ final class DocumentFacts
         $days = $itinerary->days > 0 ? $itinerary->days : $nights;
 
         return [
-            'yacht' => $booking->departure->yacht->name,
+            'property' => $booking->departure->property->name,
             'embark' => $itinerary->embark,
             'disembark' => $itinerary->disembark,
             'departure_date' => $this->longDate($departure),

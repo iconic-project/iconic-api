@@ -44,7 +44,7 @@ final class RequestController extends Controller
             ->join('departures', 'departures.id', '=', 'bookings.departure_id')
             ->join('booking_requests', 'booking_requests.booking_id', '=', 'bookings.id')
             ->with([
-                'departure.yacht',
+                'departure.property',
                 'cabin',
                 'contact',
                 'bookingRequest',

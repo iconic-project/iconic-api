@@ -16,27 +16,27 @@ final class DepartureLocks
     /**
      * @param  Collection<int, CabinClaim>  $claims
      */
-    public static function dateAndYachtCount(Collection $claims): int
+    public static function dateAndPropertyCount(Collection $claims): int
     {
         return $claims
             ->filter(fn (CabinClaim $claim): bool => $claim->released_at === null)
-            ->filter(fn (CabinClaim $claim): bool => self::locksDateAndYacht($claim))
+            ->filter(fn (CabinClaim $claim): bool => self::locksDateAndProperty($claim))
             ->count();
     }
 
     /**
      * @param  Collection<int, CabinClaim>  $claims
-     * @return array{date_and_yacht: bool, delete: bool, reason: string|null}
+     * @return array{date_and_property: bool, delete: bool, reason: string|null}
      */
     public static function for(Collection $claims): array
     {
-        $dateAndYacht = self::dateAndYachtCount($claims);
+        $dateAndProperty = self::dateAndPropertyCount($claims);
         $active = $claims->filter(fn (CabinClaim $claim): bool => $claim->released_at === null);
         $hasAny = $claims->isNotEmpty();
 
         if ($active->isNotEmpty()) {
             return [
-                'date_and_yacht' => $dateAndYacht > 0,
+                'date_and_property' => $dateAndProperty > 0,
                 'delete' => true,
                 'reason' => self::activeDeleteMessage($active),
             ];
@@ -44,22 +44,22 @@ final class DepartureLocks
 
         if ($hasAny) {
             return [
-                'date_and_yacht' => false,
+                'date_and_property' => false,
                 'delete' => true,
                 'reason' => self::HISTORY_DELETE,
             ];
         }
 
         return [
-            'date_and_yacht' => false,
+            'date_and_property' => false,
             'delete' => false,
             'reason' => null,
         ];
     }
 
-    public static function dateAndYachtMessage(int $count): string
+    public static function dateAndPropertyMessage(int $count): string
     {
-        return 'Date and yacht are locked — '.$count.' cabin(s) sold or held on this departure. Move guests with "Move to another departure" on each booking first.';
+        return 'Date and property are locked — '.$count.' cabin(s) sold or held on this departure. Move guests with "Move to another departure" on each booking first.';
     }
 
     /**
@@ -124,7 +124,7 @@ final class DepartureLocks
         return $locked;
     }
 
-    private static function locksDateAndYacht(CabinClaim $claim): bool
+    private static function locksDateAndProperty(CabinClaim $claim): bool
     {
         if ($claim->kind === ClaimKind::Booking) {
             return true;

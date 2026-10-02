@@ -29,7 +29,7 @@ function issuesCabin(array $booking = []): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
         'adults' => 2,
@@ -93,7 +93,7 @@ test('a minor today who turns 18 before departure still needs guardian consent',
     $actor = managerUser();
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
     ]);

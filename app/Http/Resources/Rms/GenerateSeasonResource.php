@@ -8,18 +8,18 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @property array{created: list<string>, skipped: list<array{yacht: string, date: string}>} $resource
+ * @property array{created: list<string>, skipped: list<array{property: string, date: string}>} $resource
  */
 class GenerateSeasonResource extends JsonResource
 {
     public static $wrap = null;
 
     /**
-     * @return array{created: list<string>, skipped: list<array{yacht: string, date: string}>}
+     * @return array{created: list<string>, skipped: list<array{property: string, date: string}>}
      */
     public function toArray(Request $request): array
     {
-        /** @var array{created: list<string>, skipped: list<array{yacht: string, date: string}>} $payload */
+        /** @var array{created: list<string>, skipped: list<array{property: string, date: string}>} $payload */
         $payload = $this->resource;
 
         return $payload;

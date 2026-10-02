@@ -21,7 +21,7 @@ final class EnginePartyRules
         $seen = [];
 
         if (count($rows) > 9) {
-            $validator->errors()->add('cabins', 'A yacht has 9 cabins.');
+            $validator->errors()->add('cabins', 'A property has 9 cabins.');
         }
 
         foreach ($rows as $index => $row) {
@@ -58,8 +58,8 @@ final class EnginePartyRules
             }
         }
 
-        if ($party > $guests->maxPerYacht) {
-            $validator->errors()->add('cabins', 'A yacht takes up to '.$guests->maxPerYacht.' guests.');
+        if ($party > $guests->maxPerProperty) {
+            $validator->errors()->add('cabins', 'A property takes up to '.$guests->maxPerProperty.' guests.');
         }
     }
 }

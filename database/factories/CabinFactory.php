@@ -6,7 +6,7 @@ namespace Database\Factories;
 
 use App\Enums\CabinCategory;
 use App\Models\Cabin;
-use App\Models\Yacht;
+use App\Models\Property;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -22,7 +22,7 @@ class CabinFactory extends Factory
         $number = fake()->numberBetween(1, 8);
 
         return [
-            'yacht_id' => Yacht::factory(),
+            'property_id' => Property::factory(),
             'code' => 'S'.$number,
             'label' => 'Suite 0'.$number,
             'category' => CabinCategory::Suite,

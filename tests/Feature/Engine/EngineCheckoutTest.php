@@ -51,7 +51,7 @@ function checkoutWestDeparture(string $date = '2027-11-07'): Departure
         'waitlist_enabled' => true,
     ]);
 
-    return $departure->fresh(['yacht.cabins', 'itinerary']);
+    return $departure->fresh(['property.cabins', 'itinerary']);
 }
 
 /**
@@ -241,7 +241,7 @@ test('party rules fail on the field named in the spec', function (array $cabins,
         ['cabin_code' => 'S1', 'adults' => 2, 'children' => 0],
         ['cabin_code' => 'S1', 'adults' => 2, 'children' => 0],
     ], 'cabins.1.cabin_code'],
-    'over yacht cap' => [[
+    'over property cap' => [[
         ['cabin_code' => 'S1', 'adults' => 3, 'children' => 0],
         ['cabin_code' => 'S2', 'adults' => 3, 'children' => 0],
         ['cabin_code' => 'S3', 'adults' => 3, 'children' => 0],

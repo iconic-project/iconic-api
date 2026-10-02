@@ -25,7 +25,7 @@ final class PortalAvailabilityController extends PortalController
         $perPage = $request->integer('per_page', 50);
 
         $page = Departure::query()
-            ->with(['yacht', 'itinerary'])
+            ->with(['property', 'itinerary'])
             ->where('status', '!=', DepartureStatus::Hidden)
             ->whereHas('itinerary', fn (Builder $query) => $query->where('status', ItineraryStatus::Published))
             ->when(
@@ -37,8 +37,8 @@ final class PortalAvailabilityController extends PortalController
                 fn (Builder $query) => $query->whereDate('date', '<=', (string) $request->validated('to')),
             )
             ->when(
-                is_string($request->validated('yacht')),
-                fn (Builder $query) => $query->whereHas('yacht', fn (Builder $inner) => $inner->where('code', $request->validated('yacht'))),
+                is_string($request->validated('property')),
+                fn (Builder $query) => $query->whereHas('property', fn (Builder $inner) => $inner->where('code', $request->validated('property'))),
             )
             ->when(
                 is_string($request->validated('itinerary')),

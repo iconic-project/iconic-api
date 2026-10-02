@@ -79,7 +79,7 @@ final class ReportDispatch
                 'parameters' => [
                     'from' => $window->from,
                     'to' => $window->to,
-                    'yacht' => null,
+                    'property' => null,
                     'itinerary' => null,
                     'channel' => null,
                     'agency' => null,

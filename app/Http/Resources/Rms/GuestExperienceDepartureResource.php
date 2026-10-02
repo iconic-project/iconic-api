@@ -9,13 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @property array{departure_id: int, date: string, yacht: string, passengers: int} $resource
+ * @property array{departure_id: int, date: string, property: string, passengers: int} $resource
  */
 #[SchemaName('GuestExperienceDepartureResource')]
 class GuestExperienceDepartureResource extends JsonResource
 {
     /**
-     * @return array{departure_id: int, date: string, yacht: string, passengers: int}
+     * @return array{departure_id: int, date: string, property: string, passengers: int}
      */
     public function toArray(Request $request): array
     {

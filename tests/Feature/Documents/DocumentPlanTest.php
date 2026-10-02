@@ -42,7 +42,7 @@ function planCabin(array $overrides = []): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S6')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S6')?->id,
         'status' => BookingStatus::PendingPayment,
         'reference' => 'ANK-2026-6401',
         'total' => 26600,

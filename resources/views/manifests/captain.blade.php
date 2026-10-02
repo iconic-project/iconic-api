@@ -12,7 +12,7 @@
             <td>
                 <div class="dtitle">CAPTAIN'S MANIFEST</div>
                 <div class="dsub">
-                    {{ $departure->yacht->name }} · {{ $departureDate }} · issued T−{{ $due->captainDays }}
+                    {{ $departure->property->name }} · {{ $departureDate }} · issued T−{{ $due->captainDays }}
                     ({{ \Carbon\CarbonImmutable::parse($due->captain)->format('j M Y') }})
                 </div>
             </td>

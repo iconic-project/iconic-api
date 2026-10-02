@@ -69,7 +69,7 @@ final class AddWaitlistEntry extends Action
                 'source' => $entry->source->value,
             ], actor: $actor, system: $actor === null);
 
-            return $entry->refresh()->load(['departure.yacht', 'contact']);
+            return $entry->refresh()->load(['departure.property', 'contact']);
         });
     }
 }

@@ -9,8 +9,8 @@ use App\Enums\DepartureStatus;
 use App\Enums\SeasonPattern;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
-use App\Support\Departures\YachtDateConflict;
+use App\Models\Property;
+use App\Support\Departures\PropertyDateConflict;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
@@ -19,21 +19,21 @@ use Illuminate\Validation\ValidationException;
 final class GenerateSeason extends Action
 {
     /**
-     * @param  list<int>  $yachtIds
-     * @return array{created: list<string>, skipped: list<array{yacht: string, date: string}>}
+     * @param  list<int>  $propertyIds
+     * @return array{created: list<string>, skipped: list<array{property: string, date: string}>}
      */
     public function handle(
         CarbonImmutable $from,
         CarbonImmutable $to,
-        array $yachtIds,
+        array $propertyIds,
         SeasonPattern $pattern,
         bool $festiveWindow,
         DepartureStatus $status,
     ): array {
         $itineraries = $this->resolveItineraries($pattern, $festiveWindow);
-        $yachts = $this->yachtsInOrder($yachtIds);
+        $properties = $this->propertiesInOrder($propertyIds);
 
-        return $this->transaction(function () use ($from, $to, $yachts, $itineraries, $pattern, $festiveWindow, $status): array {
+        return $this->transaction(function () use ($from, $to, $properties, $itineraries, $pattern, $festiveWindow, $status): array {
             $created = [];
             $skipped = [];
             $week = 0;
@@ -42,15 +42,15 @@ final class GenerateSeason extends Action
                 : $from->next(CarbonInterface::SUNDAY);
 
             while ($cursor->lte($to)) {
-                foreach ($yachts->values() as $index => $yacht) {
+                foreach ($properties->values() as $index => $property) {
                     $exists = Departure::query()
-                        ->where('yacht_id', $yacht->id)
+                        ->where('property_id', $property->id)
                         ->whereDate('date', $cursor->toDateString())
                         ->exists();
 
                     if ($exists) {
                         $skipped[] = [
-                            'yacht' => $yacht->code,
+                            'property' => $property->code,
                             'date' => $cursor->toDateString(),
                         ];
 
@@ -72,10 +72,10 @@ final class GenerateSeason extends Action
                         ]);
                     }
 
-                    $departure = YachtDateConflict::guard($yacht, $cursor, function () use ($yacht, $cursor, $itinerary, $status, $festive): Departure {
+                    $departure = PropertyDateConflict::guard($property, $cursor, function () use ($property, $cursor, $itinerary, $status, $festive): Departure {
                         return app(CreateDeparture::class)->handle(
                             [
-                                'yacht_id' => $yacht->id,
+                                'property_id' => $property->id,
                                 'date' => $cursor->toDateString(),
                                 'itinerary_id' => $itinerary->id,
                                 'status' => $status,
@@ -142,24 +142,24 @@ final class GenerateSeason extends Action
     }
 
     /**
-     * @param  list<int>  $yachtIds
-     * @return Collection<int, Yacht>
+     * @param  list<int>  $propertyIds
+     * @return Collection<int, Property>
      */
-    private function yachtsInOrder(array $yachtIds): Collection
+    private function propertiesInOrder(array $propertyIds): Collection
     {
-        $byId = Yacht::query()->whereIn('id', $yachtIds)->get()->keyBy('id');
+        $byId = Property::query()->whereIn('id', $propertyIds)->get()->keyBy('id');
 
-        return collect($yachtIds)
-            ->map(function (int $id) use ($byId): Yacht {
-                $yacht = $byId->get($id);
+        return collect($propertyIds)
+            ->map(function (int $id) use ($byId): Property {
+                $property = $byId->get($id);
 
-                if (! $yacht instanceof Yacht) {
+                if (! $property instanceof Property) {
                     throw ValidationException::withMessages([
-                        'yacht_ids' => ['Yacht '.$id.' does not exist.'],
+                        'property_ids' => ['Property '.$id.' does not exist.'],
                     ]);
                 }
 
-                return $yacht;
+                return $property;
             })
             ->values();
     }

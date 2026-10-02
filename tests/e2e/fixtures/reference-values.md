@@ -180,7 +180,7 @@ New-itinerary defaults (`App\Support\Itineraries\Defaults` / prototype `mkItin`)
 
 ### Departures
 
-Source: `seed-data.json` → `departures`. Upserted by `(yacht_id, date)` so references stay `DEP-001`–`DEP-016`. Next create is `DEP-017` (`ReferenceService`, pad 3).
+Source: `seed-data.json` → `departures`. Upserted by `(property_id, date)` so references stay `DEP-001`–`DEP-016`. Next create is `DEP-017` (`ReferenceService`, pad 3).
 
 | Reference | Date | Yacht | Itinerary | Festive |
 |---|---|---|---|---|

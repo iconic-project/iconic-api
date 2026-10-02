@@ -37,7 +37,7 @@ final class CreateCheckoutSession extends Action
     {
         return $this->transaction(function () use ($departure, $cabins, $ipHash): array {
             $departure = DepartureLocks::lock((int) $departure->id);
-            $departure->loadMissing(['yacht.cabins', 'itinerary']);
+            $departure->loadMissing(['property.cabins', 'itinerary']);
 
             $this->releaseOldestIfCapped($ipHash);
 
@@ -117,7 +117,7 @@ final class CreateCheckoutSession extends Action
     {
         $codes = array_map(fn (array $row): string => $row['cabin_code'], $cabins);
 
-        return $departure->yacht->cabins
+        return $departure->property->cabins
             ->filter(fn (Cabin $cabin): bool => in_array($cabin->code, $codes, true))
             ->sortBy('sort')
             ->values();

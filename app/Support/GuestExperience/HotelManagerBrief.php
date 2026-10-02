@@ -18,14 +18,14 @@ final class HotelManagerBrief
 
     public function html(Departure $departure, bool $sensitive): string
     {
-        $departure->loadMissing(['yacht', 'itinerary']);
+        $departure->loadMissing(['property', 'itinerary']);
         $passengers = ManifestRoster::passengers($departure);
         $answered = $passengers->filter(
             fn (ManifestPassenger $passenger): bool => $passenger->guest->currentPreference instanceof GuestPreference,
         );
 
         $html = view('guest-experience.brief', [
-            'yacht' => $departure->yacht->name,
+            'property' => $departure->property->name,
             'departureDate' => $departure->date->format('j M Y'),
             'guests' => $passengers->count(),
             'answered' => $answered->count(),

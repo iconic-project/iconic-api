@@ -16,7 +16,7 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $yacht_id
+ * @property int $property_id
  * @property string $code
  * @property string $label
  * @property CabinCategory $category
@@ -25,9 +25,9 @@ use Illuminate\Support\Carbon;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Yacht $yacht
+ * @property-read Property $property
  */
-#[Fillable(['yacht_id', 'code', 'label', 'category', 'sort'])]
+#[Fillable(['property_id', 'code', 'label', 'category', 'sort'])]
 class Cabin extends Model
 {
     /** @use HasFactory<CabinFactory> */
@@ -45,10 +45,10 @@ class Cabin extends Model
     }
 
     /**
-     * @return BelongsTo<Yacht, $this>
+     * @return BelongsTo<Property, $this>
      */
-    public function yacht(): BelongsTo
+    public function property(): BelongsTo
     {
-        return $this->belongsTo(Yacht::class);
+        return $this->belongsTo(Property::class);
     }
 }

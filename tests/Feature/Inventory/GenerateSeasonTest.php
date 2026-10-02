@@ -6,7 +6,7 @@ use App\Enums\ItineraryStatus;
 use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 
@@ -24,16 +24,16 @@ beforeEach(function (): void {
 });
 
 /**
- * @return array{from: string, to: string, yacht_ids: list<int>, pattern: string, festive_window: bool, status: string}
+ * @return array{from: string, to: string, property_ids: list<int>, pattern: string, festive_window: bool, status: string}
  */
 function seasonPayload(array $overrides = []): array
 {
     return [
         'from' => '2028-01-02',
         'to' => '2028-02-06',
-        'yacht_ids' => [
-            Yacht::query()->where('code', 'ANAMARA')->value('id'),
-            Yacht::query()->where('code', 'ANATIVA')->value('id'),
+        'property_ids' => [
+            Property::query()->where('code', 'ANAMARA')->value('id'),
+            Property::query()->where('code', 'ANATIVA')->value('id'),
         ],
         'pattern' => 'ALT',
         'festive_window' => false,
@@ -59,7 +59,7 @@ function altSixWeekTable(): array
     ];
 }
 
-test('generate season alternates west and north for two yachts over six weeks', function (): void {
+test('generate season alternates west and north for two properties over six weeks', function (): void {
     $mateo = managerUser();
 
     $response = $this->actingAs($mateo)
@@ -72,14 +72,14 @@ test('generate season alternates west and north for two yachts over six weeks', 
     expect($response->json())->not->toHaveKey('data');
 
     foreach (altSixWeekTable() as $week) {
-        foreach (['ANAMARA', 'ANATIVA'] as $yacht) {
+        foreach (['ANAMARA', 'ANATIVA'] as $property) {
             $departure = Departure::query()
-                ->whereHas('yacht', fn ($query) => $query->where('code', $yacht))
+                ->whereHas('property', fn ($query) => $query->where('code', $property))
                 ->whereDate('date', $week['date'])
                 ->with('itinerary')
                 ->firstOrFail();
 
-            expect($departure->itinerary->code)->toBe($week[$yacht]);
+            expect($departure->itinerary->code)->toBe($week[$property]);
             expect($departure->festive)->toBeFalse();
             expect($departure->status->value)->toBe('CLOSED');
         }
@@ -99,7 +99,7 @@ test('generate season 2 jan to 26 mar 2028 creates 26 opposite-route departures'
     expect($response->json('created'))->toHaveCount(26);
 
     $byDate = Departure::query()
-        ->with(['yacht', 'itinerary'])
+        ->with(['property', 'itinerary'])
         ->orderBy('date')
         ->get()
         ->groupBy(fn (Departure $departure): string => $departure->date->toDateString());
@@ -109,7 +109,7 @@ test('generate season 2 jan to 26 mar 2028 creates 26 opposite-route departures'
     foreach ($byDate as $pair) {
         expect($pair)->toHaveCount(2);
         expect($pair[0]->itinerary->code)->not->toBe($pair[1]->itinerary->code);
-        expect($pair->pluck('yacht.code')->sort()->values()->all())->toBe(['ANAMARA', 'ANATIVA']);
+        expect($pair->pluck('property.code')->sort()->values()->all())->toBe(['ANAMARA', 'ANATIVA']);
     }
 });
 
@@ -165,10 +165,10 @@ test('a festive window crossing 15 dec and 2 jan uses fest only inside the windo
     }
 });
 
-test('existing yacht-date pairs are skipped', function (): void {
+test('existing property-date pairs are skipped', function (): void {
     $west = Itinerary::query()->where('code', 'WEST')->firstOrFail();
     Departure::factory()->create([
-        'yacht_id' => Yacht::query()->where('code', 'ANAMARA')->value('id'),
+        'property_id' => Property::query()->where('code', 'ANAMARA')->value('id'),
         'itinerary_id' => $west->id,
         'date' => '2028-01-02',
     ]);
@@ -182,7 +182,7 @@ test('existing yacht-date pairs are skipped', function (): void {
 
     expect($response->json('created'))->toHaveCount(1);
     expect($response->json('skipped'))->toBe([
-        ['yacht' => 'ANAMARA', 'date' => '2028-01-02'],
+        ['property' => 'ANAMARA', 'date' => '2028-01-02'],
     ]);
 });
 

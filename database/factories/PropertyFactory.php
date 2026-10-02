@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Models\Yacht;
+use App\Enums\PropertyStatus;
+use App\Models\Property;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<Yacht>
+ * @extends Factory<Property>
  */
-class YachtFactory extends Factory
+class PropertyFactory extends Factory
 {
     /**
      * @return array<string, mixed>
@@ -22,6 +23,7 @@ class YachtFactory extends Factory
         return [
             'code' => $code,
             'name' => $code,
+            'status' => PropertyStatus::Active,
         ];
     }
 }

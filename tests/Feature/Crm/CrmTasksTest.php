@@ -80,7 +80,7 @@ test('each system kind is raised once and the sweep does not raise it again', fu
 
     $held = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::OnHoldAgency,
         'reference' => 'ANK-CAP-1',
     ]);

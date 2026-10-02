@@ -58,7 +58,7 @@ function bookedCabin(array $overrides = []): Booking
 function requestedHold(bool $expired = false, string $cabinCode = 'S2'): Booking
 {
     $departure = ReservationFixtures::anamaraDeparture();
-    $cabin = $departure->yacht->cabins->firstWhere('code', $cabinCode);
+    $cabin = $departure->property->cabins->firstWhere('code', $cabinCode);
     $actor = managerUser();
     $booking = Booking::factory()->create([
         'reference' => null,

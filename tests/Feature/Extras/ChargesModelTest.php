@@ -32,7 +32,7 @@ function chargesCabin(array $overrides = []): Booking
 
     return Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S3')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
         'deposit_pct' => 10,

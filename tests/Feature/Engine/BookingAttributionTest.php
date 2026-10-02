@@ -105,7 +105,7 @@ test('a staff agency booking keeps commission and has no marketing touch', funct
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'owner_id' => adminUser()->id,

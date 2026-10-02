@@ -23,7 +23,7 @@ final class QuestionnairePage
     public static function forToken(BookingAccessToken $token): array
     {
         $booking = $token->booking;
-        $booking->loadMissing(['departure.itinerary', 'departure.yacht']);
+        $booking->loadMissing(['departure.itinerary', 'departure.property']);
         $ids = array_map(intval(...), $token->covered_guest_ids ?? []);
 
         $guests = Guest::query()

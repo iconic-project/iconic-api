@@ -54,7 +54,7 @@ test('two record payment calls on one booking wait 1205 never 1213 and confirm o
     $departure = ReservationFixtures::anamaraDeparture('2028-05-14');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::PendingPayment,
         'reference' => 'ANK-2026-0699',
         'total' => 26600,

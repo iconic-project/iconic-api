@@ -44,7 +44,7 @@ test('a document send arrives in Mailpit', function (): void {
     $actor = adminUser();
     $booking = Booking::factory()->create([
         'departure_id' => ReservationFixtures::anamaraDeparture('2029-01-07')->id,
-        'cabin_id' => ReservationFixtures::anamaraDeparture('2029-01-07')->yacht->cabins->firstWhere('code', 'S3')?->id,
+        'cabin_id' => ReservationFixtures::anamaraDeparture('2029-01-07')->property->cabins->firstWhere('code', 'S3')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-7100',
     ]);

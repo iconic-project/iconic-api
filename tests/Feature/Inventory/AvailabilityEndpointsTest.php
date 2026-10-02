@@ -9,7 +9,7 @@ use App\Enums\ItineraryStatus;
 use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\Itinerary;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\ConfigSeeder;
@@ -68,7 +68,7 @@ test('the demo calendar is free except the seeded fam-trip block', function (): 
             }
 
             $blocked[] = [
-                'yacht' => $row['yacht']['code'],
+                'property' => $row['property']['code'],
                 'cabin' => $row['cabin']['code'],
                 'state' => $cell['state'],
                 'reference' => $cell['claim']['holder']['reference'] ?? null,
@@ -79,7 +79,7 @@ test('the demo calendar is free except the seeded fam-trip block', function (): 
 
     expect($blocked)->toHaveCount(2);
     expect(collect($blocked)->pluck('cabin')->sort()->values()->all())->toBe(['S7', 'S8']);
-    expect(collect($blocked)->pluck('yacht')->unique()->all())->toBe(['ANAMARA']);
+    expect(collect($blocked)->pluck('property')->unique()->all())->toBe(['ANAMARA']);
     expect(collect($blocked)->pluck('state')->unique()->all())->toBe(['BLOCKED']);
     expect(collect($blocked)->pluck('reference')->unique()->all())->toBe(['BLK-001']);
     expect(collect($blocked)->pluck('detail')->unique()->all())->toBe([
@@ -117,14 +117,14 @@ test('the demo layout exposes the fam-trip block detail on ANAMARA S7 and S8', f
 });
 
 test('a hold claim has a null holder detail', function (): void {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $departure = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
         'date' => '2028-04-02',
     ]);
     $holder = ClaimHolder::query()->create(['reference' => 'HLD-NULL', 'name' => 'Hold']);
-    $cabin = $yacht->cabins()->where('code', 'S1')->firstOrFail();
+    $cabin = $property->cabins()->where('code', 'S1')->firstOrFail();
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
         app(ClaimService::class)->claim(
@@ -167,12 +167,12 @@ test('calendar and the departure list do not N+1 over sixteen departures', funct
 });
 
 test('kpis are computed over the filtered set not the page', function (): void {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $published = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
     $draft = Itinerary::factory()->create(['status' => ItineraryStatus::Draft]);
 
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $published->id,
         'date' => '2028-04-02',
         'status' => DepartureStatus::OnSale,
@@ -180,7 +180,7 @@ test('kpis are computed over the filtered set not the page', function (): void {
         'reference' => 'DEP-201',
     ]);
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $published->id,
         'date' => '2028-04-09',
         'status' => DepartureStatus::OnSale,
@@ -188,7 +188,7 @@ test('kpis are computed over the filtered set not the page', function (): void {
         'reference' => 'DEP-202',
     ]);
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $draft->id,
         'date' => '2028-04-16',
         'status' => DepartureStatus::OnSale,
@@ -198,8 +198,8 @@ test('kpis are computed over the filtered set not the page', function (): void {
     $full = Departure::query()->where('reference', 'DEP-202')->firstOrFail();
     $holderA = ClaimHolder::query()->create(['reference' => 'KPI-A', 'name' => 'A']);
     $holderB = ClaimHolder::query()->create(['reference' => 'KPI-B', 'name' => 'B']);
-    $suites = $full->yacht->cabins()->where('code', '!=', 'OWNER')->get();
-    $owner = $full->yacht->cabins()->where('code', 'OWNER')->get();
+    $suites = $full->property->cabins()->where('code', '!=', 'OWNER')->get();
+    $owner = $full->property->cabins()->where('code', 'OWNER')->get();
 
     DB::transaction(function () use ($full, $holderA, $holderB, $suites, $owner): void {
         $service = app(ClaimService::class);
@@ -218,14 +218,14 @@ test('kpis are computed over the filtered set not the page', function (): void {
 });
 
 test('an expired unreleased hold counts as free', function (): void {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $departure = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
         'date' => '2028-04-02',
     ]);
     $holder = ClaimHolder::query()->create(['reference' => 'EXP-FREE', 'name' => 'Expired']);
-    $cabin = $yacht->cabins()->where('code', 'S1')->firstOrFail();
+    $cabin = $property->cabins()->where('code', 'S1')->firstOrFail();
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
         app(ClaimService::class)->claim(
@@ -251,16 +251,16 @@ test('an expired unreleased hold counts as free', function (): void {
 
 test('itinerary rows include live_departures_count', function (): void {
     $published = Itinerary::factory()->create(['status' => ItineraryStatus::Published, 'code' => 'LIVE']);
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
 
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $published->id,
         'date' => '2028-04-02',
         'status' => DepartureStatus::OnSale,
     ]);
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => $published->id,
         'date' => '2028-04-09',
         'status' => DepartureStatus::Hidden,
@@ -277,9 +277,9 @@ test('itinerary rows include live_departures_count', function (): void {
 });
 
 test('with_cabins includes cabin rows on the list', function (): void {
-    $yacht = Yacht::query()->where('code', 'ANAMARA')->firstOrFail();
+    $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
         'date' => '2028-04-02',
     ]);

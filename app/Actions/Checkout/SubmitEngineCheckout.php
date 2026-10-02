@@ -71,7 +71,7 @@ final class SubmitEngineCheckout extends Action
         return $this->transaction(function () use ($session, $data, $ip): array {
             $session = CheckoutSession::query()->whereKey($session->id)->lockForUpdate()->firstOrFail();
             $departure = DepartureLocks::lock((int) $session->departure_id);
-            $departure->load(['yacht.cabins', 'itinerary']);
+            $departure->load(['property.cabins', 'itinerary']);
 
             if ($session->status !== CheckoutSessionStatus::Holding || $session->expires_at->isPast()) {
                 throw new ConflictException('This checkout session is no longer holding cabins.');

@@ -15,7 +15,7 @@ final class SeedMapper
      * @param  array<string, mixed>  $row
      * @return array{
      *     reference: string,
-     *     yacht_code: string,
+     *     property_code: string,
      *     itinerary_code: string,
      *     status: DepartureStatus,
      *     urgency_threshold: int,
@@ -31,7 +31,7 @@ final class SeedMapper
 
         return [
             'reference' => (string) $row['id'],
-            'yacht_code' => (string) $row['yacht'],
+            'property_code' => (string) $row['property'],
             'itinerary_code' => (string) $row['itin'],
             'status' => DepartureStatus::from((string) $row['status']),
             'urgency_threshold' => (int) $row['thr'],

@@ -23,7 +23,7 @@ test('the crm contacts list query count does not grow with extra contacts and bo
     $departure = ReservationFixtures::anamaraDeparture('2027-12-19');
     Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $first->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
@@ -41,7 +41,7 @@ test('the crm contacts list query count does not grow with extra contacts and bo
         $extra = ReservationFixtures::anamaraDeparture('2028-01-0'.($index + 2));
         Booking::factory()->create([
             'departure_id' => $extra->id,
-            'cabin_id' => $extra->yacht->cabins->firstWhere('code', $cabin)?->id,
+            'cabin_id' => $extra->property->cabins->firstWhere('code', $cabin)?->id,
             'contact_id' => $contact->id,
             'owner_id' => $actor->id,
             'status' => BookingStatus::Confirmed,

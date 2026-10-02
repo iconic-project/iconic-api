@@ -11,7 +11,7 @@ use App\Models\Booking;
 use App\Models\Cabin;
 use App\Models\CabinClaim;
 use App\Models\Departure;
-use App\Models\Yacht;
+use App\Models\Property;
 use App\Support\Alerts\AlertKeys;
 use App\Support\BusinessTime;
 use Database\Seeders\ConfigSeeder;
@@ -31,9 +31,9 @@ afterEach(function (): void {
 test('occupancy alerts sit below the percent and inside the day window, and a sailed departure resolves', function (): void {
     expect(BusinessTime::now()->toDateString())->toBe('2020-01-05');
 
-    $yacht = Yacht::factory()->create();
+    $property = Property::factory()->create();
     $cabins = collect(range(1, 10))->map(fn (int $number): Cabin => Cabin::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'code' => 'S'.$number,
         'label' => 'Suite '.$number,
         'category' => CabinCategory::Suite,
@@ -44,10 +44,10 @@ test('occupancy alerts sit below the percent and inside the day window, and a sa
         'reference' => 'ANK-2020-0001',
     ]);
 
-    $low = occupiedDeparture($yacht, $cabins, $holder, '2020-02-02', 3);
-    $exact = occupiedDeparture($yacht, $cabins, $holder, '2020-02-09', 4);
-    $boundary = occupiedDeparture($yacht, $cabins, $holder, '2020-04-04', 3);
-    $outside = occupiedDeparture($yacht, $cabins, $holder, '2020-04-05', 3);
+    $low = occupiedDeparture($property, $cabins, $holder, '2020-02-02', 3);
+    $exact = occupiedDeparture($property, $cabins, $holder, '2020-02-09', 4);
+    $boundary = occupiedDeparture($property, $cabins, $holder, '2020-04-04', 3);
+    $outside = occupiedDeparture($property, $cabins, $holder, '2020-04-05', 3);
 
     Artisan::call('iconic:occupancy-check');
 
@@ -69,10 +69,10 @@ test('occupancy alerts sit below the percent and inside the day window, and a sa
 /**
  * @param  Collection<int, Cabin>  $cabins
  */
-function occupiedDeparture(Yacht $yacht, Collection $cabins, Booking $holder, string $date, int $sold): Departure
+function occupiedDeparture(Property $property, Collection $cabins, Booking $holder, string $date, int $sold): Departure
 {
     $departure = Departure::factory()->create([
-        'yacht_id' => $yacht->id,
+        'property_id' => $property->id,
         'date' => $date,
         'reference' => 'DEP-'.str_replace('-', '', $date),
     ]);

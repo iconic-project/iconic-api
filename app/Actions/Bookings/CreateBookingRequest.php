@@ -52,7 +52,7 @@ final class CreateBookingRequest extends Action
     {
         return $this->transaction(function () use ($data, $actor, $referenceAt): Booking {
             $departure = DepartureLocks::lock((int) $data['departure_id']);
-            $departure->load(['yacht.cabins']);
+            $departure->load(['property.cabins']);
 
             $type = $data['type'] instanceof BookingType
                 ? $data['type']
@@ -185,7 +185,7 @@ final class CreateBookingRequest extends Action
             ]);
 
             return $booking->refresh()->load([
-                'departure.yacht',
+                'departure.property',
                 'cabin',
                 'contact',
                 'owner',

@@ -8,7 +8,7 @@ final readonly class GuestsSettings
 {
     public function __construct(
         public int $maxPerCabin,
-        public int $maxPerYacht,
+        public int $maxPerProperty,
         public int $childMinAge,
         public int $childMaxAge,
         public bool $adultRequiredWithChildren,
@@ -18,7 +18,7 @@ final readonly class GuestsSettings
     /**
      * @return array{
      *     max_per_cabin: int,
-     *     max_per_yacht: int,
+     *     max_per_property: int,
      *     child_min_age: int,
      *     child_max_age: int,
      *     adult_required_with_children: bool,
@@ -29,7 +29,7 @@ final readonly class GuestsSettings
     {
         return [
             'max_per_cabin' => $this->maxPerCabin,
-            'max_per_yacht' => $this->maxPerYacht,
+            'max_per_property' => $this->maxPerProperty,
             'child_min_age' => $this->childMinAge,
             'child_max_age' => $this->childMaxAge,
             'adult_required_with_children' => $this->adultRequiredWithChildren,

@@ -51,13 +51,13 @@ function mergeFixture(): array
     $departure = ReservationFixtures::anamaraDeparture('2027-12-05');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $loser->id,
         'status' => BookingStatus::Confirmed,
     ]);
     $later = Booking::factory()->create([
         'departure_id' => ReservationFixtures::anamaraDeparture('2027-12-12')->id,
-        'cabin_id' => ReservationFixtures::anamaraDeparture('2027-12-12')->yacht->cabins->firstWhere('code', 'S2')?->id,
+        'cabin_id' => ReservationFixtures::anamaraDeparture('2027-12-12')->property->cabins->firstWhere('code', 'S2')?->id,
         'contact_id' => $loser->id,
         'status' => BookingStatus::Requested,
     ]);
@@ -216,7 +216,7 @@ test('unmerge restores recorded rows and leaves a booking created after the merg
 
     $after = Booking::factory()->create([
         'departure_id' => ReservationFixtures::anamaraDeparture('2028-01-02')->id,
-        'cabin_id' => ReservationFixtures::anamaraDeparture('2028-01-02')->yacht->cabins->firstWhere('code', 'S3')?->id,
+        'cabin_id' => ReservationFixtures::anamaraDeparture('2028-01-02')->property->cabins->firstWhere('code', 'S3')?->id,
         'contact_id' => $fixture['survivor']->id,
         'status' => BookingStatus::Confirmed,
     ]);

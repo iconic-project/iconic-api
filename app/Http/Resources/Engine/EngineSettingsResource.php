@@ -17,7 +17,7 @@ class EngineSettingsResource extends JsonResource
      * @return array{
      *     guests: array{
      *         max_per_cabin: int,
-     *         max_per_yacht: int,
+     *         max_per_property: int,
      *         child_min_age: int,
      *         child_max_age: int,
      *         adult_required_with_children: bool,
@@ -117,7 +117,7 @@ class EngineSettingsResource extends JsonResource
             'fees' => $settings->fees->toArray(),
             'charter' => [
                 ...$charter,
-                'capacity' => $settings->guests->maxPerYacht,
+                'capacity' => $settings->guests->maxPerProperty,
             ],
         ];
     }

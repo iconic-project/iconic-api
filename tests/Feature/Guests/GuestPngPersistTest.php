@@ -24,7 +24,7 @@ test('a later publish of png amounts does not rewrite stored fees', function ():
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
         'departure_id' => $departure->id,
-        'cabin_id' => $departure->yacht->cabins->firstWhere('code', 'S1')?->id,
+        'cabin_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 

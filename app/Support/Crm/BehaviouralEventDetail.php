@@ -18,7 +18,7 @@ final class BehaviouralEventDetail
         array $params,
         ?string $itineraryName = null,
         ?string $departureDate = null,
-        ?string $yachtName = null,
+        ?string $propertyName = null,
     ): string {
         $parts = [];
 
@@ -28,11 +28,11 @@ final class BehaviouralEventDetail
 
         if (is_string($departureDate) && $departureDate !== '') {
             $formatted = self::formatDate($departureDate);
-            $parts[] = is_string($yachtName) && $yachtName !== ''
-                ? $formatted.' · '.$yachtName
+            $parts[] = is_string($propertyName) && $propertyName !== ''
+                ? $formatted.' · '.$propertyName
                 : $formatted;
-        } elseif (is_string($yachtName) && $yachtName !== '') {
-            $parts[] = $yachtName;
+        } elseif (is_string($propertyName) && $propertyName !== '') {
+            $parts[] = $propertyName;
         }
 
         if (isset($params['cabin_count']) && is_numeric($params['cabin_count'])) {

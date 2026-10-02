@@ -26,7 +26,7 @@ final class ReportDefinitions
             new ReportDefinition('commissions-payable', 'Commissions payable', 'Approved-agency commissions that the accrual status marks payable.', Permission::PaymentsRecord, $csv),
             new ReportDefinition('gateway-reconciliation', 'Gateway reconciliation', 'Card payments that carry a gateway id. The gateway id is the only external identifier.', Permission::PaymentsRecord, $csv),
             new ReportDefinition('commercial-summary', 'Commercial summary', 'The commercial metrics for the window: occupancy, RevPAB, ADR, lead time, channel mix, nationality counts, NPS, commissions and cash.', Permission::PanelRms, $pdf),
-            new ReportDefinition('occupancy', 'Occupancy', 'Sold and sellable berths by departure, from the metrics layer. A charter counts as the whole yacht.', Permission::PanelRms, $csv),
+            new ReportDefinition('occupancy', 'Occupancy', 'Sold and sellable berths by departure, from the metrics layer. A charter counts as the whole property.', Permission::PanelRms, $csv),
             new ReportDefinition('pipeline-summary', 'Pipeline summary', 'Collected, pending, overdue and scheduled cash for the window, from Payments & Revenue.', Permission::PanelRms, $pdf),
             new ReportDefinition('agency-report', 'Agency report', 'Commission blocked, earned, payable and paid by approved agency. Company name and reference only.', Permission::AgenciesManage, $csv),
         ];

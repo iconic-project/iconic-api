@@ -32,10 +32,10 @@ final class ReservationQuoter
     public function quote(array $input, ?Departure $departure = null): ReservationQuote
     {
         $departure ??= Departure::query()
-            ->with(['yacht.cabins', 'itinerary'])
+            ->with(['property.cabins', 'itinerary'])
             ->findOrFail((int) $input['departure_id']);
 
-        $departure->loadMissing(['yacht.cabins']);
+        $departure->loadMissing(['property.cabins']);
 
         $type = $input['type'] instanceof BookingType
             ? $input['type']
@@ -59,7 +59,7 @@ final class ReservationQuoter
         $context = $this->context($input);
 
         $parties = $type === BookingType::Charter
-            ? [$this->quoteCharter($departure, $rows[0], $snapshot, $backToBack, $year, $guests->maxPerYacht, $rates)]
+            ? [$this->quoteCharter($departure, $rows[0], $snapshot, $backToBack, $year, $guests->maxPerProperty, $rates)]
             : $this->quoteCabins($departure, $rows, $snapshot, $backToBack, $year, $guests->maxPerCabin, $rates, $context);
 
         $warnings = [];
@@ -91,7 +91,7 @@ final class ReservationQuoter
         DepartureSnapshot $snapshot,
         bool $backToBack,
         int $year,
-        int $maxPerYacht,
+        int $maxPerProperty,
         RatesDocument $rates,
     ): QuotedParty {
         $adults = max(0, (int) ($row['adults'] ?? 0));
@@ -103,8 +103,8 @@ final class ReservationQuoter
             $errors[] = 'At least 1 adult is required.';
         }
 
-        if ($adults + $children > $maxPerYacht) {
-            $errors[] = 'Charter capacity is '.$maxPerYacht.' PAX — this party is '.($adults + $children).'.';
+        if ($adults + $children > $maxPerProperty) {
+            $errors[] = 'Charter capacity is '.$maxPerProperty.' PAX — this party is '.($adults + $children).'.';
         }
 
         if ($children > $adults) {
@@ -138,7 +138,7 @@ final class ReservationQuoter
 
         return new QuotedParty(
             cabinCode: null,
-            cabinLabel: 'Full yacht',
+            cabinLabel: 'Full property',
             adults: $adults,
             children: $children,
             available: $available,
@@ -172,7 +172,7 @@ final class ReservationQuoter
             $children = max(0, (int) ($row['children'] ?? 0));
             $errors = [];
             $warnings = [];
-            $cabin = $departure->yacht->cabins->first(
+            $cabin = $departure->property->cabins->first(
                 fn (Cabin $item): bool => $item->code === $code,
             );
 

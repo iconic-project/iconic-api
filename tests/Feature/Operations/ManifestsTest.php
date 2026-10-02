@@ -76,7 +76,7 @@ test('the roster counts sold bookings and orders by cabin then position', functi
         ->all();
 
     expect($names)->toBe(['Alpha', 'Beta', 'Gamma', 'Epsilon', 'Delta'])
-        ->and(ManifestRoster::passengers($departure)->last()?->cabinLabel())->toBe('Full yacht');
+        ->and(ManifestRoster::passengers($departure)->last()?->cabinLabel())->toBe('Full property');
 });
 
 test('due dates follow fit or charter and the list status follows live completeness', function (): void {
@@ -473,7 +473,7 @@ function manifestDeparture(string $date = '2026-07-05'): Departure
 function manifestCabin(Departure $departure, int $sort, string $code, string $label): Cabin
 {
     return Cabin::factory()->create([
-        'yacht_id' => $departure->yacht_id,
+        'property_id' => $departure->property_id,
         'sort' => $sort,
         'code' => $code,
         'label' => $label,

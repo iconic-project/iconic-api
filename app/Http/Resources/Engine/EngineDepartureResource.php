@@ -22,7 +22,7 @@ class EngineDepartureResource extends JsonResource
      * @return array{
      *     id: int,
      *     itinerary: string,
-     *     yacht: string,
+     *     property: string,
      *     embark: string,
      *     disembark: string,
      *     festive: bool,
@@ -47,7 +47,7 @@ class EngineDepartureResource extends JsonResource
         return [
             'id' => $departure->id,
             'itinerary' => $departure->itinerary->code,
-            'yacht' => $departure->yacht->code,
+            'property' => $departure->property->code,
             'embark' => $departure->date->toDateString(),
             'disembark' => $departure->returnDate()->toDateString(),
             'festive' => $departure->festive,

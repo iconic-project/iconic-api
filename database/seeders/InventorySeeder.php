@@ -6,7 +6,7 @@ namespace Database\Seeders;
 
 use App\Enums\CabinCategory;
 use App\Models\Cabin;
-use App\Models\Yacht;
+use App\Models\Property;
 use Illuminate\Database\Seeder;
 
 final class InventorySeeder extends Seeder
@@ -14,7 +14,7 @@ final class InventorySeeder extends Seeder
     public function run(): void
     {
         foreach (['ANAMARA', 'ANATIVA'] as $code) {
-            $yacht = Yacht::query()->firstOrCreate(
+            $property = Property::query()->firstOrCreate(
                 ['code' => $code],
                 ['name' => $code],
             );
@@ -22,7 +22,7 @@ final class InventorySeeder extends Seeder
             foreach ($this->cabins() as $cabin) {
                 Cabin::query()->firstOrCreate(
                     [
-                        'yacht_id' => $yacht->id,
+                        'property_id' => $property->id,
                         'code' => $cabin['code'],
                     ],
                     [
