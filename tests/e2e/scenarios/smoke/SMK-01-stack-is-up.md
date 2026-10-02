@@ -15,8 +15,8 @@ If health, panel login, engine chrome or Mailpit is down, every later scenario i
 
 ## Expected
 - [ ] E1 · Health JSON has `"status":"ok"` and `checks.db`, `checks.redis`, `checks.queue` all `"ok"`.
-- [ ] E2 · Panel `/login` shows the HILO wordmark, subtitle `RMS · REVENUE ENGINE`, title `Sign in`, fields `Email` and `Password`, button `Sign in`, link `Forgot password?`.
-- [ ] E3 · Engine home shows header brand `HILO`, subtitle `INTIMATE YACHT EXPEDITIONS`, nav `Expeditions` and `Private Charter`, hero coords `0°40′S 90°33′W · Galápagos, Ecuador`, footer line `Iconic · Intimate yacht expeditions · Galápagos`.
+- [ ] E2 · Panel `/login` shows the ICONIC wordmark, subtitle `RMS · REVENUE ENGINE`, title `Sign in`, fields `Email` and `Password`, button `Sign in`, link `Forgot password?`.
+- [ ] E3 · Engine home shows header brand `ICONIC`, subtitle `INTIMATE YACHT EXPEDITIONS`, nav `Expeditions` and `Private Charter`, hero coords `0°40′S 90°33′W · Galápagos, Ecuador`, footer line `Iconic · Intimate yacht expeditions · Galápagos`.
 - [ ] E4 · Mailpit UI loads (not an error page). The `/livez` endpoint is 200.
 
 ## Notes

@@ -1,0 +1,2489 @@
+{
+  "rates": {
+    "years": [
+      2027,
+      2028,
+      2029
+    ],
+    "base": {
+      "SUITE": {
+        "2027": 13300,
+        "2028": 13965,
+        "2029": 14663
+      },
+      "OWNER": {
+        "2027": 25000,
+        "2028": 26250,
+        "2029": 27563
+      },
+      "CHARTER": {
+        "2027": 199500,
+        "2028": 209475,
+        "2029": 219949
+      }
+    },
+    "terms": {
+      "cabinDep": 10,
+      "cabinBalDays": 120,
+      "charterDep": 20,
+      "charterDepDays": 5,
+      "charterBalDays": 120
+    },
+    "rules": {
+      "single": 75,
+      "triple": 10,
+      "child": 15,
+      "childPerAdult": 1,
+      "childPerCabin": 2,
+      "b2b": 5,
+      "festivePax": 750,
+      "festiveCharter": 12000
+    }
+  },
+  "extras_catalog": [
+    {
+      "code": "FLT",
+      "name": "Domestic flights GYE/UIO ↔ SCY (round-trip)",
+      "unit": "per person",
+      "price": 420,
+      "transfer": true
+    },
+    {
+      "code": "HPRE",
+      "name": "Pre-cruise hotel — San Cristóbal (1 night, double)",
+      "unit": "per room-night",
+      "price": 320,
+      "transfer": true
+    },
+    {
+      "code": "HPOST",
+      "name": "Post-cruise hotel — San Cristóbal (1 night, double)",
+      "unit": "per room-night",
+      "price": 320,
+      "transfer": true
+    },
+    {
+      "code": "SPA",
+      "name": "Spa treatment",
+      "unit": "per treatment",
+      "price": null
+    },
+    {
+      "code": "BAR",
+      "name": "Premium bar package",
+      "unit": "per person",
+      "price": null
+    },
+    {
+      "code": "BTQ",
+      "name": "Anakata boutique",
+      "unit": "per item",
+      "price": null
+    }
+  ],
+  "engine_settings": {
+    "maxCabin": 3,
+    "maxYacht": 16,
+    "childMin": 6,
+    "childMax": 17,
+    "adultWithChild": true,
+    "underMsg": "Under 6 not accommodated",
+    "defFrom": "2027-11",
+    "defTo": "2028-01",
+    "defAdults": 2,
+    "horizon": 24,
+    "noteBNPL": "We will hold the cabins for you, obligation-free. Our team confirms availability and sends your deposit link — nothing is charged today.",
+    "noteChild": "A 15% discount applies to children aged 6–17. One discount per adult, maximum two per couple. Not available on festive departures.",
+    "noteSolo": "Single occupancy +75% ppdo · triple sharing −10% ppdo. Shown live in the next step.",
+    "payToday": "We will hold your cabins for you, obligation-free. Our team confirms availability and sends your deposit link (10%) — nothing is charged until you decide.",
+    "noteDetails": "Full guest details (passports, dietary preferences) and payment are arranged after we confirm your cabins — no card is required today. Travel insurance is the sole responsibility of the passenger. Anakata does not sell or intermediate travel insurance.",
+    "step1": "Within 24 hours a member of our team confirms your cabins and answers any questions — by your preferred channel.",
+    "step2": "You receive your booking confirmation and deposit link (10%). Your cabins stay held while you decide, per our hold policy.",
+    "step3": "After the deposit, we gather guest details and preferences, and our concierge curates flights, stays and on-board touches.",
+    "tct": 20,
+    "pngAd": 200,
+    "pngCh": 100,
+    "showFees": true,
+    "feeNote": "Informational — regulatory Galápagos fees, not charged today. PNG is paid at SCY airport; TCT is arranged with our team.",
+    "chHead": "The yacht, entirely yours",
+    "chIntro": "One yacht, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.",
+    "chItin": "Customizable",
+    "chSla": 24,
+    "chCtx": [
+      "Family",
+      "Friends",
+      "Corporate / Incentive",
+      "Celebration"
+    ],
+    "chThanks": "Thank you — your charter enquiry has been received. A dedicated member of our team will contact you within 24 hours to schedule a discovery call."
+  },
+  "policies": {
+    "commCap": 12,
+    "commDefault": 10,
+    "modFee": 0,
+    "extrasDueH": 72,
+    "wireHours": 72,
+    "webHoldMin": 20,
+    "webExtMin": 10,
+    "holdNearH": 48,
+    "holdLongD": 5,
+    "reqSla": 24,
+    "refundSla": 15,
+    "remind1": 21,
+    "remind2": 7,
+    "manifestFit": 15,
+    "manifestCh": 30,
+    "cancel": [
+      {
+        "min": 120,
+        "pct": 5
+      },
+      {
+        "min": 90,
+        "pct": 50
+      },
+      {
+        "min": 0,
+        "pct": 100
+      }
+    ]
+  },
+  "cancellation_bands": [
+    {
+      "min": 120,
+      "pct": 5
+    },
+    {
+      "min": 90,
+      "pct": 50
+    },
+    {
+      "min": 0,
+      "pct": 100
+    }
+  ],
+  "itineraries": [
+    {
+      "status": "PUBLISHED",
+      "order": 1,
+      "festive": false,
+      "nDays": 8,
+      "nights": 7,
+      "embark": "San Cristóbal (SCY)",
+      "disembark": "San Cristóbal (SCY)",
+      "tag": "8 days · 7 nights",
+      "grad": "linear-gradient(135deg,#1B2832 0%,#2A3A42 45%,#33413F 100%)",
+      "img": "",
+      "alt": "",
+      "desc": "Isabela and Fernandina — the wild western edge. Flightless cormorants, marine iguana colonies, volcanic shorelines that feel newly made.",
+      "long": "This itinerary follows the Western Realm route. Isabela and Fernandina — the wild western edge. Flightless cormorants, marine iguana colonies, volcanic shorelines that feel newly made. Every day is led by our expert naturalist guides aboard an intimate 16-guest expedition yacht — snorkel, kayak, guided walks and wildlife observation included.",
+      "hi": [
+        "Isabela",
+        "Fernandina",
+        "Flightless Cormorant",
+        "volcanic coasts"
+      ],
+      "chips": [
+        "16 guests",
+        "8 suites + owner's",
+        "7 nights · Sun→Sun",
+        "SCY ↔ SCY"
+      ],
+      "overview": "Embark & disembark San Cristóbal (SCY) · All expeditions include naturalist guides, snorkel, kayak, guided walks and wildlife observation.",
+      "facts": [
+        [
+          "Accommodation",
+          "9 cabins — 8 Suites + Owner's Suite, all facing the sea"
+        ],
+        [
+          "Dining",
+          "Sustainable, locally sourced — expedition gastronomy"
+        ],
+        [
+          "Yacht",
+          "Sundeck, jacuzzi & Wi-Fi · 16 guests"
+        ],
+        [
+          "Crew & Guides",
+          "Expert naturalist guides · full expedition crew"
+        ],
+        [
+          "Activities",
+          "Snorkel, kayak, guided walks, wildlife observation"
+        ],
+        [
+          "Language",
+          "English & Spanish"
+        ]
+      ],
+      "plan": [
+        [
+          "Day 1 — Sunday",
+          "Embark in San Cristóbal (SCY). Welcome aboard, safety briefing, sunset sail."
+        ],
+        [
+          "Day 2",
+          "Punta Moreno & Elizabeth Bay, Isabela — zodiac through mangroves, penguins and rays."
+        ],
+        [
+          "Day 3",
+          "Urbina Bay & Tagus Cove, Isabela — giant tortoises, kayak the dramatic coastline."
+        ],
+        [
+          "Day 4",
+          "Punta Espinoza, Fernandina — snorkel with flightless cormorants and marine iguanas."
+        ],
+        [
+          "Day 5",
+          "Punta Vicente Roca — deep-water snorkel; whale-watching across the Bolívar Channel."
+        ],
+        [
+          "Day 6",
+          "Rábida & Chinese Hat — red-sand beaches, sea lion colonies, evening naturalist talk."
+        ],
+        [
+          "Day 7",
+          "Santa Cruz highlands — giant tortoises in the wild; farewell dinner aboard."
+        ],
+        [
+          "Day 8 — Sunday",
+          "Disembark in San Cristóbal after breakfast. Transfer to SCY airport."
+        ]
+      ],
+      "inc": [
+        "All meals aboard, expedition gastronomy, house wines with dinner",
+        "All guided excursions, snorkel & kayak equipment, wetsuits",
+        "Expert naturalist guides · transfers in San Cristóbal"
+      ],
+      "exc": [
+        "International & domestic flights · PNG entry fee (paid at SCY airport) · TCT transit card (USD 20)",
+        "Travel insurance — sole responsibility of the passenger; Anakata does not sell or intermediate travel insurance",
+        "Spa, premium bar & boutique — arranged with our concierge after booking"
+      ],
+      "faqs": [
+        [
+          "Do I pay anything today?",
+          "No — book now, pay later. We hold your cabins obligation-free and send a 10% deposit link once our team confirms."
+        ],
+        [
+          "Can children join?",
+          "From age 6 on departure day. Ages 6–17 receive −15% ppdo (not on festive departures)."
+        ],
+        [
+          "Can I change dates later?",
+          "Date changes are free of charge, subject to availability."
+        ]
+      ],
+      "slug": "western-realm",
+      "metaT": "",
+      "metaD": "",
+      "k": "WEST",
+      "name": "Western Realm"
+    },
+    {
+      "status": "PUBLISHED",
+      "order": 2,
+      "festive": false,
+      "nDays": 8,
+      "nights": 7,
+      "embark": "San Cristóbal (SCY)",
+      "disembark": "San Cristóbal (SCY)",
+      "tag": "8 days · 7 nights",
+      "grad": "linear-gradient(135deg,#141B17 0%,#37453D 55%,#585940 100%)",
+      "img": "",
+      "alt": "",
+      "desc": "Genovesa and the northern isles. Red-footed boobies in the thousands, snorkel walls alive with rays, evenings of open ocean crossings.",
+      "long": "This itinerary follows the Northern Passage route. Genovesa and the northern isles. Red-footed boobies in the thousands, snorkel walls alive with rays, evenings of open ocean crossings. Every day is led by our expert naturalist guides aboard an intimate 16-guest expedition yacht — snorkel, kayak, guided walks and wildlife observation included.",
+      "hi": [
+        "Genovesa",
+        "Bartolomé",
+        "Red-footed Booby",
+        "snorkel walls"
+      ],
+      "chips": [
+        "16 guests",
+        "8 suites + owner's",
+        "7 nights · Sun→Sun",
+        "SCY ↔ SCY"
+      ],
+      "overview": "Embark & disembark San Cristóbal (SCY) · All expeditions include naturalist guides, snorkel, kayak, guided walks and wildlife observation.",
+      "facts": [
+        [
+          "Accommodation",
+          "9 cabins — 8 Suites + Owner's Suite, all facing the sea"
+        ],
+        [
+          "Dining",
+          "Sustainable, locally sourced — expedition gastronomy"
+        ],
+        [
+          "Yacht",
+          "Sundeck, jacuzzi & Wi-Fi · 16 guests"
+        ],
+        [
+          "Crew & Guides",
+          "Expert naturalist guides · full expedition crew"
+        ],
+        [
+          "Activities",
+          "Snorkel, kayak, guided walks, wildlife observation"
+        ],
+        [
+          "Language",
+          "English & Spanish"
+        ]
+      ],
+      "plan": [
+        [
+          "Day 1 — Sunday",
+          "Embark in San Cristóbal (SCY). Welcome aboard, first briefing under way."
+        ],
+        [
+          "Day 2",
+          "Genovesa — Prince Philip's Steps: red-footed boobies, Nazca boobies, short-eared owls."
+        ],
+        [
+          "Day 3",
+          "Genovesa — Darwin Bay; snorkel walls alive with rays and reef fish."
+        ],
+        [
+          "Day 4",
+          "Bartolomé — Pinnacle Rock, penguins; lava fields of Sullivan Bay."
+        ],
+        [
+          "Day 5",
+          "Santiago — Puerto Egas; fur seal grottos, tide pools at golden hour."
+        ],
+        [
+          "Day 6",
+          "North Seymour — frigatebird colonies in display; blue-footed boobies."
+        ],
+        [
+          "Day 7",
+          "Santa Cruz highlands — giant tortoises; farewell dinner aboard."
+        ],
+        [
+          "Day 8 — Sunday",
+          "Disembark in San Cristóbal after breakfast. Transfer to SCY airport."
+        ]
+      ],
+      "inc": [
+        "All meals aboard, expedition gastronomy, house wines with dinner",
+        "All guided excursions, snorkel & kayak equipment, wetsuits",
+        "Expert naturalist guides · transfers in San Cristóbal"
+      ],
+      "exc": [
+        "International & domestic flights · PNG entry fee (paid at SCY airport) · TCT transit card (USD 20)",
+        "Travel insurance — sole responsibility of the passenger; Anakata does not sell or intermediate travel insurance",
+        "Spa, premium bar & boutique — arranged with our concierge after booking"
+      ],
+      "faqs": [
+        [
+          "Do I pay anything today?",
+          "No — book now, pay later. We hold your cabins obligation-free and send a 10% deposit link once our team confirms."
+        ],
+        [
+          "Can children join?",
+          "From age 6 on departure day. Ages 6–17 receive −15% ppdo (not on festive departures)."
+        ],
+        [
+          "Can I change dates later?",
+          "Date changes are free of charge, subject to availability."
+        ]
+      ],
+      "slug": "northern-passage",
+      "metaT": "",
+      "metaD": "",
+      "k": "NORTH",
+      "name": "Northern Passage"
+    },
+    {
+      "status": "PUBLISHED",
+      "order": 3,
+      "festive": true,
+      "nDays": 8,
+      "nights": 7,
+      "embark": "San Cristóbal (SCY)",
+      "disembark": "San Cristóbal (SCY)",
+      "tag": "Christmas & New Year",
+      "grad": "linear-gradient(135deg,#202B26 0%,#2A362F 50%,#A97C4B 100%)",
+      "img": "",
+      "alt": "",
+      "desc": "The archipelago at its calmest light, over Christmas and New Year. A festive supplement applies; holiday departures sell first.",
+      "long": "This itinerary follows the Festive Expeditions route. The archipelago at its calmest light, over Christmas and New Year. A festive supplement applies; holiday departures sell first. Every day is led by our expert naturalist guides aboard an intimate 16-guest expedition yacht — snorkel, kayak, guided walks and wildlife observation included.",
+      "hi": [
+        "Dec 19 & Dec 26 departures",
+        "festive supplement +USD 750 pp"
+      ],
+      "chips": [
+        "16 guests",
+        "8 suites + owner's",
+        "7 nights · Sun→Sun",
+        "SCY ↔ SCY"
+      ],
+      "overview": "Embark & disembark San Cristóbal (SCY) · All expeditions include naturalist guides, snorkel, kayak, guided walks and wildlife observation.",
+      "facts": [
+        [
+          "Accommodation",
+          "9 cabins — 8 Suites + Owner's Suite, all facing the sea"
+        ],
+        [
+          "Dining",
+          "Sustainable, locally sourced — expedition gastronomy"
+        ],
+        [
+          "Yacht",
+          "Sundeck, jacuzzi & Wi-Fi · 16 guests"
+        ],
+        [
+          "Crew & Guides",
+          "Expert naturalist guides · full expedition crew"
+        ],
+        [
+          "Activities",
+          "Snorkel, kayak, guided walks, wildlife observation"
+        ],
+        [
+          "Language",
+          "English & Spanish"
+        ]
+      ],
+      "plan": [
+        [
+          "Day 1 — Sunday",
+          "Embark in San Cristóbal (SCY). Festive welcome aboard."
+        ],
+        [
+          "Days 2–6",
+          "The archipelago at its calmest light — itinerary follows the Western Realm route with festive celebrations aboard: Christmas Eve dinner or New Year at anchor under the stars."
+        ],
+        [
+          "Day 7",
+          "Santa Cruz highlands — giant tortoises; gala farewell dinner."
+        ],
+        [
+          "Day 8 — Sunday",
+          "Disembark in San Cristóbal after breakfast."
+        ]
+      ],
+      "inc": [
+        "All meals aboard, expedition gastronomy, house wines with dinner",
+        "All guided excursions, snorkel & kayak equipment, wetsuits",
+        "Expert naturalist guides · transfers in San Cristóbal"
+      ],
+      "exc": [
+        "International & domestic flights · PNG entry fee (paid at SCY airport) · TCT transit card (USD 20)",
+        "Travel insurance — sole responsibility of the passenger; Anakata does not sell or intermediate travel insurance",
+        "Spa, premium bar & boutique — arranged with our concierge after booking"
+      ],
+      "faqs": [
+        [
+          "Do I pay anything today?",
+          "No — book now, pay later. We hold your cabins obligation-free and send a 10% deposit link once our team confirms."
+        ],
+        [
+          "Can children join?",
+          "From age 6 on departure day. Ages 6–17 receive −15% ppdo (not on festive departures)."
+        ],
+        [
+          "Can I change dates later?",
+          "Date changes are free of charge, subject to availability."
+        ]
+      ],
+      "slug": "festive-expeditions",
+      "metaT": "",
+      "metaD": "",
+      "k": "FEST",
+      "name": "Festive Expeditions"
+    }
+  ],
+  "departures": [
+    {
+      "id": "DEP-001",
+      "di": 0,
+      "yacht": "ANAMARA",
+      "itin": "WEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "Inaugural sailing",
+      "date": "2027-11-07",
+      "festive": false
+    },
+    {
+      "id": "DEP-002",
+      "di": 0,
+      "yacht": "ANATIVA",
+      "itin": "NORTH",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "Inaugural sailing",
+      "date": "2027-11-07",
+      "festive": false
+    },
+    {
+      "id": "DEP-003",
+      "di": 1,
+      "yacht": "ANAMARA",
+      "itin": "NORTH",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-11-14",
+      "festive": false
+    },
+    {
+      "id": "DEP-004",
+      "di": 1,
+      "yacht": "ANATIVA",
+      "itin": "WEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-11-14",
+      "festive": false
+    },
+    {
+      "id": "DEP-005",
+      "di": 2,
+      "yacht": "ANAMARA",
+      "itin": "WEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-11-21",
+      "festive": false
+    },
+    {
+      "id": "DEP-006",
+      "di": 2,
+      "yacht": "ANATIVA",
+      "itin": "NORTH",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-11-21",
+      "festive": false
+    },
+    {
+      "id": "DEP-007",
+      "di": 3,
+      "yacht": "ANAMARA",
+      "itin": "NORTH",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-11-28",
+      "festive": false
+    },
+    {
+      "id": "DEP-008",
+      "di": 3,
+      "yacht": "ANATIVA",
+      "itin": "WEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-11-28",
+      "festive": false
+    },
+    {
+      "id": "DEP-009",
+      "di": 4,
+      "yacht": "ANAMARA",
+      "itin": "WEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-12-05",
+      "festive": false
+    },
+    {
+      "id": "DEP-010",
+      "di": 4,
+      "yacht": "ANATIVA",
+      "itin": "NORTH",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-12-05",
+      "festive": false
+    },
+    {
+      "id": "DEP-011",
+      "di": 5,
+      "yacht": "ANAMARA",
+      "itin": "NORTH",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-12-12",
+      "festive": false
+    },
+    {
+      "id": "DEP-012",
+      "di": 5,
+      "yacht": "ANATIVA",
+      "itin": "WEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-12-12",
+      "festive": false
+    },
+    {
+      "id": "DEP-013",
+      "di": 6,
+      "yacht": "ANAMARA",
+      "itin": "FEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-12-19",
+      "festive": true
+    },
+    {
+      "id": "DEP-014",
+      "di": 6,
+      "yacht": "ANATIVA",
+      "itin": "FEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-12-19",
+      "festive": true
+    },
+    {
+      "id": "DEP-015",
+      "di": 7,
+      "yacht": "ANAMARA",
+      "itin": "FEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-12-26",
+      "festive": true
+    },
+    {
+      "id": "DEP-016",
+      "di": 7,
+      "yacht": "ANATIVA",
+      "itin": "FEST",
+      "status": "ON_SALE",
+      "thr": 3,
+      "wait": true,
+      "note": "",
+      "date": "2027-12-26",
+      "festive": true
+    }
+  ],
+  "offers": [
+    {
+      "id": "OF-001",
+      "code": "OPENING-27",
+      "name": "Opening season credit",
+      "type": "CREDIT",
+      "value": 500,
+      "valueText": "",
+      "chan": "D2C",
+      "partner": "",
+      "cabins": [
+        "SUITE"
+      ],
+      "itins": [
+        "WEST",
+        "NORTH"
+      ],
+      "bookFrom": "",
+      "bookTo": "",
+      "travFrom": "2027-11-01",
+      "travTo": "2027-12-31",
+      "badge": "OPENING OFFER",
+      "showCard": true,
+      "showRow": true,
+      "priceLine": "Opening season credit — on-board ancillaries",
+      "terms": "USD 500 ancillary credit per Suite on non-festive departures in November and December 2027. Not combinable with other offers.",
+      "stack": false,
+      "status": "LIVE"
+    },
+    {
+      "id": "OF-002",
+      "code": "VIRTUOSO-EARLY",
+      "name": "Virtuoso early booking",
+      "type": "COMM",
+      "value": 2,
+      "valueText": "",
+      "chan": "B2B",
+      "partner": "Virtuoso network",
+      "cabins": [
+        "SUITE",
+        "OWNER"
+      ],
+      "itins": [
+        "WEST",
+        "NORTH"
+      ],
+      "bookFrom": "2027-01-01",
+      "bookTo": "2027-03-31",
+      "travFrom": "",
+      "travTo": "",
+      "badge": "",
+      "showCard": false,
+      "showRow": false,
+      "priceLine": "",
+      "terms": "Extra 2% partner commission on bookings made in Q1 2027.",
+      "stack": false,
+      "status": "DRAFT"
+    }
+  ],
+  "agencies": [
+    {
+      "id": "AG-001",
+      "name": "Blue Latitude Travel",
+      "contact": "S. Ferreira",
+      "email": "s.ferreira@bluelatitude.—",
+      "country": "US",
+      "network": "Virtuoso",
+      "comm": 10,
+      "terms": "30 days post-cruise · wire",
+      "status": "APPROVED",
+      "reqAt": "2026-06-18",
+      "decided": "20 Jun 2026 · Carolina",
+      "users": [
+        {
+          "n": "S. Ferreira",
+          "e": "s.ferreira@bluelatitude.—",
+          "st": "Active"
+        }
+      ]
+    },
+    {
+      "id": "AG-002",
+      "name": "Meridian Voyages",
+      "contact": "T. Nakamura",
+      "email": "t.nakamura@meridian.—",
+      "country": "JP",
+      "network": "ILTM",
+      "comm": 15,
+      "terms": "30 days post-cruise · wire",
+      "status": "APPROVED",
+      "reqAt": "2026-06-25",
+      "decided": "27 Jun 2026 · Carolina",
+      "users": [
+        {
+          "n": "T. Nakamura",
+          "e": "t.nakamura@meridian.—",
+          "st": "Active"
+        }
+      ],
+      "blocked": {
+        "ref": "ANK-2026-0021",
+        "value": 26600,
+        "dep": "2027-11-14"
+      }
+    },
+    {
+      "id": "AG-003",
+      "name": "Andes Luxe Travel",
+      "contact": "P. Ibáñez",
+      "email": "p.ibanez@andesluxe.—",
+      "country": "CL",
+      "network": "Signature",
+      "comm": 10,
+      "terms": "30 days post-cruise · wire",
+      "status": "PENDING",
+      "reqAt": "2026-09-11",
+      "decided": "",
+      "users": [
+        {
+          "n": "P. Ibáñez",
+          "e": "p.ibanez@andesluxe.—",
+          "st": "Invite on approval"
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "id": "GRP-007",
+      "name": "Alvear family & friends",
+      "coord": {
+        "name": "Lorena Alvear",
+        "email": "l.alvear@—.com",
+        "phone": "+54 9 11 5555 0142",
+        "pc": "WHATSAPP"
+      },
+      "created": "20 Jul 2026"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "ANK-2026-0003",
+      "guest": "Harrison & Whitfield",
+      "type": "CABIN",
+      "chan": "WEB_DIRECT",
+      "dep": 0,
+      "cab": "S1",
+      "st": "CONFIRMED",
+      "total": 26600,
+      "bal": 23940,
+      "owner": "Lucía",
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P1",
+          "first": "Daniel",
+          "last": "Harrison",
+          "dob": "1971-04-12",
+          "nat": "US",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "d.harrison@—.com",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P2",
+          "first": "Claire",
+          "last": "Whitfield",
+          "dob": "1974-09-30",
+          "nat": "US",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [
+        {
+          "code": "FLT",
+          "qty": 2,
+          "rate": 420
+        },
+        {
+          "code": "HPRE",
+          "qty": 1,
+          "rate": 320
+        },
+        {
+          "code": "HPOST",
+          "qty": 1,
+          "rate": 320
+        }
+      ],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.0",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "Booking engine",
+          "what": "Reservation created · CONFIRMED path",
+          "why": ""
+        },
+        {
+          "at": "2 Jul 2026, 14:05",
+          "who": "Payment gateway",
+          "what": "Deposit received USD 2,660 · Card (Stripe)",
+          "why": ""
+        }
+      ],
+      "tctManaged": true,
+      "pngManaged": true,
+      "billing": "845 Ocean Drive, Miami, FL 33139, USA",
+      "phone": "+1 305 555 0198"
+    },
+    {
+      "id": "ANK-2026-0005",
+      "guest": "The Brandt Family",
+      "type": "CABIN",
+      "chan": "WEB_DIRECT",
+      "dep": 0,
+      "cab": "S2",
+      "st": "FULLY_PAID",
+      "total": 37905,
+      "bal": 0,
+      "owner": "Mateo",
+      "px": "2 AD + 1 CH",
+      "depPct": 10,
+      "adults": 2,
+      "children": 1,
+      "guests": [
+        {
+          "id": "P3",
+          "first": "Markus",
+          "last": "Brandt",
+          "dob": "1979-02-14",
+          "nat": "DE",
+          "res": false,
+          "pp": "C4F7K2L9M",
+          "ppExp": "2031-05-01",
+          "ins": true,
+          "email": "m.brandt@—.de",
+          "med": "",
+          "guardian": null,
+          "pref": {
+            "diet": "No shellfish for Julia; Leon: no spicy food",
+            "breakfast": "Full",
+            "pillow": "Medium",
+            "temp": "Moderate (21–23°C)",
+            "bev": "Red wine, sparkling water",
+            "intensity": "Moderate",
+            "time": "Flexible",
+            "interests": "Marine life, photography",
+            "celebr": "Leon's birthday — 2 March (not on board)",
+            "access": "",
+            "emerg": "Heike Brandt (sister) +49 30 5555 0199",
+            "first": "Yes",
+            "req": "Snorkel gear in child size",
+            "src": "Recorded by Mateo — phone call (sample data)",
+            "at": "05 Sep 2026"
+          },
+          "lead": true
+        },
+        {
+          "id": "P4",
+          "first": "Julia",
+          "last": "Brandt",
+          "dob": "1981-06-03",
+          "nat": "DE",
+          "res": false,
+          "pp": "C4F7K8Q1R",
+          "ppExp": "2031-05-01",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P5",
+          "first": "Leon",
+          "last": "Brandt",
+          "dob": "2015-03-02",
+          "nat": "DE",
+          "res": false,
+          "pp": "C4F9T3W6Z",
+          "ppExp": "2029-08-15",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": {
+            "name": "Markus Brandt",
+            "rel": "Father",
+            "at": "02 Jul 2026, 14:05"
+          },
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.105",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.105",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.105",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.105",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.12.41.105",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "Booking engine",
+          "what": "Reservation created · FULLY PAID path",
+          "why": ""
+        },
+        {
+          "at": "24 Jun 2026, 14:05",
+          "who": "Payment gateway",
+          "what": "Deposit received USD 3,791 · Card (Stripe)",
+          "why": ""
+        },
+        {
+          "at": "19 Aug 2026, 10:12",
+          "who": "Payment gateway",
+          "what": "Balance received USD 34,114 → FULLY PAID",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0007",
+      "guest": "M. Castellanos",
+      "type": "CABIN",
+      "chan": "AGENCY",
+      "dep": 1,
+      "cab": "S3",
+      "st": "CONFIRMED",
+      "total": 23275,
+      "bal": 20948,
+      "owner": "Lucía",
+      "agent": "Blue Latitude · 10%",
+      "px": "1 AD",
+      "comm": {
+        "agency": "Blue Latitude Travel",
+        "rate": 0.1,
+        "approved": true
+      },
+      "depPct": 10,
+      "adults": 1,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P6",
+          "first": "Mariana",
+          "last": "Castellanos",
+          "dob": "1985-11-20",
+          "nat": "CO",
+          "res": false,
+          "pp": "AX1234567",
+          "ppExp": "2030-02-01",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.13.41.75",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.13.41.75",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.13.41.75",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.13.41.75",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "RMS manual — Lucía",
+          "what": "Reservation created · CONFIRMED path",
+          "why": ""
+        },
+        {
+          "at": "5 Jul 2026, 14:05",
+          "who": "Carolina (finance)",
+          "what": "Deposit received USD 2,327 · Wire transfer",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0009",
+      "guest": "Söderberg Party",
+      "type": "CABIN",
+      "chan": "WEB_DIRECT",
+      "dep": 2,
+      "cab": "OWNER",
+      "st": "CONFIRMED",
+      "total": 50000,
+      "bal": 45000,
+      "owner": "Mateo",
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P7",
+          "first": "Erik",
+          "last": "Söderberg",
+          "dob": "1968-01-09",
+          "nat": "SE",
+          "res": false,
+          "pp": "91827364",
+          "ppExp": "2032-03-10",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P8",
+          "first": "Anna",
+          "last": "Söderberg",
+          "dob": "1970-07-22",
+          "nat": "SE",
+          "res": false,
+          "pp": "91827365",
+          "ppExp": "2032-03-10",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.14.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.14.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.14.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.14.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.14.41.0",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "Booking engine",
+          "what": "Reservation created · CONFIRMED path",
+          "why": ""
+        },
+        {
+          "at": "8 Jul 2026, 14:05",
+          "who": "Payment gateway",
+          "what": "Deposit received USD 5,000 · Stripe payment link",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0011",
+      "guest": "J. & P. Okafor",
+      "type": "CABIN",
+      "chan": "WEB_DIRECT",
+      "dep": 4,
+      "cab": "S1",
+      "st": "CONFIRMED",
+      "total": 26600,
+      "bal": 23940,
+      "owner": "Lucía",
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P9",
+          "first": "Joseph",
+          "last": "Okafor",
+          "dob": "1976-05-05",
+          "nat": "GB",
+          "res": false,
+          "pp": "548213977",
+          "ppExp": "2033-01-20",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P10",
+          "first": "Precious",
+          "last": "Okafor",
+          "dob": "1978-12-11",
+          "nat": "GB",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.16.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.16.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.16.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.16.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.16.41.0",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "Booking engine",
+          "what": "Reservation created · CONFIRMED path",
+          "why": ""
+        },
+        {
+          "at": "10 Jul 2026, 14:05",
+          "who": "Payment gateway",
+          "what": "Deposit received USD 2,660 · Card (Stripe)",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0012",
+      "guest": "Vandermeer Charter",
+      "type": "CHARTER",
+      "chan": "CHARTER_DIRECT",
+      "dep": 6,
+      "cab": "ALL",
+      "st": "CONFIRMED",
+      "total": 211500,
+      "bal": 169200,
+      "owner": "Carolina",
+      "charter": true,
+      "px": "16 PAX",
+      "depPct": 20,
+      "adults": 0,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P11",
+          "first": "Rutger",
+          "last": "Vandermeer",
+          "dob": "1965-08-30",
+          "nat": "NL",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P23",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P24",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P25",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P26",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P27",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P28",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P29",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P30",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P31",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P32",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P33",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P34",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P35",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P36",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P37",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.18.41.100",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.18.41.100",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.18.41.100",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.18.41.100",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.18.41.100",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "RMS manual — Carolina",
+          "what": "Reservation created · CONFIRMED path",
+          "why": ""
+        },
+        {
+          "at": "15 Jul 2026, 14:05",
+          "who": "Carolina (finance)",
+          "what": "Deposit received USD 42,300 · Wire transfer",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0014",
+      "guest": "R. Ellison",
+      "type": "CABIN",
+      "chan": "WEB_DIRECT",
+      "dep": 1,
+      "cab": "S5",
+      "st": "PENDING_PAYMENT",
+      "total": 26600,
+      "bal": 26600,
+      "owner": "Lucía",
+      "wire": true,
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P12",
+          "first": "Robert",
+          "last": "Ellison",
+          "dob": "1969-03-15",
+          "nat": "US",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P38",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "Booking engine",
+          "what": "Reservation created · PENDING PAYMENT path",
+          "why": ""
+        },
+        {
+          "at": "12 Sept 2026, 15:04",
+          "who": "Lucía",
+          "what": "Wire instructions issued — USD 2,660 · 72h window",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0016",
+      "guest": "L. Alvear",
+      "type": "CABIN",
+      "chan": "INBOUND",
+      "dep": 3,
+      "cab": "S1",
+      "st": "CONFIRMED",
+      "total": 26600,
+      "bal": 23940,
+      "owner": "Mateo",
+      "grp": "GRP-007",
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P13",
+          "first": "Lorena",
+          "last": "Alvear",
+          "dob": "1972-10-02",
+          "nat": "AR",
+          "res": false,
+          "pp": "AAG512877",
+          "ppExp": "2031-11-01",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P14",
+          "first": "Martín",
+          "last": "Alvear",
+          "dob": "1970-04-18",
+          "nat": "AR",
+          "res": false,
+          "pp": "AAG512878",
+          "ppExp": "2031-11-01",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "RMS manual — Mateo",
+          "what": "Reservation created · CONFIRMED path",
+          "why": ""
+        },
+        {
+          "at": "20 Jul 2026, 14:05",
+          "who": "Carolina (finance)",
+          "what": "Deposit received USD 2,660 · Wire transfer",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0017",
+      "guest": "S. & T. Ruiz",
+      "type": "CABIN",
+      "chan": "INBOUND",
+      "dep": 3,
+      "cab": "S6",
+      "st": "CONFIRMED",
+      "total": 26600,
+      "bal": 23940,
+      "owner": "Mateo",
+      "grp": "GRP-007",
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P15",
+          "first": "Sofía",
+          "last": "Ruiz",
+          "dob": "1990-06-25",
+          "nat": "AR",
+          "res": false,
+          "pp": "AAH113209",
+          "ppExp": "2030-06-01",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P16",
+          "first": "Tomás",
+          "last": "Ruiz",
+          "dob": "1989-09-14",
+          "nat": "AR",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "RMS manual — Mateo",
+          "what": "Reservation created · CONFIRMED path",
+          "why": ""
+        },
+        {
+          "at": "20 Jul 2026, 14:05",
+          "who": "Carolina (finance)",
+          "what": "Deposit received USD 2,660 · Wire transfer",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0019",
+      "guest": "D. & A. Pereyra",
+      "type": "CABIN",
+      "chan": "INBOUND",
+      "dep": 3,
+      "cab": "S7",
+      "st": "CONFIRMED",
+      "total": 26600,
+      "bal": 23940,
+      "owner": "Mateo",
+      "grp": "GRP-007",
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P17",
+          "first": "Diego",
+          "last": "Pereyra",
+          "dob": "1983-02-27",
+          "nat": "EC",
+          "res": false,
+          "pp": "A0977123",
+          "ppExp": "2029-12-12",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P18",
+          "first": "Ana",
+          "last": "Pereyra",
+          "dob": "1985-05-19",
+          "nat": "EC",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.15.41.0",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "RMS manual — Mateo",
+          "what": "Reservation created · CONFIRMED path",
+          "why": ""
+        },
+        {
+          "at": "20 Jul 2026, 14:05",
+          "who": "Carolina (finance)",
+          "what": "Deposit received USD 2,660 · Wire transfer",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-2026-0018",
+      "guest": "A. Fontaine",
+      "type": "CABIN",
+      "chan": "WEB_DIRECT",
+      "dep": 5,
+      "cab": "S2",
+      "st": "OVERDUE",
+      "total": 26600,
+      "bal": 23940,
+      "owner": "Lucía",
+      "overdue": true,
+      "gd": "2/2",
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P19",
+          "first": "Amélie",
+          "last": "Fontaine",
+          "dob": "1980-03-08",
+          "nat": "FR",
+          "res": false,
+          "pp": "19FH55012",
+          "ppExp": "2030-10-01",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P20",
+          "first": "Paul",
+          "last": "Fontaine",
+          "dob": "1978-11-29",
+          "nat": "FR",
+          "res": false,
+          "pp": "19FH55013",
+          "ppExp": "2030-10-01",
+          "ins": true,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [
+        {
+          "doc": "Terms & Conditions",
+          "ver": "v2026.1 (text pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.17.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Cancellation policy",
+          "ver": "v2026.1 (pending LEG-001)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.17.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Privacy policy",
+          "ver": "v2026.1 (pending LEG-002)",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.17.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Travel insurance declaration",
+          "ver": "OPS-005 v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.17.41.0",
+          "by": "Lead guest — payment link"
+        },
+        {
+          "doc": "Marketing (optional)",
+          "ver": "v1",
+          "at": "02 Jul 2026, 14:05",
+          "ip": "73.17.41.0",
+          "by": "Lead guest — payment link"
+        }
+      ],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "Booking engine",
+          "what": "Reservation created · OVERDUE path",
+          "why": ""
+        },
+        {
+          "at": "30 Jun 2026, 14:05",
+          "who": "Payment gateway",
+          "what": "Deposit received USD 2,660 · Card (Stripe)",
+          "why": ""
+        },
+        {
+          "at": "12 Jul 2026, 08:00",
+          "who": "System",
+          "what": "OVERDUE flag · client email + team alert (Day 1) — no auto-cancel",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-R-2026-0041",
+      "guest": "E. Harmon",
+      "type": "CABIN",
+      "chan": "WEB_DIRECT",
+      "dep": 2,
+      "cab": "S4",
+      "st": "REQUESTED",
+      "total": 26600,
+      "bal": 26600,
+      "owner": "Lucía",
+      "req": {
+        "pc": "WHATSAPP",
+        "party": "2 adults · 1 cabin",
+        "expires": "46 business hours",
+        "slaLeft": "19h",
+        "advisor": false,
+        "notes": "Anniversary on board"
+      },
+      "px": "2 AD",
+      "depPct": 10,
+      "adults": 2,
+      "children": 0,
+      "guests": [
+        {
+          "id": "P21",
+          "first": "Emma",
+          "last": "Harmon",
+          "dob": "1975-01-17",
+          "nat": "US",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P39",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "Booking engine",
+          "what": "Reservation created · REQUESTED path",
+          "why": ""
+        }
+      ]
+    },
+    {
+      "id": "ANK-R-2026-0042",
+      "guest": "L. Moreau",
+      "type": "CABIN",
+      "chan": "WEB_DIRECT",
+      "dep": 3,
+      "cab": "S5",
+      "st": "REQUESTED",
+      "total": 37905,
+      "bal": 37905,
+      "owner": "Mateo",
+      "req": {
+        "pc": "EMAIL",
+        "party": "2 adults + 1 child · 1 cabin",
+        "expires": "4 business days",
+        "slaLeft": "SLA BREACH — 26h",
+        "advisor": true,
+        "notes": "Travel advisor booking. Client prefers a fore cabin if possible."
+      },
+      "px": "2 AD + 1 CH",
+      "depPct": 10,
+      "adults": 2,
+      "children": 1,
+      "guests": [
+        {
+          "id": "P22",
+          "first": "Louise",
+          "last": "Moreau",
+          "dob": "1984-08-03",
+          "nat": "FR",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null,
+          "lead": true
+        },
+        {
+          "id": "P40",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        },
+        {
+          "id": "P41",
+          "first": "",
+          "last": "",
+          "dob": "",
+          "nat": "",
+          "res": false,
+          "pp": "",
+          "ppExp": "",
+          "ins": false,
+          "email": "",
+          "med": "",
+          "guardian": null,
+          "pref": null
+        }
+      ],
+      "anc": [],
+      "consents": [],
+      "log": [
+        {
+          "at": "02 Jul 2026, 14:03",
+          "who": "Booking engine",
+          "what": "Reservation created · REQUESTED path",
+          "why": ""
+        }
+      ]
+    }
+  ],
+  "payments": [
+    {
+      "id": "PAY-0001",
+      "bk": "ANK-2026-0003",
+      "date": "2026-07-02",
+      "kind": "Deposit",
+      "method": "Card (Stripe)",
+      "amount": 2660,
+      "ref": "ANK-2026-0003-D01",
+      "status": "Settled",
+      "gw": "pi_3RHOM1GXX",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0002",
+      "bk": "ANK-2026-0005",
+      "date": "2026-06-24",
+      "kind": "Deposit",
+      "method": "Card (Stripe)",
+      "amount": 3791,
+      "ref": "ANK-2026-0005-D01",
+      "status": "Settled",
+      "gw": "pi_38N9NNFXO",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0003",
+      "bk": "ANK-2026-0005",
+      "date": "2026-08-19",
+      "kind": "Balance",
+      "method": "Card (Stripe)",
+      "amount": 34114,
+      "ref": "ANK-2026-0005-B01",
+      "status": "Settled",
+      "gw": "pi_3AG6UFFKF",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0004",
+      "bk": "ANK-2026-0007",
+      "date": "2026-07-05",
+      "kind": "Deposit",
+      "method": "Wire transfer",
+      "amount": 2327,
+      "ref": "ANK-2026-0007-D01",
+      "status": "Settled",
+      "gw": "",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0005",
+      "bk": "ANK-2026-0009",
+      "date": "2026-07-08",
+      "kind": "Deposit",
+      "method": "Stripe payment link",
+      "amount": 5000,
+      "ref": "ANK-2026-0009-D01",
+      "status": "Settled",
+      "gw": "pi_3M54IYPTG",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0006",
+      "bk": "ANK-2026-0011",
+      "date": "2026-07-10",
+      "kind": "Deposit",
+      "method": "Card (Stripe)",
+      "amount": 2660,
+      "ref": "ANK-2026-0011-D01",
+      "status": "Settled",
+      "gw": "pi_39VZGV82G",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0007",
+      "bk": "ANK-2026-0012",
+      "date": "2026-07-15",
+      "kind": "Deposit",
+      "method": "Wire transfer",
+      "amount": 42300,
+      "ref": "ANK-2026-0012-D01",
+      "status": "Settled",
+      "gw": "",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0008",
+      "bk": "ANK-2026-0016",
+      "date": "2026-07-20",
+      "kind": "Deposit",
+      "method": "Wire transfer",
+      "amount": 2660,
+      "ref": "ANK-2026-0016-D01",
+      "status": "Settled",
+      "gw": "",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0009",
+      "bk": "ANK-2026-0017",
+      "date": "2026-07-20",
+      "kind": "Deposit",
+      "method": "Wire transfer",
+      "amount": 2660,
+      "ref": "ANK-2026-0017-D01",
+      "status": "Settled",
+      "gw": "",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0010",
+      "bk": "ANK-2026-0019",
+      "date": "2026-07-20",
+      "kind": "Deposit",
+      "method": "Wire transfer",
+      "amount": 2660,
+      "ref": "ANK-2026-0019-D01",
+      "status": "Settled",
+      "gw": "",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0011",
+      "bk": "ANK-2026-0018",
+      "date": "2026-06-30",
+      "kind": "Deposit",
+      "method": "Card (Stripe)",
+      "amount": 2660,
+      "ref": "ANK-2026-0018-D01",
+      "status": "Settled",
+      "gw": "pi_3TMBWHR6V",
+      "by": "System"
+    },
+    {
+      "id": "PAY-0012",
+      "bk": "ANK-2026-0014",
+      "date": "2026-09-12",
+      "kind": "Deposit",
+      "method": "Wire transfer",
+      "amount": 2660,
+      "ref": "ANK-2026-0014-D01",
+      "status": "Awaiting wire",
+      "gw": "",
+      "by": "System"
+    }
+  ],
+  "refund_queue": [
+    {
+      "id": "ANK-2026-0007",
+      "cancelled": "2026-07-10",
+      "days": 484,
+      "value": 26600,
+      "paid": 2660
+    },
+    {
+      "id": "ANK-2026-0011",
+      "cancelled": "2026-07-12",
+      "days": 103,
+      "value": 26600,
+      "paid": 26600
+    }
+  ]
+}

@@ -1,0 +1,785 @@
+{
+  "generated_at": "2026-09-12T15:04:48.523Z",
+  "itineraries": [
+    {
+      "code": "WEST",
+      "name": "Western Realm",
+      "slug": "western-realm",
+      "days": 8,
+      "nights": 7,
+      "embark": "San Cristóbal (SCY)",
+      "disembark": "San Cristóbal (SCY)",
+      "festive": false,
+      "tagline": "8 days · 7 nights",
+      "card": {
+        "description": "Isabela and Fernandina — the wild western edge. Flightless cormorants, marine iguana colonies, volcanic shorelines that feel newly made.",
+        "highlights": [
+          "Isabela",
+          "Fernandina",
+          "Flightless Cormorant",
+          "volcanic coasts"
+        ],
+        "chips": [
+          "16 guests",
+          "8 suites + owner's",
+          "7 nights · Sun→Sun",
+          "SCY ↔ SCY"
+        ],
+        "hero_image": null,
+        "hero_alt": "",
+        "fallback_gradient": "linear-gradient(135deg,#1B2832 0%,#2A3A42 45%,#33413F 100%)"
+      },
+      "overview": "Embark & disembark San Cristóbal (SCY) · All expeditions include naturalist guides, snorkel, kayak, guided walks and wildlife observation.",
+      "detail": {
+        "long_description": "This itinerary follows the Western Realm route. Isabela and Fernandina — the wild western edge. Flightless cormorants, marine iguana colonies, volcanic shorelines that feel newly made. Every day is led by our expert naturalist guides aboard an intimate 16-guest expedition yacht — snorkel, kayak, guided walks and wildlife observation included.",
+        "facts": [
+          [
+            "Accommodation",
+            "9 cabins — 8 Suites + Owner's Suite, all facing the sea"
+          ],
+          [
+            "Dining",
+            "Sustainable, locally sourced — expedition gastronomy"
+          ],
+          [
+            "Yacht",
+            "Sundeck, jacuzzi & Wi-Fi · 16 guests"
+          ],
+          [
+            "Crew & Guides",
+            "Expert naturalist guides · full expedition crew"
+          ],
+          [
+            "Activities",
+            "Snorkel, kayak, guided walks, wildlife observation"
+          ],
+          [
+            "Language",
+            "English & Spanish"
+          ]
+        ],
+        "day_by_day": [
+          [
+            "Day 1 — Sunday",
+            "Embark in San Cristóbal (SCY). Welcome aboard, safety briefing, sunset sail."
+          ],
+          [
+            "Day 2",
+            "Punta Moreno & Elizabeth Bay, Isabela — zodiac through mangroves, penguins and rays."
+          ],
+          [
+            "Day 3",
+            "Urbina Bay & Tagus Cove, Isabela — giant tortoises, kayak the dramatic coastline."
+          ],
+          [
+            "Day 4",
+            "Punta Espinoza, Fernandina — snorkel with flightless cormorants and marine iguanas."
+          ],
+          [
+            "Day 5",
+            "Punta Vicente Roca — deep-water snorkel; whale-watching across the Bolívar Channel."
+          ],
+          [
+            "Day 6",
+            "Rábida & Chinese Hat — red-sand beaches, sea lion colonies, evening naturalist talk."
+          ],
+          [
+            "Day 7",
+            "Santa Cruz highlands — giant tortoises in the wild; farewell dinner aboard."
+          ],
+          [
+            "Day 8 — Sunday",
+            "Disembark in San Cristóbal after breakfast. Transfer to SCY airport."
+          ]
+        ],
+        "included": [
+          "All meals aboard, expedition gastronomy, house wines with dinner",
+          "All guided excursions, snorkel & kayak equipment, wetsuits",
+          "Expert naturalist guides · transfers in San Cristóbal"
+        ],
+        "excluded": [
+          "International & domestic flights · PNG entry fee (paid at SCY airport) · TCT transit card (USD 20)",
+          "Travel insurance — sole responsibility of the passenger; Anakata does not sell or intermediate travel insurance",
+          "Spa, premium bar & boutique — arranged with our concierge after booking"
+        ],
+        "faqs": [
+          [
+            "Do I pay anything today?",
+            "No — book now, pay later. We hold your cabins obligation-free and send a 10% deposit link once our team confirms."
+          ],
+          [
+            "Can children join?",
+            "From age 6 on departure day. Ages 6–17 receive −15% ppdo (not on festive departures)."
+          ],
+          [
+            "Can I change dates later?",
+            "Date changes are free of charge, subject to availability."
+          ]
+        ]
+      },
+      "seo": {
+        "title": "",
+        "description": ""
+      }
+    },
+    {
+      "code": "NORTH",
+      "name": "Northern Passage",
+      "slug": "northern-passage",
+      "days": 8,
+      "nights": 7,
+      "embark": "San Cristóbal (SCY)",
+      "disembark": "San Cristóbal (SCY)",
+      "festive": false,
+      "tagline": "8 days · 7 nights",
+      "card": {
+        "description": "Genovesa and the northern isles. Red-footed boobies in the thousands, snorkel walls alive with rays, evenings of open ocean crossings.",
+        "highlights": [
+          "Genovesa",
+          "Bartolomé",
+          "Red-footed Booby",
+          "snorkel walls"
+        ],
+        "chips": [
+          "16 guests",
+          "8 suites + owner's",
+          "7 nights · Sun→Sun",
+          "SCY ↔ SCY"
+        ],
+        "hero_image": null,
+        "hero_alt": "",
+        "fallback_gradient": "linear-gradient(135deg,#141B17 0%,#37453D 55%,#585940 100%)"
+      },
+      "overview": "Embark & disembark San Cristóbal (SCY) · All expeditions include naturalist guides, snorkel, kayak, guided walks and wildlife observation.",
+      "detail": {
+        "long_description": "This itinerary follows the Northern Passage route. Genovesa and the northern isles. Red-footed boobies in the thousands, snorkel walls alive with rays, evenings of open ocean crossings. Every day is led by our expert naturalist guides aboard an intimate 16-guest expedition yacht — snorkel, kayak, guided walks and wildlife observation included.",
+        "facts": [
+          [
+            "Accommodation",
+            "9 cabins — 8 Suites + Owner's Suite, all facing the sea"
+          ],
+          [
+            "Dining",
+            "Sustainable, locally sourced — expedition gastronomy"
+          ],
+          [
+            "Yacht",
+            "Sundeck, jacuzzi & Wi-Fi · 16 guests"
+          ],
+          [
+            "Crew & Guides",
+            "Expert naturalist guides · full expedition crew"
+          ],
+          [
+            "Activities",
+            "Snorkel, kayak, guided walks, wildlife observation"
+          ],
+          [
+            "Language",
+            "English & Spanish"
+          ]
+        ],
+        "day_by_day": [
+          [
+            "Day 1 — Sunday",
+            "Embark in San Cristóbal (SCY). Welcome aboard, first briefing under way."
+          ],
+          [
+            "Day 2",
+            "Genovesa — Prince Philip's Steps: red-footed boobies, Nazca boobies, short-eared owls."
+          ],
+          [
+            "Day 3",
+            "Genovesa — Darwin Bay; snorkel walls alive with rays and reef fish."
+          ],
+          [
+            "Day 4",
+            "Bartolomé — Pinnacle Rock, penguins; lava fields of Sullivan Bay."
+          ],
+          [
+            "Day 5",
+            "Santiago — Puerto Egas; fur seal grottos, tide pools at golden hour."
+          ],
+          [
+            "Day 6",
+            "North Seymour — frigatebird colonies in display; blue-footed boobies."
+          ],
+          [
+            "Day 7",
+            "Santa Cruz highlands — giant tortoises; farewell dinner aboard."
+          ],
+          [
+            "Day 8 — Sunday",
+            "Disembark in San Cristóbal after breakfast. Transfer to SCY airport."
+          ]
+        ],
+        "included": [
+          "All meals aboard, expedition gastronomy, house wines with dinner",
+          "All guided excursions, snorkel & kayak equipment, wetsuits",
+          "Expert naturalist guides · transfers in San Cristóbal"
+        ],
+        "excluded": [
+          "International & domestic flights · PNG entry fee (paid at SCY airport) · TCT transit card (USD 20)",
+          "Travel insurance — sole responsibility of the passenger; Anakata does not sell or intermediate travel insurance",
+          "Spa, premium bar & boutique — arranged with our concierge after booking"
+        ],
+        "faqs": [
+          [
+            "Do I pay anything today?",
+            "No — book now, pay later. We hold your cabins obligation-free and send a 10% deposit link once our team confirms."
+          ],
+          [
+            "Can children join?",
+            "From age 6 on departure day. Ages 6–17 receive −15% ppdo (not on festive departures)."
+          ],
+          [
+            "Can I change dates later?",
+            "Date changes are free of charge, subject to availability."
+          ]
+        ]
+      },
+      "seo": {
+        "title": "",
+        "description": ""
+      }
+    },
+    {
+      "code": "FEST",
+      "name": "Festive Expeditions",
+      "slug": "festive-expeditions",
+      "days": 8,
+      "nights": 7,
+      "embark": "San Cristóbal (SCY)",
+      "disembark": "San Cristóbal (SCY)",
+      "festive": true,
+      "tagline": "Christmas & New Year",
+      "card": {
+        "description": "The archipelago at its calmest light, over Christmas and New Year. A festive supplement applies; holiday departures sell first.",
+        "highlights": [
+          "Dec 19 & Dec 26 departures",
+          "festive supplement +USD 750 pp"
+        ],
+        "chips": [
+          "16 guests",
+          "8 suites + owner's",
+          "7 nights · Sun→Sun",
+          "SCY ↔ SCY"
+        ],
+        "hero_image": null,
+        "hero_alt": "",
+        "fallback_gradient": "linear-gradient(135deg,#202B26 0%,#2A362F 50%,#A97C4B 100%)"
+      },
+      "overview": "Embark & disembark San Cristóbal (SCY) · All expeditions include naturalist guides, snorkel, kayak, guided walks and wildlife observation.",
+      "detail": {
+        "long_description": "This itinerary follows the Festive Expeditions route. The archipelago at its calmest light, over Christmas and New Year. A festive supplement applies; holiday departures sell first. Every day is led by our expert naturalist guides aboard an intimate 16-guest expedition yacht — snorkel, kayak, guided walks and wildlife observation included.",
+        "facts": [
+          [
+            "Accommodation",
+            "9 cabins — 8 Suites + Owner's Suite, all facing the sea"
+          ],
+          [
+            "Dining",
+            "Sustainable, locally sourced — expedition gastronomy"
+          ],
+          [
+            "Yacht",
+            "Sundeck, jacuzzi & Wi-Fi · 16 guests"
+          ],
+          [
+            "Crew & Guides",
+            "Expert naturalist guides · full expedition crew"
+          ],
+          [
+            "Activities",
+            "Snorkel, kayak, guided walks, wildlife observation"
+          ],
+          [
+            "Language",
+            "English & Spanish"
+          ]
+        ],
+        "day_by_day": [
+          [
+            "Day 1 — Sunday",
+            "Embark in San Cristóbal (SCY). Festive welcome aboard."
+          ],
+          [
+            "Days 2–6",
+            "The archipelago at its calmest light — itinerary follows the Western Realm route with festive celebrations aboard: Christmas Eve dinner or New Year at anchor under the stars."
+          ],
+          [
+            "Day 7",
+            "Santa Cruz highlands — giant tortoises; gala farewell dinner."
+          ],
+          [
+            "Day 8 — Sunday",
+            "Disembark in San Cristóbal after breakfast."
+          ]
+        ],
+        "included": [
+          "All meals aboard, expedition gastronomy, house wines with dinner",
+          "All guided excursions, snorkel & kayak equipment, wetsuits",
+          "Expert naturalist guides · transfers in San Cristóbal"
+        ],
+        "excluded": [
+          "International & domestic flights · PNG entry fee (paid at SCY airport) · TCT transit card (USD 20)",
+          "Travel insurance — sole responsibility of the passenger; Anakata does not sell or intermediate travel insurance",
+          "Spa, premium bar & boutique — arranged with our concierge after booking"
+        ],
+        "faqs": [
+          [
+            "Do I pay anything today?",
+            "No — book now, pay later. We hold your cabins obligation-free and send a 10% deposit link once our team confirms."
+          ],
+          [
+            "Can children join?",
+            "From age 6 on departure day. Ages 6–17 receive −15% ppdo (not on festive departures)."
+          ],
+          [
+            "Can I change dates later?",
+            "Date changes are free of charge, subject to availability."
+          ]
+        ]
+      },
+      "seo": {
+        "title": "",
+        "description": ""
+      }
+    }
+  ],
+  "departures": [
+    {
+      "id": "DEP-001",
+      "itinerary": "WEST",
+      "yacht": "ANAMARA",
+      "embark": "2027-11-07",
+      "disembark": "2027-11-14",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 6,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": "Inaugural sailing",
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-002",
+      "itinerary": "NORTH",
+      "yacht": "ANATIVA",
+      "embark": "2027-11-07",
+      "disembark": "2027-11-14",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 8,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": "Inaugural sailing",
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-003",
+      "itinerary": "NORTH",
+      "yacht": "ANAMARA",
+      "embark": "2027-11-14",
+      "disembark": "2027-11-21",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 4,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-004",
+      "itinerary": "WEST",
+      "yacht": "ANATIVA",
+      "embark": "2027-11-14",
+      "disembark": "2027-11-21",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 7,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-005",
+      "itinerary": "WEST",
+      "yacht": "ANAMARA",
+      "embark": "2027-11-21",
+      "disembark": "2027-11-28",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 7,
+      "owner_free": false,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-006",
+      "itinerary": "NORTH",
+      "yacht": "ANATIVA",
+      "embark": "2027-11-21",
+      "disembark": "2027-11-28",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 8,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-007",
+      "itinerary": "NORTH",
+      "yacht": "ANAMARA",
+      "embark": "2027-11-28",
+      "disembark": "2027-12-05",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 4,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-008",
+      "itinerary": "WEST",
+      "yacht": "ANATIVA",
+      "embark": "2027-11-28",
+      "disembark": "2027-12-05",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 8,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-009",
+      "itinerary": "WEST",
+      "yacht": "ANAMARA",
+      "embark": "2027-12-05",
+      "disembark": "2027-12-12",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 6,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-010",
+      "itinerary": "NORTH",
+      "yacht": "ANATIVA",
+      "embark": "2027-12-05",
+      "disembark": "2027-12-12",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 8,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-011",
+      "itinerary": "NORTH",
+      "yacht": "ANAMARA",
+      "embark": "2027-12-12",
+      "disembark": "2027-12-19",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 7,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-012",
+      "itinerary": "WEST",
+      "yacht": "ANATIVA",
+      "embark": "2027-12-12",
+      "disembark": "2027-12-19",
+      "festive": false,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 8,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": [
+        "OPENING-27"
+      ]
+    },
+    {
+      "id": "DEP-014",
+      "itinerary": "FEST",
+      "yacht": "ANATIVA",
+      "embark": "2027-12-19",
+      "disembark": "2027-12-26",
+      "festive": true,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 8,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": []
+    },
+    {
+      "id": "DEP-015",
+      "itinerary": "FEST",
+      "yacht": "ANAMARA",
+      "embark": "2027-12-26",
+      "disembark": "2028-01-02",
+      "festive": true,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 8,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": []
+    },
+    {
+      "id": "DEP-016",
+      "itinerary": "FEST",
+      "yacht": "ANATIVA",
+      "embark": "2027-12-26",
+      "disembark": "2028-01-02",
+      "festive": true,
+      "rate_year": 2027,
+      "status": "ON_SALE",
+      "suites_free": 8,
+      "owner_free": true,
+      "label": "AVAILABLE",
+      "urgency_threshold": 3,
+      "waitlist": true,
+      "note": null,
+      "offers": []
+    }
+  ],
+  "rates": {
+    "currency": "USD",
+    "years": [
+      2027,
+      2028,
+      2029
+    ],
+    "suite_pp_double": {
+      "2027": 13300,
+      "2028": 13965,
+      "2029": 14663
+    },
+    "owner_pp_double": {
+      "2027": 25000,
+      "2028": 26250,
+      "2029": 27563
+    },
+    "charter_week": {
+      "2027": 199500,
+      "2028": 209475,
+      "2029": 219949
+    },
+    "terms": {
+      "cabinDep": 10,
+      "cabinBalDays": 120,
+      "charterDep": 20,
+      "charterDepDays": 5,
+      "charterBalDays": 120
+    },
+    "rules": {
+      "single": 75,
+      "triple": 10,
+      "child": 15,
+      "childPerAdult": 1,
+      "childPerCabin": 2,
+      "b2b": 5,
+      "festivePax": 750,
+      "festiveCharter": 12000
+    }
+  },
+  "settings": {
+    "guests": {
+      "max_per_cabin": 3,
+      "max_per_yacht": 16,
+      "child_age": [
+        6,
+        17
+      ],
+      "adult_required_with_children": true,
+      "under_age_message": "Under 6 not accommodated",
+      "booking_bar_note": "Maximum 3 guests per cabin · 16 guests per yacht · every cabin with children includes an adult."
+    },
+    "policies": {
+      "max_commission_pct": 12,
+      "web_hold_min": 20,
+      "web_hold_extension_min": 10,
+      "hold_near_business_hours": 48,
+      "hold_long_lead_business_days": 5,
+      "response_sla_hours": 24,
+      "modification_fee": 0,
+      "cancellation_bands": [
+        {
+          "min": 120,
+          "pct": 5
+        },
+        {
+          "min": 90,
+          "pct": 50
+        },
+        {
+          "min": 0,
+          "pct": 100
+        }
+      ]
+    },
+    "calendar": {
+      "first_bookable_month": "2027-11",
+      "default_search": [
+        "2027-11",
+        "2028-01"
+      ],
+      "default_adults": 2,
+      "horizon_months": 24
+    },
+    "locale": {
+      "default": "en",
+      "live": [
+        "en"
+      ],
+      "scaffolded": [],
+      "currency": "USD"
+    },
+    "copy": {
+      "book_now_pay_later": "We will hold the cabins for you, obligation-free. Our team confirms availability and sends your deposit link — nothing is charged today.",
+      "children": "A 15% discount applies to children aged 6–17. One discount per adult, maximum two per couple. Not available on festive departures.",
+      "solo_triple": "Single occupancy +75% ppdo · triple sharing −10% ppdo. Shown live in the next step.",
+      "pay_today": "We will hold your cabins for you, obligation-free. Our team confirms availability and sends your deposit link (10%) — nothing is charged until you decide.",
+      "details_note": "Full guest details (passports, dietary preferences) and payment are arranged after we confirm your cabins — no card is required today. Travel insurance is the sole responsibility of the passenger. Anakata does not sell or intermediate travel insurance.",
+      "confirmation_steps": [
+        "Within 24 hours a member of our team confirms your cabins and answers any questions — by your preferred channel.",
+        "You receive your booking confirmation and deposit link (10%). Your cabins stay held while you decide, per our hold policy.",
+        "After the deposit, we gather guest details and preferences, and our concierge curates flights, stays and on-board touches."
+      ]
+    },
+    "fees": {
+      "show_in_price_panel": true,
+      "tct_per_person": 20,
+      "png_foreign_over_12": 200,
+      "png_foreign_12_and_under": 100,
+      "footnote": "Informational — regulatory Galápagos fees, not charged today. PNG is paid at SCY airport; TCT is arranged with our team."
+    },
+    "charter": {
+      "headline": "The yacht, entirely yours",
+      "intro": "One yacht, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.",
+      "capacity": 16,
+      "itinerary_label": "Customizable",
+      "response_sla_hours": 24,
+      "group_contexts": [
+        "Family",
+        "Friends",
+        "Corporate / Incentive",
+        "Celebration"
+      ],
+      "thank_you": "Thank you — your charter enquiry has been received. A dedicated member of our team will contact you within 24 hours to schedule a discovery call."
+    }
+  },
+  "offers": [
+    {
+      "code": "OPENING-27",
+      "type": "CREDIT",
+      "value": 500,
+      "cabins": [
+        "SUITE"
+      ],
+      "itineraries": [
+        "WEST",
+        "NORTH"
+      ],
+      "booking_window": [
+        null,
+        null
+      ],
+      "travel_window": [
+        "2027-11-01",
+        "2027-12-31"
+      ],
+      "combinable": false,
+      "badge": "OPENING OFFER",
+      "show_on_card": true,
+      "show_on_departures": true,
+      "price_line": "Opening season credit — on-board ancillaries",
+      "terms": "USD 500 ancillary credit per Suite on non-festive departures in November and December 2027. Not combinable with other offers."
+    }
+  ]
+}
