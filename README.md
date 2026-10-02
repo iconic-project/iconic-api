@@ -1,6 +1,6 @@
 # iconic-api
 
-Laravel 13 API for Iconic (Galápagos yacht expeditions). RMS and CRM are two sections of this one app. The public booking engine is a separate frontend.
+Laravel 13 API for Iconic (hotel reservations). RMS and CRM are two sections of this one app. The public booking engine is a separate frontend.
 
 PHP, Composer, Artisan, Pest, Pint and Larastan run **inside Docker**. Do not run them on the host.
 
@@ -155,4 +155,4 @@ The first admin in a non-demo environment: `php artisan iconic:create-admin you@
 ## Requirements and sprints
 
 - Requirements: [`docs/requirements/`](docs/requirements/) — start with [`INDEX.md`](docs/requirements/INDEX.md) and [`08-dev-decisions.md`](docs/requirements/08-dev-decisions.md) (highest authority when documents disagree).
-- Sprints: [`docs/sprints/`](docs/sprints/) — roadmap in [`ROADMAP.md`](docs/sprints/ROADMAP.md); the current sprint is a folder `sprint-NN/` with a `README.md` and ordered task files.
+- Sprints: [`docs/sprints/`](docs/sprints/) — roadmap in [`ROADMAP.md`](docs/sprints/ROADMAP.md); hotel migration (sprints 16–22) in [`HOTEL-ROADMAP.md`](docs/sprints/HOTEL-ROADMAP.md). The current sprint is a folder `sprint-NN/` with a `README.md` and ordered task files.

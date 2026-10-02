@@ -50,7 +50,10 @@ app/
 - Every table: `created_at, updated_at, created_by, updated_by` (nullable FKs to users for system actions).
 
 ## Dates
-- Date-only fields (departure dates, date of birth) use `App\Casts\CalendarDate` and serialise as `YYYY-MM-DD`. Timestamps use `Iso::utc()`.
+- Date-only fields (check-in, check-out, nights, date of birth) use `App\Casts\CalendarDate` and serialise as `YYYY-MM-DD`. Timestamps use `Iso::utc()`.
+
+## Vocabulary
+After Sprint 22, the identifiers `departure` (as inventory), `yacht`, `cabin`, `itinerary`, `voyage`, `cruise`, `png`, `ppdo` must not appear in `app/` except in `database/migrations` that already exist. An Arch test enforces this (Sprint 22). See `docs/requirements/09-hotel-generalisation.md` §2.
 
 ## Sensitive data
 - Encrypted at rest via a custom cast using a dedicated key (`SENSITIVE_DATA_KEY`, separate from `APP_KEY`): `passport_no`, `medical_note`, `dietary_note`, `accessibility_note`. `dob` and `nationality` are **not** encrypted (the RMS queries them for PNG fee categories and the nationality KPI) but are treated as sensitive.
@@ -82,7 +85,7 @@ app/
 - A reason is required where a document says so (cancellations, manual FULLY_PAID, OPS-007 decisions, deletion, release). Validate it in the FormRequest; do not invent it in the Action.
 - Sensitive values (and `password` / `remember_token`) are redacted automatically by `History`. The key stays; the value becomes `[redacted]`.
 - History is never written from controllers. Controllers call Actions; Actions call `History`.
-- **Exception to A4 (request holds):** when `ClaimService` releases an expired HOLD, it dispatches `HoldExpired` **synchronously in the same transaction** (not queued, not `ShouldDispatchAfterCommit`). A listener marks `booking_requests.hold_expired_at` and writes `request.hold_expired` as System. The request stay in REQUESTED — the cabin is freed, the request is never auto-cancelled (G9). The hold state on the request row must never disagree with the claim.
+- **Exception to A4 (request holds):** when `ClaimService` releases an expired HOLD, it dispatches `HoldExpired` **synchronously in the same transaction** (not queued, not `ShouldDispatchAfterCommit`). A listener marks `booking_requests.hold_expired_at` and writes `request.hold_expired` as System. The request stay in REQUESTED — the room-nights are freed, the request is never auto-cancelled (G9). The hold state on the request row must never disagree with the claim.
 
 ## References
 - The business reference column is `reference`, a unique string (`ANK-2026-0005`, `DEP-012`, `BLK-001`…).
@@ -105,6 +108,6 @@ app/
 - Scramble generates OpenAPI from the code. Keep FormRequests and Resources typed so the spec is accurate — the frontends generate their TypeScript types from it.
 
 ## Tests
-- Every calculation and rule gets unit tests; use the values in doc 02 (pricing: 26,600 · 23,275 · 35,910 · 37,905 · 50,000 · 28,100 · 199,500 · 211,500; PNG fee categories).
+- Every calculation and rule gets unit tests; use the reference stays in `docs/requirements/examples/hotel-seed-data.json` (`reference_quotes`). Until Sprint 18 lands, also use the doc 02 values (pricing: 26,600 · 23,275 · 35,910 · 37,905 · 50,000 · 28,100 · 199,500 · 211,500; PNG fee categories) (yacht, removed in Sprint 18).
 - Every endpoint gets feature tests covering: happy path, validation, each role's permission, own-records rule.
 - Fixtures come from `docs/requirements/examples/seed-data.json` via seeders — do not hand-type sample data.

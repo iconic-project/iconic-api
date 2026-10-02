@@ -6,8 +6,8 @@ alwaysApply: true
 # Iconic — core rules
 
 ## What we are building
-Three products for Iconic (Galápagos yacht expeditions, yachts ANAMARA and ANATIVA) that behave as one sales pipeline:
-- **RMS** (reservations) — the ledger: inventory, departures, rates, offers, bookings, payments, commissions, documents, guest personal data, policies.
+Three products for Iconic, a reservation system for **hotels** (rooms sold by the night), that behave as one sales pipeline:
+- **RMS** (reservations) — the ledger: inventory, stays, rates, offers, bookings, payments, commissions, documents, guest personal data, policies.
 - **Booking Engine** (iconic.co) — the shop window: renders only what the RMS publishes, captures behaviour and requests.
 - **CRM** — the relationship: contacts, identity, attribution, consent, lifecycle, segments, journeys, deals, tasks, conversations. **The CRM has no write path to money.**
 
@@ -24,15 +24,16 @@ Repos (all open in one Cursor multi-root workspace):
 
 ## Where the requirements live
 All requirements are in `iconic-api/docs/requirements/` (from other repos: `../iconic-api/docs/requirements/`).
-Sprints are in `iconic-api/docs/sprints/sprint-NN/` — a `README.md` (context for the whole sprint) and ordered task files (`01-….md`, `02-….md`), handed to you **one at a time**. Read `docs/requirements/08-dev-decisions.md` first — it records architecture choices and resolves contradictions between the documents.
+Sprints are in `iconic-api/docs/sprints/sprint-NN/` — a `README.md` (context for the whole sprint) and ordered task files (`01-….md`, `02-….md`), handed to you **one at a time**. For stays, rooms and nights, read `docs/requirements/09-hotel-generalisation.md` first. For everything else, read `docs/requirements/08-dev-decisions.md` first — it records architecture choices and resolves contradictions between the documents.
 
 **Order of authority when documents disagree** (highest first):
-1. `08-dev-decisions.md` (development decisions + resolved contradictions)
-2. `05-decisions-and-open-questions.md` (Iconic's decisions of 12 Sep 2026)
-3. `07-three-system-integration-contract.md` (field ownership, events)
-4. `01`–`04` (functional spec, data model, business rules, engine contract)
-5. The RMS and CRM prototypes (HTML) — both implemented in `iconic-panel` — behaviour and design reference
-6. The booking-engine `booking_engine_SPEC.md` (with `booking_engine_README.md`) and its prototype `prototype/booking_engine_index.html` — **v3, written before the 12 Sep decisions**; its design is the reference, but its business rules lose to everything above.
+1. `09-hotel-generalisation.md` — for stays, rooms, nights, rates per night, check-in/out, and the retirement of departures, this document ranks above `08-dev-decisions.md`. Everywhere else, `08` keeps its place. When this document says a yacht rule is retired, the yacht rule in `01`–`07` no longer applies, even if those documents are not edited.
+2. `08-dev-decisions.md` (development decisions + resolved contradictions)
+3. `05-decisions-and-open-questions.md` (Iconic's decisions of 12 Sep 2026)
+4. `07-three-system-integration-contract.md` (field ownership, events)
+5. `01`–`04` (functional spec, data model, business rules, engine contract)
+6. The RMS and CRM prototypes (HTML) — both implemented in `iconic-panel` — behaviour and design reference
+7. The booking-engine `booking_engine_SPEC.md` (with `booking_engine_README.md`) and its prototype `prototype/booking_engine_index.html` — **v3, written before the 12 Sep decisions**; its design is the reference, but its business rules lose to everything above.
 
 `examples/seed-data.json` = fixtures. `examples/booking-engine-feed.json` = feed shape. `screenshots/` = visual acceptance reference.
 
@@ -41,11 +42,11 @@ Sprints are in `iconic-api/docs/sprints/sprint-NN/` — a `README.md` (context f
 2. **Server-side enforcement.** Every permission, status transition, price, discount, commission cap and availability check is enforced in `iconic-api`. The frontends are convenience only — never the source of truth.
 3. **Rules are data, not code.** Rates, business rules and engine settings live in the database with their source code (FIN-001, OPS-004…). Never hard-code a business value (a price, a percentage, a number of days) anywhere. If you need one, read it from the rules/rates/settings store.
 4. **Money** is USD integers (no cents) in the RMS and API. Cents only on rendered documents. Never floats.
-5. **Dates** are ISO `YYYY-MM-DD`, stored UTC. Departures are Sundays; cruises are 7 nights, Sunday → Sunday.
+5. **Dates** are ISO `YYYY-MM-DD`. A stay is `[check_in, check_out)`; a night `D` is the night from `D` into `D+1`. Any arrival day, any length allowed by the restrictions. Check-in/out times are operational, never inventory (09 H1–H3).
 6. **Append-only history.** Bookings, rates, rules, settings and agent actions keep a history of `at, actor, what, why`. Nothing is edited or deleted in history. Reason is mandatory where the docs say so.
 7. **Frozen at sale.** A booking's price lines, rates and deposit % never change when rates change later.
 8. **English only**, guest-facing and internal. Keep UI strings externalised (i18n files) so a second locale stays possible.
-9. **No automation ever cancels a booking** (OPS-007).
+9. **No automation ever cancels a booking** (OPS-007). No automation changes a stay status (09 H11).
 10. **Passport and medical data** are encrypted at rest, restricted by role, never sent to the CRM.
 
 ## Never guess
