@@ -176,3 +176,5 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | PORTAL-PAY-01 | An agent deposit link settles like a staff link | sprint-15, portal | P1 | B20 | Ada Agent + Carolina | [portal/PORTAL-PAY-01-deposit-settles.md](portal/PORTAL-PAY-01-deposit-settles.md) |
 | PORTAL-PAY-02 | Another agency's booking cannot be paid | sprint-15, portal | P1 | B20 | Ada Agent | [portal/PORTAL-PAY-02-other-agency-refused.md](portal/PORTAL-PAY-02-other-agency-refused.md) |
 | LOCALE-01 | Spanish panel chrome persists, then English returns | sprint-15, panel | P2 | B20 | Carolina | [panel/LOCALE-01-spanish-persists.md](panel/LOCALE-01-spanish-persists.md) |
+| HSET-01 | Properties and room types in the RMS | sprint-16, hotel | P1 | B21 | Carolina | [hotel/HSET-01-properties-and-room-types.md](hotel/HSET-01-properties-and-room-types.md) |
+| HSET-02 | Stay rules on the Business Rules page | sprint-16, hotel | P1 | B21 | Carolina | [hotel/HSET-02-stay-rules.md](hotel/HSET-02-stay-rules.md) |

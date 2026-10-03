@@ -68,6 +68,16 @@ test('the seeded business rules document matches seed-data.json plus the new fie
     expect($document['documents']['voucher_days_before'])->toBe(7);
     expect($document['crm']['segment_high_ltv'])->toBe(20000);
     expect($document['crm']['segment_mid_ltv'])->toBe(8000);
+    expect($document['stay'])->toBe([
+        'check_in_time' => '15:00',
+        'check_out_time' => '11:00',
+        'no_show_cutoff_time' => '23:59',
+        'min_nights' => 1,
+        'max_nights' => 30,
+        'max_rooms_per_booking' => 5,
+        'check_in_requires_full_payment' => true,
+        'booking_horizon_days' => 730,
+    ]);
 
     $bands = array_map(
         fn (array $band): array => ['min_days' => $band['min'], 'penalty_pct' => $band['pct']],

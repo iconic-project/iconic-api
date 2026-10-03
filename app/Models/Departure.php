@@ -9,6 +9,7 @@ use App\Enums\DepartureStatus;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
 use App\Support\Inventory\DepartureSnapshot;
+use App\Support\Stays\StayDates;
 use Carbon\CarbonImmutable;
 use Database\Factories\DepartureFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -105,13 +106,18 @@ class Departure extends Model
 
     public const DEFAULT_NIGHTS = 7;
 
-    public function returnDate(): CarbonImmutable
+    public function stayDates(): StayDates
     {
         $this->loadMissing('itinerary');
 
         $nights = $this->itinerary->nights;
 
-        return $this->date->addDays($nights > 0 ? $nights : self::DEFAULT_NIGHTS);
+        return StayDates::forNights($this->date, $nights > 0 ? $nights : self::DEFAULT_NIGHTS);
+    }
+
+    public function returnDate(): CarbonImmutable
+    {
+        return $this->stayDates()->checkOut();
     }
 
     public function historyLabel(): string

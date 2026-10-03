@@ -136,6 +136,7 @@ final class Registry
             ),
             ...self::legalRows($initial),
             ...self::crmRows($initial),
+            ...self::stayRows($initial),
             ...self::lockedRows(),
         ];
     }
@@ -372,6 +373,14 @@ final class Registry
             'crm-pipeline-probability-deposit' => data_get($document, 'crm.pipeline.probability_deposit_pending').'%',
             'privacy-request-sla' => data_get($document, 'privacy.request_sla_days').' calendar days',
             'crm-segment-mid-ltv' => Money::format((int) data_get($document, 'crm.segment_mid_ltv')),
+            'stay-check-in-time' => (string) data_get($document, 'stay.check_in_time'),
+            'stay-check-out-time' => (string) data_get($document, 'stay.check_out_time'),
+            'stay-no-show-cutoff' => (string) data_get($document, 'stay.no_show_cutoff_time'),
+            'stay-min-nights' => ((int) data_get($document, 'stay.min_nights') === 1 ? '1 night' : data_get($document, 'stay.min_nights').' nights'),
+            'stay-max-nights' => data_get($document, 'stay.max_nights').' nights',
+            'stay-max-rooms' => data_get($document, 'stay.max_rooms_per_booking').' rooms',
+            'stay-check-in-full-payment' => data_get($document, 'stay.check_in_requires_full_payment') === true ? 'Yes' : 'No',
+            'stay-booking-horizon' => data_get($document, 'stay.booking_horizon_days').' days',
             default => $definition->sourceDisplay,
         };
     }
@@ -1502,6 +1511,106 @@ final class Registry
     }
 
     /**
+     * @param  array<string, mixed>  $initial
+     * @return list<RuleDefinition>
+     */
+    private static function stayRows(array $initial): array
+    {
+        $g = RuleGroup::Stay;
+
+        return [
+            self::here(
+                'stay-check-in-time',
+                $g,
+                'HQ3',
+                'Check-in time',
+                RuleStatus::PendingClient,
+                ['stay.check_in_time'],
+                BusinessRulesDocument::sourceDisplay('stay.check_in_time'),
+                data_get($initial, 'stay.check_in_time'),
+                'Stay clock',
+            ),
+            self::here(
+                'stay-check-out-time',
+                $g,
+                'HQ3',
+                'Check-out time',
+                RuleStatus::PendingClient,
+                ['stay.check_out_time'],
+                BusinessRulesDocument::sourceDisplay('stay.check_out_time'),
+                data_get($initial, 'stay.check_out_time'),
+                'Stay clock',
+            ),
+            self::here(
+                'stay-no-show-cutoff',
+                $g,
+                'HQ3',
+                'No-show cutoff',
+                RuleStatus::PendingClient,
+                ['stay.no_show_cutoff_time'],
+                BusinessRulesDocument::sourceDisplay('stay.no_show_cutoff_time'),
+                data_get($initial, 'stay.no_show_cutoff_time'),
+                'Stay clock',
+            ),
+            self::here(
+                'stay-min-nights',
+                $g,
+                'HQ3',
+                'Minimum nights',
+                RuleStatus::PendingClient,
+                ['stay.min_nights'],
+                BusinessRulesDocument::sourceDisplay('stay.min_nights'),
+                data_get($initial, 'stay.min_nights'),
+                'Bookings',
+            ),
+            self::here(
+                'stay-max-nights',
+                $g,
+                'HQ3',
+                'Maximum nights',
+                RuleStatus::PendingClient,
+                ['stay.max_nights'],
+                BusinessRulesDocument::sourceDisplay('stay.max_nights'),
+                data_get($initial, 'stay.max_nights'),
+                'Stay clock',
+            ),
+            self::here(
+                'stay-max-rooms',
+                $g,
+                'HQ3',
+                'Maximum rooms per booking',
+                RuleStatus::PendingClient,
+                ['stay.max_rooms_per_booking'],
+                BusinessRulesDocument::sourceDisplay('stay.max_rooms_per_booking'),
+                data_get($initial, 'stay.max_rooms_per_booking'),
+                'Bookings',
+            ),
+            self::here(
+                'stay-check-in-full-payment',
+                $g,
+                'HQ3',
+                'Check-in requires full payment',
+                RuleStatus::PendingClient,
+                ['stay.check_in_requires_full_payment'],
+                BusinessRulesDocument::sourceDisplay('stay.check_in_requires_full_payment'),
+                data_get($initial, 'stay.check_in_requires_full_payment'),
+                'Check-in',
+            ),
+            self::here(
+                'stay-booking-horizon',
+                $g,
+                'HQ3',
+                'Booking horizon',
+                RuleStatus::PendingClient,
+                ['stay.booking_horizon_days'],
+                BusinessRulesDocument::sourceDisplay('stay.booking_horizon_days'),
+                data_get($initial, 'stay.booking_horizon_days'),
+                'Bookings',
+            ),
+        ];
+    }
+
+    /**
      * @return list<RuleDefinition>
      */
     private static function lockedRows(): array
@@ -1517,6 +1626,7 @@ final class Registry
                 '7 nights, Sun → Sun',
                 'Every departure, rate and itinerary assumes 7 nights — changing it is a rebuild, not a setting.',
                 'Departures, engine',
+                'Retired by 09 H2 — any arrival day, any length. Sprint 22 deletes this entry.',
             ),
             self::locked(
                 'ops-002-cabins',
@@ -1642,6 +1752,7 @@ final class Registry
         string $sourceDisplay,
         string $lockReason,
         string $usedIn,
+        ?string $note = null,
     ): RuleDefinition {
         return new RuleDefinition(
             $key,
@@ -1655,6 +1766,7 @@ final class Registry
             null,
             $usedIn,
             lockReason: $lockReason,
+            note: $note,
         );
     }
 }

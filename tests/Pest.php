@@ -214,6 +214,23 @@ function businessRulesDocument(array $overrides = []): array
 }
 
 /**
+ * Read one path from docs/requirements/examples/hotel-seed-data.json.
+ */
+function hotelFixture(string $path): mixed
+{
+    /** @var array<string, mixed>|null $fixture */
+    static $fixture = null;
+
+    if ($fixture === null) {
+        $file = base_path('docs/requirements/examples/hotel-seed-data.json');
+        $decoded = json_decode((string) file_get_contents($file), true, flags: JSON_THROW_ON_ERROR);
+        $fixture = is_array($decoded) ? $decoded : [];
+    }
+
+    return data_get($fixture, $path);
+}
+
+/**
  * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>
  */

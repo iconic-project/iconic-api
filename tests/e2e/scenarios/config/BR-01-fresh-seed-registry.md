@@ -12,9 +12,9 @@ The registry counts are the contract for “are we still seeding the documented 
 2. Read the four KPIs and the filter chips. Open **Differs / flagged**.
 
 ## Expected
-- [ ] E1 · KPIs: `Rules tracked` = **91**; `Adjusted here` = **66**; `Set in other tabs` = **15**; `Differ from source / flagged` = **42**. ⚠ UNVERIFIED — `BusinessRulesEndpointsTest` / `Registry::counts()`, not a reset screen.
-- [ ] E2 · Chip counts match: All 91 · Adjust here 66 · Set in other tabs 15 · Locked 10 · Differs / flagged 42. ⚠ UNVERIFIED — same source.
-- [ ] E3 · Flagged rows are the pending statuses plus OPS-006: `TEXT IN DRAFTING`, four × `PENDING LEGAL` (passport, medical, behavioural raw, unstitched anonymous), thirty-four × `PENDING CLIENT` (online-deposit, max discount, five hold defaults, seven consent versions including analytics and checkout marketing, five bank details, two CRM segment thresholds, eight pipeline SLA and probability rows, the subject-request SLA, report file retention, charter cancellation bands, charter proposal validity, portal invitation validity). OPS-006 is `CONFIRMED` with a note (⚠). ⚠ UNVERIFIED — `Registry.php` + Pest (`differs_or_flagged` 42), not a reset screen.
+- [ ] E1 · KPIs: `Rules tracked` = **99**; `Adjusted here` = **74**; `Set in other tabs` = **15**; `Differ from source / flagged` = **51**. ⚠ UNVERIFIED — `BusinessRulesEndpointsTest` / `Registry::counts()`, not a reset screen.
+- [ ] E2 · Chip counts match: All 99 · Adjust here 74 · Set in other tabs 15 · Locked 10 · Differs / flagged 51. ⚠ UNVERIFIED — same source.
+- [ ] E3 · Flagged rows are the pending statuses plus two confirmed notes: `TEXT IN DRAFTING`, four × `PENDING LEGAL` (passport, medical, behavioural raw, unstitched anonymous), forty-four × `PENDING CLIENT` (the previous pending-client set, including manifest chase and the NPS review URL, plus eight Stay rows: check-in time, check-out time, no-show cutoff, minimum nights, maximum nights, maximum rooms per booking, check-in requires full payment, booking horizon — all HQ3 demo). OPS-006 is `CONFIRMED` with a note (⚠). OPS-001 duration is `CONFIRMED` with a retired note pointing at 09 H2. ⚠ UNVERIFIED — `Registry.php` + Pest (`differs_or_flagged` 51), not a reset screen.
 - [ ] E4 · No confirmed `here` row shows `≠ differs from source` on a fresh seed.
 
 ## Notes

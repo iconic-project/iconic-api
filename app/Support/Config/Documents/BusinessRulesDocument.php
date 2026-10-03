@@ -35,6 +35,7 @@ final class BusinessRulesDocument extends ConfigDocument
         public readonly ReportsRules $reports,
         public readonly CharterRules $charter,
         public readonly PortalRules $portal,
+        public readonly StayRules $stay,
         public readonly array $bands,
         public readonly array $charterBands,
     ) {}
@@ -157,6 +158,17 @@ final class BusinessRulesDocument extends ConfigDocument
             'portal' => [
                 'invite_valid_days' => 14,
             ],
+            // TODO(OPEN: HQ3) demo value
+            'stay' => [
+                'check_in_time' => '15:00',
+                'check_out_time' => '11:00',
+                'no_show_cutoff_time' => '23:59',
+                'min_nights' => 1,
+                'max_nights' => 30,
+                'max_rooms_per_booking' => 5,
+                'check_in_requires_full_payment' => true,
+                'booking_horizon_days' => 730,
+            ],
             'cancellation' => [
                 'bands' => [
                     ['min_days' => 120, 'penalty_pct' => 5],
@@ -197,6 +209,7 @@ final class BusinessRulesDocument extends ConfigDocument
         $reports = is_array($data['reports'] ?? null) ? $data['reports'] : [];
         $charter = is_array($data['charter'] ?? null) ? $data['charter'] : [];
         $portal = is_array($data['portal'] ?? null) ? $data['portal'] : [];
+        $stay = is_array($data['stay'] ?? null) ? $data['stay'] : [];
         $cancellation = is_array($data['cancellation'] ?? null) ? $data['cancellation'] : [];
 
         $reminders = [];
@@ -345,6 +358,16 @@ final class BusinessRulesDocument extends ConfigDocument
             new PortalRules(
                 (int) ($portal['invite_valid_days'] ?? 0),
             ),
+            new StayRules(
+                is_string($stay['check_in_time'] ?? null) ? $stay['check_in_time'] : '',
+                is_string($stay['check_out_time'] ?? null) ? $stay['check_out_time'] : '',
+                is_string($stay['no_show_cutoff_time'] ?? null) ? $stay['no_show_cutoff_time'] : '',
+                (int) ($stay['min_nights'] ?? 0),
+                (int) ($stay['max_nights'] ?? 0),
+                (int) ($stay['max_rooms_per_booking'] ?? 0),
+                self::flag($stay['check_in_requires_full_payment'] ?? false),
+                (int) ($stay['booking_horizon_days'] ?? 0),
+            ),
             $bands,
             $charterBands,
         );
@@ -370,6 +393,7 @@ final class BusinessRulesDocument extends ConfigDocument
      *     reports: array{retention_days: int},
      *     charter: array{deposit_business_days: int, proposal_valid_business_days: int},
      *     portal: array{invite_valid_days: int},
+     *     stay: array{check_in_time: string, check_out_time: string, no_show_cutoff_time: string, min_nights: int, max_nights: int, max_rooms_per_booking: int, check_in_requires_full_payment: bool, booking_horizon_days: int},
      *     cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, charter_bands: list<array{min_days: int, penalty_pct: int}>}
      * }
      */
@@ -396,6 +420,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'reports' => $this->reports->toArray(),
             'charter' => $this->charter->toArray(),
             'portal' => $this->portal->toArray(),
+            'stay' => $this->stay->toArray(),
             'cancellation' => [
                 'bands' => array_map(
                     fn (CancellationBand $band): array => $band->toArray(),
@@ -469,6 +494,15 @@ final class BusinessRulesDocument extends ConfigDocument
             'charter.proposal_valid_business_days' => ['required', 'integer', 'min:1', 'max:60'],
             'portal' => ['required', 'array'],
             'portal.invite_valid_days' => ['required', 'integer', 'min:1', 'max:60'],
+            'stay' => ['required', 'array'],
+            'stay.check_in_time' => ['required', 'date_format:H:i'],
+            'stay.check_out_time' => ['required', 'date_format:H:i'],
+            'stay.no_show_cutoff_time' => ['required', 'date_format:H:i'],
+            'stay.min_nights' => ['required', 'integer', 'min:1'],
+            'stay.max_nights' => ['required', 'integer', 'min:1', 'max:365', new BusinessRulesConstraint('max_nights_gte_min')],
+            'stay.max_rooms_per_booking' => ['required', 'integer', 'min:1', 'max:50'],
+            'stay.check_in_requires_full_payment' => ['required', 'boolean'],
+            'stay.booking_horizon_days' => ['required', 'integer', 'min:30', 'max:1095'],
             'legal' => ['required', 'array'],
             'legal.consent_versions' => ['required', 'array'],
             'legal.consent_versions.terms' => ['required', 'string', 'min:1', 'max:120'],
@@ -563,6 +597,14 @@ final class BusinessRulesDocument extends ConfigDocument
             'charter.deposit_business_days' => 'FIN-003 · Charter deposit due in business days',
             'charter.proposal_valid_business_days' => 'O5 · Charter proposal validity',
             'portal.invite_valid_days' => '§5.5 · Portal invitation validity',
+            'stay.check_in_time' => 'Stay · Check-in time',
+            'stay.check_out_time' => 'Stay · Check-out time',
+            'stay.no_show_cutoff_time' => 'Stay · No-show cutoff',
+            'stay.min_nights' => 'Stay · Minimum nights',
+            'stay.max_nights' => 'Stay · Maximum nights',
+            'stay.max_rooms_per_booking' => 'Stay · Maximum rooms per booking',
+            'stay.check_in_requires_full_payment' => 'Stay · Check-in requires full payment',
+            'stay.booking_horizon_days' => 'Stay · Booking horizon',
             'cancellation.charter_bands' => 'O6 · Charter cancellation penalty bands',
             'legal.consent_versions.terms' => 'LEG-001 · Terms & Conditions version',
             'legal.consent_versions.cancellation' => 'LEG-001 · Cancellation policy version',
@@ -654,6 +696,13 @@ final class BusinessRulesDocument extends ConfigDocument
             }
         }
 
+        if ($this->stay->checkOutTime > $this->stay->checkInTime) {
+            $warnings[] = new Warning(
+                'stay.check_out_time',
+                'Check-out time is later than check-in time — a room cannot be turned over on the same day.',
+            );
+        }
+
         $source = self::fromArray(self::initial());
         $seen = [];
 
@@ -711,6 +760,14 @@ final class BusinessRulesDocument extends ConfigDocument
             'charter.deposit_business_days' => '5 business days (FIN-003)',
             'charter.proposal_valid_business_days' => '10 business days (PENDING CLIENT, O5)',
             'portal.invite_valid_days' => '14 days (PENDING CLIENT, Sprint 13 task 01)',
+            'stay.check_in_time' => '15:00 (demo, HQ3)',
+            'stay.check_out_time' => '11:00 (demo, HQ3)',
+            'stay.no_show_cutoff_time' => '23:59 (demo, HQ3)',
+            'stay.min_nights' => '1 night (demo, HQ3)',
+            'stay.max_nights' => '30 nights (demo, HQ3)',
+            'stay.max_rooms_per_booking' => '5 rooms (demo, HQ3)',
+            'stay.check_in_requires_full_payment' => 'Yes (demo, HQ3)',
+            'stay.booking_horizon_days' => '730 days (demo, HQ3)',
             'cancellation.charter_bands' => '≥120 d 5% · 90–119 d 50% · 0–89 d 100% (PENDING CLIENT, O6, copies the cabin bands)',
             'legal.consent_versions.terms' => 'v2026.1 (text pending LEG-001)',
             'legal.consent_versions.cancellation' => 'v2026.1 (pending LEG-001)',
@@ -745,6 +802,11 @@ final class BusinessRulesDocument extends ConfigDocument
             'cancellation.bands' => '≥120 d 5% · 90–119 d 50% · 0–89 d 100%',
             default => $path,
         };
+    }
+
+    private static function flag(mixed $value): bool
+    {
+        return $value === true || $value === 1 || $value === '1';
     }
 
     /**

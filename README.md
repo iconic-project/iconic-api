@@ -152,6 +152,21 @@ Local demo users (seeded only in `local` and `testing`, password `password`):
 
 The first admin in a non-demo environment: `php artisan iconic:create-admin you@example.com "You"`. The invitation email appears in Mailpit (`http://localhost:8025`); the command also prints the link.
 
+## Seed mode
+
+`ICONIC_SEED_MODE` chooses the inventory a fresh seed writes. The seeder reads it through `config('iconic.seed_mode')`. The default is `yacht`. Sprint 19 switches the default to `hotel`.
+
+| Value | What `php artisan migrate:fresh --seed` writes |
+|---|---|
+| `yacht` | ANAMARA and ANATIVA, plus the local demo departures, bookings and agencies |
+| `hotel` | Hotel Demo (`HTL`) from `docs/requirements/examples/hotel-seed-data.json`: 1 property, 4 room types, 24 rooms. Yacht inventory and yacht demo bookings are skipped. Bookings in that file are not seeded until Sprint 19 |
+
+Hotel inventory is seeded only when `APP_ENV` is `local` or `testing`, same as the demo users. Roles, published config, segments, journeys and message templates still seed in both modes.
+
+```bash
+docker compose exec -e ICONIC_SEED_MODE=hotel app sh -c "php artisan migrate:fresh --seed"
+```
+
 ## Requirements and sprints
 
 - Requirements: [`docs/requirements/`](docs/requirements/) — start with [`INDEX.md`](docs/requirements/INDEX.md) and [`08-dev-decisions.md`](docs/requirements/08-dev-decisions.md) (highest authority when documents disagree).

@@ -1,0 +1,325 @@
+{
+  "meta": {
+    "demo": true,
+    "note": "Demo values for development and tests. Real values are client inputs (09 HQ*)."
+  },
+  "property": {
+    "code": "HTL",
+    "name": "Hotel Demo",
+    "slug": "hotel-demo",
+    "timezone": null,
+    "address_line_1": "1 Demo Street",
+    "address_line_2": null,
+    "city": "Demo City",
+    "postcode": "00000",
+    "country": null,
+    "phone": "+1-555-0100",
+    "email": "stay@hotel-demo.test",
+    "description": "Demo hotel used by development and tests. Twenty-four rooms on three floors. Real copy is a client input.",
+    "hero_image_path": null,
+    "hero_alt": null,
+    "highlights": [
+      "24 rooms",
+      "3 floors",
+      "Four room types"
+    ],
+    "facts": [
+      ["Rooms", "24"],
+      ["Floors", "3"]
+    ],
+    "faqs": [
+      ["Is this a live hotel?", "No. This property is demo data for development and tests."]
+    ],
+    "policies_text": "Demo house rules. Real policy text is a client input.",
+    "meta_title": "Hotel Demo",
+    "meta_description": "Demo hotel for development and tests.",
+    "status": "ACTIVE"
+  },
+  "room_types": [
+    {
+      "code": "STD",
+      "name": "Standard Double",
+      "slug": "standard-double",
+      "base_occupancy": 2,
+      "max_occupancy": 2,
+      "max_adults": 2,
+      "max_children": 0,
+      "sort": 1,
+      "description": "Demo double room for two guests.",
+      "size_sqm": 22,
+      "bed_setup": "1 double bed",
+      "amenities": ["Wifi", "Desk"],
+      "status": "ACTIVE"
+    },
+    {
+      "code": "TWN",
+      "name": "Twin",
+      "slug": "twin",
+      "base_occupancy": 2,
+      "max_occupancy": 2,
+      "max_adults": 2,
+      "max_children": 0,
+      "sort": 2,
+      "description": "Demo twin room for two guests.",
+      "size_sqm": 22,
+      "bed_setup": "2 single beds",
+      "amenities": ["Wifi", "Desk"],
+      "status": "ACTIVE"
+    },
+    {
+      "code": "FAM",
+      "name": "Family",
+      "slug": "family",
+      "base_occupancy": 2,
+      "max_occupancy": 4,
+      "max_adults": 4,
+      "max_children": 2,
+      "sort": 3,
+      "description": "Demo family room. Base two guests, maximum four, maximum two children.",
+      "size_sqm": 32,
+      "bed_setup": "1 double bed and 2 singles",
+      "amenities": ["Wifi", "Desk"],
+      "status": "ACTIVE"
+    },
+    {
+      "code": "STE",
+      "name": "Suite",
+      "slug": "suite",
+      "base_occupancy": 2,
+      "max_occupancy": 3,
+      "max_adults": 3,
+      "max_children": 1,
+      "sort": 4,
+      "description": "Demo suite. Base two guests, maximum three.",
+      "size_sqm": 40,
+      "bed_setup": "1 king bed and 1 single",
+      "amenities": ["Wifi", "Desk", "Sofa"],
+      "status": "ACTIVE"
+    }
+  ],
+  "rooms": [
+    {"code": "101", "floor": "1", "room_type": "STD", "label": "Room 101", "sort": 1},
+    {"code": "102", "floor": "1", "room_type": "STD", "label": "Room 102", "sort": 2},
+    {"code": "103", "floor": "1", "room_type": "STD", "label": "Room 103", "sort": 3},
+    {"code": "104", "floor": "1", "room_type": "STD", "label": "Room 104", "sort": 4},
+    {"code": "105", "floor": "1", "room_type": "TWN", "label": "Room 105", "sort": 5},
+    {"code": "106", "floor": "1", "room_type": "TWN", "label": "Room 106", "sort": 6},
+    {"code": "107", "floor": "1", "room_type": "FAM", "label": "Room 107", "sort": 7},
+    {"code": "108", "floor": "1", "room_type": "STE", "label": "Room 108", "sort": 8},
+    {"code": "201", "floor": "2", "room_type": "STD", "label": "Room 201", "sort": 9},
+    {"code": "202", "floor": "2", "room_type": "STD", "label": "Room 202", "sort": 10},
+    {"code": "203", "floor": "2", "room_type": "STD", "label": "Room 203", "sort": 11},
+    {"code": "204", "floor": "2", "room_type": "STD", "label": "Room 204", "sort": 12},
+    {"code": "205", "floor": "2", "room_type": "TWN", "label": "Room 205", "sort": 13},
+    {"code": "206", "floor": "2", "room_type": "TWN", "label": "Room 206", "sort": 14},
+    {"code": "207", "floor": "2", "room_type": "FAM", "label": "Room 207", "sort": 15},
+    {"code": "208", "floor": "2", "room_type": "STE", "label": "Room 208", "sort": 16},
+    {"code": "301", "floor": "3", "room_type": "STD", "label": "Room 301", "sort": 17},
+    {"code": "302", "floor": "3", "room_type": "STD", "label": "Room 302", "sort": 18},
+    {"code": "303", "floor": "3", "room_type": "TWN", "label": "Room 303", "sort": 19},
+    {"code": "304", "floor": "3", "room_type": "TWN", "label": "Room 304", "sort": 20},
+    {"code": "305", "floor": "3", "room_type": "FAM", "label": "Room 305", "sort": 21},
+    {"code": "306", "floor": "3", "room_type": "FAM", "label": "Room 306", "sort": 22},
+    {"code": "307", "floor": "3", "room_type": "FAM", "label": "Room 307", "sort": 23},
+    {"code": "308", "floor": "3", "room_type": "STE", "label": "Room 308", "sort": 24}
+  ],
+  "seasons": [
+    {"code": "LOW", "name": "Low", "from": "2026-01-01", "to": "2026-03-31"},
+    {"code": "SHOULDER", "name": "Shoulder", "from": "2026-04-01", "to": "2026-06-30"},
+    {"code": "HIGH", "name": "High", "from": "2026-07-01", "to": "2026-09-30"},
+    {"code": "PEAK", "name": "Peak", "from": "2026-12-20", "to": "2026-12-31"}
+  ],
+  "room_rates": [
+    {"room_type": "STD", "season": "LOW", "nightly": 100},
+    {"room_type": "STD", "season": "SHOULDER", "nightly": 150},
+    {"room_type": "STD", "season": "HIGH", "nightly": 200},
+    {"room_type": "STD", "season": "PEAK", "nightly": 250},
+    {"room_type": "TWN", "season": "LOW", "nightly": 90},
+    {"room_type": "TWN", "season": "SHOULDER", "nightly": 140},
+    {"room_type": "TWN", "season": "HIGH", "nightly": 180},
+    {"room_type": "TWN", "season": "PEAK", "nightly": 220},
+    {"room_type": "FAM", "season": "LOW", "nightly": 160},
+    {"room_type": "FAM", "season": "SHOULDER", "nightly": 220},
+    {"room_type": "FAM", "season": "HIGH", "nightly": 280},
+    {"room_type": "FAM", "season": "PEAK", "nightly": 340},
+    {"room_type": "STE", "season": "LOW", "nightly": 300},
+    {"room_type": "STE", "season": "SHOULDER", "nightly": 400},
+    {"room_type": "STE", "season": "HIGH", "nightly": 500},
+    {"room_type": "STE", "season": "PEAK", "nightly": 600}
+  ],
+  "occupancy": {
+    "extra_adult_nightly": 40,
+    "extra_child_nightly": 20,
+    "single_occupancy_pct": -10
+  },
+  "day_of_week": {
+    "1": 0,
+    "2": 0,
+    "3": 0,
+    "4": 0,
+    "5": 10,
+    "6": 10,
+    "7": 0
+  },
+  "length_of_stay": [
+    {"min_nights": 7, "discount_pct": 10},
+    {"min_nights": 14, "discount_pct": 15}
+  ],
+  "supplements": [
+    {
+      "code": "FESTIVE",
+      "label": "Festive",
+      "from": "2026-12-24",
+      "to": "2026-12-26",
+      "per_night": 50,
+      "basis": "ROOM"
+    }
+  ],
+  "rate_plans": [
+    {
+      "code": "BAR",
+      "name": "Best available",
+      "adjust_pct": 0,
+      "refundable": true,
+      "deposit_pct": 30,
+      "balance_days": 21,
+      "cancellation": "standard",
+      "meal_plan": "RO",
+      "default": true
+    },
+    {
+      "code": "NR",
+      "name": "Non-refundable",
+      "adjust_pct": -10,
+      "refundable": false,
+      "deposit_pct": 100,
+      "balance_days": 0,
+      "cancellation": "non_refundable",
+      "meal_plan": "RO",
+      "default": false
+    }
+  ],
+  "terms": "Demo rate terms. Real terms are a client input.",
+  "restrictions": [
+    {
+      "room_type": null,
+      "from": "2026-08-10",
+      "to": "2026-08-16",
+      "stop_sell": true,
+      "closed_to_arrival": false,
+      "closed_to_departure": false,
+      "min_stay": null,
+      "note": "Stop-sell week"
+    },
+    {
+      "room_type": null,
+      "from": "2026-07-03",
+      "to": "2026-07-05",
+      "stop_sell": false,
+      "closed_to_arrival": false,
+      "closed_to_departure": false,
+      "min_stay": 3,
+      "note": "Min-stay 3 weekend"
+    },
+    {
+      "room_type": "STD",
+      "from": "2026-09-01",
+      "to": "2026-09-01",
+      "stop_sell": false,
+      "closed_to_arrival": true,
+      "closed_to_departure": false,
+      "min_stay": null,
+      "note": "Closed to arrival"
+    }
+  ],
+  "bookings": [
+    {"reference": "HTL-001", "room": "101", "room_type": "STD", "check_in": "2026-03-02", "nights": 4, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": "GRP-001"},
+    {"reference": "HTL-002", "room": "201", "room_type": "STD", "check_in": "2026-03-05", "nights": 6, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": "GRP-001"},
+    {"reference": "HTL-003", "room": "301", "room_type": "STD", "check_in": "2026-03-09", "nights": 3, "adults": 2, "children": 0, "status": "FULLY_PAID", "rate_plan": "BAR", "group": "GRP-001"},
+    {"reference": "HTL-004", "room": "102", "room_type": "STD", "check_in": "2026-04-06", "nights": 3, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-005", "room": "102", "room_type": "STD", "check_in": "2026-04-09", "nights": 2, "adults": 2, "children": 0, "status": "PENDING_PAYMENT", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-006", "room": "205", "room_type": "TWN", "check_in": "2026-05-11", "nights": 4, "adults": 2, "children": 0, "status": "FULLY_PAID", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-007", "room": "205", "room_type": "TWN", "check_in": "2026-05-15", "nights": 1, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-008", "room": "103", "room_type": "STD", "check_in": "2026-06-02", "nights": 2, "adults": 2, "children": 0, "status": "REQUESTED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-009", "room": "104", "room_type": "STD", "check_in": "2026-06-03", "nights": 5, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-010", "room": "105", "room_type": "TWN", "check_in": "2026-06-06", "nights": 7, "adults": 2, "children": 0, "status": "FULLY_PAID", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-011", "room": "106", "room_type": "TWN", "check_in": "2026-06-07", "nights": 1, "adults": 2, "children": 0, "status": "COMPLETED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-012", "room": "107", "room_type": "FAM", "check_in": "2026-06-08", "nights": 14, "adults": 2, "children": 2, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-013", "room": "108", "room_type": "STE", "check_in": "2026-06-10", "nights": 8, "adults": 2, "children": 1, "status": "FULLY_PAID", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-014", "room": "202", "room_type": "STD", "check_in": "2026-06-12", "nights": 9, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-015", "room": "203", "room_type": "STD", "check_in": "2026-06-15", "nights": 6, "adults": 2, "children": 0, "status": "PENDING_PAYMENT", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-016", "room": "204", "room_type": "STD", "check_in": "2026-06-18", "nights": 4, "adults": 1, "children": 0, "status": "CANCELLED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-017", "room": "206", "room_type": "TWN", "check_in": "2026-07-01", "nights": 3, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-018", "room": "207", "room_type": "FAM", "check_in": "2026-07-06", "nights": 5, "adults": 2, "children": 1, "status": "FULLY_PAID", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-019", "room": "208", "room_type": "STE", "check_in": "2026-07-08", "nights": 2, "adults": 2, "children": 0, "status": "ON_BOARD", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-020", "room": "302", "room_type": "STD", "check_in": "2026-07-13", "nights": 7, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-021", "room": "303", "room_type": "TWN", "check_in": "2026-07-20", "nights": 1, "adults": 2, "children": 0, "status": "REQUESTED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-022", "room": "304", "room_type": "TWN", "check_in": "2026-08-03", "nights": 10, "adults": 2, "children": 0, "status": "FULLY_PAID", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-023", "room": "305", "room_type": "FAM", "check_in": "2026-08-17", "nights": 4, "adults": 2, "children": 2, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-024", "room": "306", "room_type": "FAM", "check_in": "2026-09-02", "nights": 3, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-025", "room": "307", "room_type": "FAM", "check_in": "2026-09-07", "nights": 6, "adults": 3, "children": 1, "status": "PENDING_PAYMENT", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-026", "room": "308", "room_type": "STE", "check_in": "2026-10-05", "nights": 2, "adults": 2, "children": 0, "status": "FULLY_PAID", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-027", "room": "101", "room_type": "STD", "check_in": "2026-10-12", "nights": 5, "adults": 2, "children": 0, "status": "CONFIRMED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-028", "room": "201", "room_type": "STD", "check_in": "2026-11-02", "nights": 8, "adults": 2, "children": 0, "status": "CANCELLED", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-029", "room": "301", "room_type": "STD", "check_in": "2026-11-16", "nights": 4, "adults": 2, "children": 0, "status": "ON_HOLD_AGENCY", "rate_plan": "BAR", "group": null},
+    {"reference": "HTL-030", "room": "103", "room_type": "STD", "check_in": "2026-12-01", "nights": 2, "adults": 2, "children": 0, "status": "COMPLETED", "rate_plan": "BAR", "group": null}
+  ],
+  "reference_quotes": [
+    {
+      "id": "Q1",
+      "input": {"room_type": "STD", "check_in": "2026-02-02", "nights": 2, "adults": 2, "children": 0, "rate_plan": "BAR"},
+      "expected_lines": [{"code": "room", "amount": 200}],
+      "expected_total": 200,
+      "working": "100 + 100 = 200"
+    },
+    {
+      "id": "Q2",
+      "input": {"room_type": "FAM", "check_in": "2026-04-06", "nights": 1, "adults": 3, "children": 0, "rate_plan": "BAR"},
+      "expected_lines": [{"code": "room", "amount": 220}, {"code": "extra_adult", "amount": 40}],
+      "expected_total": 260,
+      "working": "220 + 40 = 260"
+    },
+    {
+      "id": "Q3",
+      "input": {"room_type": "FAM", "check_in": "2026-04-06", "nights": 1, "adults": 2, "children": 1, "rate_plan": "BAR"},
+      "expected_lines": [{"code": "room", "amount": 220}, {"code": "extra_child", "amount": 20}],
+      "expected_total": 240,
+      "working": "220 + 20 = 240"
+    },
+    {
+      "id": "Q4",
+      "input": {"room_type": "STD", "check_in": "2026-02-02", "nights": 1, "adults": 1, "children": 0, "rate_plan": "BAR"},
+      "expected_lines": [{"code": "room", "amount": 100}, {"code": "single_occupancy", "amount": -10}],
+      "expected_total": 90,
+      "working": "100 + -10 = 90"
+    },
+    {
+      "id": "Q5",
+      "input": {"room_type": "STD", "check_in": "2026-07-03", "nights": 1, "adults": 2, "children": 0, "rate_plan": "BAR"},
+      "expected_lines": [{"code": "room", "amount": 200}, {"code": "day_of_week", "amount": 20}],
+      "expected_total": 220,
+      "working": "200 + 20 = 220"
+    },
+    {
+      "id": "Q6",
+      "input": {"room_type": "STD", "check_in": "2026-12-24", "nights": 1, "adults": 2, "children": 0, "rate_plan": "BAR"},
+      "expected_lines": [{"code": "room", "amount": 250}, {"code": "supplement", "amount": 50}],
+      "expected_total": 300,
+      "working": "250 + 50 = 300"
+    },
+    {
+      "id": "Q7",
+      "input": {"room_type": "STD", "check_in": "2026-02-02", "nights": 1, "adults": 2, "children": 0, "rate_plan": "NR"},
+      "expected_lines": [{"code": "room", "amount": 100}, {"code": "rate_plan", "amount": -10}],
+      "expected_total": 90,
+      "working": "100 + -10 = 90"
+    },
+    {
+      "id": "Q8",
+      "input": {"room_type": "STD", "check_in": "2026-02-02", "nights": 7, "adults": 2, "children": 0, "rate_plan": "BAR"},
+      "expected_lines": [{"code": "room", "amount": 700}, {"code": "day_of_week", "amount": 20}, {"code": "length_of_stay", "amount": -72}],
+      "expected_total": 648,
+      "working": "100 + 100 + 100 + 100 + 110 + 110 + 100 + -72 = 648"
+    }
+  ]
+}

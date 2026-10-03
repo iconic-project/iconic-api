@@ -13,6 +13,7 @@ enum RuleGroup: string
     case DataRetention = 'data_retention';
     case Legal = 'legal';
     case Crm = 'crm';
+    case Stay = 'stay';
     case StructuralLocked = 'structural_locked';
 
     public function label(): string
@@ -25,6 +26,7 @@ enum RuleGroup: string
             self::DataRetention => 'Data retention',
             self::Legal => 'Legal documents',
             self::Crm => 'CRM',
+            self::Stay => 'Stay',
             self::StructuralLocked => 'Structural — locked',
         };
     }

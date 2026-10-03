@@ -31,6 +31,7 @@ final class BusinessRulesConstraint implements ValidationRule, ValidatorAwareRul
             'reminders_decreasing' => $this->remindersDecreasing($value, $fail),
             'bands' => $this->bands($value, $fail),
             'day_end_after_start' => $this->dayEndAfterStart($value, $data, $attribute, $fail),
+            'max_nights_gte_min' => $this->maxNightsAtLeastMin($value, $data, $fail),
             default => null,
         };
     }
@@ -116,6 +117,22 @@ final class BusinessRulesConstraint implements ValidationRule, ValidatorAwareRul
 
         if ($value <= $start) {
             $fail('Business day end must be after the start.');
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function maxNightsAtLeastMin(mixed $value, array $data, Closure $fail): void
+    {
+        $min = data_get($data, 'stay.min_nights');
+
+        if (! is_numeric($value) || ! is_numeric($min)) {
+            return;
+        }
+
+        if ((int) $value < (int) $min) {
+            $fail('Maximum nights must be at least the minimum nights.');
         }
     }
 }

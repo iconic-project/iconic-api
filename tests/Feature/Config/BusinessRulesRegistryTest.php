@@ -17,6 +17,40 @@ beforeEach(function (): void {
     $this->seed(ConfigSeeder::class);
 });
 
+test('the stay group lists eight labelled demo values and ops-001 is marked retired', function (): void {
+    $rows = collect(Registry::rows(app(CurrentConfig::class)));
+    $stay = $rows->where('group', 'stay');
+
+    expect($stay)->toHaveCount(8);
+    expect($stay->pluck('name')->all())->toBe([
+        'Check-in time',
+        'Check-out time',
+        'No-show cutoff',
+        'Minimum nights',
+        'Maximum nights',
+        'Maximum rooms per booking',
+        'Check-in requires full payment',
+        'Booking horizon',
+    ]);
+    expect($stay->every(fn (array $row): bool => $row['group_label'] === 'Stay'))->toBeTrue();
+    expect($stay->every(fn (array $row): bool => $row['status'] === 'PENDING_CLIENT'))->toBeTrue();
+    expect($stay->pluck('current_display')->all())->toBe([
+        '15:00',
+        '11:00',
+        '23:59',
+        '1 night',
+        '30 nights',
+        '5 rooms',
+        'Yes',
+        '730 days',
+    ]);
+
+    $duration = $rows->firstWhere('key', 'ops-001-duration');
+    expect($duration)->not->toBeNull();
+    expect($duration['note'])->toContain('09 H2');
+    expect($duration['current_display'])->toBe('7 nights · Sunday → Sunday');
+});
+
 test('every here path exists on the document and every leaf is covered once', function (): void {
     $leaves = DocumentDiff::leafPaths(BusinessRulesDocument::fromArray(BusinessRulesDocument::initial())->toArray());
     $here = Registry::herePaths();
