@@ -11,6 +11,7 @@ use App\Support\Config\DocumentDiff;
 use App\Support\Config\Documents\BusinessRulesDocument;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\RolesSeeder;
+use Illuminate\Validation\ValidationException;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
@@ -82,21 +83,21 @@ test('a changed commission cap marks the FIN-005 row as differing', function ():
     expect($row['current_display'])->toBe('15%');
 });
 
-test('publishing suite 2027 at 13000 marks the FIN-001 base-rates row as differing', function (): void {
+test('publishing a legacy suite price is refused and FIN-001 stays on the seeded rates', function (): void {
     $document = ratesDocument();
     $document['years'][0]['suite_pp'] = 13000;
 
-    app(ConfigPublisher::class)->publish(
+    expect(fn () => app(ConfigPublisher::class)->publish(
         ConfigKind::Rates,
         $document,
         1,
         'BOARD-RATES',
         adminUser(),
-    );
+    ))->toThrow(ValidationException::class);
 
     $row = collect(Registry::rows(app(CurrentConfig::class)))->firstWhere('key', 'fin-001-base-rates');
 
-    expect($row['differs'])->toBeTrue();
+    expect($row['differs'])->toBeFalse();
 });
 
 test('a changed engine child age marks the OPS-004 row as differing', function (): void {

@@ -57,6 +57,38 @@ final class Registry
                 'Refund Approvals, penalty engine',
             ),
             self::here(
+                'cancellation-sets',
+                RuleGroup::Cancellation,
+                '09 H8',
+                'Cancellation band sets',
+                RuleStatus::TextInDrafting,
+                [
+                    'cancellation.sets.STANDARD',
+                    'cancellation.sets.CHARTER',
+                    'cancellation.sets.standard',
+                    'cancellation.sets.non_refundable',
+                ],
+                BusinessRulesDocument::sourceDisplay('cancellation.sets'),
+                [
+                    'cancellation.sets.STANDARD' => data_get($initial, 'cancellation.sets.STANDARD'),
+                    'cancellation.sets.CHARTER' => data_get($initial, 'cancellation.sets.CHARTER'),
+                    'cancellation.sets.standard' => data_get($initial, 'cancellation.sets.standard'),
+                    'cancellation.sets.non_refundable' => data_get($initial, 'cancellation.sets.non_refundable'),
+                ],
+                'Rate plans, penalty engine',
+            ),
+            self::here(
+                'taxes',
+                RuleGroup::PricingPayments,
+                '09 H9',
+                'Taxes and fees',
+                RuleStatus::TextInDrafting,
+                ['taxes'],
+                BusinessRulesDocument::sourceDisplay('taxes'),
+                data_get($initial, 'taxes'),
+                'Stay quotes',
+            ),
+            self::here(
                 'charter-deposit-business-days',
                 RuleGroup::PricingPayments,
                 'FIN-003',
@@ -362,6 +394,8 @@ final class Registry
             'legal-entity-routing' => (string) data_get($document, 'legal_entity.bank.routing'),
             'legal-entity-swift' => (string) data_get($document, 'legal_entity.bank.swift'),
             'cancellation-bands' => self::bandDisplay(data_get($document, 'cancellation.bands') ?? []),
+            'cancellation-sets' => implode(', ', array_keys(is_array(data_get($document, 'cancellation.sets')) ? data_get($document, 'cancellation.sets') : [])),
+            'taxes' => self::taxDisplay(data_get($document, 'taxes')),
             'crm-segment-high-ltv' => Money::format((int) data_get($document, 'crm.segment_high_ltv')),
             'crm-pipeline-sla-new-lead' => data_get($document, 'crm.pipeline.sla_new_lead_business_hours').' business hours',
             'crm-pipeline-sla-qualifying' => data_get($document, 'crm.pipeline.sla_qualifying_business_days').' business days',
@@ -427,6 +461,17 @@ final class Registry
         }
 
         return implode(' · ', $parts);
+    }
+
+    private static function taxDisplay(mixed $taxes): string
+    {
+        if (! is_array($taxes) || $taxes === []) {
+            return 'none';
+        }
+
+        $count = count($taxes);
+
+        return $count === 1 ? '1 tax' : $count.' taxes';
     }
 
     /**

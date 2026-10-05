@@ -99,7 +99,7 @@ test('the change list shows a per-year price edit, not the raw years list', func
 
     expect($changes)->toHaveCount(1);
     expect($changes[0]->path)->toBe('years.2028.suite_pp');
-    expect($changes[0]->label)->toBe('Suite 2028');
+    expect($changes[0]->label)->toBe('Legacy (yacht) Suite 2028');
     expect($changes[0]->from)->toBe(13965);
     expect($changes[0]->to)->toBe(15000);
 });
@@ -112,7 +112,11 @@ test('adding a year lists each new price leaf', function (): void {
     $changes = RatesDocument::fromArray($draft)->changesAgainst($published);
     $labels = array_map(fn ($change): string => $change->label, $changes);
 
-    expect($labels)->toBe(['Suite 2030', "Owner's Suite 2030", 'Charter 2030']);
+    expect($labels)->toBe([
+        'Legacy (yacht) Suite 2030',
+        "Legacy (yacht) Owner's Suite 2030",
+        'Legacy (yacht) Charter 2030',
+    ]);
     expect($changes[0]->from)->toBeNull();
     expect($changes[0]->to)->toBe(15396);
 });

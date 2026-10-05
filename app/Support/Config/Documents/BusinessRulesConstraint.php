@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Config\Documents;
 
+use App\Enums\TaxBasis;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Contracts\Validation\ValidatorAwareRule;
@@ -32,6 +33,7 @@ final class BusinessRulesConstraint implements ValidationRule, ValidatorAwareRul
             'bands' => $this->bands($value, $fail),
             'day_end_after_start' => $this->dayEndAfterStart($value, $data, $attribute, $fail),
             'max_nights_gte_min' => $this->maxNightsAtLeastMin($value, $data, $fail),
+            'tax_pct_max' => $this->taxPctMax($value, $data, $attribute, $fail),
             default => null,
         };
     }
@@ -133,6 +135,22 @@ final class BusinessRulesConstraint implements ValidationRule, ValidatorAwareRul
 
         if ((int) $value < (int) $min) {
             $fail('Maximum nights must be at least the minimum nights.');
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function taxPctMax(mixed $value, array $data, string $attribute, Closure $fail): void
+    {
+        $basis = data_get($data, (string) preg_replace('/\.amount$/', '.basis', $attribute));
+
+        if ($basis !== TaxBasis::PctOfRoom->value || ! is_numeric($value)) {
+            return;
+        }
+
+        if ((int) $value > 100) {
+            $fail('A percentage tax cannot be above 100%.');
         }
     }
 }

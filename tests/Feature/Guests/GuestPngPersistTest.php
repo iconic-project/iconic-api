@@ -12,6 +12,7 @@ use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\ValidationException;
 use Tests\Support\Bookings\ReservationFixtures;
 
 beforeEach(function (): void {
@@ -49,13 +50,13 @@ test('a later publish of png amounts does not rewrite stored fees', function ():
     $document = app(CurrentConfig::class)->engineSettings()->toArray();
     $document['fees']['png']['foreign_over_12'] = 250;
 
-    app(ConfigPublisher::class)->publish(
+    expect(fn () => app(ConfigPublisher::class)->publish(
         ConfigKind::EngineSettings,
         $document,
         $current->version,
         'Sprint 6: png republish must not rewrite stored guest fees',
         $actor,
-    );
+    ))->toThrow(ValidationException::class);
 
     expect($guest->fresh()?->png_fee)->toBe(200);
     expect($guest->fresh()?->png_category)->toBe(PngCategory::ForeignOver12);

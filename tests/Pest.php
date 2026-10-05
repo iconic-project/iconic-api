@@ -7,14 +7,19 @@ use App\Enums\ConfigKind;
 use App\Enums\PaymentKind;
 use App\Enums\PaymentStatus;
 use App\Enums\Permission;
+use App\Enums\RoomTypeStatus;
 use App\Enums\SystemRole;
 use App\Models\Agency;
 use App\Models\AgencyUser;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Property;
 use App\Models\Role;
+use App\Models\RoomType;
 use App\Models\User;
+use App\Services\Config\ConfigPublisher;
 use App\Services\Config\ConfigRegistry;
+use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\ClaimService;
 use App\Support\BusinessTime;
 use App\Support\Config\Documents\BusinessRulesDocument;
@@ -335,6 +340,43 @@ function overdueCabin(array $overrides = []): Booking
     }
 
     return $booking->fresh() ?? $booking;
+}
+
+function publishStayRates(): void
+{
+    $property = Property::factory()->create();
+    $types = [
+        ['STD', 'Standard Double', 2, 2, 2, 0],
+        ['TWN', 'Twin', 2, 2, 2, 0],
+        ['FAM', 'Family', 2, 4, 4, 2],
+        ['STE', 'Suite', 2, 3, 3, 1],
+        ['LIM', 'Limit', 2, 3, 2, 2],
+    ];
+
+    foreach ($types as $index => [$code, $name, $base, $max, $adults, $children]) {
+        RoomType::query()->create([
+            'property_id' => $property->id,
+            'code' => $code,
+            'name' => $name,
+            'slug' => strtolower($code).'-stay',
+            'base_occupancy' => $base,
+            'max_occupancy' => $max,
+            'max_adults' => $adults,
+            'max_children' => $children,
+            'sort' => $index + 1,
+            'status' => RoomTypeStatus::Active,
+        ]);
+    }
+
+    $config = app(CurrentConfig::class);
+
+    app(ConfigPublisher::class)->publish(
+        ConfigKind::Rates,
+        RatesDocument::initial(),
+        $config->version(ConfigKind::Rates)->version,
+        'STAY-RATES',
+        adminUser(),
+    );
 }
 
 function limitedAdminRole(): Role

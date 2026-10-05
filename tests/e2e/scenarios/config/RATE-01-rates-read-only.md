@@ -8,14 +8,15 @@
 Sales Exec must not be able to edit prices. The page is still useful for the price check.
 
 ## Steps
-1. Sign in as `lucia@iconic.test` / `password`. Open `http://localhost:3001/rms/commercial/rates`.
-2. Scroll the base-rates table, helper area, approval row, and **Price check — published vs your draft**.
+1. Hotel seed (`ICONIC_SEED_MODE=hotel` before `reset.sh`). A yacht seed still shows this page, but the price-check totals in E4 are the hotel reference stays.
+2. Sign in as `lucia@iconic.test` / `password`. Open `http://localhost:3001/rms/commercial/rates`.
+3. Read the top bar, the **Seasons** table, and **Price check — published vs your draft**. Open **Legacy (yacht) — read only** only far enough to see that its inputs are disabled.
 
 ## Expected
 - [ ] E1 · State line is `VIEW ONLY — ADMIN / DIRECTOR EDITS RATES`.
-- [ ] E2 · Rate inputs are disabled. There is no helper row (`Annual increase` / `Round to` / `＋ Add …`).
-- [ ] E3 · No approval field (`Approval ref / reason (required)` is absent).
-- [ ] E4 · Price check **Published** and **Draft** match for sailing year 2027; every **Difference** is `no change`.
+- [ ] E2 · There is no approval field (`Approval ref / reason (required)` is absent) and no `Save & publish`.
+- [ ] E3 · Season code, name, from, and to inputs are disabled. There is no `Add a season`. The legacy block's inputs are disabled.
+- [ ] E4 · The price-check card `STD · 2026-02-02 · 2 nights` shows room total `USD 200` and difference `no change`. There is no **Sailing year** control.
 
 ## Notes
-Rates view-only copy is hard-coded (admin/director), unlike Engine Settings which uses the role name.
+Rates view-only copy is hard-coded (admin/director), unlike Engine Settings which uses the role name. The eight stay totals are **HRATE-01**. This scenario only checks that Lucía can read one of them.

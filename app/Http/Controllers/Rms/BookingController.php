@@ -34,13 +34,16 @@ use App\Http\Resources\Rms\ChangeHistoryResource;
 use App\Http\Resources\Rms\MovePreviewResource;
 use App\Http\Resources\Rms\ReservationCreatedResource;
 use App\Http\Resources\Rms\ReservationQuoteResource;
+use App\Http\Resources\Rms\StayRoomsQuoteResource;
 use App\Models\Booking;
 use App\Models\ChangeHistory;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Pricing\ReservationQuoter;
+use App\Services\Pricing\StayQuoter;
 use App\Support\Bookings\BookingFormOptions;
 use App\Support\BusinessTime;
+use App\Support\Stays\StayDates;
 use Dedoc\Scramble\Attributes\Response as DocumentedResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -136,9 +139,22 @@ final class BookingController extends Controller
         return new BookingFormOptionsResource(BookingFormOptions::fromConfig($config));
     }
 
-    public function quote(QuoteReservationRequest $request, ReservationQuoter $quoter): ReservationQuoteResource
-    {
+    public function quote(
+        QuoteReservationRequest $request,
+        ReservationQuoter $quoter,
+        StayQuoter $stayQuoter,
+    ): ReservationQuoteResource|StayRoomsQuoteResource {
         $this->authorize('create', Booking::class);
+
+        if ($request->filled('check_in')) {
+            /** @var array{check_in: string, check_out: string, rooms: list<array{room_type: string, adults: int, child_ages?: list<int>, rate_plan?: string|null, promo?: string|null, online_deposit?: bool}>} $validated */
+            $validated = $request->validated();
+
+            return new StayRoomsQuoteResource($stayQuoter->quoteRooms(
+                StayDates::of($validated['check_in'], $validated['check_out']),
+                $validated['rooms'],
+            ));
+        }
 
         return new ReservationQuoteResource($quoter->quote($request->validated()));
     }

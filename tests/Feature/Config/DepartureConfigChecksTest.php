@@ -73,11 +73,13 @@ test('departures in a year with no rates warn', function (): void {
         'status' => DepartureStatus::OnSale,
     ]);
 
-    $this->actingAs(adminUser())
+    $response = $this->actingAs(adminUser())
         ->postJson('/api/rms/rates/validate', ['document' => ratesDocument()])
-        ->assertOk()
-        ->assertJsonPath('warnings.0.path', 'years')
-        ->assertJsonPath('warnings.0.message', 'Departures in 2031 have no rates.');
+        ->assertOk();
+
+    $yearWarning = collect($response->json('warnings'))->firstWhere('path', 'years');
+
+    expect($yearWarning['message'] ?? null)->toBe('Departures in 2031 have no rates.');
 });
 
 test('engine settings warn when the default search starts before the first bookable month', function (): void {

@@ -38,6 +38,13 @@ test('the seeded rates document matches seed-data.json', function (): void {
     expect($document['rules']['back_to_back_pct'])->toBe($rates['rules']['b2b']);
     expect($document['rules']['festive_supplement_pp'])->toBe($rates['rules']['festivePax']);
     expect($document['rules']['festive_supplement_charter'])->toBe($rates['rules']['festiveCharter']);
+    expect($document['schema_version'])->toBe(2);
+    expect($document['seasons'])->toBe(hotelFixture('seasons'));
+    expect($document['occupancy'])->toBe(hotelFixture('occupancy'));
+    expect($document['length_of_stay'])->toBe(hotelFixture('length_of_stay'));
+    expect($document['supplements'])->toBe(hotelFixture('supplements'));
+    expect($document['room_rates'])->toBe([]);
+    expect(collect($document['rate_plans'])->firstWhere('default', true)['code'])->toBe('BAR');
 
     $row = RateVersion::query()->firstOrFail();
     expect($row->version)->toBe(1);

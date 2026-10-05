@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace App\Support\Config\Documents;
 
 use App\Enums\ConfigKind;
+use App\Enums\TaxBasis;
 use App\Services\Config\CurrentConfig;
 use App\Support\Config\ConfigDocument;
 use App\Support\Config\Warning;
 use App\Support\Payments\CancellationPenalty;
+use Illuminate\Validation\Rule;
 
 final class BusinessRulesDocument extends ConfigDocument
 {
     /**
      * @param  list<CancellationBand>  $bands
      * @param  list<CancellationBand>  $charterBands
+     * @param  array<string, list<CancellationBand>>  $cancellationSets
+     * @param  list<Tax>  $taxes
      */
     public function __construct(
         public readonly CommissionRules $commission,
@@ -38,6 +42,9 @@ final class BusinessRulesDocument extends ConfigDocument
         public readonly StayRules $stay,
         public readonly array $bands,
         public readonly array $charterBands,
+        public readonly array $cancellationSets,
+        public readonly array $taxes,
+        public readonly bool $hasTaxes,
     ) {}
 
     /**
@@ -45,6 +52,12 @@ final class BusinessRulesDocument extends ConfigDocument
      */
     public static function initial(): array
     {
+        $bands = [
+            ['min_days' => 120, 'penalty_pct' => 5],
+            ['min_days' => 90, 'penalty_pct' => 50],
+            ['min_days' => 0, 'penalty_pct' => 100],
+        ];
+
         return [
             'commission' => [
                 'cap_pct' => 12,
@@ -170,17 +183,16 @@ final class BusinessRulesDocument extends ConfigDocument
                 'booking_horizon_days' => 730,
             ],
             'cancellation' => [
-                'bands' => [
-                    ['min_days' => 120, 'penalty_pct' => 5],
-                    ['min_days' => 90, 'penalty_pct' => 50],
-                    ['min_days' => 0, 'penalty_pct' => 100],
-                ],
-                'charter_bands' => [
-                    ['min_days' => 120, 'penalty_pct' => 5],
-                    ['min_days' => 90, 'penalty_pct' => 50],
-                    ['min_days' => 0, 'penalty_pct' => 100],
+                'bands' => $bands,
+                'charter_bands' => $bands,
+                'sets' => [
+                    'STANDARD' => $bands,
+                    'CHARTER' => $bands,
+                    'standard' => $bands,
+                    'non_refundable' => $bands,
                 ],
             ],
+            'taxes' => Taxes::list(),
         ];
     }
 
@@ -222,33 +234,24 @@ final class BusinessRulesDocument extends ConfigDocument
         $maxDiscount = $discounts['max_total_discount_pct'] ?? null;
         $maxDiscount = $maxDiscount === null || $maxDiscount === '' ? null : (int) $maxDiscount;
 
-        $bands = [];
-        foreach ($cancellation['bands'] ?? [] as $band) {
-            if (! is_array($band)) {
-                continue;
-            }
+        $bands = self::bandList($cancellation['bands'] ?? []);
+        $charterBands = self::bandList($cancellation['charter_bands'] ?? []);
+        $sets = [];
+        $rawSets = is_array($cancellation['sets'] ?? null) ? $cancellation['sets'] : [];
 
-            $bands[] = new CancellationBand(
-                (int) ($band['min_days'] ?? 0),
-                (int) ($band['penalty_pct'] ?? 0),
-            );
+        foreach ($rawSets as $code => $rows) {
+            $sets[(string) $code] = self::bandList($rows);
         }
 
-        usort($bands, fn (CancellationBand $a, CancellationBand $b): int => $b->minDays <=> $a->minDays);
-
-        $charterBands = [];
-        foreach ($cancellation['charter_bands'] ?? [] as $band) {
-            if (! is_array($band)) {
-                continue;
+        if ($sets === []) {
+            if ($bands !== []) {
+                $sets['STANDARD'] = $bands;
             }
 
-            $charterBands[] = new CancellationBand(
-                (int) ($band['min_days'] ?? 0),
-                (int) ($band['penalty_pct'] ?? 0),
-            );
+            if ($charterBands !== []) {
+                $sets['CHARTER'] = $charterBands;
+            }
         }
-
-        usort($charterBands, fn (CancellationBand $a, CancellationBand $b): int => $b->minDays <=> $a->minDays);
 
         return new self(
             new CommissionRules(
@@ -370,6 +373,9 @@ final class BusinessRulesDocument extends ConfigDocument
             ),
             $bands,
             $charterBands,
+            self::orderedSets($sets),
+            self::taxesFrom($data['taxes'] ?? []),
+            array_key_exists('taxes', $data),
         );
     }
 
@@ -394,12 +400,13 @@ final class BusinessRulesDocument extends ConfigDocument
      *     charter: array{deposit_business_days: int, proposal_valid_business_days: int},
      *     portal: array{invite_valid_days: int},
      *     stay: array{check_in_time: string, check_out_time: string, no_show_cutoff_time: string, min_nights: int, max_nights: int, max_rooms_per_booking: int, check_in_requires_full_payment: bool, booking_horizon_days: int},
-     *     cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, charter_bands: list<array{min_days: int, penalty_pct: int}>}
+     *     cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, charter_bands: list<array{min_days: int, penalty_pct: int}>, sets: array<string, list<array{min_days: int, penalty_pct: int}>>},
+     *     taxes?: list<array{code: string, label: string, basis: string, amount: int, child_exempt_under_age: int|null, charged: bool, shown_in_price_panel: bool}>
      * }
      */
     public function toArray(): array
     {
-        return [
+        $document = [
             'commission' => $this->commission->toArray(),
             'modification_fee_usd' => $this->modificationFeeUsd,
             'payments' => $this->payments->toArray(),
@@ -422,16 +429,21 @@ final class BusinessRulesDocument extends ConfigDocument
             'portal' => $this->portal->toArray(),
             'stay' => $this->stay->toArray(),
             'cancellation' => [
-                'bands' => array_map(
-                    fn (CancellationBand $band): array => $band->toArray(),
-                    $this->bands,
-                ),
-                'charter_bands' => array_map(
-                    fn (CancellationBand $band): array => $band->toArray(),
-                    $this->charterBands,
-                ),
+                'bands' => self::bandsToArray($this->bands),
+                'charter_bands' => self::bandsToArray($this->charterBands),
+                'sets' => self::setsToArray($this->cancellationSets),
             ],
+            'taxes' => array_map(
+                fn (Tax $tax): array => $tax->toArray(),
+                $this->taxes,
+            ),
         ];
+
+        if (! $this->hasTaxes) {
+            unset($document['taxes']);
+        }
+
+        return $document;
     }
 
     /**
@@ -549,6 +561,20 @@ final class BusinessRulesDocument extends ConfigDocument
             'cancellation.charter_bands' => ['required', 'array', 'min:1', 'max:6', new BusinessRulesConstraint('bands')],
             'cancellation.charter_bands.*.min_days' => ['required', 'integer', 'min:0', 'max:999'],
             'cancellation.charter_bands.*.penalty_pct' => ['required', 'integer', 'min:0', 'max:100'],
+            'cancellation.sets' => ['required', 'array'],
+            'cancellation.sets.STANDARD' => ['required', 'array', 'min:1', 'max:6', new BusinessRulesConstraint('bands')],
+            'cancellation.sets.CHARTER' => ['required', 'array', 'min:1', 'max:6', new BusinessRulesConstraint('bands')],
+            'cancellation.sets.*' => ['required', 'array', 'min:1', 'max:6', new BusinessRulesConstraint('bands')],
+            'cancellation.sets.*.*.min_days' => ['required', 'integer', 'min:0', 'max:999'],
+            'cancellation.sets.*.*.penalty_pct' => ['required', 'integer', 'min:0', 'max:100'],
+            'taxes' => ['present', 'array'],
+            'taxes.*.code' => ['required', 'string', 'min:1', 'max:32', 'distinct'],
+            'taxes.*.label' => ['required', 'string', 'min:1', 'max:80'],
+            'taxes.*.basis' => ['required', Rule::enum(TaxBasis::class)],
+            'taxes.*.amount' => ['required', 'integer', 'min:0', 'max:1000000', new BusinessRulesConstraint('tax_pct_max')],
+            'taxes.*.child_exempt_under_age' => ['nullable', 'integer', 'min:0', 'max:120'],
+            'taxes.*.charged' => ['required', 'boolean'],
+            'taxes.*.shown_in_price_panel' => ['required', 'boolean'],
         ];
     }
 
@@ -637,6 +663,8 @@ final class BusinessRulesDocument extends ConfigDocument
             'crm.pipeline.probability_deposit_pending' => 'M4 · Deposit pending probability',
             'privacy.request_sla_days' => 'M7 · Subject request SLA',
             'cancellation.bands' => '§4.1.5 · Cabin cancellation penalty bands',
+            'cancellation.sets' => 'Cancellation band sets',
+            'taxes' => 'Taxes and fees',
         ];
     }
 
@@ -800,8 +828,109 @@ final class BusinessRulesDocument extends ConfigDocument
             'crm.pipeline.probability_deposit_pending' => '80% (PENDING CLIENT, prototype pipeline)',
             'privacy.request_sla_days' => '30 calendar days (PENDING LEG-002)',
             'cancellation.bands' => '≥120 d 5% · 90–119 d 50% · 0–89 d 100%',
+            'cancellation.sets' => 'STANDARD and CHARTER keep the cabin and charter bands (09 H8)',
+            'taxes' => 'Empty until published (09 H9). The hotel fixture has no tax list.',
             default => $path,
         };
+    }
+
+    /**
+     * @param  list<CancellationBand>  $bands
+     * @return list<array{min_days: int, penalty_pct: int}>
+     */
+    private static function bandsToArray(array $bands): array
+    {
+        return array_map(
+            fn (CancellationBand $band): array => $band->toArray(),
+            $bands,
+        );
+    }
+
+    /**
+     * @param  array<string, list<CancellationBand>>  $sets
+     * @return array<string, list<array{min_days: int, penalty_pct: int}>>
+     */
+    private static function setsToArray(array $sets): array
+    {
+        $encoded = [];
+
+        foreach (self::orderedSets($sets) as $code => $bands) {
+            $encoded[$code] = self::bandsToArray($bands);
+        }
+
+        return $encoded;
+    }
+
+    /**
+     * @param  array<string, list<CancellationBand>>  $sets
+     * @return array<string, list<CancellationBand>>
+     */
+    private static function orderedSets(array $sets): array
+    {
+        $ordered = [];
+
+        foreach (['STANDARD', 'CHARTER', 'standard', 'non_refundable'] as $code) {
+            if (isset($sets[$code])) {
+                $ordered[$code] = $sets[$code];
+            }
+        }
+
+        foreach ($sets as $code => $bands) {
+            if (! array_key_exists($code, $ordered)) {
+                $ordered[$code] = $bands;
+            }
+        }
+
+        return $ordered;
+    }
+
+    /**
+     * @return list<CancellationBand>
+     */
+    private static function bandList(mixed $rows): array
+    {
+        if (! is_array($rows)) {
+            return [];
+        }
+
+        $bands = [];
+
+        foreach ($rows as $band) {
+            if (! is_array($band)) {
+                continue;
+            }
+
+            $bands[] = new CancellationBand(
+                (int) ($band['min_days'] ?? 0),
+                (int) ($band['penalty_pct'] ?? 0),
+            );
+        }
+
+        usort($bands, fn (CancellationBand $a, CancellationBand $b): int => $b->minDays <=> $a->minDays);
+
+        return $bands;
+    }
+
+    /**
+     * @return list<Tax>
+     */
+    private static function taxesFrom(mixed $rows): array
+    {
+        if (! is_array($rows)) {
+            return [];
+        }
+
+        $taxes = [];
+
+        foreach ($rows as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $taxes[] = Tax::fromArray($row);
+        }
+
+        return $taxes;
     }
 
     private static function flag(mixed $value): bool

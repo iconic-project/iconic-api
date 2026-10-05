@@ -362,13 +362,13 @@ final class EngineSettingsDocument extends ConfigDocument
             'locale.default' => 'Locale',
             'locale.live' => 'Live locales',
             'locale.currency' => 'Currency',
-            'fees.tct_pp' => 'TCT transit card',
-            'fees.png.foreign_over_12' => 'PNG fee — foreign visitor over 12',
-            'fees.png.foreign_12_and_under' => 'PNG fee — foreign visitor 12 and under',
-            'fees.png.can_adult' => 'PNG fee — CAN adult',
-            'fees.png.can_minor' => 'PNG fee — CAN minor',
-            'fees.png.national_or_resident' => 'PNG fee — national or resident',
-            'fees.png.exempt_under_age' => 'PNG fee — exempt under age',
+            'fees.tct_pp' => 'Legacy (yacht) TCT transit card',
+            'fees.png.foreign_over_12' => 'Legacy (yacht) PNG fee — foreign visitor over 12',
+            'fees.png.foreign_12_and_under' => 'Legacy (yacht) PNG fee — foreign visitor 12 and under',
+            'fees.png.can_adult' => 'Legacy (yacht) PNG fee — CAN adult',
+            'fees.png.can_minor' => 'Legacy (yacht) PNG fee — CAN minor',
+            'fees.png.national_or_resident' => 'Legacy (yacht) PNG fee — national or resident',
+            'fees.png.exempt_under_age' => 'Legacy (yacht) PNG fee — exempt under age',
             'fees.show_in_price_panel' => 'Show fees in price panel',
             'fees.footnote' => 'Fee footnote',
             'copy.book_now_pay_later' => 'Note — Book now, pay later',
@@ -406,6 +406,28 @@ final class EngineSettingsDocument extends ConfigDocument
         }
 
         return false;
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    public function publishErrors(?ConfigDocument $published): array
+    {
+        if (! $published instanceof self) {
+            return [];
+        }
+
+        $errors = [];
+
+        if ($this->fees->tctPp !== $published->fees->tctPp) {
+            $errors['fees.tct_pp'] = ['Legacy (yacht) — this value cannot be changed.'];
+        }
+
+        if ($this->fees->png->toArray() !== $published->fees->png->toArray()) {
+            $errors['fees.png'] = ['Legacy (yacht) — this value cannot be changed.'];
+        }
+
+        return $errors;
     }
 
     /**

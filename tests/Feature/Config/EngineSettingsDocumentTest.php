@@ -211,3 +211,19 @@ test('copy with no numbers produces no copy-versus-rates or copy-versus-sla warn
 
     expect($warnings)->toBe([]);
 });
+
+test('png and tct fees are read-only and the footnote can still change', function (): void {
+    $current = EngineSettingsDocument::fromArray(EngineSettingsDocument::initial());
+
+    $tct = EngineSettingsDocument::initial();
+    $tct['fees']['tct_pp'] = 21;
+    expect(EngineSettingsDocument::fromArray($tct)->publishErrors($current))->toHaveKey('fees.tct_pp');
+
+    $png = EngineSettingsDocument::initial();
+    $png['fees']['png']['foreign_over_12'] = 201;
+    expect(EngineSettingsDocument::fromArray($png)->publishErrors($current))->toHaveKey('fees.png');
+
+    $note = EngineSettingsDocument::initial();
+    $note['fees']['footnote'] = 'Hotel taxes are configured separately.';
+    expect(EngineSettingsDocument::fromArray($note)->publishErrors($current))->toBe([]);
+});

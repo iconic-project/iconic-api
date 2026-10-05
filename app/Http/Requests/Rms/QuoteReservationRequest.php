@@ -22,6 +22,21 @@ class QuoteReservationRequest extends FormRequest
      */
     public function rules(): array
     {
+        if ($this->filled('check_in')) {
+            return [
+                'check_in' => ['required', 'date_format:Y-m-d'],
+                'check_out' => ['required', 'date_format:Y-m-d', 'after:check_in'],
+                'rooms' => ['required', 'array', 'min:1'],
+                'rooms.*.room_type' => ['required', 'string', 'max:16'],
+                'rooms.*.adults' => ['required', 'integer', 'min:0', 'max:36'],
+                'rooms.*.child_ages' => ['sometimes', 'array'],
+                'rooms.*.child_ages.*' => ['integer', 'min:0', 'max:120'],
+                'rooms.*.rate_plan' => ['sometimes', 'nullable', 'string', 'max:32'],
+                'rooms.*.promo' => ['sometimes', 'nullable', 'string', 'max:32'],
+                'rooms.*.online_deposit' => ['sometimes', 'boolean'],
+            ];
+        }
+
         return [
             'departure_id' => ['required', 'integer', 'exists:departures,id'],
             'type' => ['required', Rule::enum(BookingType::class)],
@@ -60,6 +75,10 @@ class QuoteReservationRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function (Validator $after): void {
+            if ($this->filled('check_in')) {
+                return;
+            }
+
             $type = $this->input('type');
             $cabins = $this->input('cabins');
 

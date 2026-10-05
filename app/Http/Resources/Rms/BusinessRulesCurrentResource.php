@@ -23,7 +23,8 @@ class BusinessRulesCurrentResource extends ConfigCurrentResource
      *         manifests: array{dpng_fit_days: int, dpng_charter_days: int, captain_days: int, chase_days_before_due: int},
      *         alerts: array{low_occupancy_pct: int, low_occupancy_days_before: int},
      *         retention: array{passport_months_after_cruise: int, medical_days_after_cruise: int},
-     *         cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>}
+     *         cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, sets: array<string, list<array{min_days: int, penalty_pct: int}>>},
+     *         taxes: list<array{code: string, label: string, basis: string, amount: int, child_exempt_under_age: int|null, charged: bool, shown_in_price_panel: bool}>
      *     },
      *     published_at: string,
      *     published_by: array{id: int, name: string}|null,

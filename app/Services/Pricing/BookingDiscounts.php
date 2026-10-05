@@ -108,6 +108,53 @@ final class BookingDiscounts
     }
 
     /**
+     * Online deposit discount and the total cap, on a stay total.
+     * Offers stay on {@see self::apply()}: they match a departure and a cabin category.
+     *
+     * @return array{quote: StayQuote, warnings: list<string>}
+     */
+    public function applyToStay(StayQuote $quote, bool $onlineDeposit): array
+    {
+        $step1 = $quote->total;
+        $onlinePct = $this->config->businessRules()->discounts->onlineDepositDiscountPct;
+        $lines = [];
+
+        if ($onlineDeposit && $onlinePct > 0 && $step1 > 0) {
+            $amount = min(Rounding::halfUp($step1 * $onlinePct / 100), $step1);
+
+            if ($amount > 0) {
+                $label = $this->config->engineSettings()->copy->onlineDepositAdvantage.' −'.$onlinePct.'%';
+                $lines[] = new StayQuoteLine('online_deposit', 'online_deposit', ['label' => $label], -$amount);
+            }
+        }
+
+        $lines = $this->capStayLines($lines, $step1);
+        $total = $step1;
+
+        foreach ($lines as $line) {
+            $total += $line->amount;
+        }
+
+        if ($total < 0) {
+            $total = 0;
+        }
+
+        return [
+            'quote' => new StayQuote(
+                $quote->nightLines,
+                [...$quote->lines, ...$lines],
+                $total,
+                $quote->depositPct,
+                Rounding::halfUp($total * $quote->depositPct / 100),
+                $quote->ratesVersionId,
+                $quote->terms,
+                $quote->taxLines,
+            ),
+            'warnings' => [],
+        ];
+    }
+
+    /**
      * @param  list<Offer>  $priceOffers
      * @return array{lines: list<QuoteLine>, warnings: list<string>}
      */
@@ -333,6 +380,47 @@ final class BookingDiscounts
         $lines[array_key_last($lines)] = new QuoteLine(
             $last->code,
             $last->label.' — reduced to the maximum discount',
+            $reduced,
+        );
+
+        return $lines;
+    }
+
+    /**
+     * @param  list<StayQuoteLine>  $lines
+     * @return list<StayQuoteLine>
+     */
+    private function capStayLines(array $lines, int $step1): array
+    {
+        $maxPct = $this->config->businessRules()->discounts->maxTotalDiscountPct;
+
+        if ($maxPct === null || $lines === []) {
+            return $lines;
+        }
+
+        $cap = Rounding::halfUp($step1 * $maxPct / 100);
+        $saving = 0;
+
+        foreach ($lines as $line) {
+            $saving -= $line->amount;
+        }
+
+        if ($saving <= $cap) {
+            return $lines;
+        }
+
+        $overflow = $saving - $cap;
+        $last = $lines[array_key_last($lines)];
+        $reduced = $last->amount + $overflow;
+
+        if ($reduced > 0) {
+            $reduced = 0;
+        }
+
+        $lines[array_key_last($lines)] = new StayQuoteLine(
+            $last->code,
+            $last->key,
+            ['label' => $last->label().' — reduced to the maximum discount'],
             $reduced,
         );
 

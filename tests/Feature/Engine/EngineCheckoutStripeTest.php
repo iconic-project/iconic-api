@@ -236,7 +236,7 @@ test('fallback on stripe expired removes only the advantage and promo lines', fu
     $session = CheckoutSession::query()->firstOrFail();
 
     $document = ratesDocument();
-    $document['years'][0]['suite_pp'] = ((int) $document['years'][0]['suite_pp']) + 5000;
+    $document['terms']['cabin_balance_days'] = ((int) $document['terms']['cabin_balance_days']) + 1;
     $current = app(CurrentConfig::class)->version(ConfigKind::Rates);
     app(ConfigPublisher::class)->publish(
         ConfigKind::Rates,

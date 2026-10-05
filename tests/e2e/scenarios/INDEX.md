@@ -25,11 +25,11 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | ROLE-04 | Unsaved matrix changes | sprint-1, users-roles | P2 | — | Carolina | [users-roles/ROLE-04-unsaved-matrix.md](users-roles/ROLE-04-unsaved-matrix.md) |
 | ROLE-05 | Read-only matrix | sprint-1, users-roles | P2 | — | Carolina + limited | [users-roles/ROLE-05-read-only-matrix.md](users-roles/ROLE-05-read-only-matrix.md) |
 | RATE-01 | Rates read-only | sprint-2, config | P2 | — | Lucía | [config/RATE-01-rates-read-only.md](config/RATE-01-rates-read-only.md) |
-| RATE-02 | Year helpers | sprint-2, config | P2 | — | Carolina | [config/RATE-02-year-helpers.md](config/RATE-02-year-helpers.md) |
-| RATE-03 | Price check matches the reference prices | sprint-2, config | P1 | B2 | Carolina | [config/RATE-03-price-check-reference.md](config/RATE-03-price-check-reference.md) |
-| RATE-04 | Invalid, then valid again | sprint-2, config | P2 | — | Carolina | [config/RATE-04-invalid-then-valid.md](config/RATE-04-invalid-then-valid.md) |
-| RATE-05 | Publish and history | sprint-2, config | P1 | B2 | Carolina | [config/RATE-05-publish-and-history.md](config/RATE-05-publish-and-history.md) |
-| RATE-06 | Two editors, one wins | sprint-2, config | P1 | B2 | Carolina ×2 | [config/RATE-06-two-editors.md](config/RATE-06-two-editors.md) |
+| RATE-02 | Year helpers | sprint-2, config | retired | — | Carolina | [config/RATE-02-year-helpers.md](config/RATE-02-year-helpers.md) |
+| RATE-03 | Price check matches the reference prices | sprint-2, config | retired | — | Carolina | [config/RATE-03-price-check-reference.md](config/RATE-03-price-check-reference.md) |
+| RATE-04 | Invalid, then valid again | sprint-2, config | retired | — | Carolina | [config/RATE-04-invalid-then-valid.md](config/RATE-04-invalid-then-valid.md) |
+| RATE-05 | Publish and history | sprint-2, config | retired | — | Carolina | [config/RATE-05-publish-and-history.md](config/RATE-05-publish-and-history.md) |
+| RATE-06 | Two editors, one wins | sprint-2, config | retired | — | Carolina ×2 | [config/RATE-06-two-editors.md](config/RATE-06-two-editors.md) |
 | ENG-01 | Manager publishes copy without a reference | sprint-2, config | P1 | B2 | Mateo | [config/ENG-01-manager-copy-no-reference.md](config/ENG-01-manager-copy-no-reference.md) |
 | ENG-02 | Manager can't touch rules | sprint-2, config | P1 | B2 | Mateo | [config/ENG-02-manager-rules-locked.md](config/ENG-02-manager-rules-locked.md) |
 | ENG-03 | Rule change needs a reference | sprint-2, config | P2 | — | Carolina | [config/ENG-03-rule-change-needs-reference.md](config/ENG-03-rule-change-needs-reference.md) |
@@ -184,3 +184,8 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | HINV-04 | Shorten and release a block | sprint-17, hotel, inventory | P2 | B22 | Mateo | [hotel/HINV-04-shorten-and-release.md](hotel/HINV-04-shorten-and-release.md) |
 | HINV-05 | Stop-sell and min-stay | sprint-17, hotel, inventory | P1 | B22 | Carolina | [hotel/HINV-05-stop-sell-and-min-stay.md](hotel/HINV-05-stop-sell-and-min-stay.md) |
 | HINV-06 | Lucía sees, cannot edit | sprint-17, hotel, inventory | P2 | B22 | Lucía | [hotel/HINV-06-lucia-sees-cannot-edit.md](hotel/HINV-06-lucia-sees-cannot-edit.md) |
+| HRATE-01 | Price check matches the reference stays | sprint-18, hotel, config | P1 | B23 | Carolina | [hotel/HRATE-01-price-check-reference-stays.md](hotel/HRATE-01-price-check-reference-stays.md) |
+| HRATE-02 | Overlapping seasons refused | sprint-18, hotel, config | P1 | B23 | Carolina | [hotel/HRATE-02-overlapping-seasons-refused.md](hotel/HRATE-02-overlapping-seasons-refused.md) |
+| HRATE-03 | Add a season and publish | sprint-18, hotel, config | P1 | B23 | Carolina ×2 | [hotel/HRATE-03-add-a-season-and-publish.md](hotel/HRATE-03-add-a-season-and-publish.md) |
+| HRATE-04 | Rate plan changes deposit and cancellation | sprint-18, hotel, config | P2 | B23 | Carolina | [hotel/HRATE-04-rate-plan-deposit-and-cancellation.md](hotel/HRATE-04-rate-plan-deposit-and-cancellation.md) |
+| HRATE-05 | City tax shown, not charged | sprint-18, hotel, config | P2 | B23 | Carolina | [hotel/HRATE-05-city-tax-shown-not-charged.md](hotel/HRATE-05-city-tax-shown-not-charged.md) |

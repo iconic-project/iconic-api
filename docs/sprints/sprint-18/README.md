@@ -24,7 +24,7 @@ Existing bookings are untouched: their `price_lines` were frozen at sale (core r
 | 06 | [Panel: rates editor and price check](06-panel-rates.md) | panel |
 | 07 | [Sprint close: e2e and report](07-sprint-close.md) | api |
 
-**E2E scenarios:** HRATE-01 … HRATE-05 (new); RATE-02, RATE-03, RATE-05, RATE-06 retired or rewritten (state which).
+**E2E scenarios:** HRATE-01 … HRATE-05 (new, batch B23). Retired: RATE-02, RATE-03, RATE-04, RATE-05, RATE-06. RATE-01 rewritten for the stay price check (still P2).
 
 ## Two documents, one rule
 Yacht bookings still being created during the migration (through the adapter) need the v1 shape until Sprint 19 ends. Decision for this sprint: the published rates document carries **both** `years` (v1, frozen, not editable in the UI any more) and the v2 keys. `CabinPricer` reads `years`; `RoomPricer` reads v2. Sprint 22 removes `years`.

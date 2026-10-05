@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Rms;
 
-use App\Enums\CabinCategory;
 use App\Enums\ConfigKind;
+use App\Enums\RoomTypeStatus;
 use App\Http\Requests\Rms\PriceCheckRequest;
 use App\Http\Resources\Rms\PriceCheckResource;
 use App\Http\Resources\Rms\RatesCurrentResource;
+use App\Models\RoomType;
 use App\Services\Config\ConfigValidator;
 use App\Services\Config\CurrentConfig;
-use App\Services\Pricing\CabinPricer;
+use App\Services\Pricing\GuestsInvalid;
 use App\Services\Pricing\NoRate;
-use App\Services\Pricing\Quote;
-use App\Services\Pricing\QuoteInput;
-use App\Services\Pricing\QuoteType;
+use App\Services\Pricing\StayQuoteInput;
+use App\Services\Pricing\StayQuoter;
+use App\Services\Pricing\StayReservationQuote;
 use App\Support\Config\Documents\RatesDocument;
+use App\Support\Stays\StayDates;
 
 class RatesController extends ConfigController
 {
@@ -38,31 +40,64 @@ class RatesController extends ConfigController
         PriceCheckRequest $request,
         ConfigValidator $validator,
         CurrentConfig $current,
-        CabinPricer $pricer,
+        StayQuoter $quoter,
     ): PriceCheckResource {
         $this->authorizeView();
 
         /** @var array<string, mixed> $document */
         $document = $request->validated('document');
-        $year = (int) $request->validated('year');
 
         $validator->assertValid($this->kind(), $document);
 
-        $published = $current->rates();
         $draft = RatesDocument::fromArray($document);
+        $versionId = (int) $current->version($this->kind())->id;
+
+        /** @var list<array<string, mixed>>|null $stays */
+        $stays = $request->validated('stays');
+
+        if (! is_array($stays) || $stays === []) {
+            $stays = $this->referenceStays();
+        }
 
         $scenarios = [];
 
-        foreach (self::scenarios($year) as $key => $scenario) {
-            $publishedQuote = $pricer->quote($published, $scenario['input']);
-            $draftQuote = $pricer->quote($draft, $scenario['input']);
+        foreach ($stays as $index => $stay) {
+            $input = $this->stayInput($stay, $current);
+            $room = RoomType::query()
+                ->where('code', $input->roomType)
+                ->where('status', RoomTypeStatus::Active)
+                ->orderBy('id')
+                ->first();
+
+            if (! $room instanceof RoomType) {
+                $publishedQuote = new NoRate('No room type '.$input->roomType.'.');
+                $draftQuote = $publishedQuote;
+            } else {
+                $publishedQuote = $quoter->quote($room, $this->withVersion($input, $versionId));
+                $draftQuote = $quoter->quote($room, $this->withVersion($input, null), $draft);
+            }
+
+            $nights = $input->stay->nights();
+            $nightWord = $nights === 1 ? 'night' : 'nights';
+            $key = isset($stay['id']) && is_string($stay['id']) && $stay['id'] !== ''
+                ? $stay['id']
+                : 'stay-'.$index;
 
             $scenarios[] = [
                 'key' => $key,
-                'label' => $scenario['label'],
-                'published' => $publishedQuote->toArray(),
-                'draft' => $draftQuote->toArray(),
-                'difference' => self::difference($publishedQuote, $draftQuote),
+                'label' => $input->roomType.' · '.$input->stay->checkIn()->toDateString().' · '.$nights.' '.$nightWord,
+                'input' => [
+                    'room_type' => $input->roomType,
+                    'check_in' => $input->stay->checkIn()->toDateString(),
+                    'check_out' => $input->stay->checkOut()->toDateString(),
+                    'nights' => $nights,
+                    'adults' => $input->adults,
+                    'child_ages' => $input->childAges,
+                    'rate_plan' => $input->ratePlan,
+                ],
+                'published' => $this->present($publishedQuote),
+                'draft' => $this->present($draftQuote),
+                'difference' => $this->difference($publishedQuote, $draftQuote),
             ];
         }
 
@@ -70,53 +105,101 @@ class RatesController extends ConfigController
     }
 
     /**
-     * @return array<string, array{label: string, input: QuoteInput}>
+     * @param  array<string, mixed>  $stay
      */
-    // TODO(Sprint 18): room type pricing (09 H8)
-    private static function scenarios(int $year): array
+    private function stayInput(array $stay, CurrentConfig $current): StayQuoteInput
     {
-        return [
-            'suite_2_adults' => [
-                'label' => 'Suite · 2 adults',
-                'input' => new QuoteInput($year, QuoteType::Cabin, CabinCategory::Suite, 2, 0),
-            ],
-            'suite_single' => [
-                'label' => 'Suite · 1 adult (single)',
-                'input' => new QuoteInput($year, QuoteType::Cabin, CabinCategory::Suite, 1, 0),
-            ],
-            'suite_triple' => [
-                'label' => 'Suite · 3 adults (triple)',
-                'input' => new QuoteInput($year, QuoteType::Cabin, CabinCategory::Suite, 3, 0),
-            ],
-            'suite_2_adults_1_child' => [
-                'label' => 'Suite · 2 adults + 1 child',
-                'input' => new QuoteInput($year, QuoteType::Cabin, CabinCategory::Suite, 2, 1),
-            ],
-            'owner_2_adults' => [
-                'label' => "Owner's Suite · 2 adults",
-                'input' => new QuoteInput($year, QuoteType::Cabin, CabinCategory::Owner, 2, 0),
-            ],
-            'suite_2_adults_festive' => [
-                'label' => 'Suite · 2 adults · festive',
-                'input' => new QuoteInput($year, QuoteType::Cabin, CabinCategory::Suite, 2, 0, festive: true),
-            ],
-            'charter' => [
-                'label' => 'Charter · 1 week',
-                'input' => new QuoteInput($year, QuoteType::Charter),
-            ],
-            'charter_festive' => [
-                'label' => 'Charter · festive week',
-                'input' => new QuoteInput($year, QuoteType::Charter, festive: true),
-            ],
-        ];
+        if (isset($stay['child_ages']) && is_array($stay['child_ages'])) {
+            $ages = array_values(array_map(static fn (mixed $age): int => (int) $age, $stay['child_ages']));
+        } else {
+            $count = (int) ($stay['children'] ?? 0);
+            $ages = $count > 0
+                ? array_fill(0, $count, $current->engineSettings()->guests->childMinAge)
+                : [];
+        }
+
+        return new StayQuoteInput(
+            StayDates::forNights((string) $stay['check_in'], (int) $stay['nights']),
+            (string) $stay['room_type'],
+            (int) $stay['adults'],
+            $ages,
+            (string) $stay['rate_plan'],
+        );
     }
 
-    private static function difference(Quote|NoRate $published, Quote|NoRate $draft): ?int
+    private function withVersion(StayQuoteInput $input, ?int $versionId): StayQuoteInput
     {
-        if ($published instanceof NoRate || $draft instanceof NoRate) {
+        return new StayQuoteInput(
+            $input->stay,
+            $input->roomType,
+            $input->adults,
+            $input->childAges,
+            $input->ratePlan,
+            $input->promo,
+            $versionId,
+            $input->onlineDeposit,
+        );
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function present(StayReservationQuote|NoRate|GuestsInvalid $quote): array
+    {
+        if ($quote instanceof StayReservationQuote) {
+            return $quote->quote->toArray();
+        }
+
+        if ($quote instanceof GuestsInvalid) {
+            return ['errors' => $quote->errors];
+        }
+
+        return $quote->toArray();
+    }
+
+    private function difference(
+        StayReservationQuote|NoRate|GuestsInvalid $published,
+        StayReservationQuote|NoRate|GuestsInvalid $draft,
+    ): ?int {
+        if (! $published instanceof StayReservationQuote || ! $draft instanceof StayReservationQuote) {
             return null;
         }
 
-        return $draft->total - $published->total;
+        return $draft->quote->total - $published->quote->total;
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function referenceStays(): array
+    {
+        $path = base_path('docs/requirements/examples/hotel-seed-data.json');
+        $decoded = json_decode((string) file_get_contents($path), true);
+
+        if (! is_array($decoded) || ! is_array($decoded['reference_quotes'] ?? null)) {
+            return [];
+        }
+
+        $stays = [];
+
+        foreach ($decoded['reference_quotes'] as $quote) {
+            if (! is_array($quote) || ! is_array($quote['input'] ?? null)) {
+                continue;
+            }
+
+            /** @var array<string, mixed> $input */
+            $input = $quote['input'];
+            $stays[] = [
+                'id' => (string) ($quote['id'] ?? ''),
+                'room_type' => (string) ($input['room_type'] ?? ''),
+                'check_in' => (string) ($input['check_in'] ?? ''),
+                'nights' => (int) ($input['nights'] ?? 0),
+                'adults' => (int) ($input['adults'] ?? 0),
+                'children' => (int) ($input['children'] ?? 0),
+                'rate_plan' => (string) ($input['rate_plan'] ?? ''),
+            ];
+        }
+
+        return $stays;
     }
 }

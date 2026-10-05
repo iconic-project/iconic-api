@@ -124,7 +124,7 @@ test('a published rates version is stored on the moved booking', function (): vo
     $saleVersion = $booking->rates_version_id;
     $target = ReservationFixtures::anamaraDeparture('2027-11-14');
     $document = ratesDocument();
-    $document['years'][1]['suite_pp'] = ((int) $document['years'][1]['suite_pp']) + 100;
+    $document['terms']['cabin_balance_days'] = ((int) $document['terms']['cabin_balance_days']) + 1;
     $current = app(CurrentConfig::class)->version(ConfigKind::Rates);
 
     app(ConfigPublisher::class)->publish(

@@ -25,6 +25,7 @@ class ConfigVersionDetailResource extends JsonResource
      *     version: int,
      *     document: array{
      *         currency: string,
+     *         schema_version: int,
      *         years: list<array{year: int, suite_pp: int, owner_pp: int, charter_week: int}>,
      *         terms: array{
      *             cabin_deposit_pct: int,
@@ -42,7 +43,14 @@ class ConfigVersionDetailResource extends JsonResource
      *             back_to_back_pct: int,
      *             festive_supplement_pp: int,
      *             festive_supplement_charter: int
-     *         }
+     *         },
+     *         seasons: list<array{code: string, name: string, from: string, to: string}>,
+     *         room_rates: list<array{room_type: string, season: string, nightly: int}>,
+     *         occupancy: array{extra_adult_nightly: int, extra_child_nightly: int, single_occupancy_pct: int},
+     *         day_of_week: array<string, int>,
+     *         length_of_stay: list<array{min_nights: int, discount_pct: int}>,
+     *         supplements: list<array{code: string, label: string, from: string, to: string, per_night: int, basis: string}>,
+     *         rate_plans: list<array{code: string, name: string, default: bool, adjust_pct: int, refundable: bool, deposit_pct: int, balance_days: int, cancellation: string, meal_plan: string}>
      *     }|array{
      *         commission: array{cap_pct: int, default_pct: int, payable_days_after_cruise: int},
      *         modification_fee_usd: int,
@@ -53,7 +61,8 @@ class ConfigVersionDetailResource extends JsonResource
      *         manifests: array{dpng_fit_days: int, dpng_charter_days: int, captain_days: int, chase_days_before_due: int},
      *         alerts: array{low_occupancy_pct: int, low_occupancy_days_before: int},
      *         retention: array{passport_months_after_cruise: int, medical_days_after_cruise: int},
-     *         cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>}
+     *         cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, sets: array<string, list<array{min_days: int, penalty_pct: int}>>},
+     *         taxes: list<array{code: string, label: string, basis: string, amount: int, child_exempt_under_age: int|null, charged: bool, shown_in_price_panel: bool}>
      *     }|array{
      *         guests: array{
      *             max_per_cabin: int,
