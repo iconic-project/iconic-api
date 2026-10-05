@@ -7,10 +7,11 @@ use App\Actions\Bookings\TransitionBooking;
 use App\Enums\BookingStatus;
 use App\Enums\ClaimKind;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
+use App\Models\RoomNightClaim;
 use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -38,7 +39,7 @@ function seededRequest(string $cabin = 'S3'): Booking
 test('the job expiring a request hold frees the cabin and keeps REQUESTED', function (): void {
     $booking = seededRequest();
 
-    CabinClaim::query()
+    RoomNightClaim::query()
         ->where('holder_id', $booking->id)
         ->whereNull('released_at')
         ->update(['expires_at' => now()->subMinute()]);
@@ -67,7 +68,7 @@ test('pre-insert cleanup expires a request hold the same way', function (): void
     $departure = $booking->departure;
     $cabin = $booking->cabin;
 
-    CabinClaim::query()
+    RoomNightClaim::query()
         ->where('holder_id', $booking->id)
         ->whereNull('released_at')
         ->update(['expires_at' => now()->subMinute()]);
@@ -75,7 +76,7 @@ test('pre-insert cleanup expires a request hold the same way', function (): void
     $other = ClaimHolder::query()->create(['reference' => 'NEW', 'name' => 'New']);
 
     DB::transaction(function () use ($departure, $cabin, $other): void {
-        app(ClaimService::class)->claim($departure, collect([$cabin]), $other, ClaimKind::Booking);
+        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $other, ClaimKind::Booking);
     });
 
     $booking->refresh()->load('bookingRequest');
@@ -86,7 +87,7 @@ test('pre-insert cleanup expires a request hold the same way', function (): void
 
 test('confirming after expiry re-claims or 409s when taken', function (): void {
     $booking = seededRequest('S5');
-    CabinClaim::query()->where('holder_id', $booking->id)->whereNull('released_at')
+    RoomNightClaim::query()->where('holder_id', $booking->id)->whereNull('released_at')
         ->update(['expires_at' => now()->subMinute()]);
     $this->artisan('inventory:release-expired-holds')->assertSuccessful();
 
@@ -97,16 +98,16 @@ test('confirming after expiry re-claims or 409s when taken', function (): void {
         ->assertJsonPath('request_reference', $booking->request_reference)
         ->assertJsonPath('reference', null);
 
-    expect($booking->fresh()->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->count())->toBe(1);
+    expect($booking->fresh()->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
 
     $taken = seededRequest('S6');
-    CabinClaim::query()->where('holder_id', $taken->id)->whereNull('released_at')
+    RoomNightClaim::query()->where('holder_id', $taken->id)->whereNull('released_at')
         ->update(['expires_at' => now()->subMinute()]);
     $this->artisan('inventory:release-expired-holds')->assertSuccessful();
 
     $blocker = ClaimHolder::query()->create(['reference' => 'TKN', 'name' => 'Taken']);
     DB::transaction(function () use ($taken, $blocker): void {
-        app(ClaimService::class)->claim($taken->departure, collect([$taken->cabin]), $blocker, ClaimKind::Booking);
+        app(LegacyDepartureClaims::class)->claim($taken->departure, collect([$taken->cabin]), $blocker, ClaimKind::Booking);
     });
 
     $this->actingAs($taken->owner)
@@ -121,13 +122,13 @@ test('a hold expiring between the transition read and convert still claims or 40
     $booking = seededRequest('S7');
 
     ClaimService::$beforeConvert = function () use ($booking): void {
-        CabinClaim::query()
+        RoomNightClaim::query()
             ->where('holder_type', $booking->getMorphClass())
             ->where('holder_id', $booking->id)
             ->whereNull('released_at')
             ->update(['expires_at' => now()->subMinute()]);
 
-        app(ClaimService::class)->releaseExpired();
+        app(LegacyDepartureClaims::class)->releaseExpired();
     };
 
     app(TransitionBooking::class)->handle($booking, [
@@ -136,6 +137,24 @@ test('a hold expiring between the transition read and convert still claims or 40
 
     $fresh = $booking->fresh();
     expect($fresh?->status)->toBe(BookingStatus::PendingPayment);
-    expect($fresh?->claims()->whereNull('released_at')->count())->toBe(1);
+    expect($fresh?->claims()->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(1);
     expect($fresh?->claims()->whereNull('released_at')->value('kind'))->toBe(ClaimKind::Booking);
+});
+
+test('HoldExpired sets hold_expired_at inside the same transaction (nights)', function (): void {
+    $booking = seededRequest('S5');
+
+    RoomNightClaim::query()
+        ->where('holder_id', $booking->id)
+        ->whereNull('released_at')
+        ->update(['expires_at' => now()->subMinute()]);
+
+    DB::beginTransaction();
+    app(ClaimService::class)->releaseExpired();
+
+    expect($booking->fresh()->bookingRequest?->hold_expired_at)->not->toBeNull();
+
+    DB::rollBack();
+
+    expect($booking->fresh()->bookingRequest?->hold_expired_at)->toBeNull();
 });

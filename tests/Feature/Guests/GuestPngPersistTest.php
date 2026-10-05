@@ -11,12 +11,17 @@ use App\Services\Config\CurrentConfig;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
+use Illuminate\Support\Carbon;
 use Tests\Support\Bookings\ReservationFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
     $this->seed(InventorySeeder::class);
     $this->seed(ConfigSeeder::class);
+});
+
+afterEach(function (): void {
+    Carbon::setTestNow();
 });
 
 test('a later publish of png amounts does not rewrite stored fees', function (): void {
@@ -57,6 +62,9 @@ test('a later publish of png amounts does not rewrite stored fees', function ():
 });
 
 test('moving a booking recomputes stored png from the new departure date', function (): void {
+    // 2028-11-12 is the last check-in inside a 730-day horizon from this day.
+    Carbon::setTestNow(Carbon::parse('2026-11-13 18:00:00', 'UTC'));
+
     $actor = adminUser();
     $from = ReservationFixtures::anamaraDeparture('2027-11-07');
     $to = ReservationFixtures::anamaraDeparture('2028-11-12');

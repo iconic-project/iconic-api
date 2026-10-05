@@ -4,6 +4,8 @@
 - **Users:** Lucía
 - **Start:** reset
 
+Status after sprint 17 task 07: yacht layout redirects to the night calendar. Sales Exec still has no New block, Shorten, or Release. The Year 2027 column checks below are the old grid. Task 08 rewrites them.
+
 ## Why
 Sales Exec can read inventory and must not see write controls. The API also refuses writes; this scenario checks the panel.
 

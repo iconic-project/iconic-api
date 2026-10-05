@@ -436,11 +436,21 @@ final class CommercialMetrics
 
         $sql = 'SELECT departures.id AS id, departures.`date` AS departure_date, properties.code AS property_code,
             (SELECT COUNT(*) FROM rooms WHERE rooms.property_id = departures.property_id) AS cabins,
-            (SELECT COUNT(*) FROM cabin_claims blk
-                WHERE blk.departure_id = departures.id AND blk.released_at IS NULL AND blk.kind = ?) AS blocked,
-            (SELECT COUNT(*) FROM cabin_claims cc
-                INNER JOIN bookings sb ON sb.id = cc.holder_id AND cc.holder_type = ?
-                WHERE cc.departure_id = departures.id AND cc.released_at IS NULL AND cc.kind = ?
+            (SELECT COUNT(DISTINCT rnc.room_id) FROM room_night_claims rnc
+                INNER JOIN rooms ON rooms.id = rnc.room_id
+                INNER JOIN itineraries itin ON itin.id = departures.itinerary_id
+                WHERE rooms.property_id = departures.property_id
+                  AND rnc.night >= departures.`date`
+                  AND rnc.night < DATE_ADD(departures.`date`, INTERVAL itin.nights DAY)
+                  AND rnc.released_at IS NULL AND rnc.kind = ?) AS blocked,
+            (SELECT COUNT(DISTINCT rnc.room_id) FROM room_night_claims rnc
+                INNER JOIN rooms ON rooms.id = rnc.room_id
+                INNER JOIN itineraries itin ON itin.id = departures.itinerary_id
+                INNER JOIN bookings sb ON sb.id = rnc.holder_id AND rnc.holder_type = ?
+                WHERE rooms.property_id = departures.property_id
+                  AND rnc.night >= departures.`date`
+                  AND rnc.night < DATE_ADD(departures.`date`, INTERVAL itin.nights DAY)
+                  AND rnc.released_at IS NULL AND rnc.kind = ?
                   AND sb.deleted_at IS NULL'.$soldScope.') AS sold_claims,
             (CASE WHEN EXISTS (
                 SELECT 1 FROM bookings cb
@@ -515,10 +525,14 @@ final class CommercialMetrics
 
         $sql .= ' AND (
             EXISTS (
-                SELECT 1 FROM cabin_claims cc
-                WHERE cc.holder_type = ? AND cc.holder_id = bookings.id
-                  AND cc.departure_id = bookings.departure_id
-                  AND cc.released_at IS NULL AND cc.kind = ?
+                SELECT 1 FROM room_night_claims rnc
+                INNER JOIN rooms ON rooms.id = rnc.room_id
+                INNER JOIN itineraries itin ON itin.id = departures.itinerary_id
+                WHERE rnc.holder_type = ? AND rnc.holder_id = bookings.id
+                  AND rooms.property_id = departures.property_id
+                  AND rnc.night >= departures.`date`
+                  AND rnc.night < DATE_ADD(departures.`date`, INTERVAL itin.nights DAY)
+                  AND rnc.released_at IS NULL AND rnc.kind = ?
             )
             OR (bookings.type = ? AND bookings.status IN ('.$statusIn.'))
         )';

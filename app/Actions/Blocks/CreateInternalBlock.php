@@ -7,17 +7,22 @@ namespace App\Actions\Blocks;
 use App\Actions\Action;
 use App\Enums\ClaimKind;
 use App\Enums\ReferenceType;
+use App\Enums\RoomStatus;
+use App\Enums\RoomTypeStatus;
 use App\Exceptions\CabinUnavailableException;
-use App\Models\CabinClaim;
-use App\Models\Departure;
+use App\Exceptions\RoomUnavailableException;
 use App\Models\InternalBlock;
+use App\Models\Property;
 use App\Models\Room;
+use App\Models\RoomNightClaim;
+use App\Models\RoomType;
 use App\Services\Inventory\ClaimService;
 use App\Services\References\ReferenceService;
 use App\Support\Blocks\ConflictMessage;
 use App\Support\History\History;
+use App\Support\Stays\StayDates;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
@@ -35,190 +40,202 @@ final class CreateInternalBlock extends Action
      */
     public function handle(array $data): InternalBlock
     {
-        $scopes = $this->resolveScopes($data['departures']);
-
         try {
-            return $this->transaction(function () use ($data, $scopes): InternalBlock {
+            $stay = StayDates::of((string) $data['starts_on'], (string) $data['ends_on']);
+            $resolved = $this->resolve($data);
+
+            return $this->transaction(function () use ($data, $stay, $resolved): InternalBlock {
                 $block = InternalBlock::query()->create([
                     'reference' => $this->references->next(ReferenceType::Block),
+                    'property_id' => $resolved['property']->id,
+                    'starts_on' => $stay->checkIn()->toDateString(),
+                    'ends_on' => $stay->checkOut()->toDateString(),
                     'reason' => $data['reason'],
                     'notes' => $data['notes'] ?? null,
                 ]);
 
-                foreach ($scopes as $index => $scope) {
-                    try {
-                        $this->claims->claim(
-                            $scope['departure'],
-                            $scope['cabins'],
-                            $block,
-                            ClaimKind::Block,
-                        );
-                    } catch (CabinUnavailableException $exception) {
-                        throw $this->conflictsAcross(
-                            $exception,
-                            $scope['departure'],
-                            array_slice($scopes, $index + 1),
-                            $block,
-                        );
-                    }
+                try {
+                    $claimed = $resolved['rooms'] instanceof EloquentCollection
+                        ? $this->claims->claim($stay, $resolved['rooms'], $block, ClaimKind::Block)
+                        : $this->claims->claimType($stay, $resolved['type'], $resolved['count'], $block, ClaimKind::Block);
+                } catch (RoomUnavailableException $exception) {
+                    throw $this->conflict($stay, $resolved['search'], $exception);
                 }
 
+                $roomIds = $claimed->pluck('room_id')->unique()->values()->all();
+
                 History::record($block, 'block.created', after: [
+                    'property_id' => $block->property_id,
+                    'starts_on' => $block->starts_on->toDateString(),
+                    'ends_on' => $block->ends_on->toDateString(),
                     'reason' => $block->reason->value,
                     'notes' => $block->notes,
-                    'departures' => array_map(
-                        fn (array $scope): array => [
-                            'departure_id' => $scope['departure']->id,
-                            'cabin_codes' => $scope['cabins']->pluck('code')->values()->all(),
-                        ],
-                        $scopes,
-                    ),
+                    'room_ids' => $roomIds,
                 ]);
 
                 return $block;
             });
         } catch (InvalidArgumentException $exception) {
             throw ValidationException::withMessages([
-                'departures' => [$exception->getMessage()],
+                'starts_on' => [$exception->getMessage()],
             ]);
         }
     }
 
     /**
-     * @param  list<array{departure_id: int, cabin_codes: list<string>|string}>  $departures
-     * @return list<array{departure: Departure, cabins: Collection<int, Room>}>
+     * @param  array<string, mixed>  $data
+     * @return array{property: Property, rooms: EloquentCollection<int, Room>|null, type: RoomType, count: int, search: EloquentCollection<int, Room>}
      */
-    private function resolveScopes(array $departures): array
+    private function resolve(array $data): array
     {
-        $scopes = [];
+        if (isset($data['rooms'])) {
+            $rooms = $this->rooms($data['rooms']);
 
-        foreach ($departures as $row) {
-            $departure = Departure::query()
-                ->with(['property.cabins', 'property'])
-                ->findOrFail((int) $row['departure_id']);
-
-            $codes = $row['cabin_codes'];
-            $cabins = $departure->property->cabins;
-
-            if ($codes !== 'ALL') {
-                $wanted = is_array($codes) ? $codes : [];
-                $cabins = $cabins
-                    ->filter(fn (Room $cabin): bool => in_array($cabin->code, $wanted, true))
-                    ->values();
-            }
-
-            $scopes[] = [
-                'departure' => $departure,
-                'cabins' => $cabins->sortBy('sort')->values(),
+            return [
+                'property' => $rooms->firstOrFail()->property,
+                'rooms' => $rooms,
+                'type' => $rooms->firstOrFail()->roomType,
+                'count' => $rooms->count(),
+                'search' => $rooms,
             ];
         }
 
-        return $scopes;
+        $type = RoomType::query()->with('property')->findOrFail((int) $data['room_type_id']);
+
+        if ($type->status !== RoomTypeStatus::Active) {
+            throw ValidationException::withMessages([
+                'room_type_id' => [$type->name.' is not active.'],
+            ]);
+        }
+
+        return [
+            'property' => $type->property,
+            'rooms' => null,
+            'type' => $type,
+            'count' => (int) $data['count'],
+            'search' => Room::query()
+                ->where('room_type_id', $type->id)
+                ->where('status', RoomStatus::Active)
+                ->orderBy('sort')
+                ->orderBy('id')
+                ->get(),
+        ];
     }
 
     /**
-     * @param  list<array{departure: Departure, cabins: Collection<int, Room>}>  $remaining
+     * @return EloquentCollection<int, Room>
      */
-    private function conflictsAcross(
-        CabinUnavailableException $first,
-        Departure $failed,
-        array $remaining,
-        InternalBlock $block,
-    ): CabinUnavailableException {
-        $unavailable = [];
-        $lines = [];
-
-        foreach ($first->unavailable as $row) {
-            $unavailable[] = $row;
-            $kind = ClaimKind::from($row['held_by']['kind']);
-            $lines[] = ConflictMessage::line($failed, $row['cabin']['label'], $kind);
-        }
-
-        foreach ($this->scanRemaining($remaining, $block) as $item) {
-            $unavailable[] = $item['unavailable'];
-            $lines[] = $item['line'];
-        }
-
-        return new CabinUnavailableException($unavailable, ConflictMessage::join($lines));
-    }
-
-    /**
-     * Plain SELECT of remaining requested pairs. No FOR UPDATE / lock in share mode.
-     *
-     * @param  list<array{departure: Departure, cabins: Collection<int, Room>}>  $remaining
-     * @return list<array{unavailable: array{cabin: array{id: int, code: string, label: string}, held_by: array{kind: string, holder_type: string, reference: string|null}}, line: string}>
-     */
-    private function scanRemaining(array $remaining, InternalBlock $block): array
+    private function rooms(mixed $raw): EloquentCollection
     {
-        if ($remaining === []) {
-            return [];
+        if (! is_array($raw)) {
+            throw ValidationException::withMessages([
+                'rooms' => ['Choose at least one room.'],
+            ]);
         }
 
-        $query = CabinClaim::query()
-            ->whereNull('released_at')
-            ->where(function ($outer) use ($block): void {
-                $outer->where('holder_type', '!=', $block->getMorphClass())
-                    ->orWhere('holder_id', '!=', $block->id);
-            })
-            ->where(function ($outer) use ($remaining): void {
-                foreach ($remaining as $scope) {
-                    $outer->orWhere(function ($inner) use ($scope): void {
-                        $inner->where('departure_id', $scope['departure']->id)
-                            ->whereIn('room_id', $scope['cabins']->pluck('id'));
-                    });
-                }
-            })
-            ->with(['cabin', 'departure.property', 'holder']);
+        $ids = [];
 
-        $items = [];
-
-        foreach ($query->get() as $claim) {
-            if ($this->isExpiredHold($claim)) {
-                continue;
+        foreach ($raw as $id) {
+            if (is_int($id) || (is_string($id) && ctype_digit($id))) {
+                $ids[] = (int) $id;
             }
+        }
 
-            $kind = $claim->kind;
-            $holder = $claim->holder;
+        $ids = array_values(array_unique($ids));
 
-            $items[] = [
-                'unavailable' => [
-                    'cabin' => [
-                        'id' => $claim->cabin->id,
-                        'code' => $claim->cabin->code,
-                        'label' => $claim->cabin->label,
-                    ],
-                    'held_by' => [
-                        'kind' => $kind->value,
-                        'holder_type' => $claim->holder_type,
-                        'reference' => $this->holderReference($holder),
-                    ],
+        $rooms = Room::query()
+            ->with(['property', 'roomType'])
+            ->whereIn('id', $ids)
+            ->get();
+
+        if ($rooms->count() !== count($ids)) {
+            throw ValidationException::withMessages([
+                'rooms' => ['Choose rooms that exist.'],
+            ]);
+        }
+
+        if ($rooms->pluck('property_id')->unique()->count() !== 1) {
+            throw ValidationException::withMessages([
+                'rooms' => ['Rooms must belong to one property.'],
+            ]);
+        }
+
+        $inactive = $rooms->first(fn (Room $room): bool => $room->status !== RoomStatus::Active);
+
+        if ($inactive instanceof Room) {
+            throw ValidationException::withMessages([
+                'rooms' => [$inactive->label.' is not active.'],
+            ]);
+        }
+
+        return $rooms->sortBy([['sort', 'asc'], ['id', 'asc']])->values();
+    }
+
+    /**
+     * @param  EloquentCollection<int, Room>  $rooms
+     */
+    private function conflict(StayDates $stay, EloquentCollection $rooms, RoomUnavailableException $exception): CabinUnavailableException
+    {
+        $claim = $this->firstConflict($stay, $rooms);
+
+        if (! $claim instanceof RoomNightClaim) {
+            return new CabinUnavailableException([], $exception->getMessage());
+        }
+
+        $reference = $this->holderReference($claim->holder);
+
+        return new CabinUnavailableException(
+            [[
+                'cabin' => [
+                    'id' => $claim->room->id,
+                    'code' => $claim->room->code,
+                    'label' => $claim->room->label,
                 ],
-                'line' => ConflictMessage::line($claim->departure, $claim->cabin->label, $kind),
-            ];
-        }
-
-        return $items;
+                'held_by' => [
+                    'kind' => $claim->kind->value,
+                    'holder_type' => $claim->holder_type,
+                    'reference' => $reference,
+                ],
+            ]],
+            ConflictMessage::line($claim->room->label, $claim->night, $claim->kind, $reference),
+        );
     }
 
-    private function isExpiredHold(CabinClaim $claim): bool
+    /**
+     * @param  EloquentCollection<int, Room>  $rooms
+     */
+    private function firstConflict(StayDates $stay, EloquentCollection $rooms): ?RoomNightClaim
     {
-        return $claim->kind === ClaimKind::Hold
-            && $claim->expires_at !== null
-            && $claim->expires_at->isPast();
+        if ($rooms->isEmpty()) {
+            return null;
+        }
+
+        $claims = RoomNightClaim::query()
+            ->whereIn('room_id', $rooms->modelKeys())
+            ->whereDate('night', '>=', $stay->checkIn()->toDateString())
+            ->whereDate('night', '<=', $stay->lastNight()->toDateString())
+            ->whereNull('released_at')
+            ->where(function ($query): void {
+                $query->where('kind', '!=', ClaimKind::Hold->value)
+                    ->orWhereNull('expires_at')
+                    ->orWhere('expires_at', '>=', now());
+            })
+            ->with(['room', 'holder'])
+            ->get();
+
+        $first = $claims->sortBy([
+            fn (RoomNightClaim $claim): string => $claim->night->toDateString(),
+            fn (RoomNightClaim $claim): int => $claim->room->sort,
+            fn (RoomNightClaim $claim): int => $claim->room->id,
+        ])->first();
+
+        return $first instanceof RoomNightClaim ? $first : null;
     }
 
     private function holderReference(mixed $holder): ?string
     {
         if (! $holder instanceof Model) {
             return null;
-        }
-
-        if (method_exists($holder, 'historyLabel')) {
-            $label = $holder->historyLabel();
-
-            if (is_string($label) && $label !== '') {
-                return $label;
-            }
         }
 
         $reference = $holder->getAttribute('reference');

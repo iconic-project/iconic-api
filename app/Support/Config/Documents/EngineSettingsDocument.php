@@ -20,6 +20,7 @@ final class EngineSettingsDocument extends ConfigDocument
         public readonly FeesSettings $fees,
         public readonly CopySettings $copy,
         public readonly CharterSettings $charter,
+        public readonly AvailabilitySettings $availability,
     ) {}
 
     /**
@@ -106,6 +107,9 @@ final class EngineSettingsDocument extends ConfigDocument
                 'online_deposit_advantage' => 'Online deposit advantage',
                 'online_deposit_perk' => 'Complimentary spa access aboard',
             ],
+            'availability' => [
+                'low_availability_threshold' => 3,
+            ],
             'charter' => [
                 'headline' => 'The property, entirely yours',
                 'intro' => 'One property, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.',
@@ -134,6 +138,7 @@ final class EngineSettingsDocument extends ConfigDocument
         $png = is_array($fees['png'] ?? null) ? $fees['png'] : [];
         $copy = is_array($data['copy'] ?? null) ? $data['copy'] : [];
         $charter = is_array($data['charter'] ?? null) ? $data['charter'] : [];
+        $availability = is_array($data['availability'] ?? null) ? $data['availability'] : [];
 
         $live = [];
         foreach ($locale['live'] ?? [] as $item) {
@@ -207,6 +212,11 @@ final class EngineSettingsDocument extends ConfigDocument
                 $contexts,
                 (string) ($charter['thank_you'] ?? ''),
             ),
+            new AvailabilitySettings(
+                array_key_exists('low_availability_threshold', $availability)
+                    ? (int) $availability['low_availability_threshold']
+                    : 3,
+            ),
         );
     }
 
@@ -257,7 +267,8 @@ final class EngineSettingsDocument extends ConfigDocument
      *         response_sla_hours: int,
      *         group_contexts: list<string>,
      *         thank_you: string
-     *     }
+     *     },
+     *     availability: array{low_availability_threshold: int}
      * }
      */
     public function toArray(): array
@@ -269,6 +280,7 @@ final class EngineSettingsDocument extends ConfigDocument
             'fees' => $this->fees->toArray(),
             'copy' => $this->copy->toArray(),
             'charter' => $this->charter->toArray(),
+            'availability' => $this->availability->toArray(),
         ];
     }
 
@@ -326,6 +338,8 @@ final class EngineSettingsDocument extends ConfigDocument
             'charter.group_contexts' => ['required', 'array', 'min:1', 'max:8'],
             'charter.group_contexts.*' => ['required', 'string', 'min:1', 'distinct'],
             'charter.thank_you' => ['required', 'string', 'min:1', 'max:320'],
+            'availability' => ['required', 'array'],
+            'availability.low_availability_threshold' => ['required', 'integer', 'min:0', 'max:99'],
         ];
     }
 
@@ -371,6 +385,7 @@ final class EngineSettingsDocument extends ConfigDocument
             'charter.response_sla_hours' => 'Charter response SLA',
             'charter.group_contexts' => 'Charter group contexts',
             'charter.thank_you' => 'Charter thank-you message',
+            'availability.low_availability_threshold' => 'Low availability threshold',
         ];
     }
 

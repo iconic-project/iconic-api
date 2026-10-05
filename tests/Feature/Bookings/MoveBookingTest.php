@@ -7,13 +7,13 @@ use App\Enums\ClaimKind;
 use App\Enums\ConfigKind;
 use App\Enums\HoldType;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
 use App\Models\Group;
+use App\Models\RoomNightClaim;
 use App\Services\Config\ConfigPublisher;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
-use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -169,7 +169,7 @@ test('a stale confirm_total is 409 and writes nothing', function (): void {
         ->assertJsonPath('message', 'The price changed since the preview (USD 1 → USD 26,600). Review and confirm again.');
 
     expect($booking->fresh()->departure_id)->toBe($booking->departure_id);
-    expect($booking->fresh()->claims()->whereNull('released_at')->count())->toBe(1);
+    expect($booking->fresh()->claims()->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(1);
 });
 
 test('a sold target cabin is 409 and leaves the booking unchanged', function (): void {
@@ -249,8 +249,9 @@ test('a charter moves all nine claims', function (): void {
         ->assertOk()
         ->assertJsonPath('cabin_label', 'Full property');
 
-    expect(CabinClaim::query()->where('holder_id', $id)->whereNull('released_at')->count())->toBe(9);
-    expect(CabinClaim::query()->where('holder_id', $id)->whereNull('released_at')->where('departure_id', $target->id)->count())->toBe(9);
+    $moved = RoomNightClaim::query()->where('holder_id', $id)->whereNull('released_at')->get();
+    expect($moved->pluck('room_id')->unique())->toHaveCount(9);
+    expect($moved->pluck('night')->map(fn ($night) => $night->toDateString())->unique()->contains($target->date->toDateString()))->toBeTrue();
 });
 
 test('requested with no active claim cannot be moved', function (): void {
@@ -290,7 +291,7 @@ test('a requested hold moves and keeps its expiry', function (): void {
     $expires = now()->addDays(3);
 
     DB::transaction(function () use ($departure, $cabin, $booking, $expires): void {
-        app(ClaimService::class)->claim(
+        app(LegacyDepartureClaims::class)->claim(
             $departure,
             collect([$cabin]),
             $booking,
@@ -317,9 +318,9 @@ test('a requested hold moves and keeps its expiry', function (): void {
         ])
         ->assertOk();
 
-    $claim = CabinClaim::query()->where('holder_id', $booking->id)->whereNull('released_at')->firstOrFail();
+    $claim = RoomNightClaim::query()->where('holder_id', $booking->id)->whereNull('released_at')->firstOrFail();
     expect($claim->kind)->toBe(ClaimKind::Hold);
-    expect($claim->departure_id)->toBe($target->id);
+    expect($claim->night->toDateString())->toBe($target->date->toDateString());
     expect($claim->expires_at?->getTimestamp())->toBe($expires->getTimestamp());
 });
 

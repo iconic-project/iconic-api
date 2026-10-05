@@ -15,7 +15,7 @@ use App\Models\CheckoutSession;
 use App\Models\Departure;
 use App\Models\Room;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Services\Pricing\ReservationQuote;
 use App\Services\Pricing\ReservationQuoter;
 use App\Support\Inventory\DepartureLocks;
@@ -24,7 +24,7 @@ use Illuminate\Support\Collection;
 final class CreateCheckoutSession extends Action
 {
     public function __construct(
-        private readonly ClaimService $claims,
+        private readonly LegacyDepartureClaims $claims,
         private readonly CurrentConfig $config,
         private readonly ReservationQuoter $quoter,
     ) {}

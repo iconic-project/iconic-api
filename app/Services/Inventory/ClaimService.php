@@ -5,17 +5,25 @@ declare(strict_types=1);
 namespace App\Services\Inventory;
 
 use App\Enums\ClaimKind;
+use App\Enums\ConfigKind;
 use App\Enums\HoldType;
 use App\Enums\ReleaseReason;
+use App\Enums\RoomStatus;
 use App\Events\AvailabilityChanged;
 use App\Events\HoldExpired;
-use App\Exceptions\CabinUnavailableException;
-use App\Models\CabinClaim;
-use App\Models\Departure;
+use App\Exceptions\RoomUnavailableException;
+use App\Models\InternalBlock;
 use App\Models\Room;
-use App\Support\BusinessTime;
+use App\Models\RoomNightClaim;
+use App\Models\RoomType;
+use App\Services\Config\CurrentConfig;
+use App\Support\Config\Documents\BusinessRulesDocument;
+use App\Support\Config\Documents\StayRules;
 use App\Support\History\History;
-use App\Support\Inventory\DepartureLocks;
+use App\Support\Inventory\RoomLocks;
+use App\Support\Stays\StayClock;
+use App\Support\Stays\StayDates;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +31,7 @@ use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -37,59 +46,121 @@ final class ClaimService
      */
     public static ?Closure $beforeConvert = null;
 
+    public function __construct(
+        private readonly RoomAllocator $allocator,
+        private readonly StayClock $clock,
+        private readonly CurrentConfig $config,
+    ) {}
+
     /**
-     * @param  Collection<int, Room>  $cabins
-     * @return Collection<int, CabinClaim>
+     * One claim group, one row per room per night.
+     *
+     * @param  Collection<int, Room>  $rooms
+     * @return Collection<int, RoomNightClaim>
      */
     public function claim(
-        Departure $departure,
-        Collection $cabins,
+        StayDates $stay,
+        Collection $rooms,
         Model $holder,
         ClaimKind $kind,
         ?HoldType $holdType = null,
         ?CarbonInterface $expiresAt = null,
     ): Collection {
         $this->guardTransaction();
-        $departure = DepartureLocks::lock((int) $departure->id);
-        $this->assertClaimable($departure, $kind, $holdType, $expiresAt);
+        $this->assertClaimable($stay, $holder, $kind, $holdType, $expiresAt);
 
-        $ordered = $cabins->sortBy('sort')->values();
+        $ordered = $rooms->sortBy('sort')->values();
 
-        $this->releaseExpiredHoldsFor($departure, $ordered);
-
-        try {
-            $claims = $this->insertClaims($departure, $ordered, $holder, $kind, $holdType, $expiresAt);
-        } catch (UniqueConstraintViolationException $exception) {
-            throw $this->conflictOrRethrow($exception, $departure, $ordered, $holder);
+        if ($ordered->isEmpty()) {
+            return new Collection;
         }
 
-        $this->dispatchAvailability([$departure->id]);
+        RoomLocks::lock($ordered->pluck('id'));
+        $this->releaseExpiredHoldsFor($ordered->pluck('id'), $stay);
+
+        try {
+            $claims = $this->insertClaims($ordered, $stay->eachNight(), $holder, $kind, $holdType, $expiresAt);
+        } catch (UniqueConstraintViolationException $exception) {
+            throw $this->conflictOrRethrow($exception, $stay, $ordered);
+        }
+
+        $this->dispatchStay($ordered, $stay);
 
         return $claims;
     }
 
     /**
-     * @param  Collection<int, Room>|null  $cabins
+     * Lock every active room of the type, then let the allocator pick.
+     *
+     * @return Collection<int, RoomNightClaim>
      */
-    public function release(Model $holder, ReleaseReason $reason, ?Collection $cabins = null): int
-    {
+    public function claimType(
+        StayDates $stay,
+        RoomType $type,
+        int $count,
+        Model $holder,
+        ClaimKind $kind,
+        ?HoldType $holdType = null,
+        ?CarbonInterface $expiresAt = null,
+    ): Collection {
         $this->guardTransaction();
 
-        $ids = $this->activeHolderClaimIds($holder, $cabins);
+        if ($count < 1) {
+            throw new InvalidArgumentException('A claim needs at least one room.');
+        }
 
-        if ($ids === []) {
+        $this->assertClaimable($stay, $holder, $kind, $holdType, $expiresAt);
+
+        $ids = Room::query()
+            ->where('room_type_id', $type->id)
+            ->where('status', RoomStatus::Active)
+            ->orderBy('id')
+            ->pluck('id');
+
+        RoomLocks::lock($ids);
+        $this->releaseExpiredHoldsFor($ids, $stay);
+
+        $picked = $this->allocator->pick($type, $stay, $count);
+
+        try {
+            $claims = $this->insertClaims($picked, $stay->eachNight(), $holder, $kind, $holdType, $expiresAt);
+        } catch (UniqueConstraintViolationException $exception) {
+            throw $this->conflictOrRethrow($exception, $stay, $picked);
+        }
+
+        $this->dispatchStay($picked, $stay);
+
+        return $claims;
+    }
+
+    /**
+     * @param  Collection<int, Room>|null  $rooms
+     */
+    public function release(
+        Model $holder,
+        ReleaseReason $reason,
+        ?Collection $rooms = null,
+        ?StayDates $nights = null,
+    ): int {
+        $this->guardTransaction();
+
+        $active = $this->activeHolderClaims($holder, $rooms, $nights);
+
+        if ($active->isEmpty()) {
             return 0;
         }
 
-        $released = $this->releaseByIds($ids, $reason);
-        $departureIds = CabinClaim::query()->whereIn('id', $ids)->pluck('departure_id')->unique()->values()->all();
-        $this->dispatchAvailability(array_map(intval(...), $departureIds));
+        $released = $this->releaseByIds($active->pluck('id')->all(), $reason);
+        $this->dispatchClaims($active);
 
         return $released;
     }
 
     /**
-     * @param  Collection<int, Room>|null  $cabins
+     * Moves the active nights onto the new holder. Returns the number of rooms
+     * moved (one per room per claim group), which is what a cabin count compares to.
+     *
+     * @param  Collection<int, Room>|null  $rooms
      */
     public function convert(
         Model $fromHolder,
@@ -97,7 +168,7 @@ final class ClaimService
         ClaimKind $kind,
         ?HoldType $holdType = null,
         ?CarbonInterface $expiresAt = null,
-        ?Collection $cabins = null,
+        ?Collection $rooms = null,
     ): int {
         $this->guardTransaction();
 
@@ -105,52 +176,54 @@ final class ClaimService
             (self::$beforeConvert)();
         }
 
-        $active = $this->activeHolderClaims($fromHolder, $cabins);
+        $active = $this->activeHolderClaims($fromHolder, $rooms, null);
 
         if ($active->isEmpty()) {
             return 0;
         }
 
-        DepartureLocks::lockMany(array_map(
-            intval(...),
-            $active->pluck('departure_id')->unique()->values()->all(),
-        ));
+        RoomLocks::lock($active->pluck('room_id'));
 
-        $active = $this->activeHolderClaims($fromHolder, $cabins);
+        $active = $this->activeHolderClaims($fromHolder, $rooms, null);
 
         if ($active->isEmpty()) {
             return 0;
         }
-
-        $sample = $active->first();
-        $this->assertClaimable($sample->departure, $kind, $holdType, $expiresAt);
-
-        $this->releaseByIds($active->pluck('id')->all(), ReleaseReason::Converted);
 
         $created = new Collection;
 
-        foreach ($active->groupBy('departure_id') as $group) {
-            /** @var Collection<int, CabinClaim> $group */
-            $departure = $group->first()?->departure;
-            if (! $departure instanceof Departure) {
-                continue;
-            }
+        foreach ($active->groupBy('claim_group') as $group) {
+            /** @var Collection<int, RoomNightClaim> $group */
+            $targetRooms = $group
+                ->map(fn (RoomNightClaim $claim): Room => $claim->room)
+                ->unique('id')
+                ->sortBy('sort')
+                ->values();
+            $nightDates = $group
+                ->map(fn (RoomNightClaim $claim): string => $claim->night->toDateString())
+                ->unique()
+                ->sort()
+                ->values();
+            $stay = StayDates::of(
+                (string) $nightDates->first(),
+                CarbonImmutable::parse((string) $nightDates->last())->addDay()->toDateString(),
+            );
 
-            $targetCabins = $group->map(fn (CabinClaim $claim): Room => $claim->cabin)->sortBy('sort')->values();
+            $this->assertClaimable($stay, $toHolder, $kind, $holdType, $expiresAt);
+            $this->releaseByIds($group->pluck('id')->all(), ReleaseReason::Converted);
+
             try {
                 $created = $created->concat(
-                    $this->insertClaims($departure, $targetCabins, $toHolder, $kind, $holdType, $expiresAt),
+                    $this->insertClaims($targetRooms, $nightDates, $toHolder, $kind, $holdType, $expiresAt),
                 );
             } catch (UniqueConstraintViolationException $exception) {
-                throw $this->conflictOrRethrow($exception, $departure, $targetCabins, $toHolder);
+                throw $this->conflictOrRethrow($exception, $stay, $targetRooms);
             }
         }
 
-        $this->dispatchAvailability(
-            array_map(intval(...), $active->pluck('departure_id')->unique()->values()->all()),
-        );
+        $this->dispatchClaims($created);
 
-        return $created->count();
+        return $created->unique(fn (RoomNightClaim $claim): string => $claim->claim_group.'-'.$claim->room_id)->count();
     }
 
     public function releaseExpired(): int
@@ -158,51 +231,58 @@ final class ClaimService
         $released = 0;
 
         do {
-            $batch = (int) DB::transaction(function (): int {
+            /** @var array{0: int, 1: int} $batch */
+            $batch = DB::transaction(function (): array {
                 $this->guardTransaction();
 
-                $ids = CabinClaim::query()
+                $groups = RoomNightClaim::query()
                     ->where('kind', ClaimKind::Hold)
                     ->whereNull('released_at')
                     ->where('expires_at', '<', now())
-                    ->orderBy('id')
+                    ->select('claim_group')
+                    ->distinct()
+                    ->orderBy('claim_group')
                     ->limit(500)
+                    ->pluck('claim_group');
+
+                if ($groups->isEmpty()) {
+                    return [0, 0];
+                }
+
+                $ids = RoomNightClaim::query()
+                    ->whereIn('claim_group', $groups->all())
+                    ->where('kind', ClaimKind::Hold)
+                    ->whereNull('released_at')
+                    ->where('expires_at', '<', now())
                     ->pluck('id')
                     ->all();
 
-                if ($ids === []) {
-                    return 0;
-                }
-
                 $count = $this->releaseExpiredByIds($ids);
-                $departureIds = CabinClaim::query()
-                    ->whereIn('id', $ids)
-                    ->pluck('departure_id')
-                    ->unique()
-                    ->values()
-                    ->all();
 
                 if ($count > 0) {
-                    $this->dispatchAvailability(array_map(intval(...), $departureIds));
+                    $this->dispatchClaims(
+                        RoomNightClaim::query()->whereIn('id', $ids)->with('room')->get(),
+                    );
                 }
 
-                return $count;
+                return [$groups->count(), $count];
             });
 
-            $released += $batch;
-        } while ($batch === 500);
+            $released += $batch[1];
+        } while ($batch[0] === 500);
 
         return $released;
     }
 
     /**
-     * @param  Collection<int, Room>  $cabins
+     * @param  Collection<int, int>  $roomIds
      */
-    private function releaseExpiredHoldsFor(Departure $departure, Collection $cabins): void
+    private function releaseExpiredHoldsFor(Collection $roomIds, StayDates $stay): void
     {
-        $ids = CabinClaim::query()
-            ->where('departure_id', $departure->id)
-            ->whereIn('room_id', $cabins->pluck('id'))
+        $ids = RoomNightClaim::query()
+            ->whereIn('room_id', $roomIds->all())
+            ->whereDate('night', '>=', $stay->checkIn()->toDateString())
+            ->whereDate('night', '<=', $stay->lastNight()->toDateString())
             ->where('kind', ClaimKind::Hold)
             ->whereNull('released_at')
             ->where('expires_at', '<', now())
@@ -221,33 +301,32 @@ final class ClaimService
      */
     private function releaseExpiredByIds(array $ids): int
     {
-        $released = 0;
+        if ($ids === []) {
+            return 0;
+        }
+
         $now = now();
 
-        foreach ($ids as $id) {
-            $affected = CabinClaim::query()
-                ->where('id', $id)
-                ->whereNull('released_at')
-                ->where('expires_at', '<', $now)
-                ->update([
-                    'released_at' => $now,
-                    'release_reason' => ReleaseReason::Expired,
-                    'updated_at' => $now,
-                ]);
+        $released = RoomNightClaim::query()
+            ->whereIn('id', $ids)
+            ->whereNull('released_at')
+            ->where('expires_at', '<', $now)
+            ->update([
+                'released_at' => $now,
+                'release_reason' => ReleaseReason::Expired,
+                'updated_at' => $now,
+            ]);
 
-            if ($affected !== 1) {
-                continue;
-            }
+        $claims = RoomNightClaim::query()->whereIn('id', $ids)->with('holder')->get();
 
-            $claim = CabinClaim::query()->with('holder')->find($id);
+        foreach ($claims->groupBy(fn (RoomNightClaim $claim): string => $claim->claim_group.'|'.$claim->holder_type.'|'.$claim->holder_id) as $group) {
+            $claim = $group->first();
             $holder = $claim?->holder;
 
-            if ($claim instanceof CabinClaim && $holder instanceof Model) {
+            if ($claim instanceof RoomNightClaim && $holder instanceof Model) {
                 History::record($holder, 'hold.expired', system: true);
                 HoldExpired::dispatch($holder, $claim);
             }
-
-            $released++;
         }
 
         return $released;
@@ -258,169 +337,155 @@ final class ClaimService
      */
     private function releaseByIds(array $ids, ReleaseReason $reason): int
     {
-        $now = now();
-        $released = 0;
-
-        foreach ($ids as $id) {
-            $affected = CabinClaim::query()
-                ->where('id', $id)
-                ->whereNull('released_at')
-                ->update([
-                    'released_at' => $now,
-                    'release_reason' => $reason,
-                    'updated_at' => $now,
-                ]);
-
-            $released += $affected;
+        if ($ids === []) {
+            return 0;
         }
 
-        return $released;
+        $now = now();
+
+        return RoomNightClaim::query()
+            ->whereIn('id', $ids)
+            ->whereNull('released_at')
+            ->update([
+                'released_at' => $now,
+                'release_reason' => $reason,
+                'updated_at' => $now,
+            ]);
     }
 
     /**
-     * @param  Collection<int, Room>|null  $cabins
-     * @return list<int>
+     * @param  Collection<int, Room>|null  $rooms
+     * @return Collection<int, RoomNightClaim>
      */
-    private function activeHolderClaimIds(Model $holder, ?Collection $cabins): array
+    private function activeHolderClaims(Model $holder, ?Collection $rooms, ?StayDates $nights): Collection
     {
-        return $this->activeHolderClaims($holder, $cabins)->pluck('id')->all();
-    }
-
-    /**
-     * @param  Collection<int, Room>|null  $cabins
-     * @return Collection<int, CabinClaim>
-     */
-    private function activeHolderClaims(Model $holder, ?Collection $cabins): Collection
-    {
-        $query = CabinClaim::query()
+        $query = RoomNightClaim::query()
             ->where('holder_type', $holder->getMorphClass())
             ->where('holder_id', $holder->getKey())
             ->whereNull('released_at')
-            ->with(['cabin', 'departure']);
+            ->with('room');
 
-        if ($cabins instanceof Collection) {
-            $query->whereIn('room_id', $cabins->pluck('id'));
+        if ($rooms instanceof Collection) {
+            $query->whereIn('room_id', $rooms->pluck('id'));
+        }
+
+        if ($nights instanceof StayDates) {
+            $query->whereDate('night', '>=', $nights->checkIn()->toDateString())
+                ->whereDate('night', '<=', $nights->lastNight()->toDateString());
         }
 
         return $query->get();
     }
 
     /**
-     * @param  Collection<int, Room>  $cabins
-     * @return Collection<int, CabinClaim>
+     * @param  Collection<int, Room>  $rooms
+     * @param  iterable<int, CarbonInterface|string>  $nights
+     * @return Collection<int, RoomNightClaim>
      */
     private function insertClaims(
-        Departure $departure,
-        Collection $cabins,
+        Collection $rooms,
+        iterable $nights,
         Model $holder,
         ClaimKind $kind,
         ?HoldType $holdType,
         ?CarbonInterface $expiresAt,
     ): Collection {
+        $group = (string) Str::uuid();
         $claims = new Collection;
+        $nightList = [];
 
-        foreach ($cabins as $cabin) {
-            $claims->push(CabinClaim::query()->create([
-                'departure_id' => $departure->id,
-                'room_id' => $cabin->id,
-                'holder_type' => $holder->getMorphClass(),
-                'holder_id' => $holder->getKey(),
-                'kind' => $kind,
-                'hold_type' => $holdType,
-                'expires_at' => $expiresAt,
-            ]));
+        foreach ($nights as $night) {
+            $nightList[] = $night instanceof CarbonInterface ? $night->toDateString() : $night;
+        }
+
+        foreach ($rooms as $room) {
+            foreach ($nightList as $night) {
+                $claims->push(RoomNightClaim::query()->create([
+                    'room_id' => $room->id,
+                    'night' => $night,
+                    'holder_type' => $holder->getMorphClass(),
+                    'holder_id' => $holder->getKey(),
+                    'kind' => $kind,
+                    'hold_type' => $holdType,
+                    'expires_at' => $expiresAt,
+                    'claim_group' => $group,
+                ]));
+            }
         }
 
         return $claims;
     }
 
     /**
-     * @param  Collection<int, Room>  $cabins
+     * @param  Collection<int, Room>  $rooms
      */
     private function conflictOrRethrow(
         UniqueConstraintViolationException $exception,
-        Departure $departure,
-        Collection $cabins,
-        Model $holder,
-    ): CabinUnavailableException {
-        if (! str_contains($exception->getMessage(), 'cabin_claims_active_key_unique')) {
+        StayDates $stay,
+        Collection $rooms,
+    ): RoomUnavailableException {
+        if (! str_contains($exception->getMessage(), 'room_night_claims_active_key_unique')) {
             throw $exception;
         }
 
-        return $this->unavailable($departure, $cabins, $holder);
-    }
-
-    /**
-     * @param  Collection<int, Room>  $cabins
-     */
-    private function unavailable(Departure $departure, Collection $cabins, Model $holder): CabinUnavailableException
-    {
-        $conflicts = CabinClaim::query()
-            ->where('departure_id', $departure->id)
-            ->whereIn('room_id', $cabins->pluck('id'))
+        $conflict = RoomNightClaim::query()
+            ->whereIn('room_id', $rooms->pluck('id'))
+            ->whereDate('night', '>=', $stay->checkIn()->toDateString())
+            ->whereDate('night', '<=', $stay->lastNight()->toDateString())
             ->whereNull('released_at')
-            ->where(function ($query) use ($holder): void {
-                $query->where('holder_type', '!=', $holder->getMorphClass())
-                    ->orWhere('holder_id', '!=', $holder->getKey());
+            ->where(function ($query): void {
+                $query->where('kind', '!=', ClaimKind::Hold->value)
+                    ->orWhereNull('expires_at')
+                    ->orWhere('expires_at', '>=', now());
             })
-            ->with(['cabin', 'holder'])
-            ->get()
-            ->filter(fn (CabinClaim $claim): bool => ! $this->isExpiredHold($claim));
+            ->with('room.roomType')
+            ->orderBy('night')
+            ->orderBy('room_id')
+            ->first();
 
-        $unavailable = $conflicts->map(function (CabinClaim $claim): array {
-            $holder = $claim->holder;
-
-            return [
-                'cabin' => [
-                    'id' => $claim->cabin->id,
-                    'code' => $claim->cabin->code,
-                    'label' => $claim->cabin->label,
-                ],
-                'held_by' => [
-                    'kind' => $claim->kind->value,
-                    'holder_type' => $claim->holder_type,
-                    'reference' => $this->holderReference($holder),
-                ],
-            ];
-        })->values()->all();
-
-        return new CabinUnavailableException($unavailable);
-    }
-
-    private function isExpiredHold(CabinClaim $claim): bool
-    {
-        return $claim->kind === ClaimKind::Hold
-            && $claim->expires_at !== null
-            && $claim->expires_at->isPast();
-    }
-
-    private function holderReference(?Model $holder): ?string
-    {
-        if (! $holder instanceof Model) {
-            return null;
+        if ($conflict instanceof RoomNightClaim) {
+            return new RoomUnavailableException(
+                $conflict->room->roomType->name,
+                $conflict->night->toDateString(),
+            );
         }
 
-        if (method_exists($holder, 'historyLabel')) {
-            $label = $holder->historyLabel();
+        $room = $rooms->first();
+        $room?->loadMissing('roomType');
 
-            if (is_string($label) && $label !== '') {
-                return $label;
-            }
-        }
-
-        $reference = $holder->getAttribute('reference');
-
-        return is_string($reference) && $reference !== '' ? $reference : null;
+        return new RoomUnavailableException(
+            $room instanceof Room ? $room->roomType->name : 'Room',
+            $stay->checkIn()->toDateString(),
+        );
     }
 
     private function assertClaimable(
-        Departure $departure,
+        StayDates $stay,
+        Model $holder,
         ClaimKind $kind,
         ?HoldType $holdType,
         ?CarbonInterface $expiresAt,
     ): void {
-        if ($departure->date->toDateString() < BusinessTime::now()->toDateString()) {
-            throw new InvalidArgumentException('Cannot claim a cabin on a departure in the past.');
+        $today = $this->clock->today();
+
+        if ($stay->checkIn()->toDateString() < $today->toDateString()) {
+            throw new InvalidArgumentException('Cannot claim a room on a night in the past.');
+        }
+
+        $rules = $this->stayRules();
+
+        if (! $holder instanceof InternalBlock) {
+            $nights = $stay->nights();
+
+            if ($nights < $rules->minNights || $nights > $rules->maxNights) {
+                throw new InvalidArgumentException(
+                    'A stay must be between '.$rules->minNights.' and '.$rules->maxNights.' nights.',
+                );
+            }
+        }
+
+        if ($stay->checkIn()->toDateString() > $today->addDays($rules->bookingHorizonDays)->toDateString()) {
+            throw new InvalidArgumentException('Check-in is outside the booking horizon.');
         }
 
         if ($kind === ClaimKind::Hold) {
@@ -448,18 +513,54 @@ final class ClaimService
         }
     }
 
-    /**
-     * @param  list<int>  $departureIds
-     */
-    private function dispatchAvailability(array $departureIds): void
+    private function stayRules(): StayRules
     {
-        $ids = array_values(array_unique(array_filter($departureIds, fn (int $id): bool => $id > 0)));
+        if (! $this->config->has(ConfigKind::BusinessRules)) {
+            return BusinessRulesDocument::fromArray(BusinessRulesDocument::initial())->stay;
+        }
 
-        if ($ids === []) {
+        return $this->config->businessRules()->stay;
+    }
+
+    /**
+     * @param  Collection<int, Room>  $rooms
+     */
+    private function dispatchStay(Collection $rooms, StayDates $stay): void
+    {
+        foreach ($rooms->pluck('property_id')->unique() as $propertyId) {
+            AvailabilityChanged::dispatch((int) $propertyId, $stay);
+        }
+    }
+
+    /**
+     * @param  Collection<int, RoomNightClaim>  $claims
+     */
+    private function dispatchClaims(Collection $claims): void
+    {
+        if ($claims->isEmpty()) {
             return;
         }
 
-        AvailabilityChanged::dispatch($ids);
+        $rooms = Room::query()->whereIn('id', $claims->pluck('room_id')->unique()->all())->get()->keyBy('id');
+
+        foreach ($claims as $claim) {
+            $room = $rooms->get($claim->room_id);
+
+            if ($room instanceof Room) {
+                $claim->setRelation('room', $room);
+            }
+        }
+
+        foreach ($claims->groupBy(fn (RoomNightClaim $claim): int => (int) $claim->room->property_id) as $propertyId => $group) {
+            /** @var Collection<int, RoomNightClaim> $group */
+            $from = $group->min(fn (RoomNightClaim $claim): string => $claim->night->toDateString());
+            $last = $group->max(fn (RoomNightClaim $claim): string => $claim->night->toDateString());
+
+            AvailabilityChanged::dispatch(
+                (int) $propertyId,
+                StayDates::of((string) $from, CarbonImmutable::parse((string) $last)->addDay()->toDateString()),
+            );
+        }
     }
 
     private function guardTransaction(): void

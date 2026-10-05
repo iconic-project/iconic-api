@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Actions\Blocks\CreateInternalBlock;
 use App\Enums\BlockReason;
-use App\Enums\ClaimKind;
 use App\Enums\ReferenceType;
 use App\Models\Departure;
 use App\Models\InternalBlock;
 use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\Room;
-use App\Services\Inventory\ClaimService;
 use App\Services\References\ReferenceService;
 use App\Support\Departures\SeedMapper as DepartureSeedMapper;
-use App\Support\History\History;
 use App\Support\Itineraries\SeedMapper;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -79,6 +77,10 @@ final class DemoInventorySeeder extends Seeder
 
     private function seedDemoBlock(): void
     {
+        if (InternalBlock::query()->where('reference', 'BLK-001')->exists()) {
+            return;
+        }
+
         $departure = Departure::query()
             ->where('reference', 'DEP-003')
             ->with('property.cabins')
@@ -92,35 +94,16 @@ final class DemoInventorySeeder extends Seeder
             ->filter(fn (Room $cabin): bool => in_array($cabin->code, ['S7', 'S8'], true))
             ->sortBy('sort')
             ->values();
+        $stay = $departure->stayDates();
 
-        DB::transaction(function () use ($departure, $cabins): void {
-            $block = InternalBlock::query()->firstOrCreate(
-                ['reference' => 'BLK-001'],
-                [
-                    'reason' => BlockReason::FamTrip,
-                    'notes' => 'Virtuoso agents fam — 4 pax',
-                ],
-            );
-
-            if ($block->claims()->whereNull('released_at')->doesntExist()) {
-                app(ClaimService::class)->claim(
-                    $departure,
-                    $cabins,
-                    $block,
-                    ClaimKind::Block,
-                );
-
-                if ($block->wasRecentlyCreated) {
-                    History::record($block, 'block.created', after: [
-                        'reason' => $block->reason->value,
-                        'notes' => $block->notes,
-                        'departures' => [[
-                            'departure_id' => $departure->id,
-                            'cabin_codes' => ['S7', 'S8'],
-                        ]],
-                    ]);
-                }
-            }
+        DB::transaction(function () use ($stay, $cabins): void {
+            app(CreateInternalBlock::class)->handle([
+                'starts_on' => $stay->checkIn()->toDateString(),
+                'ends_on' => $stay->checkOut()->toDateString(),
+                'rooms' => $cabins->pluck('id')->all(),
+                'reason' => BlockReason::FamTrip->value,
+                'notes' => 'Virtuoso agents fam — 4 pax',
+            ]);
 
             app(ReferenceService::class)->ensureAtLeast(ReferenceType::Block, 1);
         });

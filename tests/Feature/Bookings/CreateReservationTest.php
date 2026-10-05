@@ -7,10 +7,10 @@ use App\Enums\BookingStatus;
 use App\Enums\ClaimKind;
 use App\Enums\Permission;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
 use App\Models\Group;
 use App\Models\Role;
+use App\Models\RoomNightClaim;
 use App\Models\User;
 use App\Services\Inventory\Availability;
 use Database\Seeders\ConfigSeeder;
@@ -48,7 +48,7 @@ test('one cabin creates a pending booking and a BOOKING claim', function (): voi
 
     expect(Booking::query()->count())->toBe(1);
     expect(Group::query()->count())->toBe(0);
-    expect(CabinClaim::query()->where('kind', ClaimKind::Booking)->whereNull('released_at')->count())->toBe(1);
+    expect(RoomNightClaim::query()->where('kind', ClaimKind::Booking)->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(1);
 
     $snapshot = app(Availability::class)->forDepartures(collect([$departure]))[$departure->id];
     $s1 = collect($snapshot->cabins)->firstWhere('cabin.code', 'S1');
@@ -74,7 +74,7 @@ test('three cabins create one group and three bookings', function (): void {
 
     $group = Group::query()->firstOrFail();
     expect($group->bookings)->toHaveCount(3);
-    expect(CabinClaim::query()->where('kind', ClaimKind::Booking)->whereNull('released_at')->count())->toBe(3);
+    expect(RoomNightClaim::query()->where('kind', ClaimKind::Booking)->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(3);
     expect(ChangeHistory::query()->where('event', 'group.created')->count())->toBe(1);
     expect(ChangeHistory::query()->where('event', 'booking.created')->count())->toBe(3);
 });
@@ -96,7 +96,7 @@ test('a charter claims all nine cabins under one booking', function (): void {
 
     $booking = Booking::query()->firstOrFail();
     expect($booking->room_id)->toBeNull();
-    expect($booking->claims()->whereNull('released_at')->count())->toBe(9);
+    expect($booking->claims()->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(9);
 });
 
 test('an existing group on another departure is 422', function (): void {
@@ -165,15 +165,18 @@ test('a visible existing group accepts a single cabin', function (): void {
 test('a taken cabin is 409 and nothing is created', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
 
+    $room = $departure->property->rooms()->where('code', 'S1')->firstOrFail();
+    $stay = $departure->stayDates();
+
     $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
         'reason' => BlockReason::Courtesy->value,
-        'departures' => [
-            ['departure_id' => $departure->id, 'cabin_codes' => ['S1']],
-        ],
+        'starts_on' => $stay->checkIn()->toDateString(),
+        'ends_on' => $stay->checkOut()->toDateString(),
+        'rooms' => [$room->id],
     ])->assertCreated();
 
     $bookingsBefore = Booking::query()->count();
-    $claimsBefore = CabinClaim::query()->count();
+    $claimsBefore = RoomNightClaim::query()->count();
     $sequencesBefore = DB::table('reference_sequences')->orderBy('scope')->pluck('last_value', 'scope')->all();
 
     $this->actingAs(managerUser())
@@ -182,7 +185,7 @@ test('a taken cabin is 409 and nothing is created', function (): void {
         ->assertJsonPath('unavailable.0.cabin.code', 'S1');
 
     expect(Booking::query()->count())->toBe($bookingsBefore);
-    expect(CabinClaim::query()->count())->toBe($claimsBefore);
+    expect(RoomNightClaim::query()->count())->toBe($claimsBefore);
     expect(DB::table('reference_sequences')->orderBy('scope')->pluck('last_value', 'scope')->all())->toBe($sequencesBefore);
 });
 

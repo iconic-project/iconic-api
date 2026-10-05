@@ -7,7 +7,7 @@ namespace App\Support\Bookings;
 use App\Enums\ClaimKind;
 use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessHours;
 use App\Support\Iso;
@@ -62,12 +62,12 @@ final class RequestSummary
         ];
     }
 
-    public static function holdClaim(Booking $booking): ?CabinClaim
+    public static function holdClaim(Booking $booking): ?RoomNightClaim
     {
         $booking->loadMissing('activeClaims');
 
         return $booking->activeClaims
-            ->filter(fn (CabinClaim $claim): bool => $claim->kind === ClaimKind::Hold)
+            ->filter(fn (RoomNightClaim $claim): bool => $claim->kind === ClaimKind::Hold)
             ->sortByDesc('id')
             ->first();
     }

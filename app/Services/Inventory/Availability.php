@@ -9,16 +9,15 @@ use App\Enums\ClaimKind;
 use App\Enums\DepartureStatus;
 use App\Enums\EngineLabelCode;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\InternalBlock;
+use App\Models\RoomNightClaim;
 use App\Support\Inventory\DepartureLocks;
+use App\Support\Inventory\DepartureNightClaims;
 use App\Support\Inventory\DepartureSnapshot;
 use App\Support\Inventory\EngineLabel;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 
 final class Availability
@@ -39,24 +38,12 @@ final class Availability
 
         $models->loadMissing(['property.cabins.roomType', 'itinerary']);
 
-        $claims = CabinClaim::query()
-            ->whereIn('departure_id', $models->modelKeys())
-            ->with(['cabin', 'holder' => function (Relation $morph): void {
-                if ($morph instanceof MorphTo) {
-                    $morph->morphWith([
-                        Booking::class => ['owner', 'bookingRequest'],
-                    ]);
-                }
-            }])
-            ->get()
-            ->groupBy('departure_id');
+        $claims = DepartureNightClaims::byDeparture($models);
 
         $result = [];
 
         foreach ($models as $departure) {
-            /** @var Collection<int, CabinClaim> $group */
-            $group = $claims->get($departure->id, new Collection);
-            $result[$departure->id] = $this->forOne($departure, $group);
+            $result[$departure->id] = $this->forOne($departure, $claims[$departure->id] ?? new Collection);
         }
 
         return $result;
@@ -106,14 +93,14 @@ final class Availability
     }
 
     /**
-     * @param  Collection<int, CabinClaim>  $claims
+     * @param  Collection<int, RoomNightClaim>  $claims
      */
     private function forOne(Departure $departure, Collection $claims): DepartureSnapshot
     {
         $cabins = $departure->property->cabins;
         $activeByCabin = $claims
-            ->filter(fn (CabinClaim $claim): bool => $claim->released_at === null)
-            ->filter(fn (CabinClaim $claim): bool => ! $this->isExpiredHold($claim))
+            ->filter(fn (RoomNightClaim $claim): bool => $claim->released_at === null)
+            ->filter(fn (RoomNightClaim $claim): bool => ! $this->isExpiredHold($claim))
             ->keyBy('room_id');
 
         $rows = [];
@@ -135,7 +122,7 @@ final class Availability
                     'category' => $cabin->roomType->code,
                 ],
                 'state' => $state->value,
-                'claim' => $claim instanceof CabinClaim ? $this->claimSummary($claim) : null,
+                'claim' => $claim instanceof RoomNightClaim ? $this->claimSummary($claim) : null,
             ];
 
             match ($state) {
@@ -153,7 +140,7 @@ final class Availability
                 }
             }
 
-            if ($state === CabinState::Sold && $claim instanceof CabinClaim) {
+            if ($state === CabinState::Sold && $claim instanceof RoomNightClaim) {
                 $soldHolderKeys[] = $claim->holder_type.'|'.$claim->holder_id;
             }
         }
@@ -187,9 +174,9 @@ final class Availability
         );
     }
 
-    private function state(?CabinClaim $claim): CabinState
+    private function state(?RoomNightClaim $claim): CabinState
     {
-        if (! $claim instanceof CabinClaim) {
+        if (! $claim instanceof RoomNightClaim) {
             return CabinState::Free;
         }
 
@@ -203,7 +190,7 @@ final class Availability
     /**
      * @return array{kind: string, hold_type: string|null, expires_at: string|null, holder: array{type: string, id: int, reference: string|null, label: string|null, detail: array{reason: string, reason_label: string}|array{status: string, type: string, segment: string, display_reference: string|null, owner_id: int, owner_name: string, party_label: string, hold_expired: bool}|null}}
      */
-    private function claimSummary(CabinClaim $claim): array
+    private function claimSummary(RoomNightClaim $claim): array
     {
         $holder = $claim->holder;
 
@@ -287,7 +274,7 @@ final class Availability
         return is_string($value) && $value !== '' ? $value : null;
     }
 
-    private function isExpiredHold(CabinClaim $claim): bool
+    private function isExpiredHold(RoomNightClaim $claim): bool
     {
         return $claim->kind === ClaimKind::Hold
             && $claim->expires_at !== null

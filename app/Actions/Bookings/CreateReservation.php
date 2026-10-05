@@ -20,7 +20,7 @@ use App\Models\Group;
 use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Services\Pricing\QuotedParty;
 use App\Services\Pricing\ReservationQuote;
 use App\Services\Pricing\ReservationQuoter;
@@ -30,7 +30,9 @@ use App\Support\Bookings\ReservationCreated;
 use App\Support\Bookings\SoldOn;
 use App\Support\Commissions\FreezeCommission;
 use App\Support\History\History;
+use App\Support\Inventory\AppliedRestrictionOverride;
 use App\Support\Inventory\DepartureLocks;
+use App\Support\Inventory\StaffStayRestrictions;
 use App\Support\Money;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
@@ -41,9 +43,10 @@ final class CreateReservation extends Action
         private ReservationQuoter $quoter,
         private ResolveContact $contacts,
         private ReferenceService $references,
-        private ClaimService $claims,
+        private LegacyDepartureClaims $claims,
         private CurrentConfig $config,
         private FreezeCommission $commissions,
+        private StaffStayRestrictions $stayRestrictions,
     ) {}
 
     /**
@@ -64,6 +67,14 @@ final class CreateReservation extends Action
                     'cabins' => $quote->errors(),
                 ]);
             }
+
+            $rooms = $quote->type === BookingType::Charter
+                ? $departure->property->cabins
+                : array_map(
+                    fn (QuotedParty $party): Room => $this->requireCabin($party),
+                    $quote->parties,
+                );
+            $override = $this->stayRestrictions->check($rooms, $departure->stayDates(), $actor, $data);
 
             $contact = $this->contacts->handle($data['client']);
             $group = $this->resolveGroup($data, $quote, $contact, $actor, $departure);
@@ -95,6 +106,7 @@ final class CreateReservation extends Action
                         : null,
                     $data,
                     $commission,
+                    $override,
                 );
 
                 $cabins = $quote->type === BookingType::Charter
@@ -191,6 +203,7 @@ final class CreateReservation extends Action
         ?string $notes,
         array $data,
         ?array $commission,
+        ?AppliedRestrictionOverride $override = null,
     ): Booking {
         $priced = $party->quote;
 
@@ -254,7 +267,11 @@ final class CreateReservation extends Action
             $createdAfter['commission_offers'] = $commission['offer_codes'];
         }
 
-        History::record($booking, 'booking.created', after: $createdAfter);
+        if ($override !== null) {
+            $createdAfter['override_restrictions'] = $override->codes;
+        }
+
+        History::record($booking, 'booking.created', after: $createdAfter, reason: $override?->reason);
 
         BookingCreated::dispatch($booking);
 
@@ -295,10 +312,12 @@ final class CreateReservation extends Action
         $lines = [];
 
         foreach ($exception->unavailable as $row) {
+            $reference = $row['held_by']['reference'] ?? null;
             $lines[] = ConflictMessage::line(
-                $departure,
                 $row['cabin']['label'],
+                $departure->date,
                 ClaimKind::from($row['held_by']['kind']),
+                is_string($reference) ? $reference : null,
             );
         }
 

@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
-use App\Enums\ItineraryStatus;
-use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
-use App\Models\Departure;
-use App\Models\Itinerary;
 use App\Models\Property;
+use App\Models\RoomNightClaim;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\User;
 use Database\Seeders\InventorySeeder;
+use Illuminate\Support\Str;
 use Database\Seeders\RolesSeeder;
 use Tests\Support\Inventory\ClaimHolder;
 
@@ -149,22 +147,15 @@ test('deactivating a room type refuses while a future claim exists', function ()
     $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     $type = RoomType::query()->where('property_id', $property->id)->where('code', 'SUITE')->firstOrFail();
     $room = $type->rooms()->firstOrFail();
-    $departure = Departure::factory()->create([
-        'property_id' => $property->id,
-        'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
-        'date' => '2028-04-02',
-    ]);
     $holder = ClaimHolder::query()->create(['reference' => 'CLM-001', 'name' => 'CLM-001']);
 
-    CabinClaim::query()->create([
-        'departure_id' => $departure->id,
+    RoomNightClaim::query()->create([
         'room_id' => $room->id,
+        'night' => '2028-04-02',
         'holder_type' => 'claim_holder',
         'holder_id' => $holder->id,
         'kind' => ClaimKind::Booking,
-        'hold_type' => null,
-        'expires_at' => null,
-        'released_at' => null,
+        'claim_group' => (string) Str::uuid(),
     ]);
 
     $this->actingAs(adminUser())
@@ -230,18 +221,14 @@ test('an admin can create, update and deactivate a room', function (): void {
 
 test('deactivating a room refuses while a future claim exists', function (): void {
     $room = Room::query()->where('code', 'S1')->firstOrFail();
-    $departure = Departure::factory()->create([
-        'property_id' => $room->property_id,
-        'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
-        'date' => '2028-04-02',
-    ]);
     $holder = ClaimHolder::query()->create(['reference' => 'CLM-002', 'name' => 'CLM-002']);
 
-    CabinClaim::query()->create([
-        'departure_id' => $departure->id,
+    RoomNightClaim::query()->create([
         'room_id' => $room->id,
+        'night' => '2028-04-02',
         'holder_type' => 'claim_holder',
         'holder_id' => $holder->id,
+        'claim_group' => (string) Str::uuid(),
         'kind' => ClaimKind::Hold,
         'hold_type' => HoldType::Web,
         'expires_at' => now()->addHour(),

@@ -16,14 +16,14 @@ use App\Events\BookingChargesChanged;
 use App\Exceptions\CabinUnavailableException;
 use App\Exceptions\ConflictException;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\Group;
 use App\Models\Room;
+use App\Models\RoomNightClaim;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
-use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Services\Pricing\Quote;
 use App\Services\Pricing\ReservationQuoter;
 use App\Support\Blocks\ConflictMessage;
@@ -33,6 +33,7 @@ use App\Support\Dates\Format;
 use App\Support\Guests\ApplyPng;
 use App\Support\History\History;
 use App\Support\Inventory\DepartureSnapshot;
+use App\Support\Inventory\StaffStayRestrictions;
 use App\Support\Money;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
@@ -48,10 +49,11 @@ final class MoveBooking extends Action
 
     public function __construct(
         private ReservationQuoter $quoter,
-        private ClaimService $claims,
+        private LegacyDepartureClaims $claims,
         private CurrentConfig $config,
         private Availability $availability,
         private ApplyPng $png,
+        private StaffStayRestrictions $stayRestrictions,
     ) {}
 
     /**
@@ -119,6 +121,11 @@ final class MoveBooking extends Action
                 );
             }
 
+            $rooms = $booking->type === BookingType::Charter
+                ? $target->property->cabins
+                : $target->property->cabins->where('code', $cabinCode)->values();
+            $override = $this->stayRestrictions->check($rooms, $target->stayDates(), $actor, $data);
+
             $before = $this->historySnapshot($booking);
 
             $this->moveClaims($booking, $target, $cabinCode);
@@ -137,7 +144,21 @@ final class MoveBooking extends Action
             $booking->load(['departure.property', 'cabin']);
             $this->png->toBooking($booking);
 
-            History::record($booking, 'booking.moved', before: $before, after: $this->historySnapshot($booking), actor: $actor);
+            $movedAfter = $override === null
+                ? $this->historySnapshot($booking)
+                : [
+                    ...$this->historySnapshot($booking),
+                    'override_restrictions' => $override->codes,
+                ];
+
+            History::record(
+                $booking,
+                'booking.moved',
+                before: $before,
+                after: $movedAfter,
+                reason: $override?->reason,
+                actor: $actor,
+            );
 
             BookingChargesChanged::dispatch($booking, 'Moved — reprice');
 
@@ -348,16 +369,16 @@ final class MoveBooking extends Action
     private function moveClaims(Booking $booking, Departure $target, ?string $cabinCode): void
     {
         $active = $booking->claims->filter(
-            fn (CabinClaim $claim): bool => $claim->released_at === null,
+            fn (RoomNightClaim $claim): bool => $claim->released_at === null,
         );
-        $hold = $active->first(fn (CabinClaim $claim): bool => $claim->kind === ClaimKind::Hold);
+        $hold = $active->first(fn (RoomNightClaim $claim): bool => $claim->kind === ClaimKind::Hold);
 
         $this->claims->release($booking, ReleaseReason::Moved);
 
         $cabins = $this->targetCabins($booking, $target, $cabinCode);
 
         try {
-            if ($booking->status === BookingStatus::Requested && $hold instanceof CabinClaim) {
+            if ($booking->status === BookingStatus::Requested && $hold instanceof RoomNightClaim) {
                 $this->claims->claim(
                     $target,
                     $cabins,
@@ -399,7 +420,7 @@ final class MoveBooking extends Action
     private function hasActiveClaim(Booking $booking): bool
     {
         return $booking->claims->contains(
-            fn (CabinClaim $claim): bool => $claim->released_at === null,
+            fn (RoomNightClaim $claim): bool => $claim->released_at === null,
         );
     }
 
@@ -445,7 +466,13 @@ final class MoveBooking extends Action
             $kind = ClaimKind::tryFrom((string) ($row['claim']['kind'] ?? ClaimKind::Booking->value))
                 ?? ClaimKind::Booking;
             $label = (string) $row['cabin']['label'];
-            $lines[] = ConflictMessage::line($target, $label, $kind);
+            $reference = $row['claim']['holder']['reference'] ?? null;
+            $lines[] = ConflictMessage::line(
+                $label,
+                $target->date,
+                $kind,
+                is_string($reference) ? $reference : null,
+            );
             $unavailable[] = [
                 'cabin' => [
                     'id' => 0,
@@ -468,10 +495,12 @@ final class MoveBooking extends Action
         $lines = [];
 
         foreach ($exception->unavailable as $row) {
+            $reference = $row['held_by']['reference'] ?? null;
             $lines[] = ConflictMessage::line(
-                $departure,
                 $row['cabin']['label'],
+                $departure->date,
                 ClaimKind::from($row['held_by']['kind']),
+                is_string($reference) ? $reference : null,
             );
         }
 

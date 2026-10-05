@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Support\Inventory\BackfillClosedDepartureRestrictions;
+use App\Support\Inventory\BackfillRoomNightClaims;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use RuntimeException;
@@ -58,5 +60,8 @@ class DatabaseSeeder extends Seeder
         $this->call(DemoConsentsSeeder::class);
         $this->call(DemoExtrasSeeder::class);
         $this->call(DemoDocumentsSeeder::class);
+
+        app(BackfillRoomNightClaims::class)->run();
+        BackfillClosedDepartureRestrictions::run();
     }
 }

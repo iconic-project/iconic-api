@@ -24,6 +24,7 @@ enum Permission: string
     case BookingsChangeStatus = 'bookings.change_status';
     case BookingsMove = 'bookings.move';
     case BookingsDelete = 'bookings.delete';
+    case BookingsOverrideRestrictions = 'bookings.override_restrictions';
 
     case RequestsConfirm = 'requests.confirm';
     case RequestsRelease = 'requests.release';
@@ -32,6 +33,7 @@ enum Permission: string
     case PropertiesManage = 'properties.manage';
     case ItinerariesManage = 'itineraries.manage';
     case BlocksManage = 'blocks.manage';
+    case InventoryManageRestrictions = 'inventory.manage_restrictions';
 
     case RatesManage = 'rates.manage';
     case RulesView = 'rules.view';
@@ -77,12 +79,14 @@ enum Permission: string
             self::BookingsChangeStatus => 'Change reservation status',
             self::BookingsMove => 'Move reservation',
             self::BookingsDelete => 'Delete reservation',
+            self::BookingsOverrideRestrictions => 'Override sell restrictions',
             self::RequestsConfirm => 'Confirm requests',
             self::RequestsRelease => 'Release requests',
             self::DeparturesManage => 'Manage departures',
             self::PropertiesManage => 'Manage properties',
             self::ItinerariesManage => 'Manage itineraries',
             self::BlocksManage => 'Manage internal blocks',
+            self::InventoryManageRestrictions => 'Manage sell restrictions',
             self::RatesManage => 'Edit rates, deposit terms and discount rules',
             self::RulesView => 'View business rules',
             self::RulesManage => 'View and adjust business rules',
@@ -123,13 +127,15 @@ enum Permission: string
             self::BookingsCreate,
             self::BookingsChangeStatus,
             self::BookingsMove,
-            self::BookingsDelete => 'bookings',
+            self::BookingsDelete,
+            self::BookingsOverrideRestrictions => 'bookings',
             self::RequestsConfirm,
             self::RequestsRelease => 'requests',
             self::DeparturesManage,
             self::PropertiesManage,
             self::ItinerariesManage,
-            self::BlocksManage => 'inventory',
+            self::BlocksManage,
+            self::InventoryManageRestrictions => 'inventory',
             self::RatesManage,
             self::RulesView,
             self::RulesManage,

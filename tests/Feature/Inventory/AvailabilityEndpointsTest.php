@@ -6,12 +6,13 @@ use App\Enums\ClaimKind;
 use App\Enums\DepartureStatus;
 use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Property;
 use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\DemoInventorySeeder;
 use Database\Seeders\InventorySeeder;
@@ -127,7 +128,7 @@ test('a hold claim has a null holder detail', function (): void {
     $cabin = $property->cabins()->where('code', 'S1')->firstOrFail();
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
-        app(ClaimService::class)->claim(
+        app(LegacyDepartureClaims::class)->claim(
             $departure,
             collect([$cabin]),
             $holder,
@@ -202,7 +203,7 @@ test('kpis are computed over the filtered set not the page', function (): void {
     $owner = $full->property->cabins()->where('code', 'OWNER')->get();
 
     DB::transaction(function () use ($full, $holderA, $holderB, $suites, $owner): void {
-        $service = app(ClaimService::class);
+        $service = app(LegacyDepartureClaims::class);
         $service->claim($full, $suites, $holderA, ClaimKind::Booking);
         $service->claim($full, $owner, $holderB, ClaimKind::Booking);
     });
@@ -228,7 +229,7 @@ test('an expired unreleased hold counts as free', function (): void {
     $cabin = $property->cabins()->where('code', 'S1')->firstOrFail();
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
-        app(ClaimService::class)->claim(
+        app(LegacyDepartureClaims::class)->claim(
             $departure,
             collect([$cabin]),
             $holder,
@@ -238,7 +239,7 @@ test('an expired unreleased hold counts as free', function (): void {
         );
     });
 
-    CabinClaim::query()->where('holder_id', $holder->id)->update([
+    RoomNightClaim::query()->where('holder_id', $holder->id)->update([
         'expires_at' => now()->subMinute(),
     ]);
 

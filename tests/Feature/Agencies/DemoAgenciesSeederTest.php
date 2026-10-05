@@ -49,5 +49,5 @@ test('demo agencies seed is idempotent and attaches the prototype fixtures', fun
     expect($held->status)->toBe(BookingStatus::OnHoldAgency);
     expect($held->commission_pct)->toBe(15);
     expect($held->commission_approved)->toBeFalse();
-    expect($held->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->count())->toBe(1);
+    expect($held->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
 });

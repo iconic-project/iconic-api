@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Requests\Rms;
 
 use App\Enums\BlockReason;
-use App\Support\Blocks\ScopeSummary;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Validator;
 
 class StoreInternalBlockRequest extends FormRequest
 {
@@ -23,54 +21,14 @@ class StoreInternalBlockRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'starts_on' => ['required', 'date_format:Y-m-d'],
+            'ends_on' => ['required', 'date_format:Y-m-d', 'after:starts_on'],
             'reason' => ['required', Rule::enum(BlockReason::class)],
             'notes' => ['sometimes', 'nullable', 'string', 'max:500'],
-            'departures' => ['required', 'array', 'min:1', 'max:20'],
-            'departures.*.departure_id' => ['required', 'integer', 'distinct', 'exists:departures,id'],
-            'departures.*.cabin_codes' => ['required'],
+            'rooms' => ['required_without:room_type_id', 'prohibits:room_type_id,count', 'array', 'min:1'],
+            'rooms.*' => ['integer', 'distinct', 'exists:rooms,id'],
+            'room_type_id' => ['required_without:rooms', 'prohibits:rooms', 'integer', 'exists:room_types,id'],
+            'count' => ['required_with:room_type_id', 'integer', 'min:1'],
         ];
-    }
-
-    public function withValidator(Validator $validator): void
-    {
-        $validator->after(function (Validator $after): void {
-            $departures = $this->input('departures');
-
-            if (! is_array($departures)) {
-                return;
-            }
-
-            foreach ($departures as $index => $row) {
-                if (! is_array($row) || ! array_key_exists('cabin_codes', $row)) {
-                    continue;
-                }
-
-                $codes = $row['cabin_codes'];
-
-                if ($codes === 'ALL') {
-                    continue;
-                }
-
-                if (! is_array($codes) || $codes === []) {
-                    $after->errors()->add(
-                        "departures.{$index}.cabin_codes",
-                        'Cabin codes must be ALL or a list of S1–S8 / OWNER.',
-                    );
-
-                    continue;
-                }
-
-                foreach ($codes as $code) {
-                    if (! is_string($code) || ! in_array($code, ScopeSummary::ALL_CABIN_CODES, true)) {
-                        $after->errors()->add(
-                            "departures.{$index}.cabin_codes",
-                            'Cabin codes must be S1–S8, OWNER, or ALL.',
-                        );
-
-                        break;
-                    }
-                }
-            }
-        });
     }
 }

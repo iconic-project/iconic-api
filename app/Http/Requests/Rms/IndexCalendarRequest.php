@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Rms;
 
+use App\Services\Inventory\NightAvailability;
 use App\Support\BusinessTime;
+use App\Support\Stays\StayDates;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Validator;
+use InvalidArgumentException;
 
 class IndexCalendarRequest extends FormRequest
 {
@@ -32,6 +35,12 @@ class IndexCalendarRequest extends FormRequest
     {
         $validator->after(function (Validator $validator): void {
             [$from, $to] = $this->range();
+
+            if ($this->filled('property_id')) {
+                $this->validateNightRange($validator, $from, $to);
+
+                return;
+            }
 
             if ($to->lt($from)) {
                 $validator->errors()->add('to', 'The end date must be on or after the start date.');
@@ -59,5 +68,20 @@ class IndexCalendarRequest extends FormRequest
             : $from->addMonths(6);
 
         return [$from, $to];
+    }
+
+    private function validateNightRange(Validator $validator, CarbonImmutable $from, CarbonImmutable $to): void
+    {
+        try {
+            $stay = StayDates::of($from->toDateString(), $to->toDateString());
+        } catch (InvalidArgumentException) {
+            $validator->errors()->add('to', 'The end date must be after the start date.');
+
+            return;
+        }
+
+        if ($stay->nights() > NightAvailability::MAX_NIGHTS) {
+            $validator->errors()->add('to', 'The calendar range cannot exceed 62 nights.');
+        }
     }
 }

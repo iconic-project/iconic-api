@@ -21,7 +21,7 @@ use App\Models\BookingRequest;
 use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Services\Pricing\QuotedParty;
 use App\Services\Pricing\ReservationQuoter;
 use App\Services\References\ReferenceService;
@@ -30,6 +30,7 @@ use App\Support\Bookings\SoldOn;
 use App\Support\BusinessHours;
 use App\Support\History\History;
 use App\Support\Inventory\DepartureLocks;
+use App\Support\Inventory\StaffStayRestrictions;
 use Carbon\CarbonInterface;
 use Illuminate\Validation\ValidationException;
 
@@ -39,8 +40,9 @@ final class CreateBookingRequest extends Action
         private ReservationQuoter $quoter,
         private ResolveContact $contacts,
         private ReferenceService $references,
-        private ClaimService $claims,
+        private LegacyDepartureClaims $claims,
         private CurrentConfig $config,
+        private StaffStayRestrictions $stayRestrictions,
     ) {}
 
     /**
@@ -104,6 +106,13 @@ final class CreateBookingRequest extends Action
                 ]);
             }
 
+            $override = $this->stayRestrictions->check(
+                [$cabin],
+                $departure->stayDates(),
+                $actor,
+                $data,
+            );
+
             $contact = $this->contacts->handle(is_array($data['client'] ?? null) ? $data['client'] : []);
             $ratesVersion = $this->config->version(ConfigKind::Rates);
             $rules = $this->config->businessRules();
@@ -151,10 +160,12 @@ final class CreateBookingRequest extends Action
                 $lines = [];
 
                 foreach ($exception->unavailable as $row) {
+                    $reference = $row['held_by']['reference'] ?? null;
                     $lines[] = ConflictMessage::line(
-                        $departure,
                         $row['cabin']['label'],
+                        $departure->date,
                         ClaimKind::from($row['held_by']['kind']),
+                        is_string($reference) ? $reference : null,
                     );
                 }
 
@@ -178,11 +189,17 @@ final class CreateBookingRequest extends Action
 
             BookingCreated::dispatch($booking);
 
-            History::record($booking, 'booking.requested', after: [
+            $requestedAfter = [
                 'request_reference' => $booking->request_reference,
                 'status' => $booking->status->value,
                 'total' => $booking->total,
-            ]);
+            ];
+
+            if ($override !== null) {
+                $requestedAfter['override_restrictions'] = $override->codes;
+            }
+
+            History::record($booking, 'booking.requested', after: $requestedAfter, reason: $override?->reason);
 
             return $booking->refresh()->load([
                 'departure.property',

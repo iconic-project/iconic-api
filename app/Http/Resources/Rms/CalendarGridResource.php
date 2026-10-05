@@ -8,7 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
+ * Departure calendar. Deprecated: pass property_id for the night grid (17-07).
+ *
  * @property array{departures: list<array<string, mixed>>, rows: list<array<string, mixed>>} $resource
+ *
+ * @deprecated Panel 17-07 reads NightCalendarResource.
  */
 class CalendarGridResource extends JsonResource
 {

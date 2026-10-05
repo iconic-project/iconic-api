@@ -7,10 +7,10 @@ use App\Enums\ClaimKind;
 use App\Enums\ItineraryStatus;
 use App\Exceptions\CabinUnavailableException;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Property;
+use App\Models\RoomNightClaim;
 use App\Models\User;
 use App\Support\Inventory\DepartureLocks;
 use Database\Seeders\ConfigSeeder;
@@ -128,5 +128,5 @@ test('two creates on the same cabin: second is 409 after the first commits', fun
     }
 
     expect(Booking::query()->count())->toBe(1);
-    expect(CabinClaim::query()->whereNull('released_at')->where('kind', ClaimKind::Booking)->count())->toBe(1);
+    expect(RoomNightClaim::query()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
 });

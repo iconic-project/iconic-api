@@ -8,11 +8,11 @@ use App\Enums\HoldType;
 use App\Enums\PaymentStatus;
 use App\Enums\ReleaseReason;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
 use App\Models\Payment;
+use App\Models\RoomNightClaim;
 use App\Services\Inventory\Availability;
-use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -70,7 +70,7 @@ function requestedHold(bool $expired = false, string $cabinCode = 'S2'): Booking
     ]);
 
     DB::transaction(function () use ($departure, $cabin, $booking): void {
-        app(ClaimService::class)->claim(
+        app(LegacyDepartureClaims::class)->claim(
             $departure,
             collect([$cabin]),
             $booking,
@@ -81,7 +81,7 @@ function requestedHold(bool $expired = false, string $cabinCode = 'S2'): Booking
     });
 
     if ($expired) {
-        CabinClaim::query()
+        RoomNightClaim::query()
             ->where('holder_id', $booking->id)
             ->whereNull('released_at')
             ->update([
@@ -208,7 +208,7 @@ test('confirming a request converts the hold and assigns a booking reference', f
 
     $booking->refresh();
     expect($booking->reference)->toStartWith('ANK-');
-    expect($booking->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->count())->toBe(1);
+    expect($booking->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
     expect($booking->claims()->whereNull('released_at')->where('kind', ClaimKind::Hold)->count())->toBe(0);
 });
 
@@ -220,7 +220,7 @@ test('an expired hold is reclaimed or 409 if the cabin was taken', function (): 
         ->assertOk()
         ->assertJsonPath('status', 'CONFIRMED');
 
-    expect($expired->fresh()->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->count())->toBe(1);
+    expect($expired->fresh()->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
 
     $taken = requestedHold(expired: true, cabinCode: 'S6');
     $departure = $taken->departure;
@@ -235,7 +235,7 @@ test('an expired hold is reclaimed or 409 if the cabin was taken', function (): 
             'released_at' => now(),
             'release_reason' => ReleaseReason::Moved,
         ]);
-        app(ClaimService::class)->claim($departure, collect([$cabin]), $other, ClaimKind::Booking);
+        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $other, ClaimKind::Booking);
     });
 
     $this->actingAs($taken->owner)

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\ClaimKind;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -50,7 +51,7 @@ test('a fully sold departure shows the same label the public engine feed shows',
     $owner = $departure->property->cabins()->where('code', 'OWNER')->get();
 
     DB::transaction(function () use ($departure, $holderA, $holderB, $suites, $owner): void {
-        $service = app(ClaimService::class);
+        $service = app(LegacyDepartureClaims::class);
         $service->claim($departure, $suites, $holderA, ClaimKind::Booking);
         $service->claim($departure, $owner, $holderB, ClaimKind::Booking);
     });

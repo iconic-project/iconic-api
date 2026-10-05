@@ -10,6 +10,7 @@ use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Property;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\Inventory\DepartureLocks;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -43,7 +44,7 @@ test('date and property lock when a hold or booking is active but not for a bloc
     $mateo = managerUser();
 
     DB::transaction(function () use ($departure, $s1, $block): void {
-        app(ClaimService::class)->claim($departure, collect([$s1]), $block, ClaimKind::Block);
+        app(LegacyDepartureClaims::class)->claim($departure, collect([$s1]), $block, ClaimKind::Block);
     });
 
     $this->actingAs($mateo)
@@ -54,7 +55,7 @@ test('date and property lock when a hold or booking is active but not for a bloc
     $departure->refresh();
 
     DB::transaction(function () use ($departure, $s2, $hold): void {
-        app(ClaimService::class)->claim(
+        app(LegacyDepartureClaims::class)->claim(
             $departure,
             collect([$s2]),
             $hold,
@@ -83,7 +84,7 @@ test('delete is refused while any active claim exists', function (): void {
     $s2 = $departure->property->cabins()->where('code', 'S2')->firstOrFail();
 
     DB::transaction(function () use ($departure, $s1, $s2, $holder): void {
-        app(ClaimService::class)->claim($departure, collect([$s1, $s2]), $holder, ClaimKind::Block);
+        app(LegacyDepartureClaims::class)->claim($departure, collect([$s1, $s2]), $holder, ClaimKind::Block);
     });
 
     $this->actingAs(managerUser())
@@ -98,7 +99,7 @@ test('a released claim still blocks delete with the history message', function (
     $cabin = $departure->property->cabins()->where('code', 'S7')->firstOrFail();
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
-        $service = app(ClaimService::class);
+        $service = app(LegacyDepartureClaims::class);
         $service->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
         $service->release($holder, ReleaseReason::Released);
     });

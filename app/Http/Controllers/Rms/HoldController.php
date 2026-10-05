@@ -9,7 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Rms\IndexHoldsRequest;
 use App\Http\Resources\Rms\HoldResource;
 use App\Models\Booking;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use App\Services\Config\CurrentConfig;
 use App\Support\Bookings\RequestQueueRules;
 use DateTimeInterface;
@@ -27,12 +27,10 @@ final class HoldController extends Controller
     )]
     public function index(IndexHoldsRequest $request): AnonymousResourceCollection
     {
-        $claims = CabinClaim::query()
+        $claims = RoomNightClaim::query()
             ->where('kind', ClaimKind::Hold)
             ->whereNull('released_at')
             ->with([
-                'cabin',
-                'departure.property',
                 'holder' => function (Relation $morph): void {
                     if ($morph instanceof MorphTo) {
                         $morph->morphWith([
@@ -44,17 +42,23 @@ final class HoldController extends Controller
             ->when(
                 $request->filled('from') || $request->filled('to'),
                 function (Builder $query) use ($request): void {
-                    $query->whereHas('departure', function (Builder $departure) use ($request): void {
-                        $departure
-                            ->when($request->filled('from'), fn (Builder $inner) => $inner->whereDate('date', '>=', (string) $request->validated('from')))
-                            ->when($request->filled('to'), fn (Builder $inner) => $inner->whereDate('date', '<=', (string) $request->validated('to')));
+                    $query->whereExists(function ($departure) use ($request): void {
+                        $departure->selectRaw('1')
+                            ->from('departures')
+                            ->join('rooms', 'rooms.id', '=', 'room_night_claims.room_id')
+                            ->join('itineraries', 'itineraries.id', '=', 'departures.itinerary_id')
+                            ->whereColumn('departures.property_id', 'rooms.property_id')
+                            ->whereRaw('`room_night_claims`.`night` >= `departures`.`date`')
+                            ->whereRaw('`room_night_claims`.`night` < DATE_ADD(`departures`.`date`, INTERVAL `itineraries`.`nights` DAY)')
+                            ->when($request->filled('from'), fn ($inner) => $inner->whereDate('departures.date', '>=', (string) $request->validated('from')))
+                            ->when($request->filled('to'), fn ($inner) => $inner->whereDate('departures.date', '<=', (string) $request->validated('to')));
                     });
                 },
             )
             ->orderBy('expires_at')
             ->orderBy('id')
             ->get()
-            ->groupBy(fn (CabinClaim $claim): string => $claim->holder_type.'|'.$claim->holder_id);
+            ->groupBy(fn (RoomNightClaim $claim): string => $claim->holder_type.'|'.$claim->holder_id);
 
         $bookings = [];
 

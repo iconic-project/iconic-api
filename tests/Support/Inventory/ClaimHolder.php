@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Support\Inventory;
 
-use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
+use App\Models\RoomNightClaim;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -29,11 +29,11 @@ class ClaimHolder extends Model
     }
 
     /**
-     * @return MorphMany<CabinClaim, $this>
+     * @return MorphMany<RoomNightClaim, $this>
      */
     public function claims(): MorphMany
     {
-        return $this->morphMany(CabinClaim::class, 'holder');
+        return $this->morphMany(RoomNightClaim::class, 'holder');
     }
 
     /**

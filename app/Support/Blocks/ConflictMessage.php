@@ -5,29 +5,35 @@ declare(strict_types=1);
 namespace App\Support\Blocks;
 
 use App\Enums\ClaimKind;
-use App\Models\Departure;
-use App\Support\Dates\Format;
+use Carbon\CarbonImmutable;
+use DateTimeInterface;
 
+/**
+ * "Room 204 is sold on Wed 4 Mar 2028 (ANK-2028-0012)"
+ */
 final class ConflictMessage
 {
-    public static function line(Departure $departure, string $cabinLabel, ClaimKind $kind): string
-    {
+    public static function line(
+        string $roomLabel,
+        DateTimeInterface $night,
+        ClaimKind $kind,
+        ?string $reference,
+    ): string {
         $verb = match ($kind) {
             ClaimKind::Hold => 'held',
             ClaimKind::Block => 'blocked',
             ClaimKind::Booking => 'sold',
         };
 
-        $departure->loadMissing('property');
+        $when = CarbonImmutable::createFromFormat('!Y-m-d', $night->format('Y-m-d'));
+        $day = $when instanceof CarbonImmutable ? $when->format('D j M Y') : $night->format('D j M Y');
+        $sentence = $roomLabel.' is '.$verb.' on '.$day;
 
-        return $cabinLabel
-            .' on '
-            .Format::calendar($departure->date)
-            .' · '
-            .$departure->property->code
-            .' is '
-            .$verb
-            .'.';
+        if (is_string($reference) && $reference !== '') {
+            $sentence .= ' ('.$reference.')';
+        }
+
+        return $sentence;
     }
 
     /**

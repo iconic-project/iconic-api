@@ -88,7 +88,7 @@ test('15 percent creates ON_HOLD_AGENCY, holds the cabin, and hides CONFIRMED', 
 
     expect($booking->status)->toBe(BookingStatus::OnHoldAgency);
     expect($booking->commission_approved)->toBeFalse();
-    expect($booking->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->count())->toBe(1);
+    expect($booking->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
 
     $held = ChangeHistory::query()
         ->where('subject_id', $booking->id)

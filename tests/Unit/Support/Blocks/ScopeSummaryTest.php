@@ -2,29 +2,40 @@
 
 declare(strict_types=1);
 
+use App\Enums\ClaimKind;
+use App\Support\Blocks\ConflictMessage;
 use App\Support\Blocks\ScopeSummary;
+use Carbon\CarbonImmutable;
 
-test('consecutive suite numbers collapse to a range', function (): void {
-    expect(ScopeSummary::format([
-        ['property_code' => 'ANATIVA', 'date' => '2027-11-14', 'cabin_codes' => ['S7', 'S8']],
-    ]))->toBe('ANATIVA · Suite 07–08 · 14 Nov 2027');
+test('a stay range lists the rooms, the checkout day, and the night count', function (): void {
+    expect(ScopeSummary::format(
+        ['101', '102'],
+        CarbonImmutable::parse('2028-03-03'),
+        CarbonImmutable::parse('2028-03-06'),
+    ))->toBe('Rooms 101, 102 · Fri 3 – Mon 6 Mar 2028 · 3 nights');
 });
 
-test('the owner suite is listed by name after suite ranges', function (): void {
-    expect(ScopeSummary::format([
-        ['property_code' => 'ANAMARA', 'date' => '2028-04-02', 'cabin_codes' => ['S7', 'S8', 'OWNER']],
-    ]))->toBe("ANAMARA · Suite 07–08, Owner's Suite · 2 Apr 2028");
+test('one room and one night stay singular', function (): void {
+    expect(ScopeSummary::format(
+        ['204'],
+        CarbonImmutable::parse('2028-03-03'),
+        CarbonImmutable::parse('2028-03-04'),
+    ))->toBe('Room 204 · Fri 3 – Sat 4 Mar 2028 · 1 night');
 });
 
-test('all nine cabins read Full property', function (): void {
-    expect(ScopeSummary::format([
-        ['property_code' => 'ANAMARA', 'date' => '2027-10-31', 'cabin_codes' => ScopeSummary::ALL_CABIN_CODES],
-    ]))->toBe('ANAMARA · Full property · 31 Oct 2027');
+test('a range that crosses a month names the start month', function (): void {
+    expect(ScopeSummary::format(
+        ['101'],
+        CarbonImmutable::parse('2028-03-30'),
+        CarbonImmutable::parse('2028-04-02'),
+    ))->toBe('Room 101 · Thu 30 Mar – Sun 2 Apr 2028 · 3 nights');
 });
 
-test('gapped suites stay listed and several property-dates join with a semicolon', function (): void {
-    expect(ScopeSummary::format([
-        ['property_code' => 'ANATIVA', 'date' => '2027-11-21', 'cabin_codes' => ['S1', 'S3']],
-        ['property_code' => 'ANAMARA', 'date' => '2027-11-14', 'cabin_codes' => ['S2']],
-    ]))->toBe('ANAMARA · Suite 02 · 14 Nov 2027; ANATIVA · Suite 01, Suite 03 · 21 Nov 2027');
+test('the conflict sentence names the first night and the holder', function (): void {
+    expect(ConflictMessage::line(
+        'Room 204',
+        CarbonImmutable::parse('2028-03-04'),
+        ClaimKind::Booking,
+        'ANK-2028-0012',
+    ))->toBe('Room 204 is sold on Sat 4 Mar 2028 (ANK-2028-0012)');
 });

@@ -6,7 +6,7 @@ namespace App\Support\Rooms;
 
 use App\Enums\ClaimKind;
 use App\Exceptions\ConflictException;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use App\Support\BusinessTime;
 use Illuminate\Support\Collection;
 
@@ -25,15 +25,15 @@ final class FutureClaimGuard
 
         $today = BusinessTime::now()->toDateString();
 
-        $blocked = CabinClaim::query()
+        $blocked = RoomNightClaim::query()
             ->whereIn('room_id', $ids)
             ->whereNull('released_at')
+            ->whereDate('night', '>=', $today)
             ->where(function ($query): void {
                 $query->where('kind', '!=', ClaimKind::Hold->value)
                     ->orWhereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
             })
-            ->whereHas('departure', fn ($query) => $query->whereDate('date', '>=', $today))
             ->exists();
 
         if ($blocked) {

@@ -4,6 +4,8 @@
 - **Users:** Carolina
 - **Start:** reset
 
+Status after sprint 17 task 07: a new block is a stay (`starts_on` / `ends_on`) on rooms or a room type plus a count. The step that ticks a yacht and a departure is the old form. Task 08 rewrites it.
+
 ## Why
 The engine label is computed in the API. Changing status, or dropping free cabins to the urgency threshold, must update the row and the KPIs.
 

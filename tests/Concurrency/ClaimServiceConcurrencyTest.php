@@ -7,13 +7,16 @@ use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
 use App\Exceptions\CabinUnavailableException;
-use App\Models\CabinClaim;
+use App\Exceptions\RoomUnavailableException;
 use App\Models\CheckoutSession;
 use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\Room;
+use App\Models\RoomNightClaim;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
+use App\Support\Stays\StayDates;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -50,6 +53,11 @@ function claimMysqlError(QueryException $e): int
     return (int) ($e->errorInfo[1] ?? 0);
 }
 
+function concurrencyRoom(): Room
+{
+    return Property::query()->where('code', 'ANAMARA')->firstOrFail()->cabins()->where('code', 'S1')->firstOrFail();
+}
+
 /**
  * @return array{departure: Departure, cabin: Room}
  */
@@ -68,25 +76,26 @@ function concurrencyCabin(): array
     ];
 }
 
-test('two claimers of the same free cabin never deadlock or double-occupy', function (): void {
-    ['departure' => $departure, 'cabin' => $cabin] = concurrencyCabin();
+test('two claimers of the same free room never deadlock or double-occupy (nights)', function (): void {
+    $room = concurrencyRoom();
+    $stay = StayDates::forNights('2028-04-02', 1);
     $first = ClaimHolder::query()->create(['reference' => 'C1', 'name' => 'One']);
     $second = ClaimHolder::query()->create(['reference' => 'C2', 'name' => 'Two']);
     $observed = 'none';
 
-    onClaimConnection('mysql', function () use ($departure, $cabin, $first): void {
+    onClaimConnection('mysql', function () use ($stay, $room, $first): void {
         DB::beginTransaction();
-        app(ClaimService::class)->claim($departure, collect([$cabin]), $first, ClaimKind::Block);
+        app(ClaimService::class)->claim($stay, collect([$room]), $first, ClaimKind::Block);
     });
 
-    onClaimConnection('mysql_lock', function () use ($departure, $cabin, $second, &$observed): void {
+    onClaimConnection('mysql_lock', function () use ($stay, $room, $second, &$observed): void {
         DB::beginTransaction();
 
         try {
-            app(ClaimService::class)->claim($departure, collect([$cabin]), $second, ClaimKind::Block);
+            app(ClaimService::class)->claim($stay, collect([$room]), $second, ClaimKind::Block);
             expect(false)->toBeTrue('the second claim should not succeed while the first is open');
-        } catch (CabinUnavailableException) {
-            expect(false)->toBeTrue('the second claim should wait on the departure row (1205), not 409');
+        } catch (RoomUnavailableException) {
+            expect(false)->toBeTrue('the second claim should wait on the room row (1205), not 409');
         } catch (QueryException $e) {
             $code = claimMysqlError($e);
             expect($code)->toBe(1205);
@@ -99,22 +108,64 @@ test('two claimers of the same free cabin never deadlock or double-occupy', func
         DB::commit();
     });
 
-    expect(CabinClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->count())->toBe(1);
+    expect(RoomNightClaim::query()->whereNull('released_at')->where('room_id', $room->id)->count())->toBe(1);
     expect($observed)->toBe('1205');
-    fwrite(STDOUT, "free-cabin concurrency observed: {$observed}\n");
 });
 
-test('two claimers of the same expired hold never deadlock or double-occupy', function (): void {
-    ['departure' => $departure, 'cabin' => $cabin] = concurrencyCabin();
+test('two overlapping stays on the last room: one wins and one is 409 (nights)', function (): void {
+    $room = concurrencyRoom();
+    $stay = StayDates::forNights('2028-05-01', 3);
+    $first = ClaimHolder::query()->create(['reference' => 'OV-1', 'name' => 'One']);
+    $second = ClaimHolder::query()->create(['reference' => 'OV-2', 'name' => 'Two']);
+
+    DB::transaction(fn () => app(ClaimService::class)->claim($stay, collect([$room]), $first, ClaimKind::Block));
+
+    expect(fn () => DB::transaction(fn () => app(ClaimService::class)->claim(
+        StayDates::forNights('2028-05-02', 2),
+        collect([$room]),
+        $second,
+        ClaimKind::Block,
+    )))->toThrow(RoomUnavailableException::class);
+
+    expect(RoomNightClaim::query()->whereNull('released_at')->where('room_id', $room->id)->count())->toBe(3);
+    expect(RoomNightClaim::query()->where('holder_id', $second->id)->count())->toBe(0);
+});
+
+test('adjacent stays on the same room both succeed (nights)', function (): void {
+    $room = concurrencyRoom();
+    $first = ClaimHolder::query()->create(['reference' => 'AD-1', 'name' => 'One']);
+    $second = ClaimHolder::query()->create(['reference' => 'AD-2', 'name' => 'Two']);
+
+    DB::transaction(fn () => app(ClaimService::class)->claim(
+        StayDates::forNights('2028-05-10', 2),
+        collect([$room]),
+        $first,
+        ClaimKind::Block,
+    ));
+    DB::transaction(fn () => app(ClaimService::class)->claim(
+        StayDates::forNights('2028-05-12', 2),
+        collect([$room]),
+        $second,
+        ClaimKind::Block,
+    ));
+
+    expect(RoomNightClaim::query()->whereNull('released_at')->where('room_id', $room->id)->count())->toBe(4);
+    expect(RoomNightClaim::query()->where('holder_id', $first->id)->whereNull('released_at')->count())->toBe(2);
+    expect(RoomNightClaim::query()->where('holder_id', $second->id)->whereNull('released_at')->count())->toBe(2);
+});
+
+test('two claimers of the same expired hold never deadlock or double-occupy (nights)', function (): void {
+    $room = concurrencyRoom();
+    $stay = StayDates::forNights('2028-04-02', 1);
     $expired = ClaimHolder::query()->create(['reference' => 'OLD', 'name' => 'Old']);
     $first = ClaimHolder::query()->create(['reference' => 'N1', 'name' => 'New one']);
     $second = ClaimHolder::query()->create(['reference' => 'N2', 'name' => 'New two']);
     $observed = 'none';
 
-    DB::transaction(function () use ($departure, $cabin, $expired): void {
+    DB::transaction(function () use ($stay, $room, $expired): void {
         app(ClaimService::class)->claim(
-            $departure,
-            collect([$cabin]),
+            $stay,
+            collect([$room]),
             $expired,
             ClaimKind::Hold,
             HoldType::Web,
@@ -122,23 +173,23 @@ test('two claimers of the same expired hold never deadlock or double-occupy', fu
         );
     });
 
-    CabinClaim::query()->where('holder_id', $expired->id)->update([
+    RoomNightClaim::query()->where('holder_id', $expired->id)->update([
         'expires_at' => now()->subMinute(),
     ]);
 
-    onClaimConnection('mysql', function () use ($departure, $cabin, $first): void {
+    onClaimConnection('mysql', function () use ($stay, $room, $first): void {
         DB::beginTransaction();
-        app(ClaimService::class)->claim($departure, collect([$cabin]), $first, ClaimKind::Block);
+        app(ClaimService::class)->claim($stay, collect([$room]), $first, ClaimKind::Block);
     });
 
-    onClaimConnection('mysql_lock', function () use ($departure, $cabin, $second, &$observed): void {
+    onClaimConnection('mysql_lock', function () use ($stay, $room, $second, &$observed): void {
         DB::beginTransaction();
 
         try {
-            app(ClaimService::class)->claim($departure, collect([$cabin]), $second, ClaimKind::Block);
+            app(ClaimService::class)->claim($stay, collect([$room]), $second, ClaimKind::Block);
             expect(false)->toBeTrue('the second claim should not succeed while the first is open');
-        } catch (CabinUnavailableException) {
-            expect(false)->toBeTrue('the second claim should wait on the departure row (1205), not 409');
+        } catch (RoomUnavailableException) {
+            expect(false)->toBeTrue('the second claim should wait on the room row (1205), not 409');
         } catch (QueryException $e) {
             $code = claimMysqlError($e);
             expect($code)->toBe(1205);
@@ -151,19 +202,18 @@ test('two claimers of the same expired hold never deadlock or double-occupy', fu
         DB::commit();
     });
 
-    expect(CabinClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->count())->toBe(1);
+    expect(RoomNightClaim::query()->whereNull('released_at')->where('room_id', $room->id)->count())->toBe(1);
     expect($observed)->toBe('1205');
-    fwrite(STDOUT, "expired-hold concurrency observed: {$observed}\n");
 });
 
-test('a claim holds the departure so a date change waits', function (): void {
+test('a yacht claim holds the departure so a date change waits (nights)', function (): void {
     ['departure' => $departure, 'cabin' => $cabin] = concurrencyCabin();
     $holder = ClaimHolder::query()->create(['reference' => 'C-LOCK', 'name' => 'Claimer']);
     $observed = 'none';
 
     onClaimConnection('mysql', function () use ($departure, $cabin, $holder): void {
         DB::beginTransaction();
-        app(ClaimService::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
+        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
     });
 
     onClaimConnection('mysql_lock', function () use ($departure, &$observed): void {
@@ -183,10 +233,9 @@ test('a claim holds the departure so a date change waits', function (): void {
 
     expect($observed)->toBe('1205');
     expect($departure->fresh()?->date->toDateString())->toBe('2028-04-02');
-    fwrite(STDOUT, "claim-then-date-change concurrency observed: {$observed}\n");
 });
 
-test('a date change holds the departure so a claim waits', function (): void {
+test('a date change holds the departure so a yacht claim waits (nights)', function (): void {
     ['departure' => $departure, 'cabin' => $cabin] = concurrencyCabin();
     $holder = ClaimHolder::query()->create(['reference' => 'C-WAIT', 'name' => 'Waiter']);
     $observed = 'none';
@@ -200,7 +249,7 @@ test('a date change holds the departure so a claim waits', function (): void {
         DB::beginTransaction();
 
         try {
-            app(ClaimService::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
+            app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
             expect(false)->toBeTrue('the claim should wait on the departure row');
         } catch (QueryException $e) {
             $code = claimMysqlError($e);
@@ -215,37 +264,22 @@ test('a date change holds the departure so a claim waits', function (): void {
     });
 
     expect($observed)->toBe('1205');
-    expect(CabinClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->count())->toBe(0);
-    fwrite(STDOUT, "date-change-then-claim concurrency observed: {$observed}\n");
+    expect(RoomNightClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->count())->toBe(0);
 });
 
-test('two converts spanning two departures in opposite order never deadlock', function (): void {
+test('two converts of the same rooms in opposite stays never deadlock (nights)', function (): void {
     $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
-    $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
-    $departureX = Departure::factory()->create([
-        'property_id' => $property->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-02',
-    ]);
-    $departureY = Departure::factory()->create([
-        'property_id' => $property->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-09',
-    ]);
     $s1 = $property->cabins()->where('code', 'S1')->firstOrFail();
     $s2 = $property->cabins()->where('code', 'S2')->firstOrFail();
-
     $fromA = ClaimHolder::query()->create(['reference' => 'FROM-A', 'name' => 'From A']);
     $toA = ClaimHolder::query()->create(['reference' => 'TO-A', 'name' => 'To A']);
     $fromB = ClaimHolder::query()->create(['reference' => 'FROM-B', 'name' => 'From B']);
     $toB = ClaimHolder::query()->create(['reference' => 'TO-B', 'name' => 'To B']);
 
-    DB::transaction(function () use ($departureX, $departureY, $s1, $s2, $fromA, $fromB): void {
+    DB::transaction(function () use ($s1, $s2, $fromA, $fromB): void {
         $claims = app(ClaimService::class);
-        $claims->claim($departureY, collect([$s1]), $fromA, ClaimKind::Block);
-        $claims->claim($departureX, collect([$s1]), $fromA, ClaimKind::Block);
-        $claims->claim($departureX, collect([$s2]), $fromB, ClaimKind::Block);
-        $claims->claim($departureY, collect([$s2]), $fromB, ClaimKind::Block);
+        $claims->claim(StayDates::forNights('2028-04-02', 1), collect([$s1, $s2]), $fromA, ClaimKind::Block);
+        $claims->claim(StayDates::forNights('2028-04-09', 1), collect([$s2, $s1]), $fromB, ClaimKind::Block);
     });
 
     $observed = 'none';
@@ -275,25 +309,31 @@ test('two converts spanning two departures in opposite order never deadlock', fu
     });
 
     expect($observed)->toBe('1205');
-    expect(CabinClaim::query()->whereNull('released_at')->where('holder_id', $toA->id)->count())->toBe(2);
-    expect(CabinClaim::query()->whereNull('released_at')->where('holder_id', $fromB->id)->count())->toBe(2);
-    fwrite(STDOUT, "convert-opposite-order concurrency observed: {$observed}\n");
+    expect(RoomNightClaim::query()->whereNull('released_at')->where('holder_id', $toA->id)->count())->toBe(2);
+    expect(RoomNightClaim::query()->whereNull('released_at')->where('holder_id', $fromB->id)->count())->toBe(2);
 });
 
-test('submit convert versus a competing claim never frees the cabin', function (): void {
-    ['departure' => $departure, 'cabin' => $cabin] = concurrencyCabin();
+test('submit convert versus a competing claim never frees the room (nights)', function (): void {
+    $room = concurrencyRoom();
+    $stay = StayDates::forNights('2028-04-02', 1);
+    $property = $room->property;
+    $departure = Departure::factory()->create([
+        'property_id' => $property->id,
+        'itinerary_id' => Itinerary::factory()->create(['status' => ItineraryStatus::Published])->id,
+        'date' => '2028-04-02',
+    ]);
     $session = CheckoutSession::factory()->create([
         'departure_id' => $departure->id,
-        'cabins' => [['cabin_code' => $cabin->code, 'adults' => 2, 'children' => 0]],
+        'cabins' => [['cabin_code' => $room->code, 'adults' => 2, 'children' => 0]],
     ]);
     $bookingHolder = ClaimHolder::query()->create(['reference' => 'REQ-1', 'name' => 'Request']);
     $competitor = ClaimHolder::query()->create(['reference' => 'RACE', 'name' => 'Racer']);
     $observed = 'none';
 
-    DB::transaction(function () use ($departure, $cabin, $session): void {
+    DB::transaction(function () use ($stay, $room, $session): void {
         app(ClaimService::class)->claim(
-            $departure,
-            collect([$cabin]),
+            $stay,
+            collect([$room]),
             $session,
             ClaimKind::Hold,
             HoldType::Web,
@@ -301,7 +341,7 @@ test('submit convert versus a competing claim never frees the cabin', function (
         );
     });
 
-    onClaimConnection('mysql', function () use ($session, $bookingHolder, $cabin): void {
+    onClaimConnection('mysql', function () use ($session, $bookingHolder, $room): void {
         DB::beginTransaction();
         app(ClaimService::class)->convert(
             $session,
@@ -309,18 +349,18 @@ test('submit convert versus a competing claim never frees the cabin', function (
             ClaimKind::Hold,
             HoldType::Request,
             now()->addDays(2),
-            collect([$cabin]),
+            collect([$room]),
         );
     });
 
-    onClaimConnection('mysql_lock', function () use ($departure, $cabin, $competitor, &$observed): void {
+    onClaimConnection('mysql_lock', function () use ($stay, $room, $competitor, &$observed): void {
         DB::beginTransaction();
 
         try {
-            app(ClaimService::class)->claim($departure, collect([$cabin]), $competitor, ClaimKind::Block);
-            expect(false)->toBeTrue('the competing claim should wait, not take a free cabin');
-        } catch (CabinUnavailableException) {
-            expect(false)->toBeTrue('the competing claim should wait on the departure row (1205), not 409');
+            app(ClaimService::class)->claim($stay, collect([$room]), $competitor, ClaimKind::Block);
+            expect(false)->toBeTrue('the competing claim should wait, not take a free room');
+        } catch (RoomUnavailableException|CabinUnavailableException) {
+            expect(false)->toBeTrue('the competing claim should wait on the room row (1205), not 409');
         } catch (QueryException $e) {
             $code = claimMysqlError($e);
             expect($code)->toBe(1205);
@@ -333,10 +373,9 @@ test('submit convert versus a competing claim never frees the cabin', function (
         DB::commit();
     });
 
-    $live = CabinClaim::query()->whereNull('released_at')->where('room_id', $cabin->id)->get();
+    $live = RoomNightClaim::query()->whereNull('released_at')->where('room_id', $room->id)->get();
     expect($live)->toHaveCount(1);
     expect($live->first()?->holder_id)->toBe($bookingHolder->id);
     expect($live->first()?->hold_type)->toBe(HoldType::Request);
     expect($observed)->toBe('1205');
-    fwrite(STDOUT, "submit-convert concurrency observed: {$observed}\n");
 });

@@ -20,6 +20,7 @@ use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\BusinessTime;
 use App\Support\Commissions\CommissionKpis;
 use App\Support\GuestExperience\NpsDashboard;
@@ -83,7 +84,7 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     }
 
     DB::transaction(function () use ($cabinDeparture, $cabin, $blocked, $charterDeparture, $charter): void {
-        $claims = app(ClaimService::class);
+        $claims = app(LegacyDepartureClaims::class);
         $claims->claim(
             $cabinDeparture,
             collect([$cabinDeparture->property->cabins->firstWhere('code', 'S1')]),
@@ -274,7 +275,7 @@ test('the metrics query count stays flat as bookings grow', function (): void {
         'total' => 28000,
     ]);
     DB::transaction(function () use ($departure, $extra): void {
-        app(ClaimService::class)->claim(
+        app(LegacyDepartureClaims::class)->claim(
             $departure,
             collect([$departure->property->cabins->firstWhere('code', 'S3')]),
             $extra,

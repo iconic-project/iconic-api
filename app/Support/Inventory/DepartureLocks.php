@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Support\Inventory;
 
 use App\Enums\ClaimKind;
-use App\Models\CabinClaim;
 use App\Models\Departure;
+use App\Models\RoomNightClaim;
 use Illuminate\Support\Collection;
 
 final class DepartureLocks
@@ -14,24 +14,24 @@ final class DepartureLocks
     public const HISTORY_DELETE = 'This departure has inventory history (released blocks or holds). Close or hide it instead.';
 
     /**
-     * @param  Collection<int, CabinClaim>  $claims
+     * @param  Collection<int, RoomNightClaim>  $claims
      */
     public static function dateAndPropertyCount(Collection $claims): int
     {
         return $claims
-            ->filter(fn (CabinClaim $claim): bool => $claim->released_at === null)
-            ->filter(fn (CabinClaim $claim): bool => self::locksDateAndProperty($claim))
+            ->filter(fn (RoomNightClaim $claim): bool => $claim->released_at === null)
+            ->filter(fn (RoomNightClaim $claim): bool => self::locksDateAndProperty($claim))
             ->count();
     }
 
     /**
-     * @param  Collection<int, CabinClaim>  $claims
+     * @param  Collection<int, RoomNightClaim>  $claims
      * @return array{date_and_property: bool, delete: bool, reason: string|null}
      */
     public static function for(Collection $claims): array
     {
         $dateAndProperty = self::dateAndPropertyCount($claims);
-        $active = $claims->filter(fn (CabinClaim $claim): bool => $claim->released_at === null);
+        $active = $claims->filter(fn (RoomNightClaim $claim): bool => $claim->released_at === null);
         $hasAny = $claims->isNotEmpty();
 
         if ($active->isNotEmpty()) {
@@ -63,13 +63,13 @@ final class DepartureLocks
     }
 
     /**
-     * @param  Collection<int, CabinClaim>  $active
+     * @param  Collection<int, RoomNightClaim>  $active
      */
     public static function activeDeleteMessage(Collection $active): string
     {
-        $blocked = $active->filter(fn (CabinClaim $claim): bool => $claim->kind === ClaimKind::Block)->count();
-        $held = $active->filter(fn (CabinClaim $claim): bool => $claim->kind === ClaimKind::Hold)->count();
-        $sold = $active->filter(fn (CabinClaim $claim): bool => $claim->kind === ClaimKind::Booking)->count();
+        $blocked = $active->filter(fn (RoomNightClaim $claim): bool => $claim->kind === ClaimKind::Block)->count();
+        $held = $active->filter(fn (RoomNightClaim $claim): bool => $claim->kind === ClaimKind::Hold)->count();
+        $sold = $active->filter(fn (RoomNightClaim $claim): bool => $claim->kind === ClaimKind::Booking)->count();
 
         $parts = [];
 
@@ -89,13 +89,11 @@ final class DepartureLocks
     }
 
     /**
-     * @return Collection<int, CabinClaim>
+     * @return Collection<int, RoomNightClaim>
      */
     public static function claimsFor(Departure $departure): Collection
     {
-        return CabinClaim::query()
-            ->where('departure_id', $departure->id)
-            ->get();
+        return DepartureNightClaims::forDeparture($departure);
     }
 
     public static function lock(int $id): Departure
@@ -124,7 +122,7 @@ final class DepartureLocks
         return $locked;
     }
 
-    private static function locksDateAndProperty(CabinClaim $claim): bool
+    private static function locksDateAndProperty(RoomNightClaim $claim): bool
     {
         if ($claim->kind === ClaimKind::Booking) {
             return true;

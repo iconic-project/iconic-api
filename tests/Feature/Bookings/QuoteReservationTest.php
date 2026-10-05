@@ -87,11 +87,14 @@ test('NoRate is an error on the cabin', function (): void {
 test('charter is unavailable when any cabin is taken', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
 
+    $room = $departure->property->rooms()->where('code', 'S8')->firstOrFail();
+    $stay = $departure->stayDates();
+
     $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
         'reason' => BlockReason::Courtesy->value,
-        'departures' => [
-            ['departure_id' => $departure->id, 'cabin_codes' => ['S8']],
-        ],
+        'starts_on' => $stay->checkIn()->toDateString(),
+        'ends_on' => $stay->checkOut()->toDateString(),
+        'rooms' => [$room->id],
     ])->assertCreated();
 
     $this->actingAs(managerUser())

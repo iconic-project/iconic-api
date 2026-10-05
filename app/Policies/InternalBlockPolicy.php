@@ -39,4 +39,9 @@ final class InternalBlockPolicy extends Policy
     {
         return $actor->hasPermission(Permission::BlocksManage);
     }
+
+    public function shorten(User $actor, InternalBlock $block): bool
+    {
+        return $actor->hasPermission(Permission::BlocksManage);
+    }
 }

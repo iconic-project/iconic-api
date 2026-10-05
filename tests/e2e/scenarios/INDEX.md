@@ -43,15 +43,15 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | BR-06 | Who can see Business Rules | sprint-2, config | P2 | — | Mateo, Lucía | [config/BR-06-who-can-see-business-rules.md](config/BR-06-who-can-see-business-rules.md) |
 | VIS-01 | Pages against the prototype | visual, sprint-2 | P3 | — | Carolina | [visual/VIS-01-pages-against-prototype.md](visual/VIS-01-pages-against-prototype.md) |
 | VIS-02 | Theme toggle everywhere | visual | P3 | — | Carolina | [visual/VIS-02-theme-toggle.md](visual/VIS-02-theme-toggle.md) |
-| INV-01 | Seeded inventory in the Calendar | sprint-3, inventory | P1 | B3 | Carolina | [inventory/INV-01-seeded-calendar.md](inventory/INV-01-seeded-calendar.md) |
+| INV-01 | Seeded inventory in the Calendar | sprint-3, inventory | retired | — | Carolina | [inventory/INV-01-seeded-calendar.md](inventory/INV-01-seeded-calendar.md) |
 | INV-02 | Write and publish an itinerary | sprint-3, inventory | P1 | B3 | Carolina | [inventory/INV-02-write-publish-itinerary.md](inventory/INV-02-write-publish-itinerary.md) |
 | INV-03 | Itinerary photo | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-03-itinerary-photo.md](inventory/INV-03-itinerary-photo.md) |
 | INV-04 | Itinerary delete guard | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-04-itinerary-delete-guard.md](inventory/INV-04-itinerary-delete-guard.md) |
 | INV-05 | Departure date rules | sprint-3, inventory | P1 | B3 | Carolina | [inventory/INV-05-departure-date-rules.md](inventory/INV-05-departure-date-rules.md) |
 | INV-06 | Generate a season | sprint-3, inventory | P1 | B3 | Carolina | [inventory/INV-06-generate-season.md](inventory/INV-06-generate-season.md) |
 | INV-07 | Status and engine label | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-07-status-engine-label.md](inventory/INV-07-status-engine-label.md) |
-| INV-08 | Block, see, release | sprint-3, inventory | P1 | B3 | Mateo | [inventory/INV-08-block-see-release.md](inventory/INV-08-block-see-release.md) |
-| INV-09 | Block conflict | sprint-3, inventory | P1 | B3 | Mateo | [inventory/INV-09-block-conflict.md](inventory/INV-09-block-conflict.md) |
+| INV-08 | Block, see, release | sprint-3, inventory | retired | — | Mateo | [inventory/INV-08-block-see-release.md](inventory/INV-08-block-see-release.md) |
+| INV-09 | Block conflict | sprint-3, inventory | retired | — | Mateo | [inventory/INV-09-block-conflict.md](inventory/INV-09-block-conflict.md) |
 | INV-10 | Departure locks with a block | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-10-departure-locks.md](inventory/INV-10-departure-locks.md) |
 | INV-11 | Rates year guard | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-11-rates-year-guard.md](inventory/INV-11-rates-year-guard.md) |
 | INV-12 | Read-only inventory for Lucía | sprint-3, inventory | P2 | — | Lucía | [inventory/INV-12-lucia-read-only.md](inventory/INV-12-lucia-read-only.md) |
@@ -178,3 +178,9 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | LOCALE-01 | Spanish panel chrome persists, then English returns | sprint-15, panel | P2 | B20 | Carolina | [panel/LOCALE-01-spanish-persists.md](panel/LOCALE-01-spanish-persists.md) |
 | HSET-01 | Properties and room types in the RMS | sprint-16, hotel | P1 | B21 | Carolina | [hotel/HSET-01-properties-and-room-types.md](hotel/HSET-01-properties-and-room-types.md) |
 | HSET-02 | Stay rules on the Business Rules page | sprint-16, hotel | P1 | B21 | Carolina | [hotel/HSET-02-stay-rules.md](hotel/HSET-02-stay-rules.md) |
+| HINV-01 | Timeline shows the hotel | sprint-17, hotel, inventory | P1 | B22 | Carolina | [hotel/HINV-01-timeline-shows-the-hotel.md](hotel/HINV-01-timeline-shows-the-hotel.md) |
+| HINV-02 | Block a room for three nights | sprint-17, hotel, inventory | P1 | B22 | Mateo | [hotel/HINV-02-block-three-nights.md](hotel/HINV-02-block-three-nights.md) |
+| HINV-03 | Block conflict names the night | sprint-17, hotel, inventory | P1 | B22 | Mateo | [hotel/HINV-03-block-conflict-names-the-night.md](hotel/HINV-03-block-conflict-names-the-night.md) |
+| HINV-04 | Shorten and release a block | sprint-17, hotel, inventory | P2 | B22 | Mateo | [hotel/HINV-04-shorten-and-release.md](hotel/HINV-04-shorten-and-release.md) |
+| HINV-05 | Stop-sell and min-stay | sprint-17, hotel, inventory | P1 | B22 | Carolina | [hotel/HINV-05-stop-sell-and-min-stay.md](hotel/HINV-05-stop-sell-and-min-stay.md) |
+| HINV-06 | Lucía sees, cannot edit | sprint-17, hotel, inventory | P2 | B22 | Lucía | [hotel/HINV-06-lucia-sees-cannot-edit.md](hotel/HINV-06-lucia-sees-cannot-edit.md) |

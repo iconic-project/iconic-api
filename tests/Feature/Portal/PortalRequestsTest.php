@@ -12,7 +12,7 @@ use App\Enums\TaskKind;
 use App\Models\AgencyUser;
 use App\Models\Alert;
 use App\Models\Booking;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use App\Models\ChangeHistory;
 use App\Models\CheckoutSession;
 use App\Models\CrmTask;
@@ -20,6 +20,7 @@ use App\Models\Departure;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\Portal\PortalRequestWords;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -113,7 +114,7 @@ test('a portal request matches an engine request and freezes the agency commissi
         ->and($booking->contact->email)->not->toBe($user->email);
 
     expect(CrmTask::query()->where('kind', TaskKind::RequestResponse)->where('booking_id', $booking->id)->exists())->toBeTrue();
-    expect(CabinClaim::query()->where('holder_id', $booking->id)->where('holder_type', $booking->getMorphClass())->count())->toBe(0);
+    expect(RoomNightClaim::query()->where('holder_id', $booking->id)->where('holder_type', $booking->getMorphClass())->count())->toBe(0);
 
     $listed = $this->actingAs($user, 'agency')
         ->withHeaders(portalHeaders())
@@ -173,7 +174,7 @@ test('two cabins become two bookings in one group and still claim nothing', func
     expect($bookings)->toHaveCount(2)
         ->and($bookings->pluck('group_id')->unique())->toHaveCount(1)
         ->and($bookings->first()?->group_id)->not->toBeNull()
-        ->and(CabinClaim::query()->count())->toBe(0);
+        ->and(RoomNightClaim::query()->count())->toBe(0);
 });
 
 test('an over-cap agency lands on ON_HOLD_AGENCY with the existing cap task and alert', function (): void {
@@ -225,7 +226,7 @@ test('a sold-out, closed, hidden, or out-of-calendar departure is refused and wr
     $holder = ClaimHolder::query()->create(['reference' => 'BLK', 'name' => 'Taken']);
 
     DB::transaction(function () use ($full, $holder): void {
-        app(ClaimService::class)->claim($full, $full->property->cabins, $holder, ClaimKind::Block);
+        app(LegacyDepartureClaims::class)->claim($full, $full->property->cabins, $holder, ClaimKind::Block);
     });
 
     $label = app(Availability::class)->forDepartures(collect([$full->fresh(['property.cabins', 'itinerary'])]))[$full->id]->engineLabel['text'];
@@ -244,7 +245,7 @@ test('a sold-out, closed, hidden, or out-of-calendar departure is refused and wr
     $ownerHolder = ClaimHolder::query()->create(['reference' => 'OWN', 'name' => 'Owner taken']);
 
     DB::transaction(function () use ($ownerTaken, $owner, $ownerHolder): void {
-        app(ClaimService::class)->claim($ownerTaken, collect([$owner]), $ownerHolder, ClaimKind::Block);
+        app(LegacyDepartureClaims::class)->claim($ownerTaken, collect([$owner]), $ownerHolder, ClaimKind::Block);
     });
 
     postPortalRequest($user, portalRequestBody($full))

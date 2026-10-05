@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Enums\BookingStatus;
 use App\Enums\ClaimKind;
 use App\Models\Booking;
-use App\Models\CabinClaim;
-use App\Services\Inventory\ClaimService;
+use App\Models\RoomNightClaim;
+use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -59,8 +59,8 @@ test('a cancelled factory booking has no active claim and a confirmed one can', 
     ]);
 
     DB::transaction(function () use ($departure, $cabin, $confirmed): void {
-        app(ClaimService::class)->claim($departure, collect([$cabin]), $confirmed, ClaimKind::Booking);
+        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $confirmed, ClaimKind::Booking);
     });
 
-    expect(CabinClaim::query()->where('holder_id', $confirmed->id)->whereNull('released_at')->count())->toBe(1);
+    expect(RoomNightClaim::query()->where('holder_id', $confirmed->id)->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(1);
 });

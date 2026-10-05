@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\Bookings\CreateBookingRequest;
 use App\Enums\BookingStatus;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -28,7 +28,7 @@ test('inventory:expire-hold releases the hold in testing', function (): void {
     $booking->refresh()->load('bookingRequest');
     expect($booking->status)->toBe(BookingStatus::Requested);
     expect($booking->bookingRequest?->hold_expired_at)->not->toBeNull();
-    expect(CabinClaim::query()->where('holder_id', $booking->id)->whereNull('released_at')->count())->toBe(0);
+    expect(RoomNightClaim::query()->where('holder_id', $booking->id)->whereNull('released_at')->count())->toBe(0);
 });
 
 test('inventory:expire-hold refuses in production', function (): void {

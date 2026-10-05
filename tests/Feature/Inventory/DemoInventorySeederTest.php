@@ -145,13 +145,16 @@ test('the demo seed creates BLK-001 on ANAMARA S7-S8 14 Nov 2027 and the next bl
     $block = InternalBlock::query()->where('reference', 'BLK-001')->firstOrFail();
     $departure = Departure::query()->where('reference', 'DEP-003')->firstOrFail();
 
+    expect($block->property_id)->toBe($departure->property_id);
+    expect($block->starts_on->toDateString())->toBe($departure->date->toDateString());
+    expect($block->ends_on->toDateString())->toBe($departure->stayDates()->checkOut()->toDateString());
     expect($block->reason)->toBe(BlockReason::FamTrip);
     expect($block->notes)->toBe('Virtuoso agents fam — 4 pax');
     expect($block->created_by)->toBeNull();
-    expect($block->claims()->whereNull('released_at')->count())->toBe(2);
+    expect($block->claims()->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(2);
     expect($block->claims()->whereNull('released_at')->pluck('kind')->unique()->all())->toBe([ClaimKind::Block]);
-    expect($block->claims()->whereNull('released_at')->pluck('departure_id')->unique()->all())->toBe([$departure->id]);
-    expect($block->claims()->with('cabin')->get()->pluck('cabin.code')->sort()->values()->all())->toBe(['S7', 'S8']);
+    expect($block->claims()->whereNull('released_at')->orderBy('night')->first()?->night->toDateString())->toBe($departure->date->toDateString());
+    expect($block->claims()->with('room')->get()->pluck('room.code')->unique()->sort()->values()->all())->toBe(['S7', 'S8']);
 
     $next = DB::transaction(fn (): string => app(ReferenceService::class)->next(ReferenceType::Block));
     expect($next)->toBe('BLK-002');

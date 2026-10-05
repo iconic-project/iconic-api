@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\CalendarDate;
 use App\Enums\BlockReason;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -18,6 +20,9 @@ use LogicException;
 /**
  * @property int $id
  * @property string $reference
+ * @property int $property_id
+ * @property CarbonImmutable $starts_on
+ * @property CarbonImmutable $ends_on
  * @property BlockReason $reason
  * @property string|null $notes
  * @property Carbon|null $released_at
@@ -27,12 +32,16 @@ use LogicException;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read Property $property
  * @property-read User|null $createdBy
  * @property-read User|null $releasedBy
- * @property-read Collection<int, CabinClaim> $claims
+ * @property-read Collection<int, RoomNightClaim> $claims
  */
 #[Fillable([
     'reference',
+    'property_id',
+    'starts_on',
+    'ends_on',
     'reason',
     'notes',
     'released_at',
@@ -49,6 +58,8 @@ class InternalBlock extends Model
     protected function casts(): array
     {
         return [
+            'starts_on' => CalendarDate::class,
+            'ends_on' => CalendarDate::class,
             'reason' => BlockReason::class,
             'released_at' => 'datetime',
         ];
@@ -60,11 +71,19 @@ class InternalBlock extends Model
     }
 
     /**
-     * @return MorphMany<CabinClaim, $this>
+     * @return BelongsTo<Property, $this>
+     */
+    public function property(): BelongsTo
+    {
+        return $this->belongsTo(Property::class);
+    }
+
+    /**
+     * @return MorphMany<RoomNightClaim, $this>
      */
     public function claims(): MorphMany
     {
-        return $this->morphMany(CabinClaim::class, 'holder');
+        return $this->morphMany(RoomNightClaim::class, 'holder');
     }
 
     /**

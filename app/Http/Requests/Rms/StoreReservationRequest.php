@@ -32,6 +32,8 @@ class StoreReservationRequest extends QuoteReservationRequest
             'internal_notes' => ['sometimes', 'nullable', 'string'],
             'agency_id' => ['sometimes', 'nullable', 'integer', 'exists:agencies,id'],
             'commission_pct' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:30'],
+            'override_restrictions' => ['sometimes', 'boolean'],
+            'restriction_reason' => ['sometimes', 'nullable', 'string', 'max:500'],
         ];
     }
 }

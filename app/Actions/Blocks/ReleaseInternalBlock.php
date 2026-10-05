@@ -16,7 +16,7 @@ final class ReleaseInternalBlock extends Action
 {
     public function __construct(private ClaimService $claims) {}
 
-    public function handle(InternalBlock $block, ?string $note, User $actor): InternalBlock
+    public function handle(InternalBlock $block, string $note, User $actor): InternalBlock
     {
         if ($block->released_at !== null) {
             throw new ConflictException('This block is already released.');

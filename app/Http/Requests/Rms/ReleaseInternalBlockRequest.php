@@ -19,7 +19,7 @@ class ReleaseInternalBlockRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'note' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'note' => ['required', 'string', 'min:1', 'max:500'],
         ];
     }
 }

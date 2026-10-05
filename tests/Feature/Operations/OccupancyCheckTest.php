@@ -8,16 +8,17 @@ use App\Enums\CabinCategory;
 use App\Enums\ClaimKind;
 use App\Models\Alert;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\Departure;
 use App\Models\Property;
 use App\Models\Room;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\Alerts\AlertKeys;
 use App\Support\BusinessTime;
 use Database\Seeders\ConfigSeeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 beforeEach(function (): void {
     $this->seed(ConfigSeeder::class);
@@ -47,7 +48,8 @@ test('occupancy alerts sit below the percent and inside the day window, and a sa
     $low = occupiedDeparture($property, $cabins, $holder, '2020-02-02', 3);
     $exact = occupiedDeparture($property, $cabins, $holder, '2020-02-09', 4);
     $boundary = occupiedDeparture($property, $cabins, $holder, '2020-04-04', 3);
-    $outside = occupiedDeparture($property, $cabins, $holder, '2020-04-05', 3);
+    // One day past the 90-day window would share the Apr 4 nights. The next free stay is Apr 12.
+    $outside = occupiedDeparture($property, $cabins, $holder, '2020-04-12', 3);
 
     Artisan::call('iconic:occupancy-check');
 
@@ -77,15 +79,12 @@ function occupiedDeparture(Property $property, Collection $cabins, Booking $hold
         'reference' => 'DEP-'.str_replace('-', '', $date),
     ]);
 
-    foreach ($cabins->take($sold) as $cabin) {
-        CabinClaim::query()->create([
-            'departure_id' => $departure->id,
-            'room_id' => $cabin->id,
-            'holder_type' => $holder->getMorphClass(),
-            'holder_id' => $holder->id,
-            'kind' => ClaimKind::Booking,
-        ]);
-    }
+    DB::transaction(fn () => app(LegacyDepartureClaims::class)->claim(
+        $departure,
+        $cabins->take($sold)->values(),
+        $holder,
+        ClaimKind::Booking,
+    ));
 
     return $departure;
 }

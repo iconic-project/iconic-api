@@ -42,6 +42,7 @@ use App\Http\Controllers\Rms\RefundController;
 use App\Http\Controllers\Rms\ReportController;
 use App\Http\Controllers\Rms\ReportSubscriptionController;
 use App\Http\Controllers\Rms\RequestController;
+use App\Http\Controllers\Rms\RestrictionController;
 use App\Http\Controllers\Rms\RoleController;
 use App\Http\Controllers\Rms\RoomController;
 use App\Http\Controllers\Rms\RoomTypeController;
@@ -266,8 +267,12 @@ Route::post('waitlist', [WaitlistController::class, 'store']);
 Route::post('waitlist/{entry}/notify', [WaitlistController::class, 'notify'])->whereNumber('entry');
 Route::post('waitlist/{entry}/remove', [WaitlistController::class, 'remove'])->whereNumber('entry');
 
+Route::get('restrictions', [RestrictionController::class, 'index']);
+Route::put('restrictions', [RestrictionController::class, 'update']);
+
 Route::get('blocks', [InternalBlockController::class, 'index']);
 Route::post('blocks', [InternalBlockController::class, 'store']);
 Route::patch('blocks/{block}', [InternalBlockController::class, 'update'])->whereNumber('block');
 Route::post('blocks/{block}/release', [InternalBlockController::class, 'release'])->whereNumber('block');
+Route::post('blocks/{block}/shorten', [InternalBlockController::class, 'shorten'])->whereNumber('block');
 Route::get('blocks/{block}/history', [InternalBlockController::class, 'history'])->whereNumber('block');

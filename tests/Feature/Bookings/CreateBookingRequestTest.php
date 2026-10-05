@@ -11,9 +11,10 @@ use App\Enums\PreferredChannel;
 use App\Exceptions\CabinUnavailableException;
 use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use App\Models\ChangeHistory;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\HoldExpiry;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -49,7 +50,7 @@ test('a request draws ANK-R, writes a HOLD and SLA, and leaves reference null', 
         $booking->bookingRequest?->submitted_at?->copy()->addHours(24),
     ))->toBeTrue();
 
-    $claim = CabinClaim::query()->where('holder_id', $booking->id)->whereNull('released_at')->firstOrFail();
+    $claim = RoomNightClaim::query()->where('holder_id', $booking->id)->whereNull('released_at')->firstOrFail();
     expect($claim->kind)->toBe(ClaimKind::Hold);
     expect($claim->hold_type)->toBe(HoldType::Request);
     expect($claim->expires_at)->not->toBeNull();
@@ -81,7 +82,7 @@ test('a claim conflict creates nothing', function (): void {
     $holder = ClaimHolder::query()->create(['reference' => 'BLK', 'name' => 'Taken']);
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
-        app(ClaimService::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
+        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
     });
 
     expect(fn () => app(CreateBookingRequest::class)->handle(

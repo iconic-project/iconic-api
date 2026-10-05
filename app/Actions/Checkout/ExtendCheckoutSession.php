@@ -7,8 +7,8 @@ namespace App\Actions\Checkout;
 use App\Actions\Action;
 use App\Enums\CheckoutSessionStatus;
 use App\Exceptions\ConflictException;
-use App\Models\CabinClaim;
 use App\Models\CheckoutSession;
+use App\Models\RoomNightClaim;
 use App\Services\Config\CurrentConfig;
 use App\Support\Inventory\DepartureLocks;
 
@@ -37,7 +37,7 @@ final class ExtendCheckoutSession extends Action
             $session->extended = true;
             $session->save();
 
-            CabinClaim::query()
+            RoomNightClaim::query()
                 ->where('holder_type', $session->getMorphClass())
                 ->where('holder_id', $session->id)
                 ->whereNull('released_at')

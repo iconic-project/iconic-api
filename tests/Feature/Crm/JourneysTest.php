@@ -22,7 +22,7 @@ use App\Models\Agency;
 use App\Models\AutomationSetting;
 use App\Models\BehaviouralEvent;
 use App\Models\Booking;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use App\Models\ChangeHistory;
 use App\Models\Contact;
 use App\Models\CrmTask;
@@ -106,7 +106,7 @@ test('each journey trigger enrols once', function (): void {
     activate('winback');
     $lost = journeyContact();
     $held = journeyBooking($lost, $owner, BookingStatus::Requested, '2027-12-05');
-    HoldExpired::dispatch($held, new CabinClaim);
+    HoldExpired::dispatch($held, new RoomNightClaim);
     $held->status = BookingStatus::Cancelled;
     $held->save();
     BookingStatusChanged::dispatch($held, BookingStatus::Requested, BookingStatus::Cancelled);
@@ -126,7 +126,7 @@ test('a send step waits, sends once, and completes', function (): void {
     activate('winback');
     $contact = journeyContact();
     $held = journeyBooking($contact, salesExecUser(), BookingStatus::Requested, '2027-12-12');
-    HoldExpired::dispatch($held, new CabinClaim);
+    HoldExpired::dispatch($held, new RoomNightClaim);
 
     $enrolment = enrolment('winback', $contact);
     expect($enrolment->status)->toBe(JourneyEnrolmentStatus::Active);
@@ -243,7 +243,7 @@ test('an inactive journey refuses enrolment and does not send', function (): voi
 
     activate('winback');
     $held = journeyBooking($contact, salesExecUser(), BookingStatus::Requested, '2028-01-09');
-    HoldExpired::dispatch($held, new CabinClaim);
+    HoldExpired::dispatch($held, new RoomNightClaim);
     $pending = enrolment('winback', $contact);
     $pending->next_due_at = now()->subMinute();
     $pending->save();
@@ -255,7 +255,7 @@ test('an inactive journey refuses enrolment and does not send', function (): voi
     expect($row->status)->toBe(JourneyEnrolmentStatus::Active)
         ->and(Delivery::query()->count())->toBe(0);
 
-    HoldExpired::dispatch($held, new CabinClaim);
+    HoldExpired::dispatch($held, new RoomNightClaim);
     expect(enrolmentCount('winback', $contact))->toBe(1);
 });
 
@@ -311,7 +311,7 @@ test('crm can list journeys, enrolments and toggle the active flag', function ()
 
     $contact = journeyContact();
     $held = journeyBooking($contact, $crm, BookingStatus::Requested, '2028-01-30');
-    HoldExpired::dispatch($held, new CabinClaim);
+    HoldExpired::dispatch($held, new RoomNightClaim);
 
     $enrolments = $this->actingAs($crm)->getJson('/api/crm/journeys/winback/enrolments')->assertOk();
     assertNoSensitiveFields($enrolments);

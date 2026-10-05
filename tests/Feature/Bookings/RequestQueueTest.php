@@ -72,7 +72,7 @@ test('confirm converts the hold and release requires a reason', function (): voi
         ->assertOk()
         ->assertJsonPath('status', BookingStatus::PendingPayment->value);
 
-    expect($booking->fresh()->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->count())->toBe(1);
+    expect($booking->fresh()->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
     expect(ChangeHistory::query()->where('event', 'booking.status_changed')->latest('id')->value('after')['what'] ?? '')
         ->toBe('Status REQUESTED → PENDING PAYMENT · deposit link to be sent via WHATSAPP');
 

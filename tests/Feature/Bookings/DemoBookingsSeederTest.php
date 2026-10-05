@@ -10,9 +10,9 @@ use App\Enums\MainChannel;
 use App\Enums\PaymentKind;
 use App\Enums\ReferenceType;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\Group;
 use App\Models\Payment;
+use App\Models\RoomNightClaim;
 use App\Services\References\ReferenceService;
 use App\Support\Bookings\ChannelSeedMap;
 use App\Support\Payments\Ledger;
@@ -61,10 +61,12 @@ test('demo bookings seed is idempotent and skips requests', function (): void {
     expect(Booking::query()->where('reference', 'ANK-2026-0018')->firstOrFail()->status)->toBe(BookingStatus::Confirmed);
     expect(Booking::query()->where('reference', 'ANK-2026-0012')->firstOrFail()->type)->toBe(BookingType::Charter);
     expect(
-        CabinClaim::query()
+        RoomNightClaim::query()
             ->where('holder_type', 'booking')
             ->where('kind', ClaimKind::Booking)
             ->whereNull('released_at')
+            ->get(['holder_id', 'room_id'])
+            ->unique(fn ($claim): string => $claim->holder_id.'-'.$claim->room_id)
             ->count(),
     )->toBe(10 + 9);
 

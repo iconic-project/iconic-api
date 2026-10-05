@@ -10,6 +10,7 @@ use App\Models\Booking;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\BusinessTime;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
@@ -46,7 +47,7 @@ test('the audit lists deleted and released rows newest first', function (): void
         'owner_id' => $admin->id,
     ]);
     DB::transaction(function () use ($departure, $cabin, $request): void {
-        app(ClaimService::class)->claim(
+        app(LegacyDepartureClaims::class)->claim(
             $departure,
             collect([$cabin]),
             $request,

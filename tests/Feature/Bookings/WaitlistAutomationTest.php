@@ -15,13 +15,14 @@ use App\Events\AvailabilityChanged;
 use App\Listeners\OfferWaitlistCabins;
 use App\Mail\Waitlist\WaitlistOfferMail;
 use App\Models\Booking;
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use App\Models\CrmTask;
 use App\Models\Delivery;
 use App\Models\Departure;
 use App\Models\Room;
 use App\Models\WaitlistEntry;
 use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -65,19 +66,19 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
         ])
         ->assertOk();
 
-    $claims = CabinClaim::query()->count();
-    $openClaims = CabinClaim::query()->whereNull('released_at')->count();
+    $claims = RoomNightClaim::query()->count();
+    $openClaims = RoomNightClaim::query()->whereNull('released_at')->count();
     $statuses = Booking::query()->orderBy('id')->pluck('status')->map(fn (BookingStatus $status): string => $status->value)->all();
 
     $this->artisan('iconic:waitlist-notify')->assertSuccessful();
     $this->artisan('iconic:waitlist-notify')->assertSuccessful();
-    app(OfferWaitlistCabins::class)->handle(new AvailabilityChanged([(int) $departure->id]));
+    app(OfferWaitlistCabins::class)->handle(new AvailabilityChanged((int) $departure->property_id, $departure->stayDates()));
 
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->where('status', DeliveryStatus::Sent)->count())->toBe(1)
         ->and(WaitlistEntry::query()->findOrFail($first)->notified_by)->toBeNull()
         ->and(WaitlistEntry::query()->findOrFail($second)->notified_at)->toBeNull()
-        ->and(CabinClaim::query()->count())->toBe($claims)
-        ->and(CabinClaim::query()->whereNull('released_at')->count())->toBe($openClaims)
+        ->and(RoomNightClaim::query()->count())->toBe($claims)
+        ->and(RoomNightClaim::query()->whereNull('released_at')->count())->toBe($openClaims)
         ->and(Booking::query()->orderBy('id')->pluck('status')->map(fn (BookingStatus $status): string => $status->value)->all())->toBe($statuses);
 
     Mail::assertSent(WaitlistOfferMail::class, function (WaitlistOfferMail $mail): bool {
@@ -87,7 +88,7 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
 
     $holder = $holders[array_key_first($holders)];
     DB::transaction(function () use ($holder): void {
-        app(ClaimService::class)->release($holder, ReleaseReason::Released);
+        app(LegacyDepartureClaims::class)->release($holder, ReleaseReason::Released);
     });
 
     $this->artisan('iconic:waitlist-notify')->assertSuccessful();
@@ -95,15 +96,15 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->where('status', DeliveryStatus::Sent)->count())->toBe(2)
         ->and(WaitlistEntry::query()->findOrFail($second)->notified_at)->not->toBeNull();
 
-    $claims = CabinClaim::query()->count();
-    $openClaims = CabinClaim::query()->whereNull('released_at')->count();
+    $claims = RoomNightClaim::query()->count();
+    $openClaims = RoomNightClaim::query()->whereNull('released_at')->count();
     $statuses = Booking::query()->orderBy('id')->pluck('status')->map(fn (BookingStatus $status): string => $status->value)->all();
 
     $this->artisan('iconic:waitlist-notify')->assertSuccessful();
 
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->where('status', DeliveryStatus::Sent)->count())->toBe(2)
-        ->and(CabinClaim::query()->count())->toBe($claims)
-        ->and(CabinClaim::query()->whereNull('released_at')->count())->toBe($openClaims)
+        ->and(RoomNightClaim::query()->count())->toBe($claims)
+        ->and(RoomNightClaim::query()->whereNull('released_at')->count())->toBe($openClaims)
         ->and(Booking::query()->orderBy('id')->pluck('status')->map(fn (BookingStatus $status): string => $status->value)->all())->toBe($statuses)
         ->and(CrmTask::query()->where('kind', TaskKind::WaitlistFollowUp)->count())->toBe(2);
 
@@ -194,7 +195,7 @@ function blockSuitesExcept(Departure $departure, string $keep): array
                 'reference' => 'BLK-'.$cabin->code,
                 'name' => $cabin->code,
             ]);
-            app(ClaimService::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
+            app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
             $holders[$cabin->code] = $holder;
         }
     });

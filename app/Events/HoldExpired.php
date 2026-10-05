@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Events;
 
-use App\Models\CabinClaim;
+use App\Models\RoomNightClaim;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Events\Dispatchable;
 
@@ -14,6 +14,6 @@ final class HoldExpired
 
     public function __construct(
         public Model $holder,
-        public CabinClaim $claim,
+        public RoomNightClaim $claim,
     ) {}
 }

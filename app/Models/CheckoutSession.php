@@ -38,7 +38,7 @@ use Illuminate\Support\Collection;
  * @property Carbon $updated_at
  * @property-read Departure $departure
  * @property-read Collection<int, Booking> $bookings
- * @property-read Collection<int, CabinClaim> $claims
+ * @property-read Collection<int, RoomNightClaim> $claims
  */
 #[Fillable([
     'token_hash',
@@ -89,11 +89,11 @@ class CheckoutSession extends Model
     }
 
     /**
-     * @return MorphMany<CabinClaim, $this>
+     * @return MorphMany<RoomNightClaim, $this>
      */
     public function claims(): MorphMany
     {
-        return $this->morphMany(CabinClaim::class, 'holder');
+        return $this->morphMany(RoomNightClaim::class, 'holder');
     }
 
     /**

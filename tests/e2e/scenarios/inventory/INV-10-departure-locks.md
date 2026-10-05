@@ -10,7 +10,7 @@ DEP-003 still has the demo block, and Sprint 4 also seeds two bookings on it. Da
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/rms/booking-engine/departures`. Open DEP-003 (`14 Nov 2027` · ANAMARA).
 2. Read **Embark date**, **Yacht**, the lock notice, and Delete.
-3. Open `/rms/operations/blocks`. Release `BLK-001` (confirm `Release BLK-001`).
+3. Open `/rms/operations/blocks`. On `BLK-001` click `Release`. **Release** stays disabled while **Note** is empty. Type `E2E release BLK-001`. Click `Release`.
 4. Return to Departures and open DEP-003 again.
 
 ## Expected

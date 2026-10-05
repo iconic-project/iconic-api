@@ -95,8 +95,8 @@ use Illuminate\Support\Facades\DB;
  * @property-read User|null $commissionApprovedBy
  * @property-read RateVersion $ratesVersion
  * @property-read CheckoutSession|null $checkoutSession
- * @property-read Collection<int, CabinClaim> $claims
- * @property-read Collection<int, CabinClaim> $activeClaims
+ * @property-read Collection<int, RoomNightClaim> $claims
+ * @property-read Collection<int, RoomNightClaim> $activeClaims
  * @property-read Collection<int, Guest> $guests
  * @property-read Collection<int, BookingExtra> $extras
  * @property-read Collection<int, Consent> $consents
@@ -364,15 +364,15 @@ class Booking extends Model
     }
 
     /**
-     * @return MorphMany<CabinClaim, $this>
+     * @return MorphMany<RoomNightClaim, $this>
      */
     public function claims(): MorphMany
     {
-        return $this->morphMany(CabinClaim::class, 'holder');
+        return $this->morphMany(RoomNightClaim::class, 'holder');
     }
 
     /**
-     * @return MorphMany<CabinClaim, $this>
+     * @return MorphMany<RoomNightClaim, $this>
      */
     public function activeClaims(): MorphMany
     {

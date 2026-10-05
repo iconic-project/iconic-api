@@ -15,10 +15,10 @@ use App\Events\BookingStatusChanged;
 use App\Exceptions\CabinUnavailableException;
 use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\CabinClaim;
 use App\Models\Room;
+use App\Models\RoomNightClaim;
 use App\Models\User;
-use App\Services\Inventory\ClaimService;
+use App\Services\Inventory\LegacyDepartureClaims;
 use App\Services\References\ReferenceService;
 use App\Support\Bookings\BookingMutationLock;
 use App\Support\Bookings\Transitions;
@@ -30,7 +30,7 @@ use Illuminate\Validation\ValidationException;
 final class TransitionBooking extends Action
 {
     public function __construct(
-        private ClaimService $claims,
+        private LegacyDepartureClaims $claims,
         private ReferenceService $references,
         private CreateRefundRequest $refunds,
         private RevokeCompleteAccessTokens $completeTokens,
@@ -187,9 +187,9 @@ final class TransitionBooking extends Action
     {
         $needed = $this->cabinsFor($booking)->count();
         $activeHold = $booking->claims
-            ->first(fn (CabinClaim $claim): bool => $claim->released_at === null && $claim->kind === ClaimKind::Hold);
+            ->first(fn (RoomNightClaim $claim): bool => $claim->released_at === null && $claim->kind === ClaimKind::Hold);
 
-        if ($activeHold instanceof CabinClaim) {
+        if ($activeHold instanceof RoomNightClaim) {
             $converted = $this->claims->convert($booking, $booking, ClaimKind::Booking);
 
             if ($converted >= $needed) {

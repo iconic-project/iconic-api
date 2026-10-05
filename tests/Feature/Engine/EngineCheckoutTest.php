@@ -19,13 +19,13 @@ use App\Enums\OfferType;
 use App\Enums\PngCategory;
 use App\Enums\PreferredChannel;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\ChangeHistory;
 use App\Models\CheckoutSession;
 use App\Models\Consent;
 use App\Models\ContactConsent;
 use App\Models\Departure;
 use App\Models\Offer;
+use App\Models\RoomNightClaim;
 use App\Services\Stripe\FakeStripeGateway;
 use App\Support\Countries;
 use App\Support\IpHash;
@@ -137,13 +137,13 @@ test('creating a checkout holds the cabins', function (): void {
     expect($session?->status)->toBe(CheckoutSessionStatus::Holding);
     expect($session?->ip_hash)->toBe(IpHash::of('127.0.0.1'));
 
-    $claims = CabinClaim::query()
+    $claims = RoomNightClaim::query()
         ->where('holder_type', 'checkout_session')
         ->where('holder_id', $session?->id)
         ->whereNull('released_at')
         ->get();
 
-    expect($claims)->toHaveCount(1);
+    expect($claims->pluck('room_id')->unique())->toHaveCount(1);
     expect($claims->first()?->kind)->toBe(ClaimKind::Hold);
     expect($claims->first()?->hold_type)->toBe(HoldType::Web);
 });
@@ -157,7 +157,7 @@ test('a second checkout on the same cabin is 409 and holds nothing', function ()
         ->assertJsonPath('message', 'Cabin unavailable.');
 
     expect(CheckoutSession::query()->count())->toBe(1);
-    expect(CabinClaim::query()->whereNull('released_at')->count())->toBe(1);
+    expect(RoomNightClaim::query()->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(1);
 });
 
 test('a hold can be extended once and the second extend is 409', function (): void {
@@ -174,7 +174,7 @@ test('a hold can be extended once and the second extend is 409', function (): vo
     expect($session?->extended)->toBeTrue();
     expect($session?->expires_at?->greaterThan($original))->toBeTrue();
 
-    $claimExpiry = CabinClaim::query()
+    $claimExpiry = RoomNightClaim::query()
         ->where('holder_type', 'checkout_session')
         ->where('holder_id', $session?->id)
         ->value('expires_at');
@@ -193,7 +193,7 @@ test('deleting a checkout releases the hold and is idempotent', function (): voi
 
     $session = CheckoutSession::findByToken($created['token']);
     expect($session?->status)->toBe(CheckoutSessionStatus::Released);
-    expect(CabinClaim::query()->where('holder_id', $session?->id)->whereNull('released_at')->count())->toBe(0);
+    expect(RoomNightClaim::query()->where('holder_id', $session?->id)->whereNull('released_at')->count())->toBe(0);
 
     $this->deleteJson('/api/engine/checkout/'.$created['token'])->assertNoContent();
     $this->deleteJson('/api/engine/checkout/'.bin2hex(random_bytes(32)))->assertNotFound();
@@ -204,7 +204,7 @@ test('the expiry job marks a web checkout session expired', function (): void {
     $created = createCheckoutHold($departure);
     $session = CheckoutSession::findByToken($created['token']);
 
-    CabinClaim::query()
+    RoomNightClaim::query()
         ->where('holder_type', 'checkout_session')
         ->where('holder_id', $session?->id)
         ->update(['expires_at' => now()->subMinute()]);
@@ -212,7 +212,7 @@ test('the expiry job marks a web checkout session expired', function (): void {
     $this->artisan('inventory:release-expired-holds')->assertSuccessful();
 
     expect($session?->fresh()?->status)->toBe(CheckoutSessionStatus::Expired);
-    expect(CabinClaim::query()->where('holder_id', $session?->id)->whereNull('released_at')->count())->toBe(0);
+    expect(RoomNightClaim::query()->where('holder_id', $session?->id)->whereNull('released_at')->count())->toBe(0);
 });
 
 test('a third holding session for the same ip_hash releases the oldest', function (): void {
@@ -224,7 +224,7 @@ test('a third holding session for the same ip_hash releases the oldest', functio
     expect(CheckoutSession::findByToken($first['token'])?->status)->toBe(CheckoutSessionStatus::Released);
     expect(CheckoutSession::findByToken($second['token'])?->status)->toBe(CheckoutSessionStatus::Holding);
     expect(CheckoutSession::findByToken($third['token'])?->status)->toBe(CheckoutSessionStatus::Holding);
-    expect(CabinClaim::query()->whereNull('released_at')->count())->toBe(2);
+    expect(RoomNightClaim::query()->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(2);
 });
 
 test('party rules fail on the field named in the spec', function (array $cabins, string $field): void {

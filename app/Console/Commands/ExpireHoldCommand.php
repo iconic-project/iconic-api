@@ -6,8 +6,8 @@ namespace App\Console\Commands;
 
 use App\Enums\ClaimKind;
 use App\Models\Booking;
-use App\Models\CabinClaim;
 use App\Models\InternalBlock;
+use App\Models\RoomNightClaim;
 use App\Services\Inventory\ClaimService;
 use Illuminate\Console\Command;
 
@@ -41,7 +41,7 @@ final class ExpireHoldCommand extends Command
             return self::FAILURE;
         }
 
-        $updated = CabinClaim::query()
+        $updated = RoomNightClaim::query()
             ->where('holder_type', $holder->getMorphClass())
             ->where('holder_id', $holder->getKey())
             ->where('kind', ClaimKind::Hold)

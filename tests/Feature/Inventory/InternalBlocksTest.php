@@ -6,17 +6,22 @@ use App\Enums\BlockReason;
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
-use App\Models\CabinClaim;
+use App\Enums\RoomStatus;
+use App\Enums\RoomTypeStatus;
 use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\InternalBlock;
 use App\Models\Itinerary;
 use App\Models\Property;
-use App\Services\Inventory\ClaimService;
+use App\Models\Room;
+use App\Models\RoomNightClaim;
+use App\Models\RoomType;
+use App\Support\Blocks\ScopeSummary;
+use App\Support\Inventory\BackfillInternalBlockRanges;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use LogicException;
 use Tests\Support\Inventory\ClaimHolder;
 
@@ -27,94 +32,245 @@ beforeEach(function (): void {
 });
 
 /**
- * @return array{0: Departure, 1: Departure}
+ * @param  list<string>  $codes
+ * @return array{reason: string, notes: string|null, starts_on: string, ends_on: string, rooms: list<int>}
  */
-function twoBlockDepartures(): array
+function blockOnDeparture(Departure $departure, array $codes, BlockReason $reason, ?string $notes = null): array
 {
-    $anamara = Property::query()->where('code', 'ANAMARA')->firstOrFail();
-    $anativa = Property::query()->where('code', 'ANATIVA')->firstOrFail();
-    $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
+    $stay = $departure->stayDates();
 
-    $first = Departure::factory()->create([
-        'property_id' => $anamara->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-02',
-        'reference' => 'DEP-101',
-    ]);
-    $second = Departure::factory()->create([
-        'property_id' => $anativa->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-09',
-        'reference' => 'DEP-102',
-    ]);
-
-    return [$first, $second];
+    return [
+        'reason' => $reason->value,
+        'notes' => $notes,
+        'starts_on' => $stay->checkIn()->toDateString(),
+        'ends_on' => $stay->checkOut()->toDateString(),
+        'rooms' => $departure->property->rooms()->whereIn('code', $codes)->orderBy('sort')->pluck('id')->all(),
+    ];
 }
 
-test('creating a block across two departures is all-or-nothing and lists every collision', function (): void {
-    [$first, $second] = twoBlockDepartures();
-    $holder = ClaimHolder::query()->create(['reference' => 'HLD-1', 'name' => 'Hold']);
-    $s1 = $first->property->cabins()->where('code', 'S1')->firstOrFail();
-    $s2 = $second->property->cabins()->where('code', 'S2')->firstOrFail();
+test('a sold night blocks the stay and names that night and holder', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create([
+        'property_id' => $property->id,
+        'code' => 'DLX',
+        'name' => 'Deluxe',
+        'status' => RoomTypeStatus::Active,
+    ]);
+    $room = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'code' => '204',
+        'label' => 'Room 204',
+        'sort' => 1,
+        'status' => RoomStatus::Active,
+    ]);
+    $holder = ClaimHolder::query()->create(['reference' => 'ANK-2028-0012', 'name' => 'Ada']);
 
-    DB::transaction(function () use ($first, $second, $holder, $s1, $s2): void {
-        app(ClaimService::class)->claim($first, collect([$s1]), $holder, ClaimKind::Hold, HoldType::Agency, now()->addDay());
-        app(ClaimService::class)->claim($second, collect([$s2]), $holder, ClaimKind::Hold, HoldType::Agency, now()->addDay());
-    });
+    RoomNightClaim::query()->create([
+        'room_id' => $room->id,
+        'night' => '2028-03-04',
+        'holder_type' => $holder->getMorphClass(),
+        'holder_id' => $holder->id,
+        'kind' => ClaimKind::Booking,
+        'claim_group' => (string) Str::uuid(),
+    ]);
 
     $response = $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
         'reason' => BlockReason::Maintenance->value,
-        'departures' => [
-            ['departure_id' => $first->id, 'cabin_codes' => ['S1', 'S2', 'S3']],
-            ['departure_id' => $second->id, 'cabin_codes' => ['S1', 'S2', 'S3']],
-        ],
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-06',
+        'rooms' => [$room->id],
     ]);
 
     $response->assertConflict();
-    expect($response->json('message'))->toContain('Suite 01 on 2 Apr 2028 · ANAMARA is held.');
-    expect($response->json('message'))->toContain('Suite 02 on 9 Apr 2028 · ANATIVA is held.');
-    expect($response->json('unavailable'))->toHaveCount(2);
+    expect($response->json('message'))->toBe('Room 204 is sold on Sat 4 Mar 2028 (ANK-2028-0012)');
+    expect($response->json('unavailable'))->toHaveCount(1);
     expect(InternalBlock::query()->count())->toBe(0);
-    expect(CabinClaim::query()->where('kind', ClaimKind::Block)->count())->toBe(0);
+    expect(RoomNightClaim::query()->where('kind', ClaimKind::Block)->count())->toBe(0);
 });
 
-test('ALL claims every cabin on the property', function (): void {
-    [$first] = twoBlockDepartures();
+test('an expired hold does not block the room', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $room = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'label' => 'Room 101',
+        'status' => RoomStatus::Active,
+    ]);
+    $holder = ClaimHolder::query()->create(['reference' => 'HLD-OLD', 'name' => 'Old']);
 
-    $this->actingAs(managerUser())
-        ->postJson('/api/rms/blocks', [
-            'reason' => BlockReason::Courtesy->value,
-            'departures' => [
-                ['departure_id' => $first->id, 'cabin_codes' => 'ALL'],
-            ],
-        ])
-        ->assertCreated()
-        ->assertJsonPath('scope_summary', 'ANAMARA · Full property · 2 Apr 2028');
+    RoomNightClaim::query()->create([
+        'room_id' => $room->id,
+        'night' => '2028-03-03',
+        'holder_type' => $holder->getMorphClass(),
+        'holder_id' => $holder->id,
+        'kind' => ClaimKind::Hold,
+        'hold_type' => HoldType::Agency,
+        'expires_at' => now()->subHour(),
+        'claim_group' => (string) Str::uuid(),
+    ]);
+
+    $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
+        'reason' => BlockReason::Maintenance->value,
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-05',
+        'rooms' => [$room->id],
+    ])->assertCreated();
+});
+
+test('rooms on a date range are claimed and the list returns that range', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $first = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'code' => '101',
+        'label' => '101',
+        'sort' => 1,
+    ]);
+    $second = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'code' => '102',
+        'label' => '102',
+        'sort' => 2,
+    ]);
+
+    $response = $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
+        'reason' => BlockReason::Maintenance->value,
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-06',
+        'rooms' => [$second->id, $first->id],
+    ])->assertCreated();
+
+    $response->assertJsonPath('starts_on', '2028-03-03')
+        ->assertJsonPath('ends_on', '2028-03-06')
+        ->assertJsonPath('nights', 3)
+        ->assertJsonPath('property.id', $property->id)
+        ->assertJsonPath('scope_summary', 'Rooms 101, 102 · Fri 3 – Mon 6 Mar 2028 · 3 nights')
+        ->assertJsonCount(2, 'rooms');
+
+    expect($response->json())->not->toHaveKey('claims');
+    expect(ChangeHistory::query()->where('event', 'block.created')->count())->toBe(1);
 
     $block = InternalBlock::query()->firstOrFail();
-    expect($block->claims()->whereNull('released_at')->count())->toBe(9);
+    expect($block->claims()->whereNull('released_at')->count())->toBe(6);
+
+    $this->actingAs(managerUser())
+        ->getJson('/api/rms/blocks?property_id='.$property->id.'&from=2028-03-01&to=2028-03-05')
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $block->id);
+
+    $this->actingAs(managerUser())
+        ->getJson('/api/rms/blocks?from=2028-03-06')
+        ->assertOk()
+        ->assertJsonPath('data', []);
 });
 
-test('release frees the cabins and a second release is 409', function (): void {
-    [$first] = twoBlockDepartures();
+test('a room type and a count claims that many rooms', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create([
+        'property_id' => $property->id,
+        'status' => RoomTypeStatus::Active,
+    ]);
+
+    foreach ([1, 2, 3] as $sort) {
+        Room::factory()->create([
+            'property_id' => $property->id,
+            'room_type_id' => $type->id,
+            'code' => 'R'.$sort,
+            'label' => 'Room '.$sort,
+            'sort' => $sort,
+        ]);
+    }
+
+    $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
+        'reason' => BlockReason::NegotiationHold->value,
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-06',
+        'room_type_id' => $type->id,
+        'count' => 2,
+    ])->assertCreated()
+        ->assertJsonCount(2, 'rooms')
+        ->assertJsonPath('rooms.0.label', 'Room 1')
+        ->assertJsonPath('rooms.1.label', 'Room 2');
+});
+
+test('a block may run longer than the maximum stay', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $room = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'status' => RoomStatus::Active,
+    ]);
+
+    $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
+        'reason' => BlockReason::Maintenance->value,
+        'starts_on' => '2028-06-01',
+        'ends_on' => '2028-07-11',
+        'rooms' => [$room->id],
+    ])->assertCreated()
+        ->assertJsonPath('nights', 40);
+});
+
+test('a block cannot start in the past or mix properties', function (): void {
+    $first = Property::factory()->create();
+    $second = Property::factory()->create();
+    $typeA = RoomType::factory()->create(['property_id' => $first->id, 'status' => RoomTypeStatus::Active]);
+    $typeB = RoomType::factory()->create(['property_id' => $second->id, 'status' => RoomTypeStatus::Active]);
+    $roomA = Room::factory()->create(['property_id' => $first->id, 'room_type_id' => $typeA->id]);
+    $roomB = Room::factory()->create(['property_id' => $second->id, 'room_type_id' => $typeB->id]);
+
+    $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
+        'reason' => BlockReason::Maintenance->value,
+        'starts_on' => '2020-01-01',
+        'ends_on' => '2020-01-03',
+        'rooms' => [$roomA->id],
+    ])->assertUnprocessable();
+
+    $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
+        'reason' => BlockReason::Maintenance->value,
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-05',
+        'rooms' => [$roomA->id, $roomB->id],
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors('rooms');
+});
+
+test('release needs a note, frees the rooms, and a second release is 409', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $room = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'status' => RoomStatus::Active,
+    ]);
     $mateo = managerUser();
 
     $created = $this->actingAs($mateo)->postJson('/api/rms/blocks', [
         'reason' => BlockReason::FamTrip->value,
         'notes' => 'Agents',
-        'departures' => [
-            ['departure_id' => $first->id, 'cabin_codes' => ['S1', 'S2', 'S3']],
-        ],
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-06',
+        'rooms' => [$room->id],
     ])->assertCreated();
 
     $id = $created->json('id');
+
+    $this->actingAs($mateo)
+        ->postJson("/api/rms/blocks/{$id}/release", [])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('note');
 
     $this->actingAs($mateo)
         ->postJson("/api/rms/blocks/{$id}/release", ['note' => 'Done'])
         ->assertOk()
         ->assertJsonPath('release_note', 'Done');
 
-    expect(CabinClaim::query()->where('holder_id', $id)->whereNull('released_at')->count())->toBe(0);
+    expect(RoomNightClaim::query()->where('holder_id', $id)->whereNull('released_at')->count())->toBe(0);
+    expect(ChangeHistory::query()->where('event', 'block.released')->count())->toBe(1);
 
     $this->actingAs($mateo)
         ->getJson('/api/rms/blocks?status=released')
@@ -122,29 +278,93 @@ test('release frees the cabins and a second release is 409', function (): void {
         ->assertJsonPath('data.0.id', $id);
 
     $this->actingAs($mateo)
-        ->getJson('/api/rms/blocks')
-        ->assertOk()
-        ->assertJsonPath('data', []);
-
-    $this->actingAs($mateo)
-        ->postJson("/api/rms/blocks/{$id}/release")
+        ->postJson("/api/rms/blocks/{$id}/release", ['note' => 'Again'])
         ->assertConflict()
         ->assertJsonPath('message', 'This block is already released.');
 });
 
-test('notes and reason can change and the scope does not', function (): void {
-    [$first] = twoBlockDepartures();
+test('shorten drops the leading or trailing nights and writes one history row', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $room = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'label' => '101',
+        'status' => RoomStatus::Active,
+    ]);
+    $mateo = managerUser();
+
+    $created = $this->actingAs($mateo)->postJson('/api/rms/blocks', [
+        'reason' => BlockReason::Maintenance->value,
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-06',
+        'rooms' => [$room->id],
+    ])->assertCreated();
+
+    $id = $created->json('id');
+
+    $this->actingAs($mateo)
+        ->postJson("/api/rms/blocks/{$id}/shorten", [
+            'starts_on' => '2028-03-04',
+            'ends_on' => '2028-03-05',
+            'reason' => 'Both ends',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('ends_on');
+
+    $this->actingAs($mateo)
+        ->postJson("/api/rms/blocks/{$id}/shorten", [
+            'starts_on' => '2028-03-04',
+            'ends_on' => '2028-03-06',
+            'reason' => 'Maintenance starts later',
+        ])
+        ->assertOk()
+        ->assertJsonPath('starts_on', '2028-03-04')
+        ->assertJsonPath('ends_on', '2028-03-06')
+        ->assertJsonPath('scope_summary', 'Room 101 · Sat 4 – Mon 6 Mar 2028 · 2 nights');
+
+    expect(RoomNightClaim::query()->where('holder_id', $id)->whereNull('released_at')->orderBy('night')->pluck('night')->map->toDateString()->all())
+        ->toBe(['2028-03-04', '2028-03-05']);
+
+    $entry = ChangeHistory::query()->where('event', 'block.shortened')->firstOrFail();
+    expect($entry->reason)->toBe('Maintenance starts later');
+    expect($entry->before)->toMatchArray(['starts_on' => '2028-03-03', 'ends_on' => '2028-03-06']);
+    expect($entry->after)->toMatchArray(['starts_on' => '2028-03-04', 'ends_on' => '2028-03-06']);
+    expect(ChangeHistory::query()->where('event', 'block.shortened')->count())->toBe(1);
+
+    $this->actingAs($mateo)
+        ->postJson("/api/rms/blocks/{$id}/shorten", [
+            'starts_on' => '2028-03-04',
+            'ends_on' => '2028-03-05',
+            'reason' => 'Ends sooner',
+        ])
+        ->assertOk()
+        ->assertJsonPath('ends_on', '2028-03-05');
+
+    expect(RoomNightClaim::query()->where('holder_id', $id)->whereNull('released_at')->count())->toBe(1);
+    expect(ChangeHistory::query()->where('event', 'block.shortened')->count())->toBe(2);
+});
+
+test('notes and reason can change and the range does not', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $room = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'label' => '101',
+    ]);
     $mateo = managerUser();
 
     $created = $this->actingAs($mateo)->postJson('/api/rms/blocks', [
         'reason' => BlockReason::FamTrip->value,
         'notes' => 'Before',
-        'departures' => [
-            ['departure_id' => $first->id, 'cabin_codes' => ['S7', 'S8']],
-        ],
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-06',
+        'rooms' => [$room->id],
     ])->assertCreated();
 
     $id = $created->json('id');
+    $summary = $created->json('scope_summary');
 
     $this->actingAs($mateo)
         ->patchJson("/api/rms/blocks/{$id}", [
@@ -154,49 +374,72 @@ test('notes and reason can change and the scope does not', function (): void {
         ->assertOk()
         ->assertJsonPath('reason', BlockReason::Courtesy->value)
         ->assertJsonPath('notes', 'After')
-        ->assertJsonPath('scope_summary', 'ANAMARA · Suite 07–08 · 2 Apr 2028');
+        ->assertJsonPath('scope_summary', $summary);
 
-    expect(CabinClaim::query()->where('holder_id', $id)->whereNull('released_at')->count())->toBe(2);
     expect(ChangeHistory::query()->where('event', 'block.updated')->count())->toBe(1);
+    expect(RoomNightClaim::query()->where('holder_id', $id)->whereNull('released_at')->count())->toBe(3);
 });
 
-test('lucia can read blocks and cannot write', function (): void {
-    [$first] = twoBlockDepartures();
-    $lucia = salesExecUser();
-    $mateo = managerUser();
-
-    $created = $this->actingAs($mateo)->postJson('/api/rms/blocks', [
+test('admin and a manager can write blocks and a sales exec cannot', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $room = Room::factory()->create([
+        'property_id' => $property->id,
+        'room_type_id' => $type->id,
+        'status' => RoomStatus::Active,
+    ]);
+    $payload = [
         'reason' => BlockReason::Maintenance->value,
-        'departures' => [
-            ['departure_id' => $first->id, 'cabin_codes' => ['S1']],
-        ],
-    ])->assertCreated();
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-05',
+        'rooms' => [$room->id],
+    ];
 
+    $created = $this->actingAs(adminUser())->postJson('/api/rms/blocks', $payload)->assertCreated();
     $id = $created->json('id');
+    $lucia = salesExecUser();
 
     $this->actingAs($lucia)->getJson('/api/rms/blocks')->assertOk();
     $this->actingAs($lucia)->getJson("/api/rms/blocks/{$id}/history")->assertOk();
-    $this->actingAs($lucia)->postJson('/api/rms/blocks', [
-        'reason' => BlockReason::Courtesy->value,
-        'departures' => [
-            ['departure_id' => $first->id, 'cabin_codes' => ['S2']],
-        ],
-    ])->assertForbidden();
+    $this->actingAs($lucia)->postJson('/api/rms/blocks', $payload)->assertForbidden();
     $this->actingAs($lucia)->patchJson("/api/rms/blocks/{$id}", ['notes' => 'no'])->assertForbidden();
-    $this->actingAs($lucia)->postJson("/api/rms/blocks/{$id}/release")->assertForbidden();
+    $this->actingAs($lucia)->postJson("/api/rms/blocks/{$id}/release", ['note' => 'no'])->assertForbidden();
+    $this->actingAs($lucia)->postJson("/api/rms/blocks/{$id}/shorten", [
+        'starts_on' => '2028-03-04',
+        'ends_on' => '2028-03-05',
+        'reason' => 'no',
+    ])->assertForbidden();
+
+    $this->actingAs(managerUser())
+        ->postJson("/api/rms/blocks/{$id}/shorten", [
+            'starts_on' => '2028-03-04',
+            'ends_on' => '2028-03-05',
+            'reason' => 'Later start',
+        ])
+        ->assertOk();
 });
 
-test('blocked cabins show as BLOCKED on the calendar and become free after release', function (): void {
-    [$first, $second] = twoBlockDepartures();
+test('blocked rooms show on the departure calendar and become free after release', function (): void {
+    $anamara = Property::query()->where('code', 'ANAMARA')->firstOrFail();
+    $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
+    $departure = Departure::factory()->create([
+        'property_id' => $anamara->id,
+        'itinerary_id' => $itinerary->id,
+        'date' => '2028-04-02',
+        'reference' => 'DEP-101',
+    ]);
     $mateo = managerUser();
 
-    $created = $this->actingAs($mateo)->postJson('/api/rms/blocks', [
-        'reason' => BlockReason::NegotiationHold->value,
-        'departures' => [
-            ['departure_id' => $first->id, 'cabin_codes' => ['S1', 'S2', 'S3']],
-            ['departure_id' => $second->id, 'cabin_codes' => ['S1', 'S2', 'S3']],
-        ],
-    ])->assertCreated();
+    $created = $this->actingAs($mateo)
+        ->postJson('/api/rms/blocks', blockOnDeparture($departure, ['S1', 'S2', 'S3'], BlockReason::NegotiationHold))
+        ->assertCreated();
+
+    $summary = ScopeSummary::format(
+        ['Suite 01', 'Suite 02', 'Suite 03'],
+        $departure->stayDates()->checkIn(),
+        $departure->stayDates()->checkOut(),
+    );
+    expect($created->json('scope_summary'))->toBe($summary);
 
     $calendar = $this->actingAs($mateo)
         ->getJson('/api/rms/calendar?from=2028-04-01&to=2028-04-30')
@@ -212,15 +455,10 @@ test('blocked cabins show as BLOCKED on the calendar and become free after relea
         }
     }
 
-    expect($blocked)->toBe(6);
+    expect($blocked)->toBe(3);
 
     $this->actingAs($mateo)
-        ->getJson("/api/rms/departures/{$first->id}/layout")
-        ->assertOk()
-        ->assertJsonPath('availability.counts.blocked', 3);
-
-    $this->actingAs($mateo)
-        ->postJson('/api/rms/blocks/'.$created->json('id').'/release')
+        ->postJson('/api/rms/blocks/'.$created->json('id').'/release', ['note' => 'Done'])
         ->assertOk();
 
     $after = $this->actingAs($mateo)
@@ -232,31 +470,30 @@ test('blocked cabins show as BLOCKED on the calendar and become free after relea
             expect($cell['state'])->toBe('FREE');
         }
     }
-
-    $this->actingAs($mateo)
-        ->getJson('/api/rms/blocks?status=released')
-        ->assertOk()
-        ->assertJsonPath('data.0.id', $created->json('id'));
 });
 
 test('a departure with an active block cannot be deleted but can change date', function (): void {
-    [$first] = twoBlockDepartures();
+    $anamara = Property::query()->where('code', 'ANAMARA')->firstOrFail();
+    $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
+    $departure = Departure::factory()->create([
+        'property_id' => $anamara->id,
+        'itinerary_id' => $itinerary->id,
+        'date' => '2028-04-02',
+        'reference' => 'DEP-101',
+    ]);
     $mateo = managerUser();
 
-    $this->actingAs($mateo)->postJson('/api/rms/blocks', [
-        'reason' => BlockReason::Maintenance->value,
-        'departures' => [
-            ['departure_id' => $first->id, 'cabin_codes' => ['S1', 'S2']],
-        ],
-    ])->assertCreated();
+    $this->actingAs($mateo)
+        ->postJson('/api/rms/blocks', blockOnDeparture($departure, ['S1', 'S2'], BlockReason::Maintenance))
+        ->assertCreated();
 
     $this->actingAs($mateo)
-        ->deleteJson("/api/rms/departures/{$first->id}")
+        ->deleteJson("/api/rms/departures/{$departure->id}")
         ->assertConflict()
         ->assertJsonPath('message', '2 blocked');
 
     $this->actingAs($mateo)
-        ->patchJson("/api/rms/departures/{$first->id}", [
+        ->patchJson("/api/rms/departures/{$departure->id}", [
             'date' => '2028-04-16',
         ])
         ->assertOk()
@@ -264,16 +501,43 @@ test('a departure with an active block cannot be deleted but can change date', f
 });
 
 test('blocks cannot be deleted', function (): void {
-    [$first] = twoBlockDepartures();
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $room = Room::factory()->create(['property_id' => $property->id, 'room_type_id' => $type->id]);
 
     $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
         'reason' => BlockReason::Courtesy->value,
-        'departures' => [
-            ['departure_id' => $first->id, 'cabin_codes' => ['S1']],
-        ],
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-05',
+        'rooms' => [$room->id],
     ])->assertCreated();
 
     $block = InternalBlock::query()->firstOrFail();
 
     expect(fn () => $block->delete())->toThrow(LogicException::class, 'Internal blocks cannot be deleted.');
+});
+
+test('backfill copies the claim span onto the block', function (): void {
+    $property = Property::factory()->create();
+    $type = RoomType::factory()->create(['property_id' => $property->id, 'status' => RoomTypeStatus::Active]);
+    $room = Room::factory()->create(['property_id' => $property->id, 'room_type_id' => $type->id]);
+
+    $created = $this->actingAs(managerUser())->postJson('/api/rms/blocks', [
+        'reason' => BlockReason::Courtesy->value,
+        'starts_on' => '2028-03-03',
+        'ends_on' => '2028-03-06',
+        'rooms' => [$room->id],
+    ])->assertCreated();
+
+    $block = InternalBlock::query()->findOrFail($created->json('id'));
+    $block->starts_on = '2028-01-01';
+    $block->ends_on = '2028-01-02';
+    $block->save();
+
+    BackfillInternalBlockRanges::run();
+    $block->refresh();
+
+    expect($block->property_id)->toBe($property->id);
+    expect($block->starts_on->toDateString())->toBe('2028-03-03');
+    expect($block->ends_on->toDateString())->toBe('2028-03-06');
 });

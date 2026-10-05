@@ -7,6 +7,7 @@ namespace App\Listeners;
 use App\Events\AvailabilityChanged;
 use App\Events\ConfigPublished;
 use App\Services\Engine\EngineFeedVersion;
+use App\Support\Inventory\DepartureNightClaims;
 use Illuminate\Support\Facades\Cache;
 
 final class BumpEngineFeedVersion
@@ -16,7 +17,7 @@ final class BumpEngineFeedVersion
         EngineFeedVersion::bump();
 
         if ($event instanceof AvailabilityChanged) {
-            foreach ($event->departureIds as $departureId) {
+            foreach (DepartureNightClaims::departureIds($event->propertyId, $event->stay) as $departureId) {
                 Cache::forget(EngineFeedVersion::cabinsKey($departureId));
             }
         }
