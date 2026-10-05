@@ -14,7 +14,6 @@ use App\Models\BookingRequest;
 use App\Models\RoomNightClaim;
 use App\Models\ChangeHistory;
 use App\Services\Inventory\ClaimService;
-use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\HoldExpiry;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -82,7 +81,7 @@ test('a claim conflict creates nothing', function (): void {
     $holder = ClaimHolder::query()->create(['reference' => 'BLK', 'name' => 'Taken']);
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
-        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
+        app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $holder, ClaimKind::Block);
     });
 
     expect(fn () => app(CreateBookingRequest::class)->handle(

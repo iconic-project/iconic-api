@@ -19,6 +19,9 @@ enum AlertKind: string
     case NpsLow = 'NPS_LOW';
     case ReportFailed = 'REPORT_FAILED';
     case CharterDepositDue = 'CHARTER_DEPOSIT_DUE';
+    case ArrivalNotCheckedIn = 'ARRIVAL_NOT_CHECKED_IN';
+    case InHousePastCheckOut = 'IN_HOUSE_PAST_CHECK_OUT';
+    case DepartureNotCheckedOut = 'DEPARTURE_NOT_CHECKED_OUT';
 
     public function label(): string
     {
@@ -36,6 +39,9 @@ enum AlertKind: string
             self::NpsLow => 'NPS below threshold',
             self::ReportFailed => 'Report failed',
             self::CharterDepositDue => 'Charter deposit due',
+            self::ArrivalNotCheckedIn => 'Arrival not checked in',
+            self::InHousePastCheckOut => 'In house past check-out',
+            self::DepartureNotCheckedOut => 'Departure not checked out',
         };
     }
 }

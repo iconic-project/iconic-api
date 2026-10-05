@@ -42,6 +42,21 @@ final class AlertKeys
         return 'confirmed-at-departure:'.$bookingId;
     }
 
+    public static function arrivalNotCheckedIn(int $bookingId): string
+    {
+        return 'arrival-not-checked-in:'.$bookingId;
+    }
+
+    public static function inHousePastCheckOut(int $bookingId): string
+    {
+        return 'in-house-past-check-out:'.$bookingId;
+    }
+
+    public static function departureNotCheckedOut(int $bookingId): string
+    {
+        return 'departure-not-checked-out:'.$bookingId;
+    }
+
     public static function ledgerStripe(string $paymentIntent): string
     {
         return 'ledger:stripe:'.$paymentIntent;

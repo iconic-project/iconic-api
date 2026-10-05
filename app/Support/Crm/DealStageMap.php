@@ -28,11 +28,11 @@ final class DealStageMap
             ),
             self::row(
                 DealStage::BookingConfirmed,
-                'The deposit is verified, or the booking is on board or overdue',
-                ['CONFIRMED', 'FULLY_PAID', 'ON_BOARD', 'OVERDUE'],
-                'The cruise completes, or the booking is cancelled',
+                'The deposit is verified, or the booking is in house or overdue',
+                ['CONFIRMED', 'FULLY_PAID', 'IN_HOUSE', 'OVERDUE'],
+                'The stay checks out, or the booking is cancelled',
             ),
-            self::row(DealStage::WonCompleted, 'The cruise is completed', ['COMPLETED'], 'It stays a past guest'),
+            self::row(DealStage::WonCompleted, 'The stay is checked out', ['CHECKED_OUT'], 'It stays a past guest'),
             self::row(
                 DealStage::Lost,
                 'Every bound booking is cancelled or released, or a person marks an unbound deal lost',

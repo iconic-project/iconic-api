@@ -51,7 +51,7 @@ test('every scheduled command is listed and has a recording hook', function (): 
 test('doc 07 jobs are catalogued and the new commands keep galapagos time and a run hook', function (): void {
     $events = collect(app(Schedule::class)->events());
     $expected = [
-        'iconic:voyage-status' => '15 0 * * *',
+        'iconic:night-audit' => '0 0 * * *',
         'iconic:ledger-check' => '0 2 * * *',
         'iconic:commission-scan' => '30 2 * * *',
         'iconic:occupancy-check' => '0 7 * * *',

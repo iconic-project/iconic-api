@@ -18,7 +18,7 @@ test('the seeded business rules document matches seed-data.json plus the new fie
 
     expect($document['commission']['cap_pct'])->toBe($policies['commCap']);
     expect($document['commission']['default_pct'])->toBe($policies['commDefault']);
-    expect($document['commission']['payable_days_after_cruise'])->toBe(30);
+    expect($document['commission']['payable_days_after_check_out'])->toBe(30);
     expect($document['modification_fee_usd'])->toBe($policies['modFee']);
     expect($document['payments']['extras_due_hours'])->toBe($policies['extrasDueH']);
     expect($document['payments']['wire_window_hours'])->toBe($policies['wireHours']);

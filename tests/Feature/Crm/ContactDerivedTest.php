@@ -75,7 +75,7 @@ test('lifecycle covers each branch including date windows and precedence', funct
     expect(crmDerived($prospect)->lifecycle)->toBe(ContactLifecycle::Prospect->value);
 
     $onBoard = Contact::factory()->create();
-    crmBooking($onBoard, $today->addDays(30)->toDateString(), BookingStatus::OnBoard);
+    crmBooking($onBoard, $today->addDays(30)->toDateString(), BookingStatus::InHouse);
     expect(crmDerived($onBoard)->lifecycle)->toBe(ContactLifecycle::Guest->value);
 
     $guestMidCruise = Contact::factory()->create();
@@ -102,7 +102,7 @@ test('lifecycle covers each branch including date windows and precedence', funct
     expect(crmDerived($past)->lifecycle)->toBe(ContactLifecycle::Sql->value);
 
     $completed = Contact::factory()->create();
-    crmBooking($completed, $today->subDays(40)->toDateString(), BookingStatus::Completed);
+    crmBooking($completed, $today->subDays(40)->toDateString(), BookingStatus::CheckedOut);
     expect(crmDerived($completed)->lifecycle)->toBe(ContactLifecycle::PastGuest->value);
 
     $identified = Contact::factory()->create([
@@ -136,7 +136,7 @@ test('lifecycle covers each branch including date windows and precedence', funct
         'email' => 'partner@agency.test',
         'status' => AgencyStatus::Approved,
     ]);
-    crmBooking($agent, $today->addDays(10)->toDateString(), BookingStatus::OnBoard);
+    crmBooking($agent, $today->addDays(10)->toDateString(), BookingStatus::InHouse);
     expect(crmDerived($agent)->lifecycle)->toBe(ContactLifecycle::Agent->value);
 
     $pendingAgent = Contact::factory()->create([

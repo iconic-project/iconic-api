@@ -46,7 +46,7 @@ test('finance records one immutable payout and the kpis move', function (): void
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'total' => 23275,
         'main_channel' => MainChannel::B2BTravelAdvisor,
     ]);

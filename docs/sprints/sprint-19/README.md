@@ -24,4 +24,4 @@ At the end of this sprint:
 | 07 | [Panel: bookings and front desk](07-panel-bookings-front-desk.md) | panel |
 | 08 | [Switch seed mode, delete the adapter, sprint close](08-switch-and-close.md) | api |
 
-**E2E scenarios:** HBKG-01 … HBKG-10 (new); BKG-* rewritten or retired (state which).
+**E2E scenarios:** HBKG-01 … HBKG-10 (new). BKG-01 through BKG-12 are retired (yacht cabin and departure steps).

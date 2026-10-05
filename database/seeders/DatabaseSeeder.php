@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
     /**
      * Seed the application's database.
      *
-     * ICONIC_SEED_MODE=yacht (default) seeds the yacht inventory.
-     * ICONIC_SEED_MODE=hotel seeds Hotel Demo instead. Sprint 19 switches the default.
+     * ICONIC_SEED_MODE=hotel (default) seeds Hotel Demo.
+     * ICONIC_SEED_MODE=yacht seeds the yacht inventory. Yacht mode stays available until Sprint 22.
      */
     public function run(): void
     {

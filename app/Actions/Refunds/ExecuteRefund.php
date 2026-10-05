@@ -11,7 +11,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\RefundRequestStatus;
 use App\Models\RefundRequest;
 use App\Models\User;
-use App\Support\Bookings\BookingMutationLock;
+use App\Support\Bookings\FrontDeskLock;
 use App\Support\History\History;
 use App\Support\Money;
 use App\Support\Payments\InsertLedgerRow;
@@ -60,7 +60,7 @@ final class ExecuteRefund extends Action
                 ? $data['reference']
                 : null;
 
-            $booking = BookingMutationLock::acquire($refund->booking, (int) $refund->booking->departure_id);
+            $booking = FrontDeskLock::acquire($refund->booking);
 
             $payment = $this->insert->handle($booking, [
                 'kind' => PaymentKind::Refund,

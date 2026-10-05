@@ -10,17 +10,21 @@ use App\Enums\BookingStatus;
 use App\Enums\Permission;
 use App\Exceptions\CabinUnavailableException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Rms\ConfirmRequestRequest;
 use App\Http\Requests\Rms\IndexRequestsRequest;
 use App\Http\Requests\Rms\ReleaseRequestRequest;
 use App\Http\Resources\Rms\BookingRequestResource;
 use App\Http\Resources\Rms\BookingResource;
+use App\Http\Resources\Rms\ConfirmRequestPreviewResource;
 use App\Models\Booking;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
+use App\Support\Bookings\ConfirmRequestRooms;
 use App\Support\Bookings\RequestQueueRules;
 use Dedoc\Scramble\Attributes\Response as DocumentedResponse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Validation\ValidationException;
 
 final class RequestController extends Controller
 {
@@ -41,14 +45,12 @@ final class RequestController extends Controller
 
         $bookings = Booking::query()
             ->select('bookings.*')
-            ->join('departures', 'departures.id', '=', 'bookings.departure_id')
             ->join('booking_requests', 'booking_requests.booking_id', '=', 'bookings.id')
             ->with([
-                'departure.property',
-                'cabin',
+                'roomType',
                 'contact',
                 'bookingRequest',
-                'claims',
+                'activeClaims',
                 'agency',
             ])
             ->where('bookings.status', BookingStatus::Requested)
@@ -58,13 +60,13 @@ final class RequestController extends Controller
             )
             ->when(
                 $request->filled('from'),
-                fn (Builder $query) => $query->whereDate('departures.date', '>=', (string) $request->validated('from')),
+                fn (Builder $query) => $query->whereDate('bookings.check_in', '>=', (string) $request->validated('from')),
             )
             ->when(
                 $request->filled('to'),
-                fn (Builder $query) => $query->whereDate('departures.date', '<=', (string) $request->validated('to')),
+                fn (Builder $query) => $query->whereDate('bookings.check_in', '<=', (string) $request->validated('to')),
             )
-            ->orderBy('booking_requests.sla_due_at')
+            ->orderBy('bookings.check_in')
             ->orderBy('bookings.id')
             ->get();
 
@@ -78,11 +80,28 @@ final class RequestController extends Controller
     /**
      * @throws CabinUnavailableException
      */
-    public function confirm(Booking $booking, TransitionBooking $action): BookingResource
+    public function preview(ConfirmRequestRequest $request, Booking $booking, ConfirmRequestRooms $rooms): ConfirmRequestPreviewResource
+    {
+        $this->authorize('confirm', $booking);
+        $this->stayRequest($booking);
+
+        $actor = $request->user();
+
+        if (! $actor instanceof User) {
+            abort(401);
+        }
+
+        return new ConfirmRequestPreviewResource($rooms->preview($booking, $actor, $request->validated()));
+    }
+
+    /**
+     * @throws CabinUnavailableException
+     */
+    public function confirm(ConfirmRequestRequest $request, Booking $booking, TransitionBooking $action): BookingResource
     {
         $this->authorize('confirm', $booking);
 
-        $actor = request()->user();
+        $actor = $request->user();
 
         if (! $actor instanceof User) {
             abort(401);
@@ -90,6 +109,7 @@ final class RequestController extends Controller
 
         return new BookingResource($action->handle($booking, [
             'to' => BookingStatus::PendingPayment,
+            ...$request->validated(),
         ], $actor));
     }
 
@@ -110,5 +130,14 @@ final class RequestController extends Controller
             'to' => BookingStatus::Released,
             'reason' => $request->validated('reason'),
         ], $actor));
+    }
+
+    private function stayRequest(Booking $booking): void
+    {
+        if ($booking->status !== BookingStatus::Requested || $booking->departure_id !== null) {
+            throw ValidationException::withMessages([
+                'booking' => ['Only a stay request can be previewed.'],
+            ]);
+        }
     }
 }

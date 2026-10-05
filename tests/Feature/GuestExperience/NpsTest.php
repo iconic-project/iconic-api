@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Actions\Bookings\CheckInBooking;
+use App\Actions\Bookings\CheckOutBooking;
 use App\Actions\Crm\RecordContactConsent;
 use App\Actions\GuestExperience\RecordGuestResponse;
 use App\Enums\AlertKind;
@@ -37,6 +39,7 @@ use App\Support\BusinessTime;
 use App\Support\Crm\TaskDue;
 use App\Support\GuestExperience\SurveyAnswers;
 use App\Support\Schedule\JobCatalogue;
+use App\Support\Stays\StayClock;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -65,7 +68,7 @@ function npsBooking(
     string $date,
     string $reference,
     User $owner,
-    BookingStatus $status = BookingStatus::Completed,
+    BookingStatus $status = BookingStatus::CheckedOut,
     string $contactEmail = 'ada@example.com',
     ?string $companionEmail = null,
     ?Contact $existingContact = null,
@@ -103,9 +106,9 @@ function npsBooking(
 
 function npsSendSurveys(Booking $booking): void
 {
-    $booking->loadMissing('departure.itinerary');
+    $booking = $booking->fresh() ?? $booking;
     $hours = app(CurrentConfig::class)->businessRules()->nps->surveyHoursAfterReturn;
-    $due = BusinessTime::calendarDay($booking->departure->returnDate()->toDateString())->addHours($hours);
+    $due = app(StayClock::class)->postStayAt($booking->stay(), $booking->checked_out_at)->addHours($hours);
     test()->travelTo($due->addMinute());
     test()->artisan('iconic:nps-survey')->assertSuccessful();
 }
@@ -178,8 +181,8 @@ test('completing a voyage raises one post-trip call and a replay does not raise 
     ]);
 
     $this->travelTo(CarbonImmutable::parse('2026-06-20 12:00:00', BusinessTime::zone()));
-    $this->artisan('iconic:voyage-status')->assertSuccessful();
-    $this->artisan('iconic:voyage-status')->assertSuccessful();
+    app(CheckInBooking::class)->handle($booking->fresh(), [], $owner);
+    app(CheckOutBooking::class)->handle($booking->fresh(), [], $owner);
 
     $tasks = CrmTask::query()->where('kind', TaskKind::PostTripCall)->get();
     $task = $tasks->first();
@@ -190,7 +193,7 @@ test('completing a voyage raises one post-trip call and a replay does not raise 
         app(CurrentConfig::class)->businessRules(),
     );
 
-    expect($booking->fresh()?->status)->toBe(BookingStatus::Completed)
+    expect($booking->fresh()?->status)->toBe(BookingStatus::CheckedOut)
         ->and($tasks)->toHaveCount(1)
         ->and($task?->idempotency_key)->toBe('post-trip-call:'.$booking->id)
         ->and($task?->owner_id)->toBe($owner->id)
@@ -203,7 +206,9 @@ test('the survey waits until return plus the configured hours, sends once, and d
     $owner = managerUser();
     $fixture = npsBooking('2028-09-03', 'ANK-NPS-SURVEY', $owner, companionEmail: null);
     $return = $fixture['departure']->returnDate()->toDateString();
-    $due = BusinessTime::calendarDay($return)->addHours(24);
+    $due = app(StayClock::class)
+        ->postStayAt($fixture['booking']->stay(), $fixture['booking']->checked_out_at)
+        ->addHours(24);
 
     expect(ContactConsent::query()->count())->toBe(0);
 
@@ -464,7 +469,8 @@ test('staff record a response only on a completed voyage, once, and call notes c
 
     $fixture = npsBooking('2028-11-20', 'ANK-NPS-STAFF', $manager, BookingStatus::FullyPaid, 'staff-voyage@example.com', 'staff-mate@example.com');
     $this->travelTo(CarbonImmutable::parse('2028-12-01 12:00:00', BusinessTime::zone()));
-    $this->artisan('iconic:voyage-status')->assertSuccessful();
+    app(CheckInBooking::class)->handle($fixture['booking']->fresh(), [], $manager);
+    app(CheckOutBooking::class)->handle($fixture['booking']->fresh(), [], $manager);
     $call = CrmTask::query()->where('idempotency_key', 'post-trip-call:'.$fixture['booking']->id)->first();
     expect($call?->status)->toBe(TaskStatus::Open);
 

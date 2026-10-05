@@ -10,21 +10,22 @@ use App\Enums\CheckoutSessionStatus;
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ReleaseReason;
-use App\Exceptions\CabinUnavailableException;
+use App\Exceptions\RoomUnavailableException;
 use App\Models\CheckoutSession;
 use App\Models\Departure;
 use App\Models\Room;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\LegacyDepartureClaims;
+use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\ReservationQuote;
 use App\Services\Pricing\ReservationQuoter;
+use App\Support\Inventory\CabinConflict;
 use App\Support\Inventory\DepartureLocks;
 use Illuminate\Support\Collection;
 
 final class CreateCheckoutSession extends Action
 {
     public function __construct(
-        private readonly LegacyDepartureClaims $claims,
+        private readonly ClaimService $claims,
         private readonly CurrentConfig $config,
         private readonly ReservationQuoter $quoter,
     ) {}
@@ -58,16 +59,17 @@ final class CreateCheckoutSession extends Action
             $claimed = $this->cabinsFor($departure, $cabins);
 
             try {
+                DepartureLocks::lock((int) $departure->id);
                 $this->claims->claim(
-                    $departure,
+                    $departure->stayDates(),
                     $claimed,
                     $session,
                     ClaimKind::Hold,
                     HoldType::Web,
                     $expiresAt,
                 );
-            } catch (CabinUnavailableException $exception) {
-                throw $exception;
+            } catch (RoomUnavailableException) {
+                throw CabinConflict::exception($departure->stayDates(), $claimed, $session);
             }
 
             $quote = $this->quoter->quote([

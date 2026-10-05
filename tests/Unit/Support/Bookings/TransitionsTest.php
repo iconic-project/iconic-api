@@ -13,14 +13,16 @@ test('the sprint 4 table matches TRANS minus sprint 5 states', function (): void
     expect(array_map(fn (BookingStatus $status): string => $status->value, Transitions::targets(BookingStatus::Confirmed)))
         ->toBe(['FULLY_PAID', 'CANCELLED']);
     expect(array_map(fn (BookingStatus $status): string => $status->value, Transitions::targets(BookingStatus::FullyPaid)))
-        ->toBe(['ON_BOARD', 'CANCELLED_POSTPAID']);
-    expect(array_map(fn (BookingStatus $status): string => $status->value, Transitions::targets(BookingStatus::OnBoard)))
-        ->toBe(['COMPLETED']);
+        ->toBe(['CONFIRMED', 'CANCELLED_POSTPAID']);
+    expect(Transitions::targets(BookingStatus::InHouse))->toBe([]);
+    expect(Transitions::frontDeskPointer(BookingStatus::InHouse))->toBe('Check in at POST /api/rms/bookings/{booking}/check-in.');
+    expect(Transitions::frontDeskPointer(BookingStatus::CheckedOut))->toBe('Check out at POST /api/rms/bookings/{booking}/check-out.');
+    expect(Transitions::frontDeskPointer(BookingStatus::NoShow))->toBe('Mark a no-show at POST /api/rms/bookings/{booking}/no-show.');
     expect(array_map(fn (BookingStatus $status): string => $status->value, Transitions::targets(BookingStatus::OnHoldAgency)))
         ->toBe(['CONFIRMED', 'RELEASED', 'CANCELLED']);
 
     foreach ([
-        BookingStatus::Completed,
+        BookingStatus::CheckedOut,
         BookingStatus::Cancelled,
         BookingStatus::CancelledPostpaid,
         BookingStatus::Released,
@@ -37,14 +39,12 @@ test('reason is required for cancellations, manual fully paid and release', func
     expect(Transitions::reasonRequired(BookingStatus::FullyPaid))->toBeTrue();
     expect(Transitions::reasonRequired(BookingStatus::Released))->toBeTrue();
     expect(Transitions::reasonRequired(BookingStatus::Confirmed))->toBeFalse();
-    expect(Transitions::reasonRequired(BookingStatus::OnBoard))->toBeFalse();
+    expect(Transitions::reasonRequired(BookingStatus::InHouse))->toBeFalse();
 });
 
-test('date guards for on board and completed', function (): void {
-    expect(Transitions::dateGuardAllows(BookingStatus::OnBoard, '2027-11-06', '2027-11-07', '2027-11-14'))->toBeFalse();
-    expect(Transitions::dateGuardAllows(BookingStatus::OnBoard, '2027-11-07', '2027-11-07', '2027-11-14'))->toBeTrue();
-    expect(Transitions::dateGuardAllows(BookingStatus::Completed, '2027-11-13', '2027-11-07', '2027-11-14'))->toBeFalse();
-    expect(Transitions::dateGuardAllows(BookingStatus::Completed, '2027-11-14', '2027-11-07', '2027-11-14'))->toBeTrue();
+test('the generic date guard does not admit front-desk statuses', function (): void {
+    expect(Transitions::targets(BookingStatus::FullyPaid))->not->toContain(BookingStatus::InHouse);
+    expect(Transitions::targets(BookingStatus::InHouse))->not->toContain(BookingStatus::CheckedOut);
     expect(Transitions::dateGuardAllows(BookingStatus::Cancelled, '2027-01-01', '2027-11-07', '2027-11-14'))->toBeTrue();
 });
 

@@ -26,7 +26,7 @@ final class FreezeCommission
      * @return array{agency_id: int, commission_pct: int, commission_approved: bool, over_cap: bool, offer_codes: list<string>}|null
      */
     // TODO(Sprint 18): room type pricing (09 H8)
-    public function resolve(array $data, Departure $departure, ?CabinCategory $category): ?array
+    public function resolve(array $data, ?Departure $departure, ?CabinCategory $category): ?array
     {
         $agencyId = $data['agency_id'] ?? null;
 
@@ -63,7 +63,7 @@ final class FreezeCommission
             : $agency->commission_pct;
         $offerCodes = [];
 
-        if ($category instanceof CabinCategory) {
+        if ($departure instanceof Departure && $category instanceof CabinCategory) {
             $commOffers = Offer::applicableTo(
                 $departure,
                 $category,

@@ -352,7 +352,7 @@ final class CommercialMetrics
 
         $bindings = [
             $rules->commission->capPct,
-            $rules->commission->payableDaysAfterCruise,
+            $rules->commission->payableDaysAfterCheckOut,
             BusinessTime::now()->toDateString(),
             AgencyStatus::Approved->value,
             $window->from,
@@ -577,8 +577,8 @@ final class CommercialMetrics
             BookingStatus::PendingPayment->value,
             BookingStatus::Confirmed->value,
             BookingStatus::FullyPaid->value,
-            BookingStatus::OnBoard->value,
-            BookingStatus::Completed->value,
+            BookingStatus::InHouse->value,
+            BookingStatus::CheckedOut->value,
             BookingStatus::Overdue->value,
             BookingStatus::OnHoldAgency->value,
         ];

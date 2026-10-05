@@ -9,7 +9,7 @@ use App\Enums\PaymentStatus;
 use App\Events\PaymentSettled;
 use App\Models\Payment;
 use App\Models\User;
-use App\Support\Bookings\BookingMutationLock;
+use App\Support\Bookings\FrontDeskLock;
 use App\Support\BusinessTime;
 use App\Support\History\History;
 use App\Support\Payments\ApplyPaymentEffects;
@@ -28,7 +28,7 @@ final class MarkWireReceived extends Action
     {
         return $this->transaction(function () use ($payment, $data, $actor): Payment {
             $payment->loadMissing('booking');
-            $booking = BookingMutationLock::acquire($payment->booking, (int) $payment->booking->departure_id);
+            $booking = FrontDeskLock::acquire($payment->booking);
             $payment = $payment->fresh() ?? $payment;
 
             if ($payment->status !== PaymentStatus::AwaitingWire) {

@@ -11,4 +11,5 @@ enum ReleaseReason: string
     case Converted = 'CONVERTED';
     case Cancelled = 'CANCELLED';
     case Moved = 'MOVED';
+    case NoShow = 'NO_SHOW';
 }

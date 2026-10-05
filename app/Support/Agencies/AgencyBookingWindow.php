@@ -20,7 +20,7 @@ final class AgencyBookingWindow
     {
         return $bookings
             ->filter(function (Booking $booking) use ($from, $to): bool {
-                $date = $booking->departure->date->toDateString();
+                $date = $booking->stay()->checkIn()->toDateString();
 
                 if ($from !== null && $date < $from) {
                     return false;

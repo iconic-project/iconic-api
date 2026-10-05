@@ -195,9 +195,9 @@ test('the stage projection follows the booking and a mixed group uses the furthe
         'stage_entered_at' => now(),
         'lost_reason' => 'No dates',
     ]);
-    $completed = $make(BookingStatus::Completed, 'S1');
+    $completed = $make(BookingStatus::CheckedOut, 'S1');
     $confirmed = $make(BookingStatus::Confirmed, 'S2');
-    $onBoard = $make(BookingStatus::OnBoard, 'S3');
+    $onBoard = $make(BookingStatus::InHouse, 'S3');
     $overdue = $make(BookingStatus::Overdue, 'S4');
     $fullyPaid = $make(BookingStatus::FullyPaid, 'S5');
     $requested = $make(BookingStatus::Requested, 'S6');
@@ -446,5 +446,5 @@ test('the stage map is the implemented doc 07 table', function (): void {
 
     expect($response->json('data'))->toHaveCount(8);
     expect($response->json('data.2.stage'))->toBe('QUOTED');
-    expect($response->json('data.5.rms_statuses'))->toContain('ON_BOARD', 'OVERDUE');
+    expect($response->json('data.5.rms_statuses'))->toContain('IN_HOUSE', 'OVERDUE');
 });

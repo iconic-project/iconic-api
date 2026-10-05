@@ -22,13 +22,13 @@ use Illuminate\Support\Collection;
  * @property int $id
  * @property string $reference
  * @property string $name
- * @property int $departure_id
+ * @property int|null $departure_id
  * @property int $coordinator_contact_id
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure $departure
+ * @property-read Departure|null $departure
  * @property-read Contact $coordinator
  * @property-read Collection<int, Booking> $bookings
  */

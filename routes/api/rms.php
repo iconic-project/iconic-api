@@ -151,9 +151,15 @@ Route::get('bookings/owners', [BookingController::class, 'owners']);
 Route::get('bookings/form-options', [BookingController::class, 'formOptions']);
 Route::post('bookings/quote', [BookingController::class, 'quote']);
 Route::post('bookings', [BookingController::class, 'store']);
+Route::post('bookings/{booking}/check-in', [BookingController::class, 'checkIn'])->whereNumber('booking');
+Route::post('bookings/{booking}/check-out', [BookingController::class, 'checkOut'])->whereNumber('booking');
+Route::post('bookings/{booking}/no-show', [BookingController::class, 'noShow'])->whereNumber('booking');
+Route::post('bookings/{booking}/undo-check-in', [BookingController::class, 'undoCheckIn'])->whereNumber('booking');
 Route::post('bookings/{booking}/transition', [BookingController::class, 'transition'])->whereNumber('booking');
 Route::post('bookings/{booking}/overdue-decision', [BookingController::class, 'overdueDecision'])->whereNumber('booking');
 Route::post('bookings/{booking}/commission-approval', [CommissionController::class, 'decide'])->whereNumber('booking');
+Route::post('bookings/{booking}/modify/preview', [BookingController::class, 'modifyPreview'])->whereNumber('booking');
+Route::post('bookings/{booking}/modify', [BookingController::class, 'modify'])->whereNumber('booking');
 Route::post('bookings/{booking}/move/preview', [BookingController::class, 'movePreview'])->whereNumber('booking');
 Route::post('bookings/{booking}/move', [BookingController::class, 'move'])->whereNumber('booking');
 Route::patch('bookings/{booking}', [BookingController::class, 'update'])->whereNumber('booking');
@@ -253,6 +259,7 @@ Route::get('contacts-in', [ContactsInController::class, 'index']);
 Route::get('contacts', [ContactController::class, 'index']);
 
 Route::get('requests', [RequestController::class, 'index']);
+Route::post('requests/{booking}/confirm/preview', [RequestController::class, 'preview'])->whereNumber('booking');
 Route::post('requests/{booking}/confirm', [RequestController::class, 'confirm'])->whereNumber('booking');
 Route::post('requests/{booking}/release', [RequestController::class, 'release'])->whereNumber('booking');
 

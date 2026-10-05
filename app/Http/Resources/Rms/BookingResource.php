@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Resources\Rms;
 
 use App\Models\Booking;
+use App\Models\Departure;
 use App\Models\Group;
 use App\Models\RefundRequest;
 use App\Models\User;
 use App\Policies\BookingPolicy;
 use App\Services\Config\CurrentConfig;
+use App\Support\Bookings\FrontDeskActions;
 use App\Support\Bookings\RequestSummary;
 use App\Support\Bookings\Transitions;
 use App\Support\Iso;
@@ -74,7 +76,16 @@ class BookingResource extends JsonResource
      *     billing_phone: string|null,
      *     can_act: bool,
      *     allowed_transitions: list<array{to: string, reason_required: bool}>,
-     *     departure: array{id: int, date: string, return_date: string, itinerary_name: string, embark: string, festive: bool, property: array{id: int, code: string, name: string}},
+     *     allowed_actions: list<'check_in'|'check_out'|'no_show'|'modify_stay'|'move_room'>,
+     *     property_id: int|null,
+     *     stay: array{check_in: string, check_out: string, nights: int},
+     *     departure: array{id: int, date: string, return_date: string, itinerary_name: string, embark: string, festive: bool, property: array{id: int, code: string, name: string}}|null,
+     *     room: array{id: int, code: string, label: string}|null,
+     *     room_type: array{id: int, code: string, name: string}|null,
+     *     rate_plan: string|null,
+     *     night_lines: list<array<string, mixed>>|null,
+     *     tax_lines: list<array<string, mixed>>|null,
+     *     times: array{expected_arrival_time: string|null, checked_in_at: string|null, checked_out_at: string|null, no_show_at: string|null},
      *     cabin: array{id: int, code: string, label: string}|null,
      *     cabin_label: string,
      *     contact: array{id: int, name: string, email: string|null, phone: string|null, country: string|null, preferred_channel: string},
@@ -96,9 +107,16 @@ class BookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        if ($this->resource->relationLoaded('cabin') && ! $this->resource->relationLoaded('room')) {
+            $this->resource->setRelation('room', $this->resource->getRelation('cabin'));
+        }
+
         $this->resource->loadMissing([
             'departure.property',
             'departure.itinerary',
+            'room.roomType',
+            'roomType',
+            'property',
             'cabin',
             'contact',
             'group.coordinator',
@@ -167,7 +185,12 @@ class BookingResource extends JsonResource
             'allowed_transitions' => $actor instanceof User
                 ? Transitions::allowedFor($this->resource, $actor)
                 : [],
-            'departure' => [
+            'allowed_actions' => $actor instanceof User
+                ? app(FrontDeskActions::class)->for($this->resource, $actor)
+                : [],
+            'property_id' => $this->property_id,
+            'stay' => $this->stay()->toArray(),
+            'departure' => $this->departure instanceof Departure ? [
                 'id' => $this->departure->id,
                 'date' => $this->departure->date->toDateString(),
                 'return_date' => $this->departure->returnDate()->toDateString(),
@@ -179,6 +202,25 @@ class BookingResource extends JsonResource
                     'code' => $this->departure->property->code,
                     'name' => $this->departure->property->name,
                 ],
+            ] : null,
+            'room' => $this->room === null ? null : [
+                'id' => $this->room->id,
+                'code' => $this->room->code,
+                'label' => $this->room->label,
+            ],
+            'room_type' => $this->roomType === null ? null : [
+                'id' => $this->roomType->id,
+                'code' => $this->roomType->code,
+                'name' => $this->roomType->name,
+            ],
+            'rate_plan' => $this->rate_plan_code,
+            'night_lines' => $this->night_lines,
+            'tax_lines' => $this->tax_lines,
+            'times' => [
+                'expected_arrival_time' => $this->expected_arrival_time,
+                'checked_in_at' => Iso::utc($this->checked_in_at),
+                'checked_out_at' => Iso::utc($this->checked_out_at),
+                'no_show_at' => Iso::utc($this->no_show_at),
             ],
             'cabin' => $this->cabin === null ? null : [
                 'id' => $this->cabin->id,

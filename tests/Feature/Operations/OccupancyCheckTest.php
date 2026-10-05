@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Services\Inventory\ClaimService;
 use App\Enums\AlertKind;
 use App\Enums\BookingStatus;
 use App\Enums\CabinCategory;
@@ -11,7 +12,6 @@ use App\Models\Booking;
 use App\Models\Departure;
 use App\Models\Property;
 use App\Models\Room;
-use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\Alerts\AlertKeys;
 use App\Support\BusinessTime;
 use Database\Seeders\ConfigSeeder;
@@ -79,8 +79,7 @@ function occupiedDeparture(Property $property, Collection $cabins, Booking $hold
         'reference' => 'DEP-'.str_replace('-', '', $date),
     ]);
 
-    DB::transaction(fn () => app(LegacyDepartureClaims::class)->claim(
-        $departure,
+    DB::transaction(fn () => app(ClaimService::class)->claim($departure->stayDates(),
         $cabins->take($sold)->values(),
         $holder,
         ClaimKind::Booking,

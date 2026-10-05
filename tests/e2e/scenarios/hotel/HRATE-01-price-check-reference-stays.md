@@ -8,7 +8,7 @@
 The eight hotel `reference_quotes` are the nightly pricing contract. If the draft total is wrong, every stay quote is wrong.
 
 ## Steps
-1. The API seed must be hotel (`ICONIC_SEED_MODE=hotel` before `reset.sh`). The default e2e seed is yacht until Sprint 19. Do not accept a sailing-year selector or the eight yacht totals (`USD 26,600` and the rest).
+1. The API seed is hotel by default (`ICONIC_SEED_MODE=hotel`). Do not accept a sailing-year selector or the eight yacht totals (`USD 26,600` and the rest).
 2. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms/commercial/rates`.
 3. Scroll to **Price check — published vs your draft**. It lists eight stays, prefilled. Do not edit them. Read each card's room total, amount due, deposit line, and difference. Totals are `docs/requirements/examples/hotel-seed-data.json` `reference_quotes`, rendered as `USD` integers.
 

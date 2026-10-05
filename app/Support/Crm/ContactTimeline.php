@@ -16,6 +16,7 @@ use App\Enums\DeliveryStatus;
 use App\Enums\PaymentKind;
 use App\Enums\PaymentStatus;
 use App\Models\Contact;
+use App\Support\Bookings\LegacyStatus;
 use App\Support\Iso;
 use App\Support\Money;
 use Carbon\CarbonImmutable;
@@ -491,8 +492,8 @@ final class ContactTimeline
     private static function bookingCopy(array $payload): array
     {
         $event = is_string($payload['event'] ?? null) ? $payload['event'] : '';
-        $status = is_string($payload['status'] ?? null) ? $payload['status'] : '';
-        $what = is_string($payload['what'] ?? null) ? $payload['what'] : '';
+        $status = LegacyStatus::value(is_string($payload['status'] ?? null) ? $payload['status'] : '');
+        $what = LegacyStatus::text(is_string($payload['what'] ?? null) ? $payload['what'] : '');
 
         $title = match ($event) {
             'booking.created' => 'Created',

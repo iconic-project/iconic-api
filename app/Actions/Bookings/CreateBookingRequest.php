@@ -16,12 +16,13 @@ use App\Enums\PreferredChannel;
 use App\Enums\ReferenceType;
 use App\Events\BookingCreated;
 use App\Exceptions\CabinUnavailableException;
+use App\Exceptions\RoomUnavailableException;
 use App\Models\Booking;
 use App\Models\BookingRequest;
 use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\LegacyDepartureClaims;
+use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\QuotedParty;
 use App\Services\Pricing\ReservationQuoter;
 use App\Services\References\ReferenceService;
@@ -29,6 +30,7 @@ use App\Support\Blocks\ConflictMessage;
 use App\Support\Bookings\SoldOn;
 use App\Support\BusinessHours;
 use App\Support\History\History;
+use App\Support\Inventory\CabinConflict;
 use App\Support\Inventory\DepartureLocks;
 use App\Support\Inventory\StaffStayRestrictions;
 use Carbon\CarbonInterface;
@@ -40,9 +42,10 @@ final class CreateBookingRequest extends Action
         private ReservationQuoter $quoter,
         private ResolveContact $contacts,
         private ReferenceService $references,
-        private LegacyDepartureClaims $claims,
+        private ClaimService $claims,
         private CurrentConfig $config,
         private StaffStayRestrictions $stayRestrictions,
+        private CreateStayReservation $stays,
     ) {}
 
     /**
@@ -52,6 +55,10 @@ final class CreateBookingRequest extends Action
      */
     public function handle(array $data, User $actor, ?CarbonInterface $referenceAt = null): Booking
     {
+        if (isset($data['check_in']) && is_string($data['check_in']) && $data['check_in'] !== '') {
+            return $this->stays->request($data, $actor, $referenceAt);
+        }
+
         return $this->transaction(function () use ($data, $actor, $referenceAt): Booking {
             $departure = DepartureLocks::lock((int) $data['departure_id']);
             $departure->load(['property.cabins']);
@@ -117,7 +124,7 @@ final class CreateBookingRequest extends Action
             $ratesVersion = $this->config->version(ConfigKind::Rates);
             $rules = $this->config->businessRules();
             $submittedAt = now();
-            $hold = BusinessHours::fromDocument($rules)->holdExpiry($submittedAt, $departure->date, $rules);
+            $hold = BusinessHours::fromDocument($rules)->holdExpiry($submittedAt, $departure->stayDates()->checkIn(), $rules);
 
             $booking = Booking::query()->create([
                 'reference' => null,
@@ -147,16 +154,21 @@ final class CreateBookingRequest extends Action
                     : null,
             ]);
 
+            $stay = $departure->stayDates();
+            $rooms = collect([$cabin]);
+
             try {
+                DepartureLocks::lock((int) $departure->id);
                 $this->claims->claim(
-                    $departure,
-                    collect([$cabin]),
+                    $stay,
+                    $rooms,
                     $booking,
                     ClaimKind::Hold,
                     HoldType::Request,
                     $hold->expiresAt,
                 );
-            } catch (CabinUnavailableException $exception) {
+            } catch (RoomUnavailableException) {
+                $exception = CabinConflict::exception($stay, $rooms, $booking);
                 $lines = [];
 
                 foreach ($exception->unavailable as $row) {

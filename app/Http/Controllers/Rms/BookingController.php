@@ -4,11 +4,18 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Rms;
 
+use App\Actions\Bookings\CheckInBooking;
+use App\Actions\Bookings\CheckOutBooking;
 use App\Actions\Bookings\CreateReservation;
+use App\Actions\Bookings\CreateStayReservation;
 use App\Actions\Bookings\DecideOverdue;
 use App\Actions\Bookings\DeleteBooking;
+use App\Actions\Bookings\MarkNoShow;
+use App\Actions\Bookings\ModifyStay;
 use App\Actions\Bookings\MoveBooking;
+use App\Actions\Bookings\MoveRoom;
 use App\Actions\Bookings\TransitionBooking;
+use App\Actions\Bookings\UndoCheckIn;
 use App\Actions\Bookings\UpdateBooking;
 use App\Enums\BookingSegment;
 use App\Enums\BookingStatus;
@@ -16,21 +23,28 @@ use App\Enums\Permission;
 use App\Enums\UserStatus;
 use App\Exceptions\CabinUnavailableException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Rms\CheckInBookingRequest;
+use App\Http\Requests\Rms\CheckOutBookingRequest;
 use App\Http\Requests\Rms\DeleteBookingRequest;
 use App\Http\Requests\Rms\IndexBookingAuditRequest;
 use App\Http\Requests\Rms\IndexBookingsRequest;
+use App\Http\Requests\Rms\MarkNoShowRequest;
+use App\Http\Requests\Rms\ModifyStayRequest;
 use App\Http\Requests\Rms\MoveBookingRequest;
 use App\Http\Requests\Rms\OverdueDecisionRequest;
+use App\Http\Requests\Rms\PreviewModifyStayRequest;
 use App\Http\Requests\Rms\PreviewMoveBookingRequest;
 use App\Http\Requests\Rms\QuoteReservationRequest;
 use App\Http\Requests\Rms\StoreReservationRequest;
 use App\Http\Requests\Rms\TransitionBookingRequest;
+use App\Http\Requests\Rms\UndoCheckInRequest;
 use App\Http\Requests\Rms\UpdateBookingRequest;
 use App\Http\Resources\Rms\BookingAuditResource;
 use App\Http\Resources\Rms\BookingFormOptionsResource;
 use App\Http\Resources\Rms\BookingOwnerResource;
 use App\Http\Resources\Rms\BookingResource;
 use App\Http\Resources\Rms\ChangeHistoryResource;
+use App\Http\Resources\Rms\ModifyStayPreviewResource;
 use App\Http\Resources\Rms\MovePreviewResource;
 use App\Http\Resources\Rms\ReservationCreatedResource;
 use App\Http\Resources\Rms\ReservationQuoteResource;
@@ -46,7 +60,9 @@ use App\Support\BusinessTime;
 use App\Support\Stays\StayDates;
 use Dedoc\Scramble\Attributes\Response as DocumentedResponse;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
 
@@ -67,11 +83,30 @@ final class BookingController extends Controller
 
         $query = Booking::query()
             ->select('bookings.*')
-            ->join('departures', 'departures.id', '=', 'bookings.departure_id')
             ->visibleTo($actor)
-            ->departingBetween(
+            ->arrivingBetween(
                 is_string($request->validated('from')) ? $request->validated('from') : null,
                 is_string($request->validated('to')) ? $request->validated('to') : null,
+            )
+            ->arrivingBetween(
+                is_string($request->validated('arriving_from')) ? $request->validated('arriving_from') : null,
+                is_string($request->validated('arriving_to')) ? $request->validated('arriving_to') : null,
+            )
+            ->checkingOutBetween(
+                is_string($request->validated('departing_from')) ? $request->validated('departing_from') : null,
+                is_string($request->validated('departing_to')) ? $request->validated('departing_to') : null,
+            )
+            ->when(
+                is_string($request->validated('in_house_on')) && $request->validated('in_house_on') !== '',
+                fn (Builder $query) => $query->inHouseOn((string) $request->validated('in_house_on')),
+            )
+            ->when(
+                $request->filled('owner_id'),
+                fn (Builder $query) => $query->where('bookings.owner_id', $request->validated('owner_id')),
+            )
+            ->when(
+                $request->filled('channel'),
+                fn (Builder $query) => $query->where('bookings.main_channel', $request->validated('channel')),
             )
             ->when($request->boolean('mine'), fn (Builder $query) => $query->where('bookings.owner_id', $actor->id))
             ->when(
@@ -113,7 +148,9 @@ final class BookingController extends Controller
             ->with([
                 'departure.property',
                 'departure.itinerary',
-                'cabin',
+                'cabin.roomType',
+                'roomType',
+                'property',
                 'contact',
                 'group.coordinator',
                 'owner',
@@ -123,7 +160,7 @@ final class BookingController extends Controller
                 'bookingRequest',
                 'activeClaims',
             ])
-            ->orderBy('departures.date')
+            ->orderBy('bookings.check_in')
             ->orderBy('bookings.reference')
             ->paginate($perPage);
 
@@ -132,11 +169,14 @@ final class BookingController extends Controller
         ]);
     }
 
-    public function formOptions(CurrentConfig $config): BookingFormOptionsResource
+    public function formOptions(Request $request, CurrentConfig $config): BookingFormOptionsResource
     {
         $this->authorize('create', Booking::class);
 
-        return new BookingFormOptionsResource(BookingFormOptions::fromConfig($config));
+        return new BookingFormOptionsResource(BookingFormOptions::fromConfig(
+            $config,
+            BookingFormOptions::stayFromQuery($request),
+        ));
     }
 
     public function quote(
@@ -166,8 +206,11 @@ final class BookingController extends Controller
         status: 201,
         type: 'array{bookings: list<App\\Http\\Resources\\Rms\\BookingResource>, group: array{id: int, reference: string, name: string, coordinator: array{id: int, name: string}}|null, warnings: list<string>}',
     )]
-    public function store(StoreReservationRequest $request, CreateReservation $action): JsonResponse
-    {
+    public function store(
+        StoreReservationRequest $request,
+        CreateReservation $action,
+        CreateStayReservation $stays,
+    ): JsonResponse {
         $this->authorize('create', Booking::class);
 
         $actor = $request->user();
@@ -176,7 +219,9 @@ final class BookingController extends Controller
             abort(401);
         }
 
-        $created = $action->handle($request->validated(), $actor);
+        $created = $request->filled('check_in')
+            ? $stays->handle($request->validated(), $actor)
+            : $action->handle($request->validated(), $actor);
 
         return (new ReservationCreatedResource($created))->response()->setStatusCode(201);
     }
@@ -192,7 +237,9 @@ final class BookingController extends Controller
             ->with([
                 'departure.property',
                 'departure.itinerary',
-                'cabin',
+                'cabin.roomType',
+                'roomType',
+                'property',
                 'contact',
                 'group.coordinator',
                 'owner',
@@ -264,9 +311,34 @@ final class BookingController extends Controller
         return BookingOwnerResource::collection($owners);
     }
 
-    /**
-     * @throws CabinUnavailableException
-     */
+    public function checkIn(CheckInBookingRequest $request, Booking $booking, CheckInBooking $action): BookingResource
+    {
+        $this->authorize('frontDesk', $booking);
+
+        return new BookingResource($action->handle($booking, $request->validated(), $this->actor($request)));
+    }
+
+    public function checkOut(CheckOutBookingRequest $request, Booking $booking, CheckOutBooking $action): BookingResource
+    {
+        $this->authorize('frontDesk', $booking);
+
+        return new BookingResource($action->handle($booking, $request->validated(), $this->actor($request)));
+    }
+
+    public function noShow(MarkNoShowRequest $request, Booking $booking, MarkNoShow $action): BookingResource
+    {
+        $this->authorize('frontDesk', $booking);
+
+        return new BookingResource($action->handle($booking, $request->validated(), $this->actor($request)));
+    }
+
+    public function undoCheckIn(UndoCheckInRequest $request, Booking $booking, UndoCheckIn $action): BookingResource
+    {
+        $this->authorize('undoCheckIn', $booking);
+
+        return new BookingResource($action->handle($booking, $request->validated(), $this->actor($request)));
+    }
+
     public function transition(
         TransitionBookingRequest $request,
         Booking $booking,
@@ -302,12 +374,34 @@ final class BookingController extends Controller
         return new BookingResource($action->handle($booking, $request->validated(), $actor));
     }
 
+    public function modifyPreview(
+        PreviewModifyStayRequest $request,
+        Booking $booking,
+        ModifyStay $action,
+    ): ModifyStayPreviewResource {
+        $this->authorize('move', $booking);
+
+        return new ModifyStayPreviewResource($action->preview($booking, $request->validated(), $this->actor($request)));
+    }
+
+    public function modify(ModifyStayRequest $request, Booking $booking, ModifyStay $action): BookingResource
+    {
+        $this->authorize('move', $booking);
+
+        return new BookingResource($action->handle($booking, $request->validated(), $this->actor($request)));
+    }
+
     public function movePreview(
         PreviewMoveBookingRequest $request,
         Booking $booking,
         MoveBooking $action,
-    ): MovePreviewResource {
+        MoveRoom $moveRoom,
+    ): MovePreviewResource|ModifyStayPreviewResource {
         $this->authorize('move', $booking);
+
+        if ($request->filled('room_id') && ! $request->filled('departure_id')) {
+            return new ModifyStayPreviewResource($moveRoom->preview($booking, $request->validated(), $this->actor($request)));
+        }
 
         return new MovePreviewResource($action->preview($booking, $request->validated()));
     }
@@ -315,14 +409,13 @@ final class BookingController extends Controller
     /**
      * @throws CabinUnavailableException
      */
-    public function move(MoveBookingRequest $request, Booking $booking, MoveBooking $action): BookingResource
+    public function move(MoveBookingRequest $request, Booking $booking, MoveBooking $action, MoveRoom $moveRoom): BookingResource
     {
         $this->authorize('move', $booking);
+        $actor = $this->actor($request);
 
-        $actor = $request->user();
-
-        if (! $actor instanceof User) {
-            abort(401);
+        if ($request->filled('room_id') && ! $request->filled('departure_id')) {
+            return new BookingResource($moveRoom->handle($booking, $request->validated(), $actor));
         }
 
         return new BookingResource($action->handle($booking, $request->validated(), $actor));
@@ -354,6 +447,17 @@ final class BookingController extends Controller
         $action->handle($booking, $request->validated(), $actor);
 
         return response()->noContent();
+    }
+
+    private function actor(FormRequest $request): User
+    {
+        $actor = $request->user();
+
+        if (! $actor instanceof User) {
+            abort(401);
+        }
+
+        return $actor;
     }
 
     /**

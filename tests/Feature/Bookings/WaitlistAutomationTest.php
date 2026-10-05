@@ -22,7 +22,6 @@ use App\Models\Departure;
 use App\Models\Room;
 use App\Models\WaitlistEntry;
 use App\Services\Inventory\ClaimService;
-use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -88,7 +87,7 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
 
     $holder = $holders[array_key_first($holders)];
     DB::transaction(function () use ($holder): void {
-        app(LegacyDepartureClaims::class)->release($holder, ReleaseReason::Released);
+        app(ClaimService::class)->release($holder, ReleaseReason::Released);
     });
 
     $this->artisan('iconic:waitlist-notify')->assertSuccessful();
@@ -195,7 +194,7 @@ function blockSuitesExcept(Departure $departure, string $keep): array
                 'reference' => 'BLK-'.$cabin->code,
                 'name' => $cabin->code,
             ]);
-            app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
+            app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $holder, ClaimKind::Block);
             $holders[$cabin->code] = $holder;
         }
     });

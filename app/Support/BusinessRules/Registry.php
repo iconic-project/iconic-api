@@ -339,7 +339,7 @@ final class Registry
         return match ($definition->key) {
             'fin-005-commission-cap' => data_get($document, 'commission.cap_pct').'%',
             'rms-default-commission' => data_get($document, 'commission.default_pct').'%',
-            'commission-payable-days' => data_get($document, 'commission.payable_days_after_cruise').' days',
+            'commission-payable-days' => data_get($document, 'commission.payable_days_after_check_out').' days',
             'fin-006-modification-fee' => Money::format((int) data_get($document, 'modification_fee_usd')),
             'extras-due-hours' => data_get($document, 'payments.extras_due_hours').' hours',
             'wire-window-hours' => data_get($document, 'payments.wire_window_hours').' hours',
@@ -801,9 +801,9 @@ final class Registry
                 '§10',
                 'Commission payable after cruise',
                 RuleStatus::Confirmed,
-                ['commission.payable_days_after_cruise'],
-                BusinessRulesDocument::sourceDisplay('commission.payable_days_after_cruise'),
-                data_get($initial, 'commission.payable_days_after_cruise'),
+                ['commission.payable_days_after_check_out'],
+                BusinessRulesDocument::sourceDisplay('commission.payable_days_after_check_out'),
+                data_get($initial, 'commission.payable_days_after_check_out'),
                 'Payments, commissions',
             ),
             self::here(

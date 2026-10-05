@@ -62,7 +62,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'commission' => [
                 'cap_pct' => 12,
                 'default_pct' => 10,
-                'payable_days_after_cruise' => 30,
+                'payable_days_after_check_out' => 30,
             ],
             'modification_fee_usd' => 0,
             'payments' => [
@@ -257,7 +257,7 @@ final class BusinessRulesDocument extends ConfigDocument
             new CommissionRules(
                 (int) ($commission['cap_pct'] ?? 0),
                 (int) ($commission['default_pct'] ?? 0),
-                (int) ($commission['payable_days_after_cruise'] ?? 0),
+                (int) ($commission['payable_days_after_check_out'] ?? $commission['payable_days_after_cruise'] ?? 0),
             ),
             (int) ($data['modification_fee_usd'] ?? 0),
             new PaymentsRules(
@@ -381,7 +381,7 @@ final class BusinessRulesDocument extends ConfigDocument
 
     /**
      * @return array{
-     *     commission: array{cap_pct: int, default_pct: int, payable_days_after_cruise: int},
+     *     commission: array{cap_pct: int, default_pct: int, payable_days_after_check_out: int},
      *     modification_fee_usd: int,
      *     payments: array{extras_due_hours: int, wire_window_hours: int, balance_reminder_days: list<int>},
      *     discounts: array{online_deposit_discount_pct: int, max_total_discount_pct: int|null},
@@ -455,7 +455,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'commission' => ['required', 'array'],
             'commission.cap_pct' => ['required', 'integer', 'min:0', 'max:30'],
             'commission.default_pct' => ['required', 'integer', 'min:0', 'max:30', new BusinessRulesConstraint('default_lte_cap')],
-            'commission.payable_days_after_cruise' => ['required', 'integer', 'min:0', 'max:120'],
+            'commission.payable_days_after_check_out' => ['required', 'integer', 'min:0', 'max:120'],
             'modification_fee_usd' => ['required', 'integer', 'min:0', 'max:10000'],
             'payments' => ['required', 'array'],
             'payments.extras_due_hours' => ['required', 'integer', 'min:0', 'max:2160'],
@@ -586,7 +586,7 @@ final class BusinessRulesDocument extends ConfigDocument
         return [
             'commission.cap_pct' => 'FIN-005 · Max agency commission',
             'commission.default_pct' => 'RMS · Default agency commission',
-            'commission.payable_days_after_cruise' => '§10 · Commission payable after cruise',
+            'commission.payable_days_after_check_out' => '§10 · Commission payable after check-out',
             'modification_fee_usd' => 'FIN-006 · Date-change / modification fee',
             'payments.extras_due_hours' => 'Iconic · Extras & collected fees — due before departure',
             'payments.wire_window_hours' => 'RMS · Wire transfer window before auto-release',
@@ -754,7 +754,7 @@ final class BusinessRulesDocument extends ConfigDocument
         return match ($path) {
             'commission.cap_pct' => '12%',
             'commission.default_pct' => '10% (confirmed 12 Sep 2026)',
-            'commission.payable_days_after_cruise' => '30 days',
+            'commission.payable_days_after_check_out' => '30 days',
             'modification_fee_usd' => 'USD 0 — free, subject to availability',
             'payments.extras_due_hours' => '72 hours (Iconic 12 Sep 2026); services taken on board are settled during / after the cruise',
             'payments.wire_window_hours' => '72 hours (confirmed 12 Sep 2026)',

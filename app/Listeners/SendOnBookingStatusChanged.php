@@ -26,6 +26,12 @@ final class SendOnBookingStatusChanged implements ShouldQueue
             return;
         }
 
+        // Cruise invoice snapshots need a departure. A stay has none.
+        // TODO(OPEN: 19-03) hotel documents are not issued on these transitions.
+        if ($booking->departure_id === null) {
+            return;
+        }
+
         if (in_array($booking->status, [
             BookingStatus::Cancelled,
             BookingStatus::CancelledPostpaid,

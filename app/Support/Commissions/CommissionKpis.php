@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 final class CommissionKpis
 {
     /**
-     * Approved agencies only. Departure dates fall inside from/to when those are set.
+     * Approved agencies only. Check-in dates fall inside from/to when those are set.
      *
      * @return array{commission_accrued: int, commission_payable: int, commission_paid: int}
      */
@@ -24,12 +24,10 @@ final class CommissionKpis
 
         $query = DB::table('bookings')
             ->join('agencies', 'agencies.id', '=', 'bookings.agency_id')
-            ->join('departures', 'departures.id', '=', 'bookings.departure_id')
-            ->join('itineraries', 'itineraries.id', '=', 'departures.itinerary_id')
             ->leftJoin('commission_payouts', 'commission_payouts.booking_id', '=', 'bookings.id')
             ->where('agencies.status', AgencyStatus::Approved->value)
-            ->when($from !== null, fn ($inner) => $inner->whereDate('departures.date', '>=', $from))
-            ->when($to !== null, fn ($inner) => $inner->whereDate('departures.date', '<=', $to));
+            ->when($from !== null, fn ($inner) => $inner->whereDate('bookings.check_in', '>=', $from))
+            ->when($to !== null, fn ($inner) => $inner->whereDate('bookings.check_in', '<=', $to));
 
         /** @var object{commission_accrued: int|string|null, commission_payable: int|string|null, commission_paid: int|string|null}|null $row */
         $row = $query->selectRaw(
@@ -38,7 +36,7 @@ final class CommissionKpis
             'COALESCE(SUM(commission_payouts.amount), 0) as commission_paid',
             [
                 $rules->commission->capPct,
-                $rules->commission->payableDaysAfterCruise,
+                $rules->commission->payableDaysAfterCheckOut,
                 BusinessTime::now()->toDateString(),
                 CommissionAccrualStatus::Payable->value,
             ],

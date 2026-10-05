@@ -9,16 +9,13 @@ use App\Enums\CommissionAccrualStatus;
 use App\Models\Booking;
 use App\Support\BusinessTime;
 use App\Support\Config\Documents\BusinessRulesDocument;
-use App\Support\Crm\ContactDerived;
 use Carbon\CarbonImmutable;
 
 final class Accrual
 {
     public static function payableDate(Booking $booking, BusinessRulesDocument $rules): CarbonImmutable
     {
-        $booking->loadMissing('departure.itinerary');
-
-        return $booking->departure->returnDate()->addDays($rules->commission->payableDaysAfterCruise);
+        return $booking->stay()->checkOut()->addDays($rules->commission->payableDaysAfterCheckOut);
     }
 
     public static function status(Booking $booking, BusinessRulesDocument $rules): CommissionAccrualStatus
@@ -45,7 +42,8 @@ final class Accrual
         $today = BusinessTime::now()->toDateString();
         $payable = self::payableDate($booking, $rules)->toDateString();
 
-        if ($booking->status === BookingStatus::Completed && $payable <= $today) {
+        // TODO(OPEN: 19-05) Business rules do not say whether a collected no-show charge accrues commission.
+        if ($booking->status === BookingStatus::CheckedOut && $payable <= $today) {
             return CommissionAccrualStatus::Payable;
         }
 
@@ -54,13 +52,12 @@ final class Accrual
 
     /**
      * Same precedence as status(). Bindings are cap percent, payable days, today (Y-m-d).
-     * The query must join departures, itineraries, and a left join of commission_payouts.
+     * The query must left-join commission_payouts. Payable date is check-out plus the configured days.
      */
     public static function statusSql(string $payouts = 'commission_payouts'): string
     {
         $cancelled = "'".BookingStatus::Cancelled->value."', '".BookingStatus::CancelledPostpaid->value."'";
-        $completed = BookingStatus::Completed->value;
-        $return = ContactDerived::returnDateSql();
+        $completed = BookingStatus::CheckedOut->value;
 
         return 'CASE
             WHEN bookings.status IN ('.$cancelled.') THEN \''.CommissionAccrualStatus::Cancelled->value.'\'
@@ -69,7 +66,7 @@ final class Accrual
                 AND bookings.commission_approved = 0 THEN \''.CommissionAccrualStatus::Blocked->value.'\'
             WHEN '.$payouts.'.id IS NOT NULL THEN \''.CommissionAccrualStatus::Paid->value.'\'
             WHEN bookings.status = \''.$completed.'\'
-                AND DATE_ADD('.$return.', INTERVAL ? DAY) <= ? THEN \''.CommissionAccrualStatus::Payable->value.'\'
+                AND DATE_ADD(bookings.check_out, INTERVAL ? DAY) <= ? THEN \''.CommissionAccrualStatus::Payable->value.'\'
             ELSE \''.CommissionAccrualStatus::EarnedOnCompletion->value.'\'
         END';
     }

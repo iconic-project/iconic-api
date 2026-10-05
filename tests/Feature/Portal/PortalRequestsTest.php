@@ -20,7 +20,6 @@ use App\Models\Departure;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
-use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\Portal\PortalRequestWords;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -226,7 +225,7 @@ test('a sold-out, closed, hidden, or out-of-calendar departure is refused and wr
     $holder = ClaimHolder::query()->create(['reference' => 'BLK', 'name' => 'Taken']);
 
     DB::transaction(function () use ($full, $holder): void {
-        app(LegacyDepartureClaims::class)->claim($full, $full->property->cabins, $holder, ClaimKind::Block);
+        app(ClaimService::class)->claim($full->stayDates(), $full->property->cabins, $holder, ClaimKind::Block);
     });
 
     $label = app(Availability::class)->forDepartures(collect([$full->fresh(['property.cabins', 'itinerary'])]))[$full->id]->engineLabel['text'];
@@ -245,7 +244,7 @@ test('a sold-out, closed, hidden, or out-of-calendar departure is refused and wr
     $ownerHolder = ClaimHolder::query()->create(['reference' => 'OWN', 'name' => 'Owner taken']);
 
     DB::transaction(function () use ($ownerTaken, $owner, $ownerHolder): void {
-        app(LegacyDepartureClaims::class)->claim($ownerTaken, collect([$owner]), $ownerHolder, ClaimKind::Block);
+        app(ClaimService::class)->claim($ownerTaken->stayDates(), collect([$owner]), $ownerHolder, ClaimKind::Block);
     });
 
     postPortalRequest($user, portalRequestBody($full))

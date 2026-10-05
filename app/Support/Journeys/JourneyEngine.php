@@ -146,7 +146,7 @@ final class JourneyEngine
             $this->enrol('winback', $booking->contact, $booking);
         }
 
-        if ($status === BookingStatus::Completed) {
+        if ($status === BookingStatus::CheckedOut) {
             $this->enrol('reengagement', $booking->contact, $booking);
         }
     }
@@ -312,7 +312,7 @@ final class JourneyEngine
             });
 
         Booking::query()
-            ->where('status', BookingStatus::Completed)
+            ->where('status', BookingStatus::CheckedOut)
             ->with('contact')
             ->each(function (Booking $booking): void {
                 $this->enrol('reengagement', $booking->contact, $booking);
@@ -469,7 +469,7 @@ final class JourneyEngine
             return false;
         }
 
-        if ($orStatus && in_array($booking->status, [BookingStatus::OnBoard, BookingStatus::Completed], true)) {
+        if ($orStatus && in_array($booking->status, [BookingStatus::InHouse, BookingStatus::CheckedOut], true)) {
             return true;
         }
 

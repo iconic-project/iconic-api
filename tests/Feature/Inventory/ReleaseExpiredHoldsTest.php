@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Services\Inventory\ClaimService;
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
@@ -11,7 +12,6 @@ use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\RoomNightClaim;
-use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;
@@ -34,9 +34,9 @@ test('the job releases expired holds in batches and writes hold.expired', functi
     $s2 = $property->cabins()->where('code', 'S2')->firstOrFail();
 
     DB::transaction(function () use ($departure, $s1, $s2, $expired, $live): void {
-        $service = app(LegacyDepartureClaims::class);
-        $service->claim($departure, collect([$s1]), $expired, ClaimKind::Hold, HoldType::Web, now()->addMinutes(20));
-        $service->claim($departure, collect([$s2]), $live, ClaimKind::Hold, HoldType::Agency, now()->addDay());
+        $service = app(ClaimService::class);
+        $service->claim($departure->stayDates(), collect([$s1]), $expired, ClaimKind::Hold, HoldType::Web, now()->addMinutes(20));
+        $service->claim($departure->stayDates(), collect([$s2]), $live, ClaimKind::Hold, HoldType::Agency, now()->addDay());
     });
 
     RoomNightClaim::query()->where('holder_id', $expired->id)->update(['expires_at' => now()->subMinute()]);

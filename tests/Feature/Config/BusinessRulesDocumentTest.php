@@ -13,7 +13,7 @@ test('rules reject ranges, default above cap, reminder order and band shape', fu
         'commission' => [
             'cap_pct' => 31,
             'default_pct' => 40,
-            'payable_days_after_cruise' => 121,
+            'payable_days_after_check_out' => 121,
         ],
         'modification_fee_usd' => 10001,
         'payments' => [
@@ -59,7 +59,7 @@ test('rules reject ranges, default above cap, reminder order and band shape', fu
 
     expect($errors->has('commission.cap_pct'))->toBeTrue();
     expect($errors->has('commission.default_pct'))->toBeTrue();
-    expect($errors->has('commission.payable_days_after_cruise'))->toBeTrue();
+    expect($errors->has('commission.payable_days_after_check_out'))->toBeTrue();
     expect($errors->has('modification_fee_usd'))->toBeTrue();
     expect($errors->has('payments.extras_due_hours'))->toBeTrue();
     expect($errors->has('payments.wire_window_hours'))->toBeTrue();

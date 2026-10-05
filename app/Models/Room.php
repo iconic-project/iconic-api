@@ -10,9 +10,11 @@ use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
 use Database\Factories\RoomFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 
@@ -31,6 +33,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon $updated_at
  * @property-read Property $property
  * @property-read RoomType $roomType
+ * @property-read Collection<int, RoomNightClaim> $nightClaims
  */
 #[Fillable([
     'property_id',
@@ -71,6 +74,14 @@ class Room extends Model
     public function roomType(): BelongsTo
     {
         return $this->belongsTo(RoomType::class);
+    }
+
+    /**
+     * @return HasMany<RoomNightClaim, $this>
+     */
+    public function nightClaims(): HasMany
+    {
+        return $this->hasMany(RoomNightClaim::class);
     }
 
     /**

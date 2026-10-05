@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace App\Support\Schedule;
 
+use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
+use App\Support\Config\Documents\BusinessRulesDocument;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Telescope\Console\PruneCommand;
+use Throwable;
 
 final class IconicSchedule
 {
@@ -113,12 +117,12 @@ final class IconicSchedule
         );
 
         RecordScheduledRuns::attach(
-            $schedule->command('iconic:voyage-status')
-                ->dailyAt('00:15')
+            $schedule->command('iconic:night-audit')
+                ->dailyAt(self::nightAuditAt())
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
                 ->onOneServer()
-                ->description('Move FULLY_PAID to ON_BOARD and ON_BOARD to COMPLETED'),
+                ->description('Raise front-desk alerts. Changes no booking status.'),
         );
 
         RecordScheduledRuns::attach(
@@ -180,6 +184,28 @@ final class IconicSchedule
                 $schedule->command('telescope:prune --hours=48')->daily(),
             );
         }
+    }
+
+    /**
+     * One minute after stay.no_show_cutoff_time, property local. The minute is
+     * schedule slack so the cut-off has passed, not a business rule.
+     */
+    public static function nightAuditAt(): string
+    {
+        try {
+            $cutoff = app(CurrentConfig::class)->businessRules()->stay->noShowCutoffTime;
+        } catch (Throwable) {
+            $stay = BusinessRulesDocument::initial()['stay'] ?? [];
+            $cutoff = is_array($stay) ? (string) ($stay['no_show_cutoff_time'] ?? '') : '';
+        }
+
+        $moment = CarbonImmutable::createFromFormat('H:i', $cutoff, BusinessTime::zone());
+
+        if (! $moment instanceof CarbonImmutable) {
+            throw new \InvalidArgumentException('stay.no_show_cutoff_time must be HH:MM.');
+        }
+
+        return $moment->addMinute()->format('H:i');
     }
 
     private static function alreadyRegistered(Schedule $schedule): bool

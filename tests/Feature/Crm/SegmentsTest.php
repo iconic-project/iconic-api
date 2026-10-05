@@ -69,7 +69,7 @@ test('each seeded segment count equals the contacts it lists', function (): void
 
     $pastDeparture = ReservationFixtures::anamaraDeparture('2024-01-07');
     $past = consentedContact(['name' => 'Past Guest', 'country' => 'US']);
-    $pastBooking = booked($past, $actor, $pastDeparture->id, 'S1', BookingStatus::Completed);
+    $pastBooking = booked($past, $actor, $pastDeparture->id, 'S1', BookingStatus::CheckedOut);
     Guest::factory()->create([
         'booking_id' => $pastBooking->id,
         'email' => $past->email,

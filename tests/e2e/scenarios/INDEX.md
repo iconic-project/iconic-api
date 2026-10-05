@@ -55,18 +55,18 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | INV-10 | Departure locks with a block | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-10-departure-locks.md](inventory/INV-10-departure-locks.md) |
 | INV-11 | Rates year guard | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-11-rates-year-guard.md](inventory/INV-11-rates-year-guard.md) |
 | INV-12 | Read-only inventory for Lucía | sprint-3, inventory | P2 | — | Lucía | [inventory/INV-12-lucia-read-only.md](inventory/INV-12-lucia-read-only.md) |
-| BKG-01 | Seeded bookings and segments | sprint-4, bookings | P1 | B4 | Carolina | [bookings/BKG-01-seeded-bookings-segments.md](bookings/BKG-01-seeded-bookings-segments.md) |
-| BKG-02 | Create a one-cabin reservation | sprint-4, bookings | P1 | B4 | Carolina | [bookings/BKG-02-create-one-cabin.md](bookings/BKG-02-create-one-cabin.md) |
-| BKG-03 | Create a three-cabin group | sprint-4, bookings | P1 | B4 | Carolina | [bookings/BKG-03-create-three-cabin-group.md](bookings/BKG-03-create-three-cabin-group.md) |
-| BKG-04 | Festive charter | sprint-4, bookings | P2 | — | Carolina | [bookings/BKG-04-festive-charter.md](bookings/BKG-04-festive-charter.md) |
-| BKG-05 | No double booking | sprint-4, bookings | P1 | B4 | Carolina ×2 | [bookings/BKG-05-no-double-booking.md](bookings/BKG-05-no-double-booking.md) |
-| BKG-06 | Legal transitions and cancellation | sprint-4, bookings | P1 | B4 | Carolina | [bookings/BKG-06-transitions-cancel.md](bookings/BKG-06-transitions-cancel.md) |
-| BKG-07 | Date change reprices | sprint-4, bookings | P2 | — | Carolina | [bookings/BKG-07-date-change-reprice.md](bookings/BKG-07-date-change-reprice.md) |
-| BKG-08 | Delete is admin-only and audited | sprint-4, bookings | P2 | — | Mateo, Carolina | [bookings/BKG-08-delete-admin-audit.md](bookings/BKG-08-delete-admin-audit.md) |
-| BKG-09 | Request queue | sprint-4, bookings | P1 | B4 | Carolina | [bookings/BKG-09-request-queue.md](bookings/BKG-09-request-queue.md) |
-| BKG-10 | Expired request hold | sprint-4, bookings | P2 | — | Carolina | [bookings/BKG-10-expired-request-hold.md](bookings/BKG-10-expired-request-hold.md) |
-| BKG-11 | Waitlist | sprint-4, bookings | P2 | — | Carolina | [bookings/BKG-11-waitlist.md](bookings/BKG-11-waitlist.md) |
-| BKG-12 | Own-records | sprint-4, bookings | P2 | — | Lucía | [bookings/BKG-12-own-records.md](bookings/BKG-12-own-records.md) |
+| BKG-01 | Seeded bookings and segments | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-01-seeded-bookings-segments.md](bookings/BKG-01-seeded-bookings-segments.md) |
+| BKG-02 | Create a one-cabin reservation | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-02-create-one-cabin.md](bookings/BKG-02-create-one-cabin.md) |
+| BKG-03 | Create a three-cabin group | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-03-create-three-cabin-group.md](bookings/BKG-03-create-three-cabin-group.md) |
+| BKG-04 | Festive charter | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-04-festive-charter.md](bookings/BKG-04-festive-charter.md) |
+| BKG-05 | No double booking | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-05-no-double-booking.md](bookings/BKG-05-no-double-booking.md) |
+| BKG-06 | Legal transitions and cancellation | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-06-transitions-cancel.md](bookings/BKG-06-transitions-cancel.md) |
+| BKG-07 | Date change reprices | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-07-date-change-reprice.md](bookings/BKG-07-date-change-reprice.md) |
+| BKG-08 | Delete is admin-only and audited | sprint-4, bookings | retired | — | Mateo, Carolina | [bookings/BKG-08-delete-admin-audit.md](bookings/BKG-08-delete-admin-audit.md) |
+| BKG-09 | Request queue | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-09-request-queue.md](bookings/BKG-09-request-queue.md) |
+| BKG-10 | Expired request hold | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-10-expired-request-hold.md](bookings/BKG-10-expired-request-hold.md) |
+| BKG-11 | Waitlist | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-11-waitlist.md](bookings/BKG-11-waitlist.md) |
+| BKG-12 | Own-records | sprint-4, bookings | retired | — | Lucía | [bookings/BKG-12-own-records.md](bookings/BKG-12-own-records.md) |
 | PAY-01 | Seeded ledger on a CONFIRMED booking | sprint-5, payments | P1 | B5 | Carolina | [payments/PAY-01-seeded-ledger.md](payments/PAY-01-seeded-ledger.md) |
 | PAY-02 | Record the balance → FULLY PAID | sprint-5, payments | P1 | B5 | Carolina | [payments/PAY-02-record-balance.md](payments/PAY-02-record-balance.md) |
 | PAY-03 | Awaiting wire, then mark received | sprint-5, payments | P1 | B5 | Carolina then CFO | [payments/PAY-03-mark-wire.md](payments/PAY-03-mark-wire.md) |
@@ -189,3 +189,13 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | HRATE-03 | Add a season and publish | sprint-18, hotel, config | P1 | B23 | Carolina ×2 | [hotel/HRATE-03-add-a-season-and-publish.md](hotel/HRATE-03-add-a-season-and-publish.md) |
 | HRATE-04 | Rate plan changes deposit and cancellation | sprint-18, hotel, config | P2 | B23 | Carolina | [hotel/HRATE-04-rate-plan-deposit-and-cancellation.md](hotel/HRATE-04-rate-plan-deposit-and-cancellation.md) |
 | HRATE-05 | City tax shown, not charged | sprint-18, hotel, config | P2 | B23 | Carolina | [hotel/HRATE-05-city-tax-shown-not-charged.md](hotel/HRATE-05-city-tax-shown-not-charged.md) |
+| HBKG-01 | Create a 2-night midweek stay | sprint-19, hotel, bookings | P1 | B24 | Carolina | [hotel/HBKG-01-two-night-midweek.md](hotel/HBKG-01-two-night-midweek.md) |
+| HBKG-02 | Three-room group with different dates | sprint-19, hotel, bookings | P1 | B24 | Carolina | [hotel/HBKG-02-three-room-group.md](hotel/HBKG-02-three-room-group.md) |
+| HBKG-03 | Restriction refusal and override | sprint-19, hotel, bookings | P1 | B24 | Carolina | [hotel/HBKG-03-restriction-override.md](hotel/HBKG-03-restriction-override.md) |
+| HBKG-04 | Check in on the arrival day | sprint-19, hotel, bookings | P1 | B24 | Carolina | [hotel/HBKG-04-check-in-arrival-day.md](hotel/HBKG-04-check-in-arrival-day.md) |
+| HBKG-05 | Early departure credits unused nights | sprint-19, hotel, bookings | P1 | B24 | Carolina | [hotel/HBKG-05-early-departure.md](hotel/HBKG-05-early-departure.md) |
+| HBKG-06 | Extend an in-house guest | sprint-19, hotel, bookings | P1 | B24 | Carolina | [hotel/HBKG-06-extend-in-house.md](hotel/HBKG-06-extend-in-house.md) |
+| HBKG-07 | No-show releases following nights | sprint-19, hotel, bookings | P1 | B24 | Carolina | [hotel/HBKG-07-no-show.md](hotel/HBKG-07-no-show.md) |
+| HBKG-08 | Move room, timeline updates | sprint-19, hotel, bookings | P2 | B24 | Carolina | [hotel/HBKG-08-move-room.md](hotel/HBKG-08-move-room.md) |
+| HBKG-09 | Balance due counts from arrival | sprint-19, hotel, bookings | P2 | B24 | Carolina | [hotel/HBKG-09-balance-from-arrival.md](hotel/HBKG-09-balance-from-arrival.md) |
+| HBKG-10 | Night audit raises alerts, no status change | sprint-19, hotel, bookings | P2 | B24 | Carolina | [hotel/HBKG-10-night-audit.md](hotel/HBKG-10-night-audit.md) |

@@ -100,7 +100,7 @@ final class PaymentsKpis
             'cabin_deposit_pct' => $terms->cabinDepositPct,
             'charter_deposit_pct' => $terms->charterDepositPct,
             'cabin_balance_days' => $terms->cabinBalanceDays,
-            'commission_payable_days' => $config->businessRules()->commission->payableDaysAfterCruise,
+            'commission_payable_days' => $config->businessRules()->commission->payableDaysAfterCheckOut,
             'commission_cap_pct' => $config->businessRules()->commission->capPct,
             'wire_window_hours' => $config->businessRules()->payments->wireWindowHours,
         ];
@@ -142,7 +142,7 @@ final class PaymentsKpis
             'cabin_deposit_pct' => $terms->cabinDepositPct,
             'charter_deposit_pct' => $terms->charterDepositPct,
             'cabin_balance_days' => $terms->cabinBalanceDays,
-            'commission_payable_days' => $config->businessRules()->commission->payableDaysAfterCruise,
+            'commission_payable_days' => $config->businessRules()->commission->payableDaysAfterCheckOut,
             'commission_cap_pct' => $config->businessRules()->commission->capPct,
             'wire_window_hours' => $config->businessRules()->payments->wireWindowHours,
         ];
@@ -162,16 +162,14 @@ final class PaymentsKpis
             BookingStatus::CancelledPostpaid->value,
         ];
         $today = BusinessTime::now()->toDateString();
-        $dueSql = 'COALESCE(bookings.balance_due_date_override, DATE_SUB((
-            SELECT departures.date FROM departures WHERE departures.id = bookings.departure_id
-        ), INTERVAL bookings.balance_days DAY))';
+        $dueSql = Booking::overdueDateSql();
 
         $owingIn = implode(', ', array_fill(0, count($owing), '?'));
         $overdueIn = implode(', ', array_fill(0, count($overdueStatuses), '?'));
         $cancelledIn = implode(', ', array_fill(0, count($cancelled), '?'));
 
         $pendingWhen = 'bookings.status IN ('.$owingIn.') AND ('.$balanceSql.') > 0';
-        $overdueWhen = 'bookings.status IN ('.$overdueIn.') AND ('.$cruiseSql.') > 0 AND ? > '.$dueSql;
+        $overdueWhen = 'bookings.status IN ('.$overdueIn.') AND ('.$cruiseSql.') > 0 AND '.$dueSql;
 
         $collected = self::paidSumQuery($viewAll, $ownerId, $from, $to, depositsOnly: false, scope: $scope);
         $deposits = self::paidSumQuery($viewAll, $ownerId, $from, $to, depositsOnly: true, scope: $scope);
@@ -199,8 +197,10 @@ final class PaymentsKpis
                     ...$overdueStatuses,
                     ...$cruisePaid,
                     $today,
+                    $today,
                     ...$overdueStatuses,
                     ...$cruisePaid,
+                    $today,
                     $today,
                     ...$cruisePaid,
                     ...$cancelled,
@@ -223,17 +223,11 @@ final class PaymentsKpis
             )
             ->when(
                 $from !== null,
-                fn (Builder $query) => $query->whereHas(
-                    'departure',
-                    fn (Builder $departure) => $departure->whereDate('date', '>=', $from),
-                ),
+                fn (Builder $query) => $query->whereDate('bookings.check_in', '>=', $from),
             )
             ->when(
                 $to !== null,
-                fn (Builder $query) => $query->whereHas(
-                    'departure',
-                    fn (Builder $departure) => $departure->whereDate('date', '<=', $to),
-                ),
+                fn (Builder $query) => $query->whereDate('bookings.check_in', '<=', $to),
             );
 
         self::constrainScope($query, $scope);

@@ -15,7 +15,6 @@ use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomNightClaim;
 use App\Services\Inventory\ClaimService;
-use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\Stays\StayDates;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Database\QueryException;
@@ -213,7 +212,7 @@ test('a yacht claim holds the departure so a date change waits (nights)', functi
 
     onClaimConnection('mysql', function () use ($departure, $cabin, $holder): void {
         DB::beginTransaction();
-        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
+        app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $holder, ClaimKind::Block);
     });
 
     onClaimConnection('mysql_lock', function () use ($departure, &$observed): void {
@@ -249,7 +248,7 @@ test('a date change holds the departure so a yacht claim waits (nights)', functi
         DB::beginTransaction();
 
         try {
-            app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $holder, ClaimKind::Block);
+            app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $holder, ClaimKind::Block);
             expect(false)->toBeTrue('the claim should wait on the departure row');
         } catch (QueryException $e) {
             $code = claimMysqlError($e);

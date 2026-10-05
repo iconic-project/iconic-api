@@ -94,7 +94,7 @@ final class AgencyController extends Controller
                     'commission_payable' => $commission['commission_payable'],
                     'commission_paid' => $commission['commission_paid'],
                     'agency_approval_business_days' => $rules->sla->agencyApprovalBusinessDays,
-                    'commission_payable_days' => $rules->commission->payableDaysAfterCruise,
+                    'commission_payable_days' => $rules->commission->payableDaysAfterCheckOut,
                     'commission_cap_pct' => $rules->commission->capPct,
                     'commission_default_pct' => $rules->commission->defaultPct,
                 ],

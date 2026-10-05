@@ -11,7 +11,7 @@ use App\Models\Booking;
 use App\Models\CommissionPayout;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Support\Bookings\BookingMutationLock;
+use App\Support\Bookings\FrontDeskLock;
 use App\Support\Commissions\Accrual;
 use App\Support\History\History;
 use Illuminate\Validation\ValidationException;
@@ -26,7 +26,7 @@ final class RecordCommissionPayout extends Action
     public function handle(Booking $booking, array $data, User $actor): Booking
     {
         return $this->transaction(function () use ($booking, $data, $actor): Booking {
-            $booking = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+            $booking = FrontDeskLock::acquire($booking);
             $booking->load(['agency', 'departure.itinerary', 'commissionPayout']);
 
             $agency = $booking->agency;

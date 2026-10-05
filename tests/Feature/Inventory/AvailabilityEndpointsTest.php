@@ -12,7 +12,6 @@ use App\Models\Itinerary;
 use App\Models\Property;
 use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
-use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\DemoInventorySeeder;
 use Database\Seeders\InventorySeeder;
@@ -128,8 +127,7 @@ test('a hold claim has a null holder detail', function (): void {
     $cabin = $property->cabins()->where('code', 'S1')->firstOrFail();
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
-        app(LegacyDepartureClaims::class)->claim(
-            $departure,
+        app(ClaimService::class)->claim($departure->stayDates(),
             collect([$cabin]),
             $holder,
             ClaimKind::Hold,
@@ -203,9 +201,9 @@ test('kpis are computed over the filtered set not the page', function (): void {
     $owner = $full->property->cabins()->where('code', 'OWNER')->get();
 
     DB::transaction(function () use ($full, $holderA, $holderB, $suites, $owner): void {
-        $service = app(LegacyDepartureClaims::class);
-        $service->claim($full, $suites, $holderA, ClaimKind::Booking);
-        $service->claim($full, $owner, $holderB, ClaimKind::Booking);
+        $service = app(ClaimService::class);
+        $service->claim($full->stayDates(), $suites, $holderA, ClaimKind::Booking);
+        $service->claim($full->stayDates(), $owner, $holderB, ClaimKind::Booking);
     });
 
     $this->actingAs(managerUser())
@@ -229,8 +227,7 @@ test('an expired unreleased hold counts as free', function (): void {
     $cabin = $property->cabins()->where('code', 'S1')->firstOrFail();
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {
-        app(LegacyDepartureClaims::class)->claim(
-            $departure,
+        app(ClaimService::class)->claim($departure->stayDates(),
             collect([$cabin]),
             $holder,
             ClaimKind::Hold,

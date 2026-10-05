@@ -37,7 +37,7 @@ test('the portal payloads match the RMS preview figures exactly', function (): v
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'total' => 23275,
         'main_channel' => MainChannel::B2BTravelAdvisor,
     ]);

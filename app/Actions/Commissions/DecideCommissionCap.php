@@ -8,7 +8,7 @@ use App\Actions\Action;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\User;
-use App\Support\Bookings\BookingMutationLock;
+use App\Support\Bookings\FrontDeskLock;
 use App\Support\History\History;
 use App\Support\Payments\ApplyPaymentEffects;
 use Illuminate\Validation\ValidationException;
@@ -23,7 +23,7 @@ final class DecideCommissionCap extends Action
     public function handle(Booking $booking, array $data, User $actor): Booking
     {
         return $this->transaction(function () use ($booking, $data, $actor): Booking {
-            $booking = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+            $booking = FrontDeskLock::acquire($booking);
 
             if ($booking->agency_id === null || $booking->commission_pct === null) {
                 throw ValidationException::withMessages([

@@ -7,24 +7,45 @@ namespace App\Http\Controllers\Rms;
 use App\Actions\Rooms\CreateRoom;
 use App\Actions\Rooms\DeactivateRoom;
 use App\Actions\Rooms\UpdateRoom;
+use App\Enums\RoomStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Rms\IndexRoomsRequest;
 use App\Http\Requests\Rms\StoreRoomRequest;
 use App\Http\Requests\Rms\UpdateRoomRequest;
 use App\Http\Resources\Rms\RoomResource;
 use App\Models\Property;
 use App\Models\Room;
+use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class RoomController extends Controller
 {
-    public function index(Property $property): AnonymousResourceCollection
+    public function index(IndexRoomsRequest $request, Property $property): AnonymousResourceCollection
     {
         $this->authorize('viewAny', Room::class);
 
-        $rooms = $property->rooms()->with('roomType')->orderBy('sort')->orderBy('code')->get();
+        $rooms = $property->rooms()->with('roomType')->orderBy('sort')->orderBy('code');
+        $from = $request->validated('free_from');
+        $to = $request->validated('free_to');
 
-        return RoomResource::collection($rooms);
+        if (is_string($from) && $from !== '' && is_string($to) && $to !== '') {
+            $lastNight = CarbonImmutable::parse($to)->subDay()->toDateString();
+            $rooms
+                ->where('status', RoomStatus::Active)
+                ->whereDoesntHave('nightClaims', function (Builder $claims) use ($from, $lastNight): void {
+                    $claims->whereNull('released_at')
+                        ->whereDate('night', '>=', $from)
+                        ->whereDate('night', '<=', $lastNight)
+                        ->where(function (Builder $hold): void {
+                            $hold->whereNull('expires_at')
+                                ->orWhere('expires_at', '>=', now());
+                        });
+                });
+        }
+
+        return RoomResource::collection($rooms->get());
     }
 
     public function store(StoreRoomRequest $request, Property $property, CreateRoom $action): JsonResponse

@@ -34,12 +34,10 @@ final class Transitions
                 BookingStatus::Cancelled,
             ],
             BookingStatus::FullyPaid => [
-                BookingStatus::OnBoard,
+                BookingStatus::Confirmed,
                 BookingStatus::CancelledPostpaid,
             ],
-            BookingStatus::OnBoard => [
-                BookingStatus::Completed,
-            ],
+            BookingStatus::InHouse => [],
             BookingStatus::OnHoldAgency => [
                 BookingStatus::Confirmed,
                 BookingStatus::Released,
@@ -65,22 +63,18 @@ final class Transitions
         string $departureDate,
         string $returnDate,
     ): bool {
-        return match ($to) {
-            BookingStatus::OnBoard => $today >= $departureDate,
-            BookingStatus::Completed => $today >= $returnDate,
-            default => true,
-        };
+        return true;
     }
 
     public static function dateGuardAllowsFor(Booking $booking, BookingStatus $to): bool
     {
-        $booking->loadMissing(['departure.itinerary']);
+        $stay = $booking->stay();
 
         return self::dateGuardAllows(
             $to,
             BusinessTime::now()->toDateString(),
-            $booking->departure->date->toDateString(),
-            $booking->departure->returnDate()->toDateString(),
+            $stay->checkIn()->toDateString(),
+            $stay->checkOut()->toDateString(),
         );
     }
 
@@ -135,7 +129,20 @@ final class Transitions
             ? 'none'
             : implode(', ', array_map(fn (BookingStatus $status): string => $status->value, $allowed));
 
-        return 'Cannot change status from '.$from->value.' to '.$to->value.'. Allowed: '.$list.'.';
+        $message = 'Cannot change status from '.$from->value.' to '.$to->value.'. Allowed: '.$list.'.';
+        $pointer = self::frontDeskPointer($to);
+
+        return $pointer === null ? $message : $message.' '.$pointer;
+    }
+
+    public static function frontDeskPointer(BookingStatus $to): ?string
+    {
+        return match ($to) {
+            BookingStatus::InHouse => 'Check in at POST /api/rms/bookings/{booking}/check-in.',
+            BookingStatus::CheckedOut => 'Check out at POST /api/rms/bookings/{booking}/check-out.',
+            BookingStatus::NoShow => 'Mark a no-show at POST /api/rms/bookings/{booking}/no-show.',
+            default => null,
+        };
     }
 
     public static function statusLabel(BookingStatus $status): string

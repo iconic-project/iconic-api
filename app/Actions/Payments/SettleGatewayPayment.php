@@ -14,7 +14,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\PaymentLink;
 use App\Models\User;
-use App\Support\Bookings\BookingMutationLock;
+use App\Support\Bookings\FrontDeskLock;
 use App\Support\History\History;
 use App\Support\Payments\ApplyPaymentEffects;
 use App\Support\Payments\InsertLedgerRow;
@@ -42,7 +42,7 @@ final class SettleGatewayPayment extends Action
     public function handle(Booking $booking, array $data, ?User $actor, bool $system = false): Payment
     {
         return $this->transaction(function () use ($booking, $data, $actor, $system): Payment {
-            $booking = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+            $booking = FrontDeskLock::acquire($booking);
 
             $existing = Payment::query()
                 ->where('gateway_id', $data['gateway_id'])

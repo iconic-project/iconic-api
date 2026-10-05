@@ -123,7 +123,7 @@ final class SubmitEngineCheckout extends Action
             $ratesVersion = $this->config->version(ConfigKind::Rates);
             $rules = $this->config->businessRules();
             $submittedAt = now();
-            $hold = BusinessHours::fromDocument($rules)->holdExpiry($submittedAt, $departure->date, $rules);
+            $hold = BusinessHours::fromDocument($rules)->holdExpiry($submittedAt, $departure->stayDates()->checkIn(), $rules);
 
             if ($hold->expiresAt->lessThanOrEqualTo($submittedAt->copy()->addMinutes(30))) {
                 throw new ConflictException('The request hold must last longer than the online deposit window.');

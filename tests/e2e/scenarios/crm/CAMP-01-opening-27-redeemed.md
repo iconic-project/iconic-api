@@ -10,7 +10,7 @@ A campaign counts sold bookings that carry the offer code. It does not count a r
 ## Steps
 1. Sign in as Carolina. Open `http://localhost:3001/crm/marketing/campaigns`.
 2. On **OPENING-27**, **Create campaign**. Name `Opening 2027`, UTM `opening27`. Create.
-3. Read Redeemed and Revenue. Independently count sold bookings (`CONFIRMED`, `FULLY_PAID`, `ON_BOARD`, `COMPLETED`, `OVERDUE`) whose `promo_code` or a price line is `OPENING-27`, and sum their charges.
+3. Read Redeemed and Revenue. Independently count sold bookings (`CONFIRMED`, `FULLY_PAID`, `IN_HOUSE`, `CHECKED_OUT`, `OVERDUE`) whose `promo_code` or a price line is `OPENING-27`, and sum their charges.
 4. If that count is 0, confirm one request that already carries the OPENING-27 line (a November engine request) so the booking is **CONFIRMED**. Read the card again.
 5. Cancel that redeemed booking in the RMS with a reason. Reload the card.
 

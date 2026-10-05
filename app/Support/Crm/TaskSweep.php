@@ -71,7 +71,7 @@ final class TaskSweep
             $this->closeKind(TaskKind::CommissionCap, 'cap:'.$booking->id, 'the booking left ON_HOLD_AGENCY');
         }
 
-        if ($to === BookingStatus::Completed) {
+        if ($to === BookingStatus::CheckedOut) {
             $this->raisePostTripCall($booking);
         }
     }
@@ -183,6 +183,11 @@ final class TaskSweep
 
     private function raisePostTripCall(Booking $booking): void
     {
+        // TODO(OPEN: 19-05) the post-trip call still measures from the departure return date.
+        if ($booking->departure_id === null) {
+            return;
+        }
+
         $booking->loadMissing('departure.itinerary');
         $rules = $this->config->businessRules();
         $reference = self::reference($booking);

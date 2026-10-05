@@ -24,7 +24,7 @@ beforeEach(function (): void {
 
 test('the departure picker lists sold departures with passengers and is open to panel.rms', function (): void {
     $early = pickerDeparture('2028-06-04', 'Ada', 'Lovelace', BookingStatus::Confirmed);
-    $later = pickerDeparture('2028-06-11', 'Grace', 'Hopper', BookingStatus::Completed);
+    $later = pickerDeparture('2028-06-11', 'Grace', 'Hopper', BookingStatus::CheckedOut);
     Guest::factory()->create([
         'booking_id' => $later['booking']->id,
         'position' => 2,
@@ -56,7 +56,7 @@ test('the departure picker lists sold departures with passengers and is open to 
 });
 
 test('survey guests are names and cabins, and a user without guest_experience.manage is refused', function (): void {
-    $fixture = pickerDeparture('2028-07-02', 'Ada', 'Lovelace', BookingStatus::Completed);
+    $fixture = pickerDeparture('2028-07-02', 'Ada', 'Lovelace', BookingStatus::CheckedOut);
     $companion = Guest::factory()->create([
         'booking_id' => $fixture['booking']->id,
         'position' => 2,

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Services\Inventory\ClaimService;
 use App\Enums\BookingStatus;
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
@@ -12,7 +13,6 @@ use App\Models\ChangeHistory;
 use App\Models\Payment;
 use App\Models\RoomNightClaim;
 use App\Services\Inventory\Availability;
-use App\Services\Inventory\LegacyDepartureClaims;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -70,8 +70,7 @@ function requestedHold(bool $expired = false, string $cabinCode = 'S2'): Booking
     ]);
 
     DB::transaction(function () use ($departure, $cabin, $booking): void {
-        app(LegacyDepartureClaims::class)->claim(
-            $departure,
+        app(ClaimService::class)->claim($departure->stayDates(),
             collect([$cabin]),
             $booking,
             ClaimKind::Hold,
@@ -98,10 +97,6 @@ test('every legal transition is accepted', function (string $from, string $to, b
         ? requestedHold()
         : bookedCabin(['status' => BookingStatus::from($from)]);
 
-    if (in_array($to, ['ON_BOARD', 'COMPLETED'], true)) {
-        $this->travelTo(CarbonImmutable::parse('2027-11-21 18:00:00', 'UTC'));
-    }
-
     $payload = ['to' => $to];
     if ($needsReason) {
         $payload['reason'] = 'Logged';
@@ -116,9 +111,7 @@ test('every legal transition is accepted', function (string $from, string $to, b
     ['PENDING_PAYMENT', 'CANCELLED', true],
     ['CONFIRMED', 'FULLY_PAID', true],
     ['CONFIRMED', 'CANCELLED', true],
-    ['FULLY_PAID', 'ON_BOARD', false],
     ['FULLY_PAID', 'CANCELLED_POSTPAID', true],
-    ['ON_BOARD', 'COMPLETED', false],
     ['REQUESTED', 'PENDING_PAYMENT', false],
     ['REQUESTED', 'CONFIRMED', false],
     ['REQUESTED', 'RELEASED', true],
@@ -129,10 +122,10 @@ test('illegal targets are 422 listing the legal ones', function (): void {
     $booking = bookedCabin(['status' => BookingStatus::Confirmed]);
 
     $this->actingAs($booking->owner)
-        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'ON_BOARD'])
+        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'IN_HOUSE'])
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['to'])
-        ->assertJsonPath('errors.to.0', 'Cannot change status from CONFIRMED to ON_BOARD. Allowed: FULLY_PAID, CANCELLED.');
+        ->assertJsonPath('errors.to.0', 'Cannot change status from CONFIRMED to IN_HOUSE. Allowed: FULLY_PAID, CANCELLED. Check in at POST /api/rms/bookings/{booking}/check-in.');
 });
 
 test('a required reason is 422 when missing and optional reasons may be omitted', function (): void {
@@ -172,29 +165,27 @@ test('lucia cannot transition mateo\'s booking and carolina can', function (): v
         ->assertJsonPath('status', 'CONFIRMED');
 });
 
-test('on board and completed follow galapagos calendar dates', function (): void {
+test('in house and checked out are not generic transitions', function (): void {
     $booking = bookedCabin(['status' => BookingStatus::FullyPaid]);
-
-    $this->travelTo(CarbonImmutable::parse('2027-11-06 18:00:00', 'UTC'));
-    $this->actingAs($booking->owner)
-        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'ON_BOARD'])
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['to']);
 
     $this->travelTo(CarbonImmutable::parse('2027-11-07 18:00:00', 'UTC'));
     $this->actingAs($booking->owner)
-        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'ON_BOARD'])
-        ->assertOk();
+        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'IN_HOUSE'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.to.0', 'Cannot change status from FULLY_PAID to IN_HOUSE. Allowed: CONFIRMED, CANCELLED_POSTPAID. Check in at POST /api/rms/bookings/{booking}/check-in.');
 
-    $this->travelTo(CarbonImmutable::parse('2027-11-13 18:00:00', 'UTC'));
-    $this->actingAs($booking->owner)
-        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'COMPLETED'])
-        ->assertUnprocessable();
+    $booking->status = BookingStatus::InHouse;
+    $booking->save();
 
-    $this->travelTo(CarbonImmutable::parse('2027-11-14 18:00:00', 'UTC'));
     $this->actingAs($booking->owner)
-        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'COMPLETED'])
-        ->assertOk();
+        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'CHECKED_OUT'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.to.0', 'Cannot change status from IN_HOUSE to CHECKED_OUT. Allowed: none. Check out at POST /api/rms/bookings/{booking}/check-out.');
+
+    $this->actingAs($booking->owner)
+        ->postJson('/api/rms/bookings/'.$booking->id.'/transition', ['to' => 'NO_SHOW'])
+        ->assertUnprocessable()
+        ->assertJsonPath('errors.to.0', 'Cannot change status from IN_HOUSE to NO_SHOW. Allowed: none. Mark a no-show at POST /api/rms/bookings/{booking}/no-show.');
 });
 
 test('confirming a request converts the hold and assigns a booking reference', function (): void {
@@ -235,7 +226,7 @@ test('an expired hold is reclaimed or 409 if the cabin was taken', function (): 
             'released_at' => now(),
             'release_reason' => ReleaseReason::Moved,
         ]);
-        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $other, ClaimKind::Booking);
+        app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $other, ClaimKind::Booking);
     });
 
     $this->actingAs($taken->owner)

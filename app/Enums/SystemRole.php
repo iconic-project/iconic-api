@@ -35,7 +35,9 @@ enum SystemRole: string
                 Permission::BookingsCreate,
                 Permission::BookingsChangeStatus,
                 Permission::BookingsMove,
+                Permission::BookingsFrontDesk,
                 Permission::BookingsOverrideRestrictions,
+                Permission::BookingsWaivePenalty,
                 Permission::RequestsConfirm,
                 Permission::RequestsRelease,
                 Permission::DeparturesManage,
@@ -60,6 +62,8 @@ enum SystemRole: string
                 Permission::BookingsCreate,
                 Permission::BookingsChangeStatus,
                 Permission::BookingsMove,
+                // TODO(OPEN: 19-03) Sales Exec front desk is granted here pending client confirmation.
+                Permission::BookingsFrontDesk,
                 Permission::RequestsConfirm,
                 Permission::RequestsRelease,
                 Permission::PipelineMoveStage,

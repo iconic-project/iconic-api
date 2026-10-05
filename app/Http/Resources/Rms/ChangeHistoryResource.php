@@ -6,6 +6,7 @@ namespace App\Http\Resources\Rms;
 
 use App\Models\ChangeHistory;
 use App\Models\User;
+use App\Support\Bookings\LegacyStatus;
 use App\Support\Iso;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -45,8 +46,8 @@ class ChangeHistoryResource extends JsonResource
                 ? ['id' => $actor->id, 'name' => $actor->name]
                 : null,
             'actor_label' => $this->actor_label,
-            'before' => $this->before,
-            'after' => $this->after,
+            'before' => LegacyStatus::payload($this->before),
+            'after' => LegacyStatus::payload($this->after),
             'reason' => $this->reason,
             'source' => $this->context['source'] ?? 'system',
             'at' => Iso::utc($this->created_at),

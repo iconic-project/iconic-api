@@ -17,7 +17,6 @@ use App\Models\Offer;
 use App\Models\Property;
 use App\Services\Engine\EngineFeedVersion;
 use App\Services\Inventory\ClaimService;
-use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\DemoInventorySeeder;
 use Database\Seeders\InventorySeeder;
@@ -189,11 +188,11 @@ test('engine labels follow availability including LIMITED AVAILABILITY', functio
     $other = ClaimHolder::query()->create(['reference' => 'HLD-ENG-2', 'name' => 'Other']);
 
     DB::transaction(function () use ($urgent, $limited, $full, $property, $holder, $other): void {
-        $service = app(LegacyDepartureClaims::class);
-        $service->claim($urgent, $property->cabins->take(6), $holder, ClaimKind::Booking);
-        $service->claim($limited, $property->cabins, $holder, ClaimKind::Hold, HoldType::Agency, now()->addDay());
-        $service->claim($full, $property->cabins->take(8), $holder, ClaimKind::Booking);
-        $service->claim($full, $property->cabins->slice(8), $other, ClaimKind::Booking);
+        $service = app(ClaimService::class);
+        $service->claim($urgent->stayDates(), $property->cabins->take(6), $holder, ClaimKind::Booking);
+        $service->claim($limited->stayDates(), $property->cabins, $holder, ClaimKind::Hold, HoldType::Agency, now()->addDay());
+        $service->claim($full->stayDates(), $property->cabins->take(8), $holder, ClaimKind::Booking);
+        $service->claim($full->stayDates(), $property->cabins->slice(8), $other, ClaimKind::Booking);
     });
 
     $feed = $this->getJson('/api/engine/feed')->assertOk()->json('departures');
@@ -230,7 +229,7 @@ test('a claim updates the next feed and cabins response', function (): void {
     $suite = $property->cabins->firstWhere('code', 'S1');
 
     DB::transaction(function () use ($departure, $suite, $holder): void {
-        app(LegacyDepartureClaims::class)->claim($departure, collect([$suite]), $holder, ClaimKind::Booking);
+        app(ClaimService::class)->claim($departure->stayDates(), collect([$suite]), $holder, ClaimKind::Booking);
     });
 
     expect(EngineFeedVersion::current())->toBeGreaterThan($version);

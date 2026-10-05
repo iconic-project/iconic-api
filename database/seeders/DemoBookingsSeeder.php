@@ -21,7 +21,7 @@ use App\Models\Property;
 use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\LegacyDepartureClaims;
+use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\CabinPricer;
 use App\Services\Pricing\NoRate;
 use App\Services\Pricing\Quote;
@@ -207,7 +207,7 @@ final class DemoBookingsSeeder extends Seeder
             ? $departure->property->cabins->sortBy('sort')->values()
             : collect([$cabin]);
 
-        app(LegacyDepartureClaims::class)->claim($departure, $cabins, $booking, ClaimKind::Booking);
+        app(ClaimService::class)->claim($departure->stayDates(), $cabins, $booking, ClaimKind::Booking);
     }
 
     /**

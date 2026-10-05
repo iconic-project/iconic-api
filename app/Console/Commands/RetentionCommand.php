@@ -50,8 +50,8 @@ final class RetentionCommand extends Command
             &$changedBookings,
         ): void {
             foreach ($bookings as $booking) {
-                $booking->loadMissing(['departure', 'guests']);
-                $returnDate = $booking->departure->returnDate();
+                $booking->loadMissing('guests');
+                $returnDate = $booking->stay()->checkOut();
                 $purgePassports = RetentionWindow::elapsed(
                     RetentionWindow::passportEndsOn($returnDate, $months),
                     $today,
@@ -255,7 +255,7 @@ final class RetentionCommand extends Command
             ->with('departure.itinerary')
             ->orderBy('id')
             ->each(function (Manifest $manifest) use ($months, $days, $today, $dry, &$captain, &$dpng): void {
-                $returnDate = $manifest->departure->returnDate();
+                $returnDate = $manifest->departure->stayDates()->checkOut();
                 $end = $manifest->kind === ManifestKind::Captain
                     ? RetentionWindow::notesEndOn($returnDate, $days)
                     : RetentionWindow::passportEndsOn($returnDate, $months);

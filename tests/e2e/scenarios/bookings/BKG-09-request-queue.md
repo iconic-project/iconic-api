@@ -1,6 +1,8 @@
 # BKG-09 · Request queue
+
+Retired in sprint 19. Hotel stays are HBKG-01 through HBKG-10. Do not walk these yacht steps.
 - **Tags:** sprint-4, bookings
-- **Priority:** P1
+- **Priority:** retired
 - **Users:** Carolina
 - **Start:** reset
 
@@ -22,4 +24,6 @@ The two seeded requests must show a live SLA. Confirm claims the cabin as PENDIN
 - [ ] E5 · Calendar: Suite 04 21 Nov is a pending/sold cell (0041 confirmed). Suite 05 28 Nov is `·` (Available).
 
 ## Notes
+Task 19-07: the queue column shows `copy` (stay, nights, room type). The API does not send `departure` or `cabin_label`.
+
 Do not run `inventory:expire-hold` in this scenario (that is BKG-10). After reset the queue is still the two staff-seeded requests; web engine requests are WEB-07. The leftover confirm-modal sentence `The deposit link is sent when payments arrive (Sprint 5).` may still be on screen — do not invent a new sentence. Confirm does not draw `ANK-2026-0022`; that draw waits for `CONFIRMED`.

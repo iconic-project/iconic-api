@@ -578,11 +578,11 @@ test('meta counts ignore section and equal the sum of the open section lists', f
 test('kinds lists the registry and a guest response references the response row', function (): void {
     $this->actingAs(adminUser())->getJson('/api/alerts/kinds')
         ->assertOk()
-        ->assertJsonCount(13, 'data')
+        ->assertJsonCount(16, 'data')
         ->assertJsonPath('data.0.emails', false)
         ->assertJsonPath('data.0.section', 'rms');
 
-    expect(AlertRegistry::all())->toHaveCount(13);
+    expect(AlertRegistry::all())->toHaveCount(16);
 
     $booking = alertBooking();
     $guest = Guest::factory()->create([

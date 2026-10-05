@@ -190,7 +190,7 @@ test('erasure waits for the cruise and an open refund, then keeps the ledger', f
     $past = Booking::factory()->create([
         'departure_id' => $pastDeparture->id,
         'contact_id' => $contact->id,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'reference' => 'ANK-PAST-1',
     ]);
     $refund = RefundRequest::factory()->create([

@@ -60,7 +60,7 @@ final class RecordGuestResponse extends Action
     ): GuestResponse {
         /** @var GuestResponse $response */
         $response = $this->transaction(function () use ($booking, $guest, $answers, $source, $actor, $actorLabel): GuestResponse {
-            if ($booking->status !== BookingStatus::Completed) {
+            if ($booking->status !== BookingStatus::CheckedOut) {
                 throw new HttpException(422, 'A survey response can only be recorded on a completed voyage.');
             }
 

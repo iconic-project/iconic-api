@@ -1,6 +1,8 @@
 # BKG-10 · Expired request hold
+
+Retired in sprint 19. Hotel stays are HBKG-01 through HBKG-10. Do not walk these yacht steps.
 - **Tags:** sprint-4, bookings
-- **Priority:** P2
+- **Priority:** retired
 - **Users:** Carolina
 - **Start:** reset
 
@@ -23,4 +25,6 @@ An expired HOLD frees the cabin and never cancels the request (G9). Confirm afte
 - [ ] E3 · Confirm succeeds. Toast `Request confirmed`. Booking is `PENDING PAYMENT`. Calendar cell is no longer free (`PEND` or `0020`). ⚠ UNVERIFIED — next ANK and cell label.
 
 ## Notes
+Task 19-07: the queue column shows `copy`. Confirm after expiry still re-claims the same room when it is free. A different free room of the type is offered on `POST /api/rms/requests/{id}/confirm/preview` and is not taken unless confirm sends that `room_id`. The panel confirm button does not yet show that alternative.
+
 `inventory:expire-hold` is a **documented artisan command** for local/testing. It is **not** a `db-check` write (`db-check.sh` would refuse it). The job sets `expires_at` in the past and runs `ClaimService::releaseExpired()`. Confirm after expiry re-claims (G9).

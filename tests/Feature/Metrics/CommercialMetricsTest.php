@@ -20,7 +20,6 @@ use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
-use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\BusinessTime;
 use App\Support\Commissions\CommissionKpis;
 use App\Support\GuestExperience\NpsDashboard;
@@ -84,20 +83,18 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     }
 
     DB::transaction(function () use ($cabinDeparture, $cabin, $blocked, $charterDeparture, $charter): void {
-        $claims = app(LegacyDepartureClaims::class);
-        $claims->claim(
-            $cabinDeparture,
+        $claims = app(ClaimService::class);
+        $claims->claim($cabinDeparture->stayDates(),
             collect([$cabinDeparture->property->cabins->firstWhere('code', 'S1')]),
             $cabin,
             ClaimKind::Booking,
         );
-        $claims->claim(
-            $cabinDeparture,
+        $claims->claim($cabinDeparture->stayDates(),
             collect([$cabinDeparture->property->cabins->firstWhere('code', 'S2')]),
             $blocked,
             ClaimKind::Booking,
         );
-        $claims->claim($charterDeparture, $charterDeparture->property->cabins, $charter, ClaimKind::Booking);
+        $claims->claim($charterDeparture->stayDates(), $charterDeparture->property->cabins, $charter, ClaimKind::Booking);
     });
 
     BookingExtra::factory()->create([
@@ -275,8 +272,7 @@ test('the metrics query count stays flat as bookings grow', function (): void {
         'total' => 28000,
     ]);
     DB::transaction(function () use ($departure, $extra): void {
-        app(LegacyDepartureClaims::class)->claim(
-            $departure,
+        app(ClaimService::class)->claim($departure->stayDates(),
             collect([$departure->property->cabins->firstWhere('code', 'S3')]),
             $extra,
             ClaimKind::Booking,

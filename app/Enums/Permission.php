@@ -23,8 +23,10 @@ enum Permission: string
     case BookingsCreate = 'bookings.create';
     case BookingsChangeStatus = 'bookings.change_status';
     case BookingsMove = 'bookings.move';
+    case BookingsFrontDesk = 'bookings.front_desk';
     case BookingsDelete = 'bookings.delete';
     case BookingsOverrideRestrictions = 'bookings.override_restrictions';
+    case BookingsWaivePenalty = 'bookings.waive_penalty';
 
     case RequestsConfirm = 'requests.confirm';
     case RequestsRelease = 'requests.release';
@@ -78,8 +80,10 @@ enum Permission: string
             self::BookingsCreate => 'Create reservation',
             self::BookingsChangeStatus => 'Change reservation status',
             self::BookingsMove => 'Move reservation',
+            self::BookingsFrontDesk => 'Front desk check-in and check-out',
             self::BookingsDelete => 'Delete reservation',
             self::BookingsOverrideRestrictions => 'Override sell restrictions',
+            self::BookingsWaivePenalty => 'Waive a stay-change penalty',
             self::RequestsConfirm => 'Confirm requests',
             self::RequestsRelease => 'Release requests',
             self::DeparturesManage => 'Manage departures',
@@ -127,8 +131,10 @@ enum Permission: string
             self::BookingsCreate,
             self::BookingsChangeStatus,
             self::BookingsMove,
+            self::BookingsFrontDesk,
             self::BookingsDelete,
-            self::BookingsOverrideRestrictions => 'bookings',
+            self::BookingsOverrideRestrictions,
+            self::BookingsWaivePenalty => 'bookings',
             self::RequestsConfirm,
             self::RequestsRelease => 'requests',
             self::DeparturesManage,

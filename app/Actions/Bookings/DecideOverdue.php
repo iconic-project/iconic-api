@@ -9,7 +9,7 @@ use App\Enums\BookingStatus;
 use App\Enums\OverdueDecision;
 use App\Models\Booking;
 use App\Models\User;
-use App\Support\Bookings\BookingMutationLock;
+use App\Support\Bookings\FrontDeskLock;
 use App\Support\BusinessTime;
 use App\Support\History\History;
 use Carbon\CarbonImmutable;
@@ -25,8 +25,7 @@ final class DecideOverdue extends Action
     public function handle(Booking $booking, array $data, User $actor): Booking
     {
         return $this->transaction(function () use ($booking, $data, $actor): Booking {
-            $booking = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
-            $booking->loadMissing('departure');
+            $booking = FrontDeskLock::acquire($booking);
 
             if (! $booking->isOverdue()) {
                 throw ValidationException::withMessages([
@@ -57,12 +56,12 @@ final class DecideOverdue extends Action
     private function extend(Booking $booking, array $data, User $actor, string $reason): Booking
     {
         $today = BusinessTime::now()->toDateString();
-        $departure = $booking->departure->date->toDateString();
+        $arrival = $booking->stay()->checkIn()->toDateString();
         $newDue = (string) $data['new_due_date'];
 
-        if ($newDue <= $today || $newDue > $departure) {
+        if ($newDue <= $today || $newDue > $arrival) {
             throw ValidationException::withMessages([
-                'new_due_date' => ['The new due date must be a future Galápagos date and not after the departure.'],
+                'new_due_date' => ['The new due date must be a future Galápagos date and not after arrival.'],
             ]);
         }
 
@@ -71,7 +70,7 @@ final class DecideOverdue extends Action
 
         if (! $override instanceof CarbonImmutable) {
             throw ValidationException::withMessages([
-                'new_due_date' => ['The new due date must be a future Galápagos date and not after the departure.'],
+                'new_due_date' => ['The new due date must be a future Galápagos date and not after arrival.'],
             ]);
         }
 

@@ -9,6 +9,7 @@ use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
+use App\Support\Stays\StayClock;
 use Illuminate\Console\Command;
 
 final class NpsSurveyCommand extends Command
@@ -17,17 +18,17 @@ final class NpsSurveyCommand extends Command
 
     protected $description = 'Send the post-trip survey once the configured hours after return have passed';
 
-    public function handle(SendSurveys $send, CurrentConfig $config): int
+    public function handle(SendSurveys $send, CurrentConfig $config, StayClock $clock): int
     {
         $hours = $config->businessRules()->nps->surveyHoursAfterReturn;
         $sent = 0;
 
         Booking::query()
-            ->where('status', BookingStatus::Completed)
-            ->with(['departure.itinerary', 'guests', 'contact', 'group.coordinator'])
+            ->where('status', BookingStatus::CheckedOut)
+            ->with(['guests', 'contact', 'group.coordinator'])
             ->orderBy('id')
-            ->each(function (Booking $booking) use ($send, $hours, &$sent): void {
-                $due = BusinessTime::calendarDay($booking->departure->returnDate()->toDateString())->addHours($hours);
+            ->each(function (Booking $booking) use ($send, $hours, $clock, &$sent): void {
+                $due = $clock->postStayAt($booking->stay(), $booking->checked_out_at)->addHours($hours);
 
                 if (BusinessTime::now()->lt($due)) {
                     return;

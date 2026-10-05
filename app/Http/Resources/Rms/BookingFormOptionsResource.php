@@ -15,7 +15,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     guests: array{child_min_age: int, child_max_age: int, max_per_cabin: int},
  *     commission: array{cap_pct: int, default_pct: int},
  *     payments: array{wire_window_hours: int},
- *     agencies: list<array{id: int, reference: string, name: string, network: string|null, commission_pct: int}>
+ *     agencies: list<array{id: int, reference: string, name: string, network: string|null, commission_pct: int}>,
+ *     room_types: list<array{id: int, code: string, name: string, property_id: int, base_occupancy: int, max_occupancy: int, max_adults: int, max_children: int, restrictions: list<string>}>,
+ *     rate_plans: list<array{code: string, name: string, default: bool, deposit_pct: int, balance_days: int, refundable: bool}>,
+ *     stay: array{min_nights: int, max_nights: int, max_rooms_per_booking: int, booking_horizon_days: int}
  * } $resource
  */
 class BookingFormOptionsResource extends JsonResource
@@ -30,7 +33,10 @@ class BookingFormOptionsResource extends JsonResource
      *     guests: array{child_min_age: int, child_max_age: int, max_per_cabin: int},
      *     commission: array{cap_pct: int, default_pct: int},
      *     payments: array{wire_window_hours: int},
-     *     agencies: list<array{id: int, reference: string, name: string, network: string|null, commission_pct: int}>
+     *     agencies: list<array{id: int, reference: string, name: string, network: string|null, commission_pct: int}>,
+     *     room_types: list<array{id: int, code: string, name: string, property_id: int, base_occupancy: int, max_occupancy: int, max_adults: int, max_children: int, restrictions: list<string>}>,
+     *     rate_plans: list<array{code: string, name: string, default: bool, deposit_pct: int, balance_days: int, refundable: bool}>,
+     *     stay: array{min_nights: int, max_nights: int, max_rooms_per_booking: int, booking_horizon_days: int}
      * }
      */
     public function toArray(Request $request): array

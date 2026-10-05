@@ -46,8 +46,8 @@ final class DocumentsDueCommand extends Command
                 BookingStatus::Confirmed,
                 BookingStatus::OnHoldAgency,
                 BookingStatus::FullyPaid,
-                BookingStatus::OnBoard,
-                BookingStatus::Completed,
+                BookingStatus::InHouse,
+                BookingStatus::CheckedOut,
             ])
             ->orderBy('id')
             ->each(function (Booking $booking) use (
@@ -161,7 +161,7 @@ final class DocumentsDueCommand extends Command
             return 0;
         }
 
-        $departure = $booking->departure->date->toDateString();
+        $departure = $booking->stay()->checkIn()->toDateString();
         $sendDate = BusinessTime::calendarDay($departure)->subDays($daysBefore)->toDateString();
 
         if ($sendDate > $today) {
@@ -210,7 +210,7 @@ final class DocumentsDueCommand extends Command
             return 0;
         }
 
-        $departure = $booking->departure->date->toDateString();
+        $departure = $booking->stay()->checkIn()->toDateString();
         $sendDate = BusinessTime::calendarDay($departure)->subDays($daysBefore)->toDateString();
 
         if ($sendDate > $today) {

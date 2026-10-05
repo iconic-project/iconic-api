@@ -18,8 +18,8 @@ final class ManifestRoster
         BookingStatus::Confirmed,
         BookingStatus::OnHoldAgency,
         BookingStatus::FullyPaid,
-        BookingStatus::OnBoard,
-        BookingStatus::Completed,
+        BookingStatus::InHouse,
+        BookingStatus::CheckedOut,
     ];
 
     /**

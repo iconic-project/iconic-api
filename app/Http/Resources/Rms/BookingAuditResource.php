@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources\Rms;
 
 use App\Models\ChangeHistory;
+use App\Support\Bookings\LegacyStatus;
 use App\Support\Iso;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -28,7 +29,7 @@ class BookingAuditResource extends JsonResource
     {
         $after = $this->after ?? [];
         $what = isset($after['what']) && is_string($after['what']) && $after['what'] !== ''
-            ? $after['what']
+            ? LegacyStatus::text($after['what'])
             : match ($this->event) {
                 'booking.deleted' => 'Reservation deleted',
                 default => 'Request released — hold returned to inventory',

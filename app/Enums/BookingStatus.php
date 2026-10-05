@@ -12,8 +12,9 @@ enum BookingStatus: string
     case PendingPayment = 'PENDING_PAYMENT';
     case Confirmed = 'CONFIRMED';
     case FullyPaid = 'FULLY_PAID';
-    case OnBoard = 'ON_BOARD';
-    case Completed = 'COMPLETED';
+    case InHouse = 'IN_HOUSE';
+    case CheckedOut = 'CHECKED_OUT';
+    case NoShow = 'NO_SHOW';
     case Overdue = 'OVERDUE';
     case OnHoldAgency = 'ON_HOLD_AGENCY';
     case Waitlisted = 'WAITLISTED';
@@ -39,8 +40,9 @@ enum BookingStatus: string
         return in_array($this, [
             self::Confirmed,
             self::FullyPaid,
-            self::OnBoard,
-            self::Completed,
+            self::InHouse,
+            self::CheckedOut,
+            self::NoShow,
             self::Overdue,
         ], true);
     }

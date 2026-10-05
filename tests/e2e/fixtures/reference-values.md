@@ -41,7 +41,7 @@ Source: `BusinessRulesDocument::initial()`.
 |---|---|
 | commission.cap_pct | 12 |
 | commission.default_pct | 10 |
-| commission.payable_days_after_cruise | 30 |
+| commission.payable_days_after_check_out | 30 |
 | modification_fee_usd | 0 |
 | payments.extras_due_hours | 72 |
 | payments.wire_window_hours | 72 |
@@ -393,7 +393,7 @@ Registry counts: Sprint 8 added `copy.online_deposit_advantage` / `online_deposi
 
 Source: task 01 (`ContactDerived`), `BusinessRulesDocument::initial()` `crm.*`, seed people from `seed-data.json` + agency / waitlist / request seeders, and the task 06 browser notes. Nothing in this section was read off a screen in task 09.
 
-Thresholds (PENDING CLIENT): HIGH above **USD 20,000** lifetime value, MID from **USD 8,000**, else NEW. Lifecycle SQL order: AGENT → GUEST → BOOKED → SQL → PAST_GUEST → MQL → PROSPECT. LTV is `SUM` of sold charges (CONFIRMED, FULLY_PAID, ON_BOARD, COMPLETED, OVERDUE). A cancelled booking drops out by itself. NPS is `—` on every row. Consent: transactional **ALWAYS ON**; marketing **OPTED IN** / **NOT OPTED IN** (list pills `MKT ✓` / `TX ONLY`). Fresh seed has no duplicate pairs.
+Thresholds (PENDING CLIENT): HIGH above **USD 20,000** lifetime value, MID from **USD 8,000**, else NEW. Lifecycle SQL order: AGENT → GUEST → BOOKED → SQL → PAST_GUEST → MQL → PROSPECT. LTV is `SUM` of sold charges (CONFIRMED, FULLY_PAID, IN_HOUSE, CHECKED_OUT, OVERDUE). A cancelled booking drops out by itself. NPS is `—` on every row. Consent: transactional **ALWAYS ON**; marketing **OPTED IN** / **NOT OPTED IN** (list pills `MKT ✓` / `TX ONLY`). Fresh seed has no duplicate pairs.
 
 Named seed people (do not invent a full LTV table): Harrison & Whitfield, The Brandt Family, M. Castellanos, Söderberg Party, J. & P. Okafor, Vandermeer Charter, R. Ellison, L. Alvear, S. & T. Ruiz, D. & A. Pereyra, A. Fontaine, E. Harmon, L. Moreau, S. Ferreira, T. Nakamura, P. Ibáñez, Lorena Alvear, Meridian Voyages hold, Anna Whitfield, K. Osei.
 
@@ -420,7 +420,7 @@ Source: `routes/console.php` and `tests/Feature/Crm/SyncJobsTest.php`. On-screen
 | `iconic:retention` | daily | `Pacific/Galapagos` |
 | `iconic:events-retention` | daily | `Pacific/Galapagos` |
 | `iconic:documents-due` | daily | `Pacific/Galapagos` |
-| `iconic:voyage-status` | daily at 00:15 (`15 0 * * *`) | `Pacific/Galapagos` |
+| `iconic:night-audit` | daily at 00:00 (`0 0 * * *`), one minute after `stay.no_show_cutoff_time` 23:59 | `Pacific/Galapagos` |
 | `iconic:ledger-check` | nightly 02:00 (`0 2 * * *`) | `Pacific/Galapagos` |
 | `iconic:commission-scan` | nightly 02:30 (`30 2 * * *`) | `Pacific/Galapagos` |
 | `iconic:manifests-due` | daily at 06:00 (`0 6 * * *`) | `Pacific/Galapagos` |
@@ -439,7 +439,7 @@ Nothing in this section was read off a `reset.sh` screen in task 11. Amounts and
 - **Stage probabilities and SLAs** (PENDING CLIENT, `BusinessRulesDocument` initial): new lead 5% / 4 business hours, qualifying 15% / 5 business days, quoted 35%, negotiation 55% / 7 business days, deposit pending 80%. ⚠ UNVERIFIED — document initial, not a screen.
 - **Register counts** (`ConsentRegister`, not a reset screen). Transactional equals every not-merged contact. Marketing equals contacts whose latest register row is granted: `DemoConsentsSeeder` writes one I6 MARKETING row per confirmed-or-later booking except `ANK-2026-0007`, and the backfill copies those. Profiling, remarketing, WhatsApp and analytics are 0 until someone opts in. Do not copy the task 09 live counts. ⚠ UNVERIFIED — seeder + `ConsentRegister.php`.
 - **Deliveries.** `DemoDocumentsSeeder` marks issued invoices, summaries and settled receipts **SENT**. It does not seed FAILED or BLOCKED. ⚠ UNVERIFIED — seeder, not a reset screen.
-- **Sold statuses** for campaign measures: CONFIRMED, FULLY_PAID, ON_BOARD, COMPLETED, OVERDUE. REQUESTED does not count. ⚠ UNVERIFIED — `ContactDerived::soldStatuses()`, not a screen.
+- **Sold statuses** for campaign measures: CONFIRMED, FULLY_PAID, IN_HOUSE, CHECKED_OUT, OVERDUE. REQUESTED does not count. ⚠ UNVERIFIED — `ContactDerived::soldStatuses()`, not a screen.
 
 ## Portal (Sprint 13)
 

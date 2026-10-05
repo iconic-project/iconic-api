@@ -1,6 +1,8 @@
 # BKG-02 · Create a one-cabin reservation
+
+Retired in sprint 19. Hotel stays are HBKG-01 through HBKG-10. Do not walk these yacht steps.
 - **Tags:** sprint-4, bookings
-- **Priority:** P1
+- **Priority:** retired
 - **Users:** Carolina
 - **Start:** reset
 

@@ -34,6 +34,11 @@ class StoreReservationRequest extends QuoteReservationRequest
             'commission_pct' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:30'],
             'override_restrictions' => ['sometimes', 'boolean'],
             'restriction_reason' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'override_reason' => ['sometimes', 'nullable', 'string', 'max:500'],
+            'expected_arrival_time' => ['sometimes', 'nullable', 'date_format:H:i'],
+            'expected_total' => $this->filled('check_in')
+                ? ['required', 'integer', 'min:0']
+                : ['sometimes', 'integer', 'min:0'],
         ];
     }
 }

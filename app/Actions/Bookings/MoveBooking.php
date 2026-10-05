@@ -15,6 +15,7 @@ use App\Enums\ReleaseReason;
 use App\Events\BookingChargesChanged;
 use App\Exceptions\CabinUnavailableException;
 use App\Exceptions\ConflictException;
+use App\Exceptions\RoomUnavailableException;
 use App\Models\Booking;
 use App\Models\Departure;
 use App\Models\Group;
@@ -23,15 +24,18 @@ use App\Models\RoomNightClaim;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
-use App\Services\Inventory\LegacyDepartureClaims;
+use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\Quote;
 use App\Services\Pricing\ReservationQuoter;
 use App\Support\Blocks\ConflictMessage;
 use App\Support\Bookings\BookingMutationLock;
+use App\Support\Bookings\StayFromDeparture;
 use App\Support\BusinessTime;
 use App\Support\Dates\Format;
 use App\Support\Guests\ApplyPng;
 use App\Support\History\History;
+use App\Support\Inventory\CabinConflict;
+use App\Support\Inventory\DepartureLocks;
 use App\Support\Inventory\DepartureSnapshot;
 use App\Support\Inventory\StaffStayRestrictions;
 use App\Support\Money;
@@ -49,7 +53,7 @@ final class MoveBooking extends Action
 
     public function __construct(
         private ReservationQuoter $quoter,
-        private LegacyDepartureClaims $claims,
+        private ClaimService $claims,
         private CurrentConfig $config,
         private Availability $availability,
         private ApplyPng $png,
@@ -136,6 +140,12 @@ final class MoveBooking extends Action
 
             $booking->departure_id = $target->id;
             $booking->room_id = $cabin?->id;
+            $stay = StayFromDeparture::columns($target, $cabin);
+            $booking->property_id = $stay['property_id'];
+            $booking->room_type_id = $stay['room_type_id'];
+            $booking->setAttribute('check_in', $stay['check_in']);
+            $booking->setAttribute('check_out', $stay['check_out']);
+            $booking->nights = $stay['nights'];
             $booking->rates_version_id = $this->config->version(ConfigKind::Rates)->id;
             $booking->price_lines = $quoted['new_price_lines'];
             $booking->total = $quoted['new_total'];
@@ -377,10 +387,14 @@ final class MoveBooking extends Action
 
         $cabins = $this->targetCabins($booking, $target, $cabinCode);
 
+        $stay = $target->stayDates();
+
         try {
+            DepartureLocks::lock((int) $target->id);
+
             if ($booking->status === BookingStatus::Requested && $hold instanceof RoomNightClaim) {
                 $this->claims->claim(
-                    $target,
+                    $stay,
                     $cabins,
                     $booking,
                     ClaimKind::Hold,
@@ -391,9 +405,9 @@ final class MoveBooking extends Action
                 return;
             }
 
-            $this->claims->claim($target, $cabins, $booking, ClaimKind::Booking);
-        } catch (CabinUnavailableException $exception) {
-            throw $this->conflict($exception, $target);
+            $this->claims->claim($stay, $cabins, $booking, ClaimKind::Booking);
+        } catch (RoomUnavailableException) {
+            throw $this->conflict(CabinConflict::exception($stay, $cabins, $booking), $target);
         }
     }
 

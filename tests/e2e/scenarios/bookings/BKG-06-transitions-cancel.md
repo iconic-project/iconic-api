@@ -1,6 +1,8 @@
 # BKG-06 · Legal transitions and cancellation
+
+Retired in sprint 19. Hotel stays are HBKG-01 through HBKG-10. Do not walk these yacht steps.
 - **Tags:** sprint-4, bookings
-- **Priority:** P1
+- **Priority:** retired
 - **Users:** Carolina
 - **Start:** reset
 
@@ -14,7 +16,7 @@ A CONFIRMED booking may only move to FULLY_PAID or CANCELLED. Cancel needs a rea
 4. Open History. Open Calendar Year 2027, ANAMARA Suite 01 on `7 Nov 2027`. Open `/rms/operations/refunds`.
 
 ## Expected
-- [ ] E1 · Legal buttons only: `→ FULLY PAID` and `→ CANCELLED`. `Delete (admin only)` is enabled (Carolina). No `→ ON BOARD` / `→ COMPLETED` / `→ RELEASED`. Paid `USD 2,660`. Balance due `USD 23,940 · due 10 Jul 2027`. Deposit `Deposit 10% · USD 2,660 ✓`.
+- [ ] E1 · Legal buttons only: `→ FULLY PAID` and `→ CANCELLED`. `Delete (admin only)` is enabled (Carolina). No `→ IN HOUSE` / `→ CHECKED OUT` / `→ RELEASED`. Paid `USD 2,660`. Balance due `USD 23,940 · due 10 Jul 2027`. Deposit `Deposit 10% · USD 2,660 ✓`.
 - [ ] E2 · Reason modal title `Status CONFIRMED → CANCELLED`. Label `Reason (required)`. ⚠ UNVERIFIED — `reasonModalTitle()` / i18n; task 07 browser.
 - [ ] E3 · Toast `Status updated` (or the panel closes/refreshes to CANCELLED). ⚠ UNVERIFIED — i18n `bookings.transitionedToast`.
 - [ ] E4 · History includes the reason `E2E cancel 0003` and a status-changed sentence CONFIRMED → CANCELLED (seeded create line stays `Reservation created in RMS — Suite 01 · 2 AD · seeded`). A refund-requested line with penalty `USD 1,330` and refund `USD 1,330` (5 % of 26,600; paid 2,660). ⚠ UNVERIFIED — History rendering of `booking.status_changed` / `refund.requested`.

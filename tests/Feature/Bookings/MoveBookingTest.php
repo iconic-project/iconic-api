@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Services\Inventory\ClaimService;
 use App\Enums\BookingStatus;
 use App\Enums\ClaimKind;
 use App\Enums\ConfigKind;
@@ -13,7 +14,6 @@ use App\Models\RoomNightClaim;
 use App\Services\Config\ConfigPublisher;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
-use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -291,8 +291,7 @@ test('a requested hold moves and keeps its expiry', function (): void {
     $expires = now()->addDays(3);
 
     DB::transaction(function () use ($departure, $cabin, $booking, $expires): void {
-        app(LegacyDepartureClaims::class)->claim(
-            $departure,
+        app(ClaimService::class)->claim($departure->stayDates(),
             collect([$cabin]),
             $booking,
             ClaimKind::Hold,

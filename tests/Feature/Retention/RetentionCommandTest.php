@@ -34,7 +34,7 @@ function retentionCabin(string $departureDate): Booking
         'departure_id' => $departure->id,
         'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'owner_id' => managerUser()->id,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
     ]);
 }
 

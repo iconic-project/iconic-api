@@ -159,8 +159,8 @@ final class WaitlistOffers
                         BookingStatus::PendingPayment,
                         BookingStatus::Confirmed,
                         BookingStatus::FullyPaid,
-                        BookingStatus::OnBoard,
-                        BookingStatus::Completed,
+                        BookingStatus::InHouse,
+                        BookingStatus::CheckedOut,
                         BookingStatus::Overdue,
                         BookingStatus::OnHoldAgency,
                     ])

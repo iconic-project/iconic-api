@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Services\Inventory\ClaimService;
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
@@ -11,7 +12,6 @@ use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomNightClaim;
-use App\Services\Inventory\LegacyDepartureClaims;
 use App\Support\Inventory\BackfillRoomNightClaims;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Database\QueryException;
@@ -56,8 +56,7 @@ test('a yacht claim writes one night row per stay night and cabin_claims refuses
     $holdHolder = ClaimHolder::query()->create(['reference' => 'RNC-HOLD', 'name' => 'Hold']);
     $releasedHolder = ClaimHolder::query()->create(['reference' => 'RNC-REL', 'name' => 'Released']);
 
-    DB::transaction(fn () => app(LegacyDepartureClaims::class)->claim(
-        $departure,
+    DB::transaction(fn () => app(ClaimService::class)->claim($departure->stayDates(),
         collect([$holdRoom]),
         $holdHolder,
         ClaimKind::Hold,
@@ -66,13 +65,12 @@ test('a yacht claim writes one night row per stay night and cabin_claims refuses
     ));
 
     DB::transaction(function () use ($departure, $releasedRoom, $releasedHolder): void {
-        app(LegacyDepartureClaims::class)->claim(
-            $departure,
+        app(ClaimService::class)->claim($departure->stayDates(),
             collect([$releasedRoom]),
             $releasedHolder,
             ClaimKind::Block,
         );
-        app(LegacyDepartureClaims::class)->release($releasedHolder, ReleaseReason::Cancelled);
+        app(ClaimService::class)->release($releasedHolder, ReleaseReason::Cancelled);
     });
 
     $stay = $departure->stayDates();

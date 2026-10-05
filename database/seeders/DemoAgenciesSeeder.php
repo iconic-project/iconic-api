@@ -21,7 +21,7 @@ use App\Models\Property;
 use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\LegacyDepartureClaims;
+use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\CabinPricer;
 use App\Services\Pricing\NoRate;
 use App\Services\Pricing\QuoteInput;
@@ -258,7 +258,7 @@ final class DemoAgenciesSeeder extends Seeder
             'sold_on' => SoldOn::today(),
         ]);
 
-        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $booking, ClaimKind::Booking);
+        app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $booking, ClaimKind::Booking);
 
         History::record($booking, 'booking.created', after: [
             'reference' => $booking->reference,

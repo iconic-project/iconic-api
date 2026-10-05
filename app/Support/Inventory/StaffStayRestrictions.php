@@ -31,8 +31,15 @@ final class StaffStayRestrictions
      */
     public function check(iterable $rooms, StayDates $stay, User $actor, array $data): ?AppliedRestrictionOverride
     {
-        $reasons = Bookability::ordered($this->reasons($rooms, $stay));
+        return $this->decide(Bookability::ordered($this->reasons($rooms, $stay)), $actor, $data);
+    }
 
+    /**
+     * @param  list<string>  $reasons
+     * @param  array<string, mixed>  $data
+     */
+    public function decide(array $reasons, User $actor, array $data): ?AppliedRestrictionOverride
+    {
         if ($reasons === []) {
             return null;
         }
@@ -47,11 +54,12 @@ final class StaffStayRestrictions
             throw new AuthorizationException('You cannot override sell restrictions.');
         }
 
-        $reason = $data['restriction_reason'] ?? null;
+        $key = array_key_exists('override_reason', $data) ? 'override_reason' : 'restriction_reason';
+        $reason = $data[$key] ?? null;
 
         if (! is_string($reason) || trim($reason) === '') {
             throw ValidationException::withMessages([
-                'restriction_reason' => ['A reason is required to override sell restrictions.'],
+                $key => ['A reason is required to override sell restrictions.'],
             ]);
         }
 

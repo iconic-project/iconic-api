@@ -27,8 +27,8 @@ final class ContactDerived
         return [
             BookingStatus::Confirmed->value,
             BookingStatus::FullyPaid->value,
-            BookingStatus::OnBoard->value,
-            BookingStatus::Completed->value,
+            BookingStatus::InHouse->value,
+            BookingStatus::CheckedOut->value,
             BookingStatus::Overdue->value,
         ];
     }
@@ -111,7 +111,7 @@ final class ContactDerived
                 SELECT 1 FROM bookings
                 WHERE bookings.contact_id = contacts.id
                   AND bookings.deleted_at IS NULL
-                  AND bookings.status = \''.BookingStatus::OnBoard->value.'\'
+                  AND bookings.status = \''.BookingStatus::InHouse->value.'\'
             ) OR EXISTS (
                 SELECT 1 '.$bookingJoin.'
                   AND bookings.status IN ('.$midCruise.')
@@ -133,7 +133,7 @@ final class ContactDerived
                 SELECT 1 FROM bookings
                 WHERE bookings.contact_id = contacts.id
                   AND bookings.deleted_at IS NULL
-                  AND bookings.status = \''.BookingStatus::Completed->value.'\'
+                  AND bookings.status = \''.BookingStatus::CheckedOut->value.'\'
             ) OR EXISTS (
                 SELECT 1 '.$bookingJoin.'
                   AND bookings.status IN ('.$sold.')

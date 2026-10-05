@@ -12,6 +12,7 @@ use App\Models\GuestResponse;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
 use App\Support\Config\Documents\NpsRules;
+use App\Support\Stays\StayClock;
 use Illuminate\Database\Eloquent\Builder;
 
 final class NpsDashboard
@@ -83,7 +84,8 @@ final class NpsDashboard
             return null;
         }
 
-        return BusinessTime::calendarDay($departure->returnDate()->toDateString())
+        return app(StayClock::class)
+            ->checkOutMoment($departure->stayDates())
             ->addHours($rules->surveyHoursAfterReturn)
             ->toDateString();
     }

@@ -375,7 +375,7 @@ class ReportQueries
             'sql' => $sql,
             'bindings' => [
                 $rules->commission->capPct,
-                $rules->commission->payableDaysAfterCruise,
+                $rules->commission->payableDaysAfterCheckOut,
                 BusinessTime::now()->toDateString(),
                 AgencyStatus::Approved->value,
                 $window->from,

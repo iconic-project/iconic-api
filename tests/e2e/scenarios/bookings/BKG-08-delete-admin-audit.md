@@ -1,6 +1,8 @@
 # BKG-08 · Delete is admin-only and audited
+
+Retired in sprint 19. Hotel stays are HBKG-01 through HBKG-10. Do not walk these yacht steps.
 - **Tags:** sprint-4, bookings
-- **Priority:** P2
+- **Priority:** retired
 - **Users:** Mateo, Carolina
 - **Start:** reset
 

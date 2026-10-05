@@ -139,7 +139,7 @@ final class SubmitPortalRequest extends Action
         $rules = $this->config->businessRules();
         $owner = EngineBookingOwner::user();
         $submittedAt = now();
-        $hold = BusinessHours::fromDocument($rules)->holdExpiry($submittedAt, $departure->date, $rules);
+        $hold = BusinessHours::fromDocument($rules)->holdExpiry($submittedAt, $departure->stayDates()->checkIn(), $rules);
         $notes = isset($data['notes']) && is_string($data['notes']) && $data['notes'] !== ''
             ? $data['notes']
             : null;

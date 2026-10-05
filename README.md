@@ -154,12 +154,12 @@ The first admin in a non-demo environment: `php artisan iconic:create-admin you@
 
 ## Seed mode
 
-`ICONIC_SEED_MODE` chooses the inventory a fresh seed writes. The seeder reads it through `config('iconic.seed_mode')`. The default is `yacht`. Sprint 19 switches the default to `hotel`.
+`ICONIC_SEED_MODE` chooses the inventory a fresh seed writes. The seeder reads it through `config('iconic.seed_mode')`. The default is `hotel`. `yacht` stays available until Sprint 22.
 
 | Value | What `php artisan migrate:fresh --seed` writes |
 |---|---|
+| `hotel` | Hotel Demo (`HTL`) from `docs/requirements/examples/hotel-seed-data.json`: 1 property, 4 room types, 24 rooms, the fixture restrictions, and the fixture bookings whose nights have a season. Yacht inventory and yacht demo bookings are skipped. |
 | `yacht` | ANAMARA and ANATIVA, plus the local demo departures, bookings and agencies |
-| `hotel` | Hotel Demo (`HTL`) from `docs/requirements/examples/hotel-seed-data.json`: 1 property, 4 room types, 24 rooms. Yacht inventory and yacht demo bookings are skipped. Bookings in that file are not seeded until Sprint 19 |
 
 Hotel inventory is seeded only when `APP_ENV` is `local` or `testing`, same as the demo users. Roles, published config, segments, journeys and message templates still seed in both modes.
 

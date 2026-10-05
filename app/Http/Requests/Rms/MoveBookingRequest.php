@@ -13,7 +13,8 @@ class MoveBookingRequest extends PreviewMoveBookingRequest
     {
         return [
             ...parent::rules(),
-            'confirm_total' => ['required', 'integer'],
+            'confirm_total' => ['required_with:departure_id', 'integer'],
+            'reason' => ['required_without:departure_id', 'string', 'max:500'],
             'override_restrictions' => ['sometimes', 'boolean'],
             'restriction_reason' => ['sometimes', 'nullable', 'string', 'max:500'],
         ];

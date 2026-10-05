@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources\Rms;
 
 use App\Models\Booking;
+use App\Models\RoomType;
 use App\Models\User;
 use App\Policies\BookingPolicy;
 use App\Support\Bookings\RequestParty;
@@ -26,8 +27,11 @@ class BookingRequestResource extends JsonResource
      *     contact: array{name: string, preferred_channel: string},
      *     travel_advisor: bool,
      *     party: string,
-     *     departure: array{id: int, date: string, property: array{id: int, code: string, name: string}},
-     *     cabin_label: string,
+     *     stay: array{check_in: string, check_out: string},
+     *     nights: int,
+     *     room_type: array{id: int, code: string, name: string}|null,
+     *     rooms_count: int,
+     *     copy: string,
      *     estimated_value: int,
      *     hold: array{expires_at: string|null, rule: string, remaining_business_minutes: int, expired: bool},
      *     sla: array{due_at: string, remaining_minutes: int, breached: bool},
@@ -39,8 +43,7 @@ class BookingRequestResource extends JsonResource
     public function toArray(Request $request): array
     {
         $this->resource->loadMissing([
-            'departure.property',
-            'cabin',
+            'roomType',
             'contact',
             'bookingRequest',
             'activeClaims',
@@ -63,6 +66,9 @@ class BookingRequestResource extends JsonResource
             'remaining_minutes' => 0,
             'breached' => false,
         ];
+        $stay = $this->stay();
+        $type = $this->roomType;
+        $rooms = RequestSummary::roomsCount($this->resource);
 
         return [
             'id' => $this->id,
@@ -73,16 +79,18 @@ class BookingRequestResource extends JsonResource
             ],
             'travel_advisor' => (bool) ($summary['travel_advisor'] ?? false),
             'party' => RequestParty::label($this->adults, $this->children),
-            'departure' => [
-                'id' => $this->departure->id,
-                'date' => $this->departure->date->toDateString(),
-                'property' => [
-                    'id' => $this->departure->property->id,
-                    'code' => $this->departure->property->code,
-                    'name' => $this->departure->property->name,
-                ],
+            'stay' => [
+                'check_in' => $stay->checkIn()->toDateString(),
+                'check_out' => $stay->checkOut()->toDateString(),
             ],
-            'cabin_label' => $this->cabinLabel(),
+            'nights' => $stay->nights(),
+            'room_type' => $type instanceof RoomType ? [
+                'id' => $type->id,
+                'code' => $type->code,
+                'name' => $type->name,
+            ] : null,
+            'rooms_count' => $rooms,
+            'copy' => $summary['copy'] ?? RequestSummary::line($rooms, $stay),
             'estimated_value' => $this->total,
             'hold' => $hold,
             'sla' => $sla,

@@ -20,11 +20,11 @@ final class DealStages
     {
         $match = self::boundMatchSql();
         $lost = self::in(BookingStatus::Cancelled, BookingStatus::CancelledPostpaid, BookingStatus::Released);
-        $won = self::in(BookingStatus::Completed);
+        $won = self::in(BookingStatus::CheckedOut);
         $confirmed = self::in(
             BookingStatus::Confirmed,
             BookingStatus::FullyPaid,
-            BookingStatus::OnBoard,
+            BookingStatus::InHouse,
             BookingStatus::Overdue,
         );
         $deposit = self::in(
@@ -79,7 +79,7 @@ final class DealStages
     public static function bookingColumnSql(string $expression): string
     {
         $match = self::boundMatchSql();
-        $order = "'COMPLETED','FULLY_PAID','ON_BOARD','OVERDUE','CONFIRMED','PENDING_PAYMENT','ON_HOLD_AGENCY','REQUESTED','WAITLISTED','CANCELLED','CANCELLED_POSTPAID','RELEASED'";
+        $order = "'CHECKED_OUT','NO_SHOW','FULLY_PAID','IN_HOUSE','OVERDUE','CONFIRMED','PENDING_PAYMENT','ON_HOLD_AGENCY','REQUESTED','WAITLISTED','CANCELLED','CANCELLED_POSTPAID','RELEASED'";
 
         return "(
             SELECT {$expression}

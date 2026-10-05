@@ -392,8 +392,8 @@ final class DocumentFacts
             'deposit_received' => $this->depositReceived(),
             'cruise_received' => $this->cruiseReceived(),
             'on_board_note' => in_array($this->booking->status, [
-                BookingStatus::OnBoard,
-                BookingStatus::Completed,
+                BookingStatus::InHouse,
+                BookingStatus::CheckedOut,
             ], true),
             'cancellation' => implode(' · ', $labels),
         ];

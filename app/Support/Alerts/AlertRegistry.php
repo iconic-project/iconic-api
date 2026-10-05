@@ -121,6 +121,30 @@ final class AlertRegistry
                 'The deposit is settled, or the booking leaves PENDING_PAYMENT.',
                 'rms',
             ),
+            new AlertKindDefinition(
+                AlertKind::ArrivalNotCheckedIn,
+                AlertSeverity::Warn,
+                [Permission::BookingsFrontDesk],
+                'Night audit finds a confirmed or fully paid arrival that is not checked in.',
+                'The booking is checked in, or it leaves confirmed and fully paid.',
+                'rms',
+            ),
+            new AlertKindDefinition(
+                AlertKind::InHousePastCheckOut,
+                AlertSeverity::Warn,
+                [Permission::BookingsFrontDesk],
+                'Night audit finds an in-house booking past its check-out date.',
+                'The booking is checked out.',
+                'rms',
+            ),
+            new AlertKindDefinition(
+                AlertKind::DepartureNotCheckedOut,
+                AlertSeverity::Warn,
+                [Permission::BookingsFrontDesk],
+                'Night audit finds an in-house booking whose check-out is today.',
+                'The booking is checked out.',
+                'rms',
+            ),
         ];
     }
 

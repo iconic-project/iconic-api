@@ -52,9 +52,9 @@ test('the roster counts sold bookings and orders by cabin then position', functi
 
     $second = manifestBooking($departure, BookingStatus::Confirmed, $early, 'ANK-2026-7002');
     $first = manifestBooking($departure, BookingStatus::FullyPaid, $early, 'ANK-2026-7001');
-    $third = manifestBooking($departure, BookingStatus::OnBoard, $late, 'ANK-2026-7003');
+    $third = manifestBooking($departure, BookingStatus::InHouse, $late, 'ANK-2026-7003');
     $charter = manifestBooking($departure, BookingStatus::OnHoldAgency, null, 'ANK-2026-7004', BookingType::Charter);
-    $held = manifestBooking($departure, BookingStatus::Completed, manifestCabin($departure, 3, 'S3', 'Suite 03'), 'ANK-2026-7005');
+    $held = manifestBooking($departure, BookingStatus::CheckedOut, manifestCabin($departure, 3, 'S3', 'Suite 03'), 'ANK-2026-7005');
 
     manifestBooking($departure, BookingStatus::Cancelled, manifestCabin($departure, 4, 'S4', 'Suite 04'), 'ANK-2026-7091');
     manifestBooking($departure, BookingStatus::Released, manifestCabin($departure, 5, 'S5', 'Suite 05'), 'ANK-2026-7092');

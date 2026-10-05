@@ -17,11 +17,13 @@ use App\Enums\PngCategory;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
 use App\Services\Config\CurrentConfig;
+use App\Support\Bookings\StayFromDeparture;
 use App\Support\BusinessTime;
 use App\Support\Payments\Ledger;
 use App\Support\Payments\PaymentsKpis;
 use App\Support\Payments\WireWindow;
 use App\Support\Rounding;
+use App\Support\Stays\StayDates;
 use Carbon\CarbonImmutable;
 use Database\Factories\BookingFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -36,13 +38,27 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 /**
  * @property int $id
  * @property string|null $reference
  * @property string|null $request_reference
  * @property BookingType $type
- * @property int $departure_id
+ * @property int|null $departure_id
+ * @property int $property_id
+ * @property int|null $room_type_id
+ * @property CarbonImmutable $check_in
+ * @property CarbonImmutable $check_out
+ * @property int $nights
+ * @property string|null $rate_plan_code
+ * @property list<array<string, mixed>>|null $night_lines
+ * @property list<array<string, mixed>>|null $tax_lines
+ * @property list<int>|null $child_ages
+ * @property string|null $expected_arrival_time
+ * @property Carbon|null $checked_in_at
+ * @property Carbon|null $checked_out_at
+ * @property Carbon|null $no_show_at
  * @property int|null $room_id
  * @property int $contact_id
  * @property int|null $group_id
@@ -85,7 +101,10 @@ use Illuminate\Support\Facades\DB;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure $departure
+ * @property-read Departure|null $departure
+ * @property-read Property $property
+ * @property-read RoomType|null $roomType
+ * @property-read Room|null $room
  * @property-read Room|null $cabin
  * @property-read Contact $contact
  * @property-read Group|null $group
@@ -119,6 +138,19 @@ use Illuminate\Support\Facades\DB;
     'request_reference',
     'type',
     'departure_id',
+    'property_id',
+    'room_type_id',
+    'check_in',
+    'check_out',
+    'nights',
+    'rate_plan_code',
+    'night_lines',
+    'tax_lines',
+    'child_ages',
+    'expected_arrival_time',
+    'checked_in_at',
+    'checked_out_at',
+    'no_show_at',
     'room_id',
     'contact_id',
     'group_id',
@@ -162,6 +194,13 @@ class Booking extends Model
     /** @use HasFactory<BookingFactory> */
     use HasAuditColumns, HasFactory, SerializesDatesAsUtc, SoftDeletes;
 
+    protected static function booted(): void
+    {
+        static::creating(function (Booking $booking): void {
+            $booking->copyStayFromDeparture();
+        });
+    }
+
     /**
      * @return array<string, string>
      */
@@ -170,6 +209,15 @@ class Booking extends Model
         return [
             'type' => BookingType::class,
             'status' => BookingStatus::class,
+            'check_in' => CalendarDate::class,
+            'check_out' => CalendarDate::class,
+            'nights' => 'integer',
+            'night_lines' => 'array',
+            'tax_lines' => 'array',
+            'child_ages' => 'array',
+            'checked_in_at' => 'datetime',
+            'checked_out_at' => 'datetime',
+            'no_show_at' => 'datetime',
             'main_channel' => MainChannel::class,
             'channel_of_origin' => ChannelOfOrigin::class,
             'utm_first' => 'array',
@@ -203,11 +251,96 @@ class Booking extends Model
     }
 
     /**
+     * @return BelongsTo<Property, $this>
+     */
+    public function property(): BelongsTo
+    {
+        return $this->belongsTo(Property::class);
+    }
+
+    /**
+     * @return BelongsTo<RoomType, $this>
+     */
+    public function roomType(): BelongsTo
+    {
+        return $this->belongsTo(RoomType::class);
+    }
+
+    /**
+     * @return BelongsTo<Room, $this>
+     */
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    /**
      * @return BelongsTo<Room, $this>
      */
     public function cabin(): BelongsTo
     {
         return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    public function stay(): StayDates
+    {
+        $attributes = $this->getAttributes();
+        $checkIn = $attributes['check_in'] ?? null;
+        $checkOut = $attributes['check_out'] ?? null;
+
+        if (! is_string($checkIn) || $checkIn === '' || ! is_string($checkOut) || $checkOut === '') {
+            throw new RuntimeException('Booking '.$this->getKey().' has no stay.');
+        }
+
+        return StayDates::of(substr($checkIn, 0, 10), substr($checkOut, 0, 10));
+    }
+
+    /**
+     * New yacht writes still name a departure. Copy its dates onto the stay columns.
+     */
+    public function copyStayFromDeparture(): void
+    {
+        if ($this->departure_id === null || ! $this->stayColumnsMissing()) {
+            return;
+        }
+
+        $departure = $this->relationLoaded('departure') ? $this->getRelation('departure') : null;
+
+        if (! $departure instanceof Departure) {
+            $departure = Departure::query()->with('itinerary')->find($this->departure_id);
+        }
+
+        if (! $departure instanceof Departure) {
+            return;
+        }
+
+        $room = null;
+
+        if ($this->room_id !== null) {
+            $loaded = $this->relationLoaded('room') ? $this->getRelation('room') : null;
+            $room = $loaded instanceof Room ? $loaded : Room::query()->find($this->room_id);
+        }
+
+        foreach (StayFromDeparture::columns($departure, $room instanceof Room ? $room : null) as $key => $value) {
+            if ($value === null || $this->getAttribute($key) !== null) {
+                continue;
+            }
+
+            $this->setAttribute($key, $value);
+        }
+    }
+
+    private function stayColumnsMissing(): bool
+    {
+        $attributes = $this->getAttributes();
+
+        foreach (['check_in', 'check_out', 'property_id', 'nights', 'room_type_id'] as $key) {
+            if (! array_key_exists($key, $attributes) || $attributes[$key] === null || $attributes[$key] === '') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -489,11 +622,9 @@ class Booking extends Model
 
     public function extrasDueAt(): CarbonImmutable
     {
-        $this->loadMissing('departure');
-
         $hours = app(CurrentConfig::class)->businessRules()->payments->extrasDueHours;
 
-        return BusinessTime::calendarDay($this->departure->date->toDateString())->subHours($hours);
+        return BusinessTime::calendarDay($this->stay()->checkIn()->toDateString())->subHours($hours);
     }
 
     private function pngCollectedTotal(): int
@@ -542,9 +673,7 @@ class Booking extends Model
             return $this->balance_due_date_override;
         }
 
-        $this->loadMissing('departure');
-
-        return $this->departure->date->subDays($this->balance_days);
+        return $this->stay()->checkIn()->subDays($this->balance_days);
     }
 
     public function isOverdue(): bool
@@ -557,7 +686,13 @@ class Booking extends Model
             return false;
         }
 
-        return BusinessTime::now()->toDateString() > $this->balanceDueDate()->toDateString();
+        $today = BusinessTime::now()->toDateString();
+
+        if ($this->paysAtHotel() && $today < $this->stay()->checkOut()->toDateString()) {
+            return false;
+        }
+
+        return $today > $this->balanceDueDate()->toDateString();
     }
 
     public function overdueDays(): ?int
@@ -707,13 +842,20 @@ class Booking extends Model
     }
 
     /**
-     * Galápagos due date: the override, or the departure date minus balance days.
+     * Due date: the override, or check-in minus balance days.
      */
     public static function dueDateSql(): string
     {
-        return 'COALESCE(bookings.balance_due_date_override, DATE_SUB((
-            SELECT departures.date FROM departures WHERE departures.id = bookings.departure_id
-        ), INTERVAL bookings.balance_days DAY))';
+        return 'COALESCE(bookings.balance_due_date_override, DATE_SUB(bookings.check_in, INTERVAL bookings.balance_days DAY))';
+    }
+
+    /**
+     * Past the balance due date, except a pay-at-hotel stay before check-out.
+     * Bindings: today, today.
+     */
+    public static function overdueDateSql(): string
+    {
+        return '(? > '.self::dueDateSql().' AND (bookings.deposit_pct <> 0 OR bookings.balance_days <> 0 OR ? >= bookings.check_out))';
     }
 
     /**
@@ -730,7 +872,15 @@ class Booking extends Model
                 BookingStatus::OnHoldAgency->value,
             ])
             ->whereRaw('('.$cruiseSql.') > 0', $paid)
-            ->whereRaw('? > '.self::dueDateSql(), [$today]);
+            ->whereRaw(self::overdueDateSql(), [$today, $today]);
+    }
+
+    /**
+     * Nothing is due before arrival. Overdue starts at check-out, not at check-in.
+     */
+    public function paysAtHotel(): bool
+    {
+        return $this->deposit_pct === 0 && $this->balance_days === 0;
     }
 
     public function depositAmount(): int
@@ -908,6 +1058,43 @@ class Booking extends Model
         }
 
         $query->where($query->qualifyColumn('owner_id'), $user->id);
+    }
+
+    /**
+     * Arrivals: check-in inside the window. Yacht check-in is the departure date.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeArrivingBetween(Builder $query, ?string $from, ?string $to): void
+    {
+        $query
+            ->when(is_string($from) && $from !== '', fn (Builder $inner) => $inner->whereDate('bookings.check_in', '>=', $from))
+            ->when(is_string($to) && $to !== '', fn (Builder $inner) => $inner->whereDate('bookings.check_in', '<=', $to));
+    }
+
+    /**
+     * Departures: check-out inside the window.
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeCheckingOutBetween(Builder $query, ?string $from, ?string $to): void
+    {
+        $query
+            ->when(is_string($from) && $from !== '', fn (Builder $inner) => $inner->whereDate('bookings.check_out', '>=', $from))
+            ->when(is_string($to) && $to !== '', fn (Builder $inner) => $inner->whereDate('bookings.check_out', '<=', $to));
+    }
+
+    /**
+     * In house on a calendar date: status in house and the night is inside [check_in, check_out).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInHouseOn(Builder $query, string $date): void
+    {
+        $query
+            ->where('bookings.status', BookingStatus::InHouse)
+            ->whereDate('bookings.check_in', '<=', $date)
+            ->whereDate('bookings.check_out', '>', $date);
     }
 
     /**

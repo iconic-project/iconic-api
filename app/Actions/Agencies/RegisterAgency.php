@@ -37,7 +37,7 @@ final class RegisterAgency extends Action
                 : $rules->commission->defaultPct;
             $terms = isset($data['payment_terms']) && is_string($data['payment_terms']) && trim($data['payment_terms']) !== ''
                 ? trim($data['payment_terms'])
-                : $rules->commission->payableDaysAfterCruise.' days post-cruise · wire';
+                : $rules->commission->payableDaysAfterCheckOut.' days after check-out · wire';
 
             $agency = Agency::query()->create([
                 'reference' => $this->references->next(ReferenceType::Agency),

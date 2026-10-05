@@ -256,7 +256,7 @@ test('ledger kpis reuse paidValues overdue and Accrual and pending includes over
     expect($own->json('meta.kpis.charter_deposit_pct'))->toBe($terms->charterDepositPct);
     expect($own->json('meta.kpis.cabin_balance_days'))->toBe($terms->cabinBalanceDays);
     expect($own->json('meta.kpis.commission_payable_days'))->toBe(
-        $config->businessRules()->commission->payableDaysAfterCruise,
+        $config->businessRules()->commission->payableDaysAfterCheckOut,
     );
     expect($own->json('meta.kpis.commission_cap_pct'))->toBe($config->businessRules()->commission->capPct);
     expect($own->json('meta.kpis.wire_window_hours'))->toBe($config->businessRules()->payments->wireWindowHours);

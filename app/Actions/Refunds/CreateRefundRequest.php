@@ -15,6 +15,7 @@ use App\Services\Config\CurrentConfig;
 use App\Support\BusinessHours;
 use App\Support\BusinessTime;
 use App\Support\History\History;
+use App\Support\Payments\CancellationBands;
 use App\Support\Payments\CancellationPenalty;
 use App\Support\Payments\Ledger;
 
@@ -25,8 +26,6 @@ final class CreateRefundRequest extends Action
     public function handle(Booking $booking, ?User $actor, bool $system = false): ?RefundRequest
     {
         return $this->transaction(function () use ($booking, $actor, $system): ?RefundRequest {
-            $booking->loadMissing('departure');
-
             if ($booking->refundRequest()->where('status', RefundRequestStatus::Pending)->exists()) {
                 return $booking->refundRequest()->where('status', RefundRequestStatus::Pending)->first();
             }
@@ -46,10 +45,10 @@ final class CreateRefundRequest extends Action
             $cancelledAt = BusinessTime::now();
             $days = BusinessTime::calendarDaysBetween(
                 $cancelledAt->toDateString(),
-                $booking->departure->date->toDateString(),
+                $booking->stay()->checkIn()->toDateString(),
             );
             $charter = $booking->type === BookingType::Charter;
-            $bandList = $charter ? $rules->charterBands : $rules->bands;
+            $bandList = app(CancellationBands::class)->forBooking($booking);
             $band = CancellationPenalty::bandFor($days, $bandList);
             $penalty = CancellationPenalty::penalty($booking->total, $band['penalty_pct']);
             $refundDue = CancellationPenalty::refundDue($paid, $penalty);

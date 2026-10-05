@@ -69,7 +69,7 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'main_channel' => MainChannel::B2BTravelAdvisor,
     ]);
 
@@ -110,7 +110,7 @@ test('the payable date is thirty days after the return date', function (): void 
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'main_channel' => MainChannel::B2BTravelAdvisor,
     ]);
 
@@ -162,7 +162,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
         'agency_id' => $agency->id,
         'commission_pct' => 15,
         'commission_approved' => false,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'main_channel' => MainChannel::B2BTravelAdvisor,
     ]);
     CommissionPayout::query()->create([
@@ -178,7 +178,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'total' => 10000,
         'main_channel' => MainChannel::B2BTravelAdvisor,
     ]);
@@ -195,7 +195,7 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'total' => 20000,
         'main_channel' => MainChannel::B2BTravelAdvisor,
     ]);

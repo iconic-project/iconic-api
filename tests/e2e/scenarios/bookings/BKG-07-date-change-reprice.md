@@ -1,6 +1,8 @@
 # BKG-07 · Date change reprices
+
+Retired in sprint 19. Hotel stays are HBKG-01 through HBKG-10. Do not walk these yacht steps.
 - **Tags:** sprint-4, bookings
-- **Priority:** P2
+- **Priority:** retired
 - **Users:** Carolina
 - **Start:** reset
 

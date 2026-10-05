@@ -198,7 +198,18 @@ test('panel-read OpenAPI schemas have properties', function (): void {
         'sold_on',
         'utm_first',
         'utm_last',
+        'stay',
+        'room',
+        'room_type',
+        'rate_plan',
+        'night_lines',
+        'tax_lines',
+        'times',
     ]);
+    $stay = openApiProperties($booking['properties']['stay'] ?? []);
+    expect($stay)->toHaveKeys(['check_in', 'check_out', 'nights']);
+    $times = openApiProperties($booking['properties']['times'] ?? []);
+    expect($times)->toHaveKeys(['expected_arrival_time', 'checked_in_at', 'checked_out_at', 'no_show_at']);
     $guestsSummary = openApiProperties($booking['properties']['guests_summary'] ?? []);
     expect($guestsSummary)->toHaveKeys(['complete', 'total']);
 

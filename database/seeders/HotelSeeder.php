@@ -99,7 +99,7 @@ final class HotelSeeder extends Seeder
             );
         }
 
-        // TODO(Sprint 19) seed bookings and room-night claims from hotel-seed-data.json.
+        app(SeedHotelBookings::class)->run($property);
     }
 
     /**

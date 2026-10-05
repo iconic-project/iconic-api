@@ -22,7 +22,6 @@ use App\Models\Agency;
 use App\Models\AutomationSetting;
 use App\Models\BehaviouralEvent;
 use App\Models\Booking;
-use App\Models\RoomNightClaim;
 use App\Models\ChangeHistory;
 use App\Models\Contact;
 use App\Models\CrmTask;
@@ -34,6 +33,7 @@ use App\Models\Guest;
 use App\Models\Journey;
 use App\Models\JourneyEnrolment;
 use App\Models\Payment;
+use App\Models\RoomNightClaim;
 use App\Models\User;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -86,9 +86,9 @@ test('each journey trigger enrols once', function (): void {
 
     activate('reengagement');
     $past = journeyContact();
-    $completed = journeyBooking($past, $owner, BookingStatus::Completed, '2027-11-21', 1000);
-    BookingStatusChanged::dispatch($completed, BookingStatus::FullyPaid, BookingStatus::Completed);
-    BookingStatusChanged::dispatch($completed, BookingStatus::FullyPaid, BookingStatus::Completed);
+    $completed = journeyBooking($past, $owner, BookingStatus::CheckedOut, '2027-11-21', 1000);
+    BookingStatusChanged::dispatch($completed, BookingStatus::FullyPaid, BookingStatus::CheckedOut);
+    BookingStatusChanged::dispatch($completed, BookingStatus::FullyPaid, BookingStatus::CheckedOut);
     expect(enrolmentCount('reengagement', $past))->toBe(1)
         ->and(enrolment('reengagement', $past)->status)->toBe(JourneyEnrolmentStatus::Active);
 

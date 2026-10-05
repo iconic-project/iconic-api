@@ -9,7 +9,6 @@ use App\Models\ChangeHistory;
 use App\Models\Departure;
 use App\Models\WaitlistEntry;
 use App\Services\Inventory\ClaimService;
-use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -104,7 +103,7 @@ test('positions compact after a removal and cabin_available flips when a block i
     $owner = $departure->property->cabins->firstWhere('code', 'OWNER');
     $holder = ClaimHolder::query()->create(['reference' => 'BLK-W', 'name' => 'Block']);
     DB::transaction(function () use ($departure, $owner, $holder): void {
-        app(LegacyDepartureClaims::class)->claim($departure, collect([$owner]), $holder, ClaimKind::Block);
+        app(ClaimService::class)->claim($departure->stayDates(), collect([$owner]), $holder, ClaimKind::Block);
     });
 
     $this->actingAs($actor)
@@ -120,7 +119,7 @@ test('positions compact after a removal and cabin_available flips when a block i
         ->assertJsonFragment(['cabin_category' => 'OWNER', 'cabin_available' => false]);
 
     DB::transaction(function () use ($holder): void {
-        app(LegacyDepartureClaims::class)->release($holder, ReleaseReason::Released);
+        app(ClaimService::class)->release($holder, ReleaseReason::Released);
     });
 
     $this->actingAs($actor)

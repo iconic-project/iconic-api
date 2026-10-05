@@ -53,6 +53,24 @@ final class BookingPolicy extends Policy
             : Response::deny('Blocked: own-records rule.');
     }
 
+    public function frontDesk(User $actor, Booking $booking): Response
+    {
+        if (! $actor->hasPermission(Permission::BookingsFrontDesk)) {
+            return Response::deny();
+        }
+
+        return $this->ownsOrMayActOnAny($actor, $booking)
+            ? Response::allow()
+            : Response::deny('Blocked: own-records rule.');
+    }
+
+    public function undoCheckIn(User $actor, Booking $booking): bool
+    {
+        $actor->loadMissing('role');
+
+        return $actor->role->isAdmin();
+    }
+
     public function move(User $actor, Booking $booking): Response
     {
         if (! $actor->hasPermission(Permission::BookingsMove)) {

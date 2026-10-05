@@ -14,7 +14,7 @@ class BusinessRulesCurrentResource extends ConfigCurrentResource
      * @return array{
      *     version: int,
      *     document: array{
-     *         commission: array{cap_pct: int, default_pct: int, payable_days_after_cruise: int},
+     *         commission: array{cap_pct: int, default_pct: int, payable_days_after_check_out: int},
      *         modification_fee_usd: int,
      *         payments: array{extras_due_hours: int, wire_window_hours: int, balance_reminder_days: list<int>},
      *         discounts: array{online_deposit_discount_pct: int, max_total_discount_pct: int|null},

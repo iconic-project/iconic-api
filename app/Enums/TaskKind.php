@@ -20,6 +20,7 @@ enum TaskKind: string
     case WaitlistFollowUp = 'WAITLIST_FOLLOW_UP';
     case CharterDeposit = 'CHARTER_DEPOSIT';
     case JourneyHandover = 'JOURNEY_HANDOVER';
+    case FrontDesk = 'FRONT_DESK';
 
     public function label(): string
     {
@@ -38,6 +39,7 @@ enum TaskKind: string
             self::WaitlistFollowUp => 'Waitlist follow-up',
             self::CharterDeposit => 'Charter deposit',
             self::JourneyHandover => 'Journey handover',
+            self::FrontDesk => 'Front desk',
         };
     }
 
@@ -58,6 +60,7 @@ enum TaskKind: string
             self::WaitlistFollowUp => 'RMS · waitlist offer + 2 business days',
             self::CharterDeposit => 'RMS · charter deposit due',
             self::JourneyHandover => 'CRM · journey handover',
+            self::FrontDesk => 'RMS · night audit',
         };
     }
 }

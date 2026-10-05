@@ -2,12 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Enums\BookingStatus;
+use App\Models\Booking;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomType;
 use Carbon\CarbonImmutable;
+use Database\Seeders\ConfigSeeder;
 use Database\Seeders\DatabaseSeeder;
+use Database\Seeders\DemoUsersSeeder;
 use Database\Seeders\HotelSeeder;
+use Database\Seeders\RolesSeeder;
 
 test('the hotel fixture keeps occupancy, rooms, seasons and quote arithmetic consistent', function (): void {
     /** @var list<array<string, mixed>> $types */
@@ -137,7 +142,10 @@ test('the hotel fixture keeps occupancy, rooms, seasons and quote arithmetic con
     }
 });
 
-test('the hotel seeder is idempotent', function (): void {
+test('the hotel seeder is idempotent and bookings have no departure', function (): void {
+    $this->seed(RolesSeeder::class);
+    $this->seed(ConfigSeeder::class);
+    $this->seed(DemoUsersSeeder::class);
     $this->seed(HotelSeeder::class);
     $this->seed(HotelSeeder::class);
 
@@ -147,6 +155,23 @@ test('the hotel seeder is idempotent', function (): void {
     expect(RoomType::query()->where('property_id', $property->id)->count())->toBe(4);
     expect(Room::query()->where('property_id', $property->id)->count())->toBe(24);
     expect($property->name)->toBe('Hotel Demo');
+    expect(Booking::query()->count())->toBe(25);
+    expect(Booking::query()->whereNotNull('departure_id')->count())->toBe(0);
+
+    $group = Booking::query()->where('reference', 'HTL-001')->firstOrFail();
+    expect($group->status)->toBe(BookingStatus::Confirmed);
+    expect($group->group?->reference)->toBe('GRP-001');
+    expect(Booking::query()->where('group_id', $group->group_id)->count())->toBe(3);
+
+    $paid = Booking::query()->where('reference', 'HTL-003')->firstOrFail();
+    expect($paid->status)->toBe(BookingStatus::FullyPaid);
+    expect($paid->payments()->count())->toBeGreaterThan(0);
+
+    expect(Booking::query()->where('request_reference', 'HTL-008')->firstOrFail()->status)->toBe(BookingStatus::Requested);
+    expect(Booking::query()->where('reference', 'HTL-011')->firstOrFail()->status)->toBe(BookingStatus::CheckedOut);
+    expect(Booking::query()->where('reference', 'HTL-016')->firstOrFail()->status)->toBe(BookingStatus::Cancelled);
+    expect(Booking::query()->where('reference', 'HTL-019')->firstOrFail()->status)->toBe(BookingStatus::InHouse);
+    expect(Booking::query()->where('reference', 'HTL-026')->exists())->toBeFalse();
 });
 
 test('hotel seed mode writes the hotel and skips the yacht inventory', function (): void {
@@ -157,4 +182,6 @@ test('hotel seed mode writes the hotel and skips the yacht inventory', function 
     expect(Property::query()->pluck('code')->all())->toBe(['HTL']);
     expect(RoomType::query()->count())->toBe(4);
     expect(Room::query()->count())->toBe(24);
+    expect(Booking::query()->whereNotNull('departure_id')->count())->toBe(0);
+    expect(Booking::query()->where('reference', 'HTL-001')->exists())->toBeTrue();
 });

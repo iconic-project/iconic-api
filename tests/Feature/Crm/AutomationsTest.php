@@ -374,7 +374,7 @@ function automationReviewBooking(string $date, string $reference, User $owner, s
         'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
-        'status' => BookingStatus::Completed,
+        'status' => BookingStatus::CheckedOut,
         'reference' => $reference,
     ]);
     $lead = Guest::factory()->create([

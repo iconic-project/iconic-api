@@ -229,6 +229,9 @@ final class AutomationCatalogue
             AlertKind::ManifestDataOverdue,
             AlertKind::ReportFailed,
             AlertKind::CharterDepositDue,
+            AlertKind::ArrivalNotCheckedIn,
+            AlertKind::InHousePastCheckOut,
+            AlertKind::DepartureNotCheckedOut,
         ];
 
         $rows = [];
@@ -276,6 +279,9 @@ final class AutomationCatalogue
             AlertKind::NpsLow => 'NPS {score} on {reference}',
             AlertKind::ReportFailed => 'Report failed',
             AlertKind::CharterDepositDue => 'Charter deposit due · {reference}',
+            AlertKind::ArrivalNotCheckedIn => 'Arrival not checked in {reference}',
+            AlertKind::InHousePastCheckOut => 'In house past check-out {reference}',
+            AlertKind::DepartureNotCheckedOut => 'Departure not checked out {reference}',
         };
     }
 

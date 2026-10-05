@@ -13,6 +13,7 @@ use App\Enums\ConfigKind;
 use App\Enums\ReferenceType;
 use App\Events\BookingCreated;
 use App\Exceptions\CabinUnavailableException;
+use App\Exceptions\RoomUnavailableException;
 use App\Models\Booking;
 use App\Models\Contact;
 use App\Models\Departure;
@@ -20,7 +21,7 @@ use App\Models\Group;
 use App\Models\Room;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\LegacyDepartureClaims;
+use App\Services\Inventory\ClaimService;
 use App\Services\Pricing\QuotedParty;
 use App\Services\Pricing\ReservationQuote;
 use App\Services\Pricing\ReservationQuoter;
@@ -31,6 +32,7 @@ use App\Support\Bookings\SoldOn;
 use App\Support\Commissions\FreezeCommission;
 use App\Support\History\History;
 use App\Support\Inventory\AppliedRestrictionOverride;
+use App\Support\Inventory\CabinConflict;
 use App\Support\Inventory\DepartureLocks;
 use App\Support\Inventory\StaffStayRestrictions;
 use App\Support\Money;
@@ -43,7 +45,7 @@ final class CreateReservation extends Action
         private ReservationQuoter $quoter,
         private ResolveContact $contacts,
         private ReferenceService $references,
-        private LegacyDepartureClaims $claims,
+        private ClaimService $claims,
         private CurrentConfig $config,
         private FreezeCommission $commissions,
         private StaffStayRestrictions $stayRestrictions,
@@ -113,10 +115,13 @@ final class CreateReservation extends Action
                     ? $departure->property->cabins->sortBy('sort')->values()
                     : collect([$this->requireCabin($party)]);
 
+                $stay = $departure->stayDates();
+
                 try {
-                    $this->claims->claim($departure, $cabins, $booking, ClaimKind::Booking);
-                } catch (CabinUnavailableException $exception) {
-                    throw $this->conflict($exception, $departure);
+                    DepartureLocks::lock((int) $departure->id);
+                    $this->claims->claim($stay, $cabins, $booking, ClaimKind::Booking);
+                } catch (RoomUnavailableException) {
+                    throw $this->conflict(CabinConflict::exception($stay, $cabins, $booking), $departure);
                 }
 
                 $bookings->push($booking);

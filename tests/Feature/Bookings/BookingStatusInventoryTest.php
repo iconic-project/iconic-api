@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Services\Inventory\ClaimService;
 use App\Enums\BookingStatus;
 use App\Enums\ClaimKind;
 use App\Models\Booking;
 use App\Models\RoomNightClaim;
-use App\Services\Inventory\LegacyDepartureClaims;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -25,8 +25,8 @@ test('holdsInventory is false only for released and cancelled statuses', functio
         BookingStatus::PendingPayment,
         BookingStatus::Confirmed,
         BookingStatus::FullyPaid,
-        BookingStatus::OnBoard,
-        BookingStatus::Completed,
+        BookingStatus::InHouse,
+        BookingStatus::CheckedOut,
         BookingStatus::Overdue,
         BookingStatus::OnHoldAgency,
         BookingStatus::Waitlisted,
@@ -59,7 +59,7 @@ test('a cancelled factory booking has no active claim and a confirmed one can', 
     ]);
 
     DB::transaction(function () use ($departure, $cabin, $confirmed): void {
-        app(LegacyDepartureClaims::class)->claim($departure, collect([$cabin]), $confirmed, ClaimKind::Booking);
+        app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $confirmed, ClaimKind::Booking);
     });
 
     expect(RoomNightClaim::query()->where('holder_id', $confirmed->id)->whereNull('released_at')->pluck('room_id')->unique())->toHaveCount(1);

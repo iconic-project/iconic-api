@@ -53,13 +53,13 @@ final class DocumentPlan
         $voucherDays = $rules->documents->voucherDaysBefore;
         $reminderSlots = $rules->payments->balanceReminderDays;
         $today = BusinessTime::now()->toDateString();
-        $departure = $booking->departure->date->toDateString();
+        $departure = $booking->stay()->checkIn()->toDateString();
         $due = $booking->balanceDueDate()->toDateString();
         $confirmed = $booking->status->isConfirmedOrLater();
         $fullyPaid = in_array($booking->status, [
             BookingStatus::FullyPaid,
-            BookingStatus::OnBoard,
-            BookingStatus::Completed,
+            BookingStatus::InHouse,
+            BookingStatus::CheckedOut,
         ], true);
         $cruiseOpen = $this->cruiseOutstanding($booking) > 0;
         $rows = [];

@@ -78,7 +78,7 @@ final class PortalPreview
             $bookings[] = [
                 'reference' => $booking->reference,
                 'lead_guest' => self::leadGuestName($booking),
-                'departure_date' => $booking->departure->date->toDateString(),
+                'departure_date' => $booking->stay()->checkIn()->toDateString(),
                 'status' => $booking->status->value,
                 'net_due' => self::netDue($booking),
             ];
