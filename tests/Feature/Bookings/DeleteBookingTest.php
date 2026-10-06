@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Models\Booking;
 use App\Models\ChangeHistory;
-use App\Services\Inventory\Availability;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -48,8 +47,7 @@ test('a manager cannot delete and an admin can with a reason', function (): void
         ->assertOk()
         ->assertJsonCount(0, 'data');
 
-    $snapshot = app(Availability::class)->forDepartures(collect([$departure]))[$departure->id];
-    expect(collect($snapshot->cabins)->firstWhere('cabin.code', 'S1')['state'])->toBe('FREE');
+    expect(Booking::withTrashed()->find($id)?->claims()->whereNull('released_at')->count())->toBe(0);
 
     $history = ChangeHistory::query()->where('event', 'booking.deleted')->firstOrFail();
     expect($history->reason)->toBe('Duplicate entry');

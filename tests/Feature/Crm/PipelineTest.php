@@ -162,12 +162,11 @@ test('one open deal is bound and none or several open a new bound deal', functio
 
 test('the stage projection follows the booking and a mixed group uses the furthest live status', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-12-05');
-    $cabins = $departure->property->cabins;
+    $cabins = $departure->property->rooms;
     $contact = Contact::factory()->create();
 
     $make = function (BookingStatus $status, string $cabin) use ($departure, $cabins, $contact): Deal {
         $booking = Booking::factory()->create([
-            'departure_id' => $departure->id,
             'room_id' => $cabins->firstWhere('code', $cabin)?->id,
             'contact_id' => $contact->id,
             'status' => $status,
@@ -204,8 +203,7 @@ test('the stage projection follows the booking and a mixed group uses the furthe
     $cancelled = $make(BookingStatus::Cancelled, 'OWNER');
     $releasedDeparture = ReservationFixtures::anamaraDeparture('2027-12-12');
     $releasedBooking = Booking::factory()->create([
-        'departure_id' => $releasedDeparture->id,
-        'room_id' => $releasedDeparture->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $releasedDeparture->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'status' => BookingStatus::Released,
         'reference' => 'ANK-REL-RELEASED',
@@ -220,16 +218,14 @@ test('the stage projection follows the booking and a mixed group uses the furthe
         'booking_id' => $releasedBooking->id,
     ]);
 
-    $group = Group::factory()->create(['departure_id' => $departure->id, 'coordinator_contact_id' => $contact->id]);
+    $group = Group::factory()->create(['coordinator_contact_id' => $contact->id]);
     Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabins->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'group_id' => $group->id,
         'status' => BookingStatus::Cancelled,
     ]);
     Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabins->firstWhere('code', 'S2')?->id,
         'contact_id' => $contact->id,
         'group_id' => $group->id,
@@ -305,8 +301,7 @@ test('moves follow ownership and a bound deal names the booking', function (): v
 
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'reference' => 'ANK-2027-0099',
         'status' => BookingStatus::PendingPayment,
@@ -358,8 +353,7 @@ test('an unassigned deal must be taken before it can move', function (): void {
 test('pipeline cash matches payments and revenue and the query count stays flat', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-12-19');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
     ]);

@@ -262,7 +262,6 @@ test('a move that changes the total changes commission amount only', function ()
 
     $preview = $this->actingAs(adminUser())
         ->postJson('/api/rms/bookings/'.$booking->id.'/move/preview', [
-            'departure_id' => $festive->id,
             'cabin_code' => 'S2',
         ])
         ->assertOk()
@@ -270,7 +269,6 @@ test('a move that changes the total changes commission amount only', function ()
 
     $this->actingAs(adminUser())
         ->postJson('/api/rms/bookings/'.$booking->id.'/move', [
-            'departure_id' => $festive->id,
             'cabin_code' => 'S2',
             'confirm_total' => $preview['new_total'],
         ])

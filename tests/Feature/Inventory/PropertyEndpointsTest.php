@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\PropertyStatus;
 use App\Models\ChangeHistory;
-use App\Models\Departure;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\User;
@@ -153,18 +152,17 @@ test('a no-op patch writes no history', function (): void {
     expect(ChangeHistory::query()->where('event', 'property.updated')->count())->toBe(0);
 });
 
-test('seeded inventory keeps every cabin and departure on a property', function (): void {
+test('seeded inventory keeps every room on a property', function (): void {
     $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
-    Departure::factory()->create(['property_id' => $property->id]);
 
     expect(Schema::hasTable('properties'))->toBeTrue();
     expect(Schema::hasTable('rooms'))->toBeTrue();
+    expect(Schema::hasTable('departures'))->toBeFalse();
+    expect(Schema::hasTable('archive_departures'))->toBeTrue();
     expect(Schema::hasColumn('rooms', 'property_id'))->toBeTrue();
     expect(Schema::hasColumn('rooms', 'room_type_id'))->toBeTrue();
-    expect(Schema::hasColumn('departures', 'property_id'))->toBeTrue();
     expect(Property::query()->count())->toBe(2);
     expect(Room::query()->count())->toBe(18);
     expect(Room::query()->whereDoesntHave('property')->exists())->toBeFalse();
-    expect(Departure::query()->whereDoesntHave('property')->exists())->toBeFalse();
     expect(Room::query()->where('property_id', $property->id)->count())->toBe(9);
 });

@@ -205,8 +205,7 @@ test('a disabled balance reminder is not sent and the overdue flag alert and tas
 
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-1415',
         'total' => 26600,
@@ -256,8 +255,7 @@ test('switching off the pre-trip email still issues the document', function (): 
 
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-1416',
         'total' => 26600,
@@ -329,8 +327,7 @@ test('a forced-off data chaser and a forced-off critical alert still send', func
 
     $departure = ReservationFixtures::anamaraDeparture('2028-09-10');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S4')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-1417',
     ]);
@@ -370,8 +367,7 @@ function automationReviewBooking(string $date, string $reference, User $owner, s
     $departure = ReservationFixtures::anamaraDeparture($date);
     $contact = Contact::factory()->create(['email' => $email]);
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::CheckedOut,

@@ -41,8 +41,7 @@ function planCabin(array $overrides = []): Booking
     unset($overrides['departure']);
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S6')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S6')?->id,
         'status' => BookingStatus::PendingPayment,
         'reference' => 'ANK-2026-6401',
         'total' => 26600,

@@ -3,10 +3,8 @@
 declare(strict_types=1);
 
 use App\Enums\BookingStatus;
-use App\Enums\PngCategory;
 use App\Models\Booking;
 use App\Models\Guest;
-use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
@@ -26,8 +24,7 @@ function guestCabin(?int $ownerId = null): Booking
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $ownerId ?? managerUser()->id,
         'status' => BookingStatus::PendingPayment,
         'adults' => 2,
@@ -45,7 +42,6 @@ test('an empty slot can be added and listed with a pending png category', functi
         ->assertJsonPath('is_lead', true)
         ->assertJsonPath('position', 1)
         ->assertJsonPath('complete', false)
-        ->assertJsonPath('png_category', PngCategory::Pending->value)
         ->assertJsonPath('png_fee', null)
         ->assertJsonPath('display_name', 'Guest 1');
 
@@ -54,9 +50,9 @@ test('an empty slot can be added and listed with a pending png category', functi
         ->assertOk()
         ->assertJsonPath('total', 1)
         ->assertJsonPath('complete_count', 0)
-        ->assertJsonPath('png_pending_count', 1)
+        ->assertJsonPath('png_pending_count', 0)
         ->assertJsonPath('png_known_total', 0)
-        ->assertJsonPath('max', app(CurrentConfig::class)->engineSettings()->guests->maxPerCabin)
+        ->assertJsonPath('max', $booking->roomType->max_occupancy)
         ->assertJsonPath('can_add', true)
         ->assertJsonPath('issues', []);
 });
@@ -205,8 +201,7 @@ test('png uses the galapagos calendar date at 23:30 galt not the utc next day', 
     $actor = managerUser();
     $departure = ReservationFixtures::anamaraDeparture('2026-09-21');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 
@@ -219,7 +214,6 @@ test('png uses the galapagos calendar date at 23:30 galt not the utc next day', 
         ])
         ->assertCreated()
         ->assertJsonPath('age_at_departure', 12)
-        ->assertJsonPath('png_category', PngCategory::Foreign12AndUnder->value)
         ->assertJsonPath('is_minor_now', true);
 
     $this->actingAs($actor)

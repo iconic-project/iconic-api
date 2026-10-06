@@ -11,14 +11,12 @@ use App\Enums\Permission;
 use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\BookingExtra;
-use App\Models\Departure;
 use App\Models\Guest;
 use App\Models\GuestResponse;
 use App\Models\Payment;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
 use App\Support\BusinessTime;
 use App\Support\Commissions\CommissionKpis;
@@ -46,9 +44,14 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     $charterDeparture = ReservationFixtures::anamaraDeparture('2027-11-14');
     $saleAt = '2027-10-01 12:00:00';
 
+    $cabinStay = $cabinDeparture->stayDates();
+    $charterStay = $charterDeparture->stayDates();
     $cabin = Booking::factory()->create([
-        'departure_id' => $cabinDeparture->id,
-        'room_id' => $cabinDeparture->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $cabinDeparture->property->rooms->firstWhere('code', 'S1')?->id,
+        'property_id' => $cabinDeparture->property_id,
+        'check_in' => $cabinStay->checkIn()->toDateString(),
+        'check_out' => $cabinStay->checkOut()->toDateString(),
+        'nights' => 7,
         'owner_id' => $admin->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
@@ -58,8 +61,11 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
         'channel_of_origin' => ChannelOfOrigin::HotelBookingEngine,
     ]);
     $blocked = Booking::factory()->create([
-        'departure_id' => $cabinDeparture->id,
-        'room_id' => $cabinDeparture->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $cabinDeparture->property->rooms->firstWhere('code', 'S2')?->id,
+        'property_id' => $cabinDeparture->property_id,
+        'check_in' => $cabinStay->checkIn()->toDateString(),
+        'check_out' => $cabinStay->checkOut()->toDateString(),
+        'nights' => 7,
         'owner_id' => $admin->id,
         'status' => BookingStatus::Confirmed,
         'total' => 10000,
@@ -69,8 +75,12 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
         'channel_of_origin' => ChannelOfOrigin::HotelBookingEngine,
     ]);
     $charter = Booking::factory()->create([
-        'departure_id' => $charterDeparture->id,
         'room_id' => null,
+        'room_type_id' => $charterDeparture->property->roomTypes()->where('code', 'STE')->value('id'),
+        'property_id' => $charterDeparture->property_id,
+        'check_in' => $charterStay->checkIn()->toDateString(),
+        'check_out' => $charterStay->checkOut()->toDateString(),
+        'nights' => 7,
         'owner_id' => $admin->id,
         'type' => BookingType::Charter,
         'status' => BookingStatus::Confirmed,
@@ -85,16 +95,16 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
     DB::transaction(function () use ($cabinDeparture, $cabin, $blocked, $charterDeparture, $charter): void {
         $claims = app(ClaimService::class);
         $claims->claim($cabinDeparture->stayDates(),
-            collect([$cabinDeparture->property->cabins->firstWhere('code', 'S1')]),
+            collect([$cabinDeparture->property->rooms->firstWhere('code', 'S1')]),
             $cabin,
             ClaimKind::Booking,
         );
         $claims->claim($cabinDeparture->stayDates(),
-            collect([$cabinDeparture->property->cabins->firstWhere('code', 'S2')]),
+            collect([$cabinDeparture->property->rooms->firstWhere('code', 'S2')]),
             $blocked,
             ClaimKind::Booking,
         );
-        $claims->claim($charterDeparture->stayDates(), $charterDeparture->property->cabins, $charter, ClaimKind::Booking);
+        $claims->claim($charterDeparture->stayDates(), $charterDeparture->property->rooms, $charter, ClaimKind::Booking);
     });
 
     BookingExtra::factory()->create([
@@ -159,42 +169,20 @@ test('commercial metrics match the calendar, payments, agencies and guest experi
             ->and($metric['definition']['sentence'])->not->toBe('');
     }
 
-    $departures = Departure::query()
-        ->with(['property.cabins', 'itinerary'])
-        ->whereDate('date', '>=', $from)
-        ->whereDate('date', '<=', $to)
-        ->get();
-    $snapshots = app(Availability::class)->forDepartures($departures);
-    $calendarSold = 0;
-    $calendarSellable = 0;
+    $rooms = $cabinDeparture->property->rooms->count();
+    $sold = 2 + $rooms;
+    $sellable = $rooms * 2;
 
-    foreach ($departures as $departure) {
-        $counts = $snapshots[$departure->id]->counts;
-        $row = collect($metrics['occupancy']['departures'])->firstWhere('id', $departure->id);
-        $sold = $counts['sold'];
-        $sellable = $counts['sold'] + $counts['held'] + $counts['free'];
-
-        if ($departure->id === $charterDeparture->id) {
-            $sold = $departure->property->cabins->count();
-        }
-
-        expect($row['sold_berths'])->toBe($sold)
-            ->and($row['sellable_berths'])->toBe($sellable);
-
-        $calendarSold += $sold;
-        $calendarSellable += $sellable;
-    }
-
-    expect($metrics['occupancy']['sold_berths'])->toBe($calendarSold)
-        ->and($metrics['occupancy']['sellable_berths'])->toBe($calendarSellable)
+    expect($metrics['occupancy']['sold_berths'])->toBe($sold)
+        ->and($metrics['occupancy']['sellable_berths'])->toBe($sellable)
         ->and($metrics['occupancy']['occupancy'])->toBe('0.6111');
 
-    $cruise = 26600 + 10000 + 199500;
-    expect($metrics['revpab']['cruise_revenue'])->toBe($cruise)
-        ->and($metrics['revpab']['cruise_revenue'])->not->toBe($cabin->chargesTotal())
-        ->and($metrics['revpab']['revpab'])->toBe(Rounding::halfUp($cruise / $calendarSellable))
-        ->and($metrics['adr']['adr'])->toBe(Rounding::halfUp($cruise / $calendarSold))
-        ->and($metrics['adr']['berths_sold'])->toBe($calendarSold);
+    $stayRevenue = 26600 + 10000 + 199500;
+    expect($metrics['revpab']['stay_revenue'])->toBe($stayRevenue)
+        ->and($metrics['revpab']['stay_revenue'])->not->toBe($cabin->chargesTotal())
+        ->and($metrics['revpab']['revpab'])->toBe(Rounding::halfUp($stayRevenue / $sellable))
+        ->and($metrics['adr']['adr'])->toBe(Rounding::halfUp($stayRevenue / $sold))
+        ->and($metrics['adr']['berths_sold'])->toBe($sold);
 
     expect($metrics['lead_time']['bookings'])->toBe(3)
         ->and($metrics['lead_time']['average_days'])->toBe('39.3')
@@ -266,14 +254,13 @@ test('the metrics query count stays flat as bookings grow', function (): void {
     $before = count(DB::getQueryLog());
 
     $extra = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S3')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 28000,
     ]);
     DB::transaction(function () use ($departure, $extra): void {
         app(ClaimService::class)->claim($departure->stayDates(),
-            collect([$departure->property->cabins->firstWhere('code', 'S3')]),
+            collect([$departure->property->rooms->firstWhere('code', 'S3')]),
             $extra,
             ClaimKind::Booking,
         );

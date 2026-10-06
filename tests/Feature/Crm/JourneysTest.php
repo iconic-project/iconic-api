@@ -462,10 +462,9 @@ function grantMarketing(Contact $contact, bool $granted): void
 function journeyBooking(Contact $contact, User $owner, BookingStatus $status, string $date = '2027-11-07', int $total = 26600): Booking
 {
     $departure = ReservationFixtures::anamaraDeparture($date);
-    $cabin = $departure->property->cabins->firstOrFail();
+    $cabin = $departure->property->rooms->firstOrFail();
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabin->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,

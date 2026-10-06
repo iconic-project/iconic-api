@@ -29,7 +29,6 @@ use App\Models\Booking;
 use App\Models\ChangeHistory;
 use App\Models\CrmTask;
 use App\Models\Delivery;
-use App\Models\Departure;
 use App\Models\Guest;
 use App\Models\GuestResponse;
 use App\Models\Payment;
@@ -48,6 +47,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\Bookings\ReservationFixtures;
+use Tests\Support\Bookings\StayAnchor;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
@@ -394,7 +394,6 @@ test('the sweep query count stays flat when extra bookings match no predicate', 
 
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     Booking::factory()->count(4)->create([
-        'departure_id' => $departure->id,
         'status' => BookingStatus::PendingPayment,
         'balance_due_date_override' => '2027-06-01',
     ]);
@@ -608,17 +607,16 @@ test('kinds lists the registry and a guest response references the response row'
 
 function alertBooking(array $overrides = []): Booking
 {
-    $departure = $overrides['departure'] ?? ReservationFixtures::anamaraDeparture('2027-11-07');
+    $anchor = $overrides['departure'] ?? ReservationFixtures::anamaraDeparture();
     unset($overrides['departure']);
 
-    if (! $departure instanceof Departure) {
-        throw new RuntimeException('departure override must be a Departure.');
+    if (! $anchor instanceof StayAnchor) {
+        throw new RuntimeException('departure override must be a stay anchor.');
     }
 
-    $cabinId = $departure->property->cabins->first()?->id;
+    $cabinId = $anchor->property->rooms->first()?->id;
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabinId,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,

@@ -73,7 +73,6 @@ test('an access export lists the relationship and no passenger data', function (
     $contact = Contact::factory()->create(['email' => 'export@iconic.test']);
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
         'contact_id' => $contact->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-EXP-1',
@@ -166,7 +165,6 @@ test('erasure waits for the cruise and an open refund, then keeps the ledger', f
     $type = $contact->type;
     $future = ReservationFixtures::anamaraDeparture('2027-11-07');
     $futureBooking = Booking::factory()->create([
-        'departure_id' => $future->id,
         'contact_id' => $contact->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-FUT-1',
@@ -185,13 +183,13 @@ test('erasure waits for the cruise and an open refund, then keeps the ledger', f
     ])->assertStatus(409);
 
     $futureBooking->forceFill(['contact_id' => Contact::factory()->create()->id])->save();
-    $pastDeparture = ReservationFixtures::anamaraDeparture('2027-11-14');
-    $pastDeparture->forceFill(['date' => '2020-01-05'])->save();
     $past = Booking::factory()->create([
-        'departure_id' => $pastDeparture->id,
         'contact_id' => $contact->id,
         'status' => BookingStatus::CheckedOut,
         'reference' => 'ANK-PAST-1',
+        'check_in' => '2020-01-05',
+        'check_out' => '2020-01-12',
+        'nights' => 7,
     ]);
     $refund = RefundRequest::factory()->create([
         'booking_id' => $past->id,

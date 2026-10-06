@@ -34,8 +34,7 @@ function endpointBooking(?int $ownerId = null): Booking
     $departure = ReservationFixtures::anamaraDeparture('2028-10-01');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S5')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S5')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-1001',
         'total' => 26600,

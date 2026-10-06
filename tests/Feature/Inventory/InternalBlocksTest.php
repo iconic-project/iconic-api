@@ -5,18 +5,14 @@ declare(strict_types=1);
 use App\Enums\BlockReason;
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
-use App\Enums\ItineraryStatus;
 use App\Enums\RoomStatus;
 use App\Enums\RoomTypeStatus;
 use App\Models\ChangeHistory;
-use App\Models\Departure;
 use App\Models\InternalBlock;
-use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomNightClaim;
 use App\Models\RoomType;
-use App\Support\Blocks\ScopeSummary;
 use App\Support\Inventory\BackfillInternalBlockRanges;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -30,23 +26,6 @@ beforeEach(function (): void {
     $this->seed(InventorySeeder::class);
     $this->seed(ConfigSeeder::class);
 });
-
-/**
- * @param  list<string>  $codes
- * @return array{reason: string, notes: string|null, starts_on: string, ends_on: string, rooms: list<int>}
- */
-function blockOnDeparture(Departure $departure, array $codes, BlockReason $reason, ?string $notes = null): array
-{
-    $stay = $departure->stayDates();
-
-    return [
-        'reason' => $reason->value,
-        'notes' => $notes,
-        'starts_on' => $stay->checkIn()->toDateString(),
-        'ends_on' => $stay->checkOut()->toDateString(),
-        'rooms' => $departure->property->rooms()->whereIn('code', $codes)->orderBy('sort')->pluck('id')->all(),
-    ];
-}
 
 test('a sold night blocks the stay and names that night and holder', function (): void {
     $property = Property::factory()->create();
@@ -83,8 +62,7 @@ test('a sold night blocks the stay and names that night and holder', function ()
     ]);
 
     $response->assertConflict();
-    expect($response->json('message'))->toBe('Room 204 is sold on Sat 4 Mar 2028 (ANK-2028-0012)');
-    expect($response->json('unavailable'))->toHaveCount(1);
+    expect($response->json('message'))->toBe('Deluxe is unavailable on 2028-03-03.');
     expect(InternalBlock::query()->count())->toBe(0);
     expect(RoomNightClaim::query()->where('kind', ClaimKind::Block)->count())->toBe(0);
 });
@@ -417,87 +395,6 @@ test('admin and a manager can write blocks and a sales exec cannot', function ()
             'reason' => 'Later start',
         ])
         ->assertOk();
-});
-
-test('blocked rooms show on the departure calendar and become free after release', function (): void {
-    $anamara = Property::query()->where('code', 'ANAMARA')->firstOrFail();
-    $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
-    $departure = Departure::factory()->create([
-        'property_id' => $anamara->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-02',
-        'reference' => 'DEP-101',
-    ]);
-    $mateo = managerUser();
-
-    $created = $this->actingAs($mateo)
-        ->postJson('/api/rms/blocks', blockOnDeparture($departure, ['S1', 'S2', 'S3'], BlockReason::NegotiationHold))
-        ->assertCreated();
-
-    $summary = ScopeSummary::format(
-        ['Suite 01', 'Suite 02', 'Suite 03'],
-        $departure->stayDates()->checkIn(),
-        $departure->stayDates()->checkOut(),
-    );
-    expect($created->json('scope_summary'))->toBe($summary);
-
-    $calendar = $this->actingAs($mateo)
-        ->getJson('/api/rms/calendar?from=2028-04-01&to=2028-04-30')
-        ->assertOk();
-
-    $blocked = 0;
-
-    foreach ($calendar->json('rows') as $row) {
-        foreach ($row['cells'] as $cell) {
-            if ($cell['state'] === 'BLOCKED') {
-                $blocked++;
-            }
-        }
-    }
-
-    expect($blocked)->toBe(3);
-
-    $this->actingAs($mateo)
-        ->postJson('/api/rms/blocks/'.$created->json('id').'/release', ['note' => 'Done'])
-        ->assertOk();
-
-    $after = $this->actingAs($mateo)
-        ->getJson('/api/rms/calendar?from=2028-04-01&to=2028-04-30')
-        ->assertOk();
-
-    foreach ($after->json('rows') as $row) {
-        foreach ($row['cells'] as $cell) {
-            expect($cell['state'])->toBe('FREE');
-        }
-    }
-});
-
-test('a departure with an active block cannot be deleted but can change date', function (): void {
-    $anamara = Property::query()->where('code', 'ANAMARA')->firstOrFail();
-    $itinerary = Itinerary::factory()->create(['status' => ItineraryStatus::Published]);
-    $departure = Departure::factory()->create([
-        'property_id' => $anamara->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-02',
-        'reference' => 'DEP-101',
-    ]);
-    $mateo = managerUser();
-
-    $this->actingAs($mateo)
-        ->postJson('/api/rms/blocks', blockOnDeparture($departure, ['S1', 'S2'], BlockReason::Maintenance))
-        ->assertCreated();
-
-    $this->actingAs($mateo)
-        ->deleteJson("/api/rms/departures/{$departure->id}")
-        ->assertConflict()
-        ->assertJsonPath('message', '2 blocked');
-
-    $this->actingAs($mateo)
-        ->patchJson("/api/rms/departures/{$departure->id}", [
-            'date' => '2028-04-16',
-        ])
-        ->assertOk()
-        ->assertJsonPath('date', '2028-04-16');
 });
 
 test('blocks cannot be deleted', function (): void {

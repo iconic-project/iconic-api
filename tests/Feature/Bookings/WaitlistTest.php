@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Enums\ClaimKind;
 use App\Enums\ReleaseReason;
 use App\Models\ChangeHistory;
-use App\Models\Departure;
 use App\Models\WaitlistEntry;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\ConfigSeeder;
@@ -13,6 +12,7 @@ use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\Support\Bookings\ReservationFixtures;
+use Tests\Support\Bookings\StayAnchor;
 use Tests\Support\Inventory\ClaimHolder;
 
 beforeEach(function (): void {
@@ -28,7 +28,7 @@ beforeEach(function (): void {
  * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>
  */
-function waitlistPayload(Departure $departure, array $overrides = [], string $code = 'SUITE'): array
+function waitlistPayload(StayAnchor $departure, array $overrides = [], string $code = 'STD'): array
 {
     $type = $departure->property->roomTypes()->where('code', $code)->firstOrFail();
     $stay = $departure->stayDates();
@@ -52,13 +52,13 @@ test('a waitlist entry is added and refused when the waitlist is off', function 
     $this->actingAs(managerUser())
         ->postJson('/api/rms/waitlist', waitlistPayload($departure))
         ->assertCreated()
-        ->assertJsonPath('stay.room_type.code', 'SUITE')
+        ->assertJsonPath('stay.room_type.code', 'STD')
         ->assertJsonPath('position', 1);
 
     expect(ChangeHistory::query()->where('event', 'waitlist.added')->count())->toBe(1);
 
-    $closed = ReservationFixtures::anamaraDeparture('2027-11-14');
-    $closed->property->roomTypes()->where('code', 'SUITE')->firstOrFail()->update(['waitlist_enabled' => false]);
+    $closed = ReservationFixtures::anamaraDeparture('2026-02-11');
+    $closed->property->roomTypes()->where('code', 'STD')->firstOrFail()->update(['waitlist_enabled' => false]);
 
     $this->actingAs(managerUser())
         ->postJson('/api/rms/waitlist', waitlistPayload($closed))
@@ -107,7 +107,7 @@ test('positions compact after a removal and room_available flips when a block is
         ->assertOk()
         ->assertJsonCount(2, 'data');
 
-    $owner = $departure->property->cabins->firstWhere('code', 'OWNER');
+    $owner = $departure->property->rooms->firstWhere('code', 'OWNER');
     $holder = ClaimHolder::query()->create(['reference' => 'BLK-W', 'name' => 'Block']);
     DB::transaction(function () use ($departure, $owner, $holder): void {
         app(ClaimService::class)->claim($departure->stayDates(), collect([$owner]), $holder, ClaimKind::Block);
@@ -116,13 +116,13 @@ test('positions compact after a removal and room_available flips when a block is
     $this->actingAs($actor)
         ->postJson('/api/rms/waitlist', waitlistPayload($departure, [
             'client' => ['name' => 'Owner wait', 'email' => 'owner-wait@iconic.test'],
-        ], 'OWNER'))
+        ], 'STE'))
         ->assertCreated();
 
     $this->actingAs($actor)
         ->getJson('/api/rms/waitlist')
         ->assertOk()
-        ->assertJsonFragment(['code' => 'OWNER'])
+        ->assertJsonFragment(['code' => 'STE'])
         ->assertJsonFragment(['room_available' => false]);
 
     DB::transaction(function () use ($holder): void {
@@ -132,7 +132,7 @@ test('positions compact after a removal and room_available flips when a block is
     $this->actingAs($actor)
         ->getJson('/api/rms/waitlist')
         ->assertOk()
-        ->assertJsonFragment(['code' => 'OWNER'])
+        ->assertJsonFragment(['code' => 'STE'])
         ->assertJsonFragment(['room_available' => true]);
 });
 

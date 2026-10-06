@@ -41,8 +41,7 @@ test('each definition runs in every format, repeats, and carries no personal dat
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
         'reference' => 'ANK-RPT-0001',
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $admin->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,

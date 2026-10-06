@@ -28,8 +28,8 @@ beforeEach(function (): void {
 
 test('the accrual list derives accrued blocked payable and cancelled', function (): void {
     $agency = Agency::factory()->create(['commission_pct' => 10]);
-    $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
-    $past = ReservationFixtures::anamaraDeparture('2026-06-07');
+    $departure = ReservationFixtures::anamaraDeparture('2026-12-21');
+    $past = ReservationFixtures::anamaraDeparture('2026-01-10');
 
     $accruedId = test()->actingAs(managerUser())
         ->postJson('/api/rms/bookings', ReservationFixtures::createPayload($departure, [
@@ -54,8 +54,7 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
         ->json('bookings.0.id');
 
     $cancelled = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S3')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -64,8 +63,10 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
     ]);
 
     $payable = Booking::factory()->create([
-        'departure_id' => $past->id,
-        'room_id' => $past->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $past->property->rooms->firstWhere('code', 'S1')?->id,
+        'check_in' => '2026-01-10',
+        'check_out' => '2026-01-17',
+        'nights' => 7,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -83,7 +84,7 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
     expect($byId[$blockedId]['status'])->toBe(CommissionAccrualStatus::Blocked->value);
     expect($byId[$cancelled->id]['status'])->toBe(CommissionAccrualStatus::Cancelled->value);
     expect($byId[$payable->id]['status'])->toBe(CommissionAccrualStatus::Payable->value);
-    expect($byId[$payable->id]['payable_date'])->toBe('2026-07-14');
+    expect($byId[$payable->id]['payable_date'])->toBe('2026-02-16');
 
     $this->actingAs(adminUser())
         ->getJson('/api/rms/commissions?status='.CommissionAccrualStatus::Blocked->value)
@@ -103,10 +104,12 @@ test('the accrual list derives accrued blocked payable and cancelled', function 
 
 test('the payable date is thirty days after the return date', function (): void {
     $agency = Agency::factory()->create(['commission_pct' => 10]);
-    $departure = ReservationFixtures::anamaraDeparture('2027-11-14');
+    $departure = ReservationFixtures::anamaraDeparture('2026-02-04');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S4')?->id,
+        'check_in' => '2026-02-04',
+        'check_out' => '2026-02-11',
+        'nights' => 7,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -117,15 +120,14 @@ test('the payable date is thirty days after the return date', function (): void 
     $rules = app(CurrentConfig::class)->businessRules();
     $payable = Accrual::payableDate($booking, $rules)->toDateString();
 
-    expect($booking->departure->returnDate()->toDateString())->toBe('2027-11-21');
-    expect($payable)->toBe('2027-12-21');
-    expect($payable)->not->toBe('2027-12-14');
+    expect($booking->stay()->checkOut()->toDateString())->toBe('2026-02-11');
+    expect($payable)->toBe('2026-03-13');
 
-    Carbon::setTestNow(Carbon::parse('2027-12-20 18:00:00', 'UTC'));
+    Carbon::setTestNow(Carbon::parse('2026-03-12 18:00:00', 'UTC'));
     expect(Accrual::status($booking->fresh() ?? $booking, $rules))
         ->toBe(CommissionAccrualStatus::EarnedOnCompletion);
 
-    Carbon::setTestNow(Carbon::parse('2027-12-21 18:00:00', 'UTC'));
+    Carbon::setTestNow(Carbon::parse('2026-03-13 18:00:00', 'UTC'));
     expect(Accrual::status($booking->fresh() ?? $booking, $rules))
         ->toBe(CommissionAccrualStatus::Payable);
 
@@ -138,10 +140,9 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
     $agency = Agency::factory()->create(['commission_pct' => 10]);
     $departure = ReservationFixtures::anamaraDeparture('2027-11-14');
     $rules = app(CurrentConfig::class)->businessRules();
-    $cabin = fn (string $code): ?int => $departure->property->cabins->firstWhere('code', $code)?->id;
+    $cabin = fn (string $code): ?int => $departure->property->rooms->firstWhere('code', $code)?->id;
 
     $cancelled = Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabin('S1'),
         'agency_id' => $agency->id,
         'commission_pct' => 10,
@@ -157,7 +158,6 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
     ]);
 
     $blocked = Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabin('S2'),
         'agency_id' => $agency->id,
         'commission_pct' => 15,
@@ -173,7 +173,6 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
     ]);
 
     $paid = Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabin('S3'),
         'agency_id' => $agency->id,
         'commission_pct' => 10,
@@ -190,7 +189,6 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
     ]);
 
     $payable = Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabin('S4'),
         'agency_id' => $agency->id,
         'commission_pct' => 10,
@@ -201,7 +199,6 @@ test('accrual status follows cancelled, blocked, paid, payable, then earned', fu
     ]);
 
     $earned = Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => $cabin('S5'),
         'agency_id' => $agency->id,
         'commission_pct' => 10,

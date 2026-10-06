@@ -26,8 +26,7 @@ function ledgerBooking(int $total = 26600, int $depositPct = 10): Booking
     $departure = ReservationFixtures::anamaraDeparture();
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'total' => $total,
         'deposit_pct' => $depositPct,
         'reference' => 'ANK-2026-0300',

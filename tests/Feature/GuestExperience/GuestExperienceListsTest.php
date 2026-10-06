@@ -6,7 +6,6 @@ use App\Enums\BookingStatus;
 use App\Enums\GuestResponseSource;
 use App\Enums\Permission;
 use App\Models\Booking;
-use App\Models\Departure;
 use App\Models\Guest;
 use App\Models\GuestResponse;
 use App\Models\Role;
@@ -105,7 +104,7 @@ test('survey guests are names and cabins, and a user without guest_experience.ma
         ->and($rows[0])->toBe([
             'guest_id' => $fixture['guest']->id,
             'name' => 'Ada Lovelace',
-            'cabin' => $fixture['booking']->cabin->label,
+            'room' => $fixture['booking']->roomLabel(),
             'responded' => false,
         ])
         ->and($rows[1]['guest_id'])->toBe($companion->id)
@@ -140,14 +139,13 @@ test('survey guests are names and cabins, and a user without guest_experience.ma
 });
 
 /**
- * @return array{departure: Departure, booking: Booking, guest: Guest}
+ * @return array{departure: \Tests\Support\Bookings\StayAnchor, booking: Booking, guest: Guest}
  */
 function pickerDeparture(string $date, string $first, string $last, BookingStatus $status): array
 {
     $departure = ReservationFixtures::anamaraDeparture($date);
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'status' => $status,
         'owner_id' => managerUser()->id,
     ]);

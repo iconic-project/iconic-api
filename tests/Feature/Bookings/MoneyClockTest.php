@@ -122,7 +122,7 @@ test('an agency window filters on check-in', function (): void {
 
     expect(AgencyBookingWindow::inRange(collect([$booking]), '2026-02-05', '2026-02-05'))->toHaveCount(1);
     expect(AgencyBookingWindow::inRange(collect([$booking]), '2026-02-06', null))->toHaveCount(0);
-    expect($booking->departure_id)->toBeNull();
+    expect($booking->check_in)->not->toBeNull();
 });
 
 function moneyClockStay(): Booking

@@ -41,8 +41,7 @@ test('finance records one immutable payout and the kpis move', function (): void
     $agency = Agency::factory()->create(['commission_pct' => 10]);
     $departure = ReservationFixtures::anamaraDeparture('2027-11-14');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -86,8 +85,7 @@ test('finance records one immutable payout and the kpis move', function (): void
         ->assertJsonValidationErrors('amount');
 
     $early = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -232,8 +230,7 @@ test('the portal preview shows net rates and only that agency', function (): voi
 
     $booking = Booking::factory()->create([
         'reference' => 'ANK-2026-8801',
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -249,8 +246,7 @@ test('the portal preview shows net rates and only that agency', function (): voi
     ]);
     $otherBooking = Booking::factory()->create([
         'reference' => 'ANK-2026-8802',
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'agency_id' => $other->id,
         'commission_pct' => 12,
         'commission_approved' => true,
@@ -285,10 +281,8 @@ test('the portal preview shows net rates and only that agency', function (): voi
     expect($encoded)->not->toContain($otherBooking->reference);
 
     $public = [];
-    foreach ($rates->years as $year) {
-        $public[] = $year->suitePp;
-        $public[] = $year->ownerPp;
-        $public[] = $year->charterWeek;
+    foreach ($rates->roomRates as $rate) {
+        $public[] = $rate->nightly;
     }
 
     $found = [];
@@ -309,11 +303,5 @@ test('the portal preview shows net rates and only that agency', function (): voi
     expect($found)->toBe([]);
 
     $net = $json['net_rates'];
-    expect($net)->toHaveCount(count($rates->years));
-    foreach ($rates->years as $index => $year) {
-        expect($net[$index]['year'])->toBe($year->year);
-        expect($net[$index]['suite_pp'])->toBe($agency->netOf($year->suitePp));
-        expect($net[$index]['owner_pp'])->toBe($agency->netOf($year->ownerPp));
-        expect($net[$index]['charter_week'])->toBe($agency->netOf($year->charterWeek));
-    }
+    expect($net)->toBe([]);
 });

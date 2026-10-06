@@ -9,17 +9,13 @@ use App\Enums\RoomNightState;
 use App\Enums\RoomStatus;
 use App\Enums\RoomTypeStatus;
 use App\Models\Booking;
-use App\Models\Departure;
-use App\Models\EngineSettingsVersion;
 use App\Models\Guest;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomNightClaim;
 use App\Models\RoomType;
 use App\Models\User;
-use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\NightAvailability;
-use App\Support\Config\Documents\EngineSettingsDocument;
 use App\Support\Stays\StayDates;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
@@ -49,7 +45,6 @@ test('the grid states each claim kind and an expired hold is free', function ():
         'owner_id' => $owner->id,
         'reference' => 'ANK-NIGHT-1',
         'room_id' => $sold->id,
-        'departure_id' => Departure::factory()->create(['property_id' => $property->id])->id,
     ]);
     Guest::factory()->create([
         'booking_id' => $booking->id,
@@ -236,41 +231,6 @@ test('a property calendar returns the night grid and rejects more than 62 nights
         ->getJson('/api/rms/calendar?from=2028-06-01&to=2028-08-03&property_id='.$property->id)
         ->assertUnprocessable()
         ->assertJsonValidationErrors('to');
-});
-
-test('the departure calendar stays on from and to without a property', function (): void {
-    $this->actingAs(managerUser())
-        ->getJson('/api/rms/calendar?from=2028-01-01&to=2028-04-01')
-        ->assertOk()
-        ->assertJsonStructure(['departures', 'rows']);
-});
-
-test('the availability threshold migration copies the most common departure urgency', function (): void {
-    $property = Property::factory()->create();
-    Departure::factory()->create(['property_id' => $property->id, 'urgency_threshold' => 4, 'date' => '2028-05-02']);
-    Departure::factory()->create(['property_id' => $property->id, 'urgency_threshold' => 4, 'date' => '2028-05-09']);
-    Departure::factory()->create(['property_id' => $property->id, 'urgency_threshold' => 3, 'date' => '2028-05-16']);
-
-    $document = EngineSettingsDocument::initial();
-    unset($document['availability']);
-
-    EngineSettingsVersion::query()->create([
-        'version' => 1,
-        'document' => $document,
-        'changes' => [],
-        'approval_reference' => 'test',
-        'published_at' => now(),
-    ]);
-
-    $migration = require base_path('database/migrations/2026_10_05_100001_add_availability_threshold_to_engine_settings.php');
-    $migration->up();
-
-    $current = app(CurrentConfig::class)->engineSettings();
-
-    expect($current->availability->lowAvailabilityThreshold)->toBe(4);
-    expect(EngineSettingsVersion::query()->orderByDesc('version')->value('approval_reference'))
-        ->toBe('Sprint 17: availability.low_availability_threshold added (09 H7)');
-    expect(EngineSettingsDocument::initial()['availability']['low_availability_threshold'])->toBe(3);
 });
 
 function nightType(Property $property, string $code, string $name, int $sort = 1): RoomType

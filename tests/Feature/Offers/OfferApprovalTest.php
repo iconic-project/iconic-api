@@ -10,7 +10,6 @@ use Tests\Support\Offers\OfferFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
-    OfferFixtures::west();
 });
 
 test('saving a percent offer goes pending and needs a director', function (): void {
@@ -145,9 +144,9 @@ test('a value-add offer goes live without director approval', function (): void 
             'code' => 'NIGHT',
             'type' => 'VALUE',
             'value' => null,
-            'value_text' => 'Complimentary pre-cruise night in Quito',
+            'value_text' => 'Complimentary night before arrival',
         ]))
         ->assertCreated()
         ->assertJsonPath('status', OfferStatus::Live->value)
-        ->assertJsonPath('benefit_label', 'Complimentary pre-cruise night in Quito');
+        ->assertJsonPath('benefit_label', 'Complimentary night before arrival');
 });

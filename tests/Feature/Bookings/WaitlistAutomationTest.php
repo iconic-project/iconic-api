@@ -16,7 +16,6 @@ use App\Mail\Waitlist\WaitlistOfferMail;
 use App\Models\Booking;
 use App\Models\CrmTask;
 use App\Models\Delivery;
-use App\Models\Departure;
 use App\Models\Room;
 use App\Models\RoomNightClaim;
 use App\Models\WaitlistEntry;
@@ -28,6 +27,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Tests\Support\Bookings\ReservationFixtures;
+use Tests\Support\Bookings\StayAnchor;
 use Tests\Support\Inventory\ClaimHolder;
 
 beforeEach(function (): void {
@@ -38,7 +38,7 @@ beforeEach(function (): void {
 });
 
 test('a cancelled booking notifies the queue once per free cabin and never holds one', function (): void {
-    $departure = ReservationFixtures::anamaraDeparture('2028-03-05');
+    $departure = ReservationFixtures::anamaraDeparture('2026-12-21');
     $actor = managerUser();
     $holders = blockSuitesExcept($departure, 'S1');
 
@@ -80,8 +80,8 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
         ->and(Booking::query()->orderBy('id')->pluck('status')->map(fn (BookingStatus $status): string => $status->value)->all())->toBe($statuses);
 
     Mail::assertSent(WaitlistOfferMail::class, function (WaitlistOfferMail $mail): bool {
-        return str_contains($mail->sentence, 'A Suite is free —')
-            && str_contains($mail->stayUrl, 'check_in=2028-03-05')
+        return str_contains($mail->sentence, 'A STD is free —')
+            && str_contains($mail->stayUrl, 'check_in=2026-12-21')
             && str_contains($mail->stayUrl, '/book/rooms?');
     });
 
@@ -127,7 +127,7 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
 });
 
 test('a missing address is one blocked delivery and removal closes the follow-up', function (): void {
-    $departure = ReservationFixtures::anamaraDeparture('2028-03-12');
+    $departure = ReservationFixtures::anamaraDeparture('2026-12-22');
     $actor = managerUser();
     blockSuitesExcept($departure, 'S1');
 
@@ -181,30 +181,30 @@ test('a missing address is one blocked delivery and removal closes the follow-up
 /**
  * @return array<string, ClaimHolder>
  */
-function blockSuitesExcept(Departure $departure, string $keep): array
+function blockSuitesExcept(StayAnchor $departure, string $keep): array
 {
     $holders = [];
-    $cabins = $departure->property->cabins->filter(
-        fn (Room $cabin): bool => $cabin->roomType->code === 'SUITE' && $cabin->code !== $keep,
+    $rooms = $departure->property->rooms->filter(
+        fn (Room $room): bool => $room->roomType->code === 'STD' && $room->code !== $keep,
     );
 
-    DB::transaction(function () use ($departure, $cabins, &$holders): void {
-        foreach ($cabins as $cabin) {
+    DB::transaction(function () use ($departure, $rooms, &$holders): void {
+        foreach ($rooms as $room) {
             $holder = ClaimHolder::query()->create([
-                'reference' => 'BLK-'.$cabin->code,
-                'name' => $cabin->code,
+                'reference' => 'BLK-'.$room->code,
+                'name' => $room->code,
             ]);
-            app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $holder, ClaimKind::Block);
-            $holders[$cabin->code] = $holder;
+            app(ClaimService::class)->claim($departure->stayDates(), collect([$room]), $holder, ClaimKind::Block);
+            $holders[$room->code] = $holder;
         }
     });
 
     return $holders;
 }
 
-function waitlistEntry(Departure $departure, string $name, ?string $email): int
+function waitlistEntry(StayAnchor $departure, string $name, ?string $email): int
 {
-    $type = $departure->property->roomTypes()->where('code', 'SUITE')->firstOrFail();
+    $type = $departure->property->roomTypes()->where('code', 'STD')->firstOrFail();
     $stay = $departure->stayDates();
     $id = test()->actingAs(managerUser())
         ->postJson('/api/rms/waitlist', [

@@ -20,8 +20,7 @@ test('guest writes record history on the booking and redact sensitive values', f
     $actor = managerUser();
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 
@@ -67,8 +66,7 @@ test('guardian consent is its own entry and is not listed on guest.updated', fun
     $actor = managerUser();
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 
@@ -128,8 +126,7 @@ test('consent alone does not write guest.updated', function (): void {
     $actor = managerUser();
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 
@@ -168,8 +165,7 @@ test('removing an empty non-lead guest writes guest.removed', function (): void 
     $actor = managerUser();
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
     ]);
 

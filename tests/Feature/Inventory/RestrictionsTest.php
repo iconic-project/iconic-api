@@ -5,13 +5,10 @@ declare(strict_types=1);
 use App\Actions\Bookings\CreateBookingRequest;
 use App\Actions\Restrictions\SetStayRestrictions;
 use App\Enums\ClaimKind;
-use App\Enums\DepartureStatus;
 use App\Enums\RoomStatus;
 use App\Enums\RoomTypeStatus;
 use App\Models\Booking;
 use App\Models\ChangeHistory;
-use App\Models\Departure;
-use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomNightClaim;
@@ -19,7 +16,6 @@ use App\Models\RoomType;
 use App\Models\StayRestriction;
 use App\Services\Inventory\NightAvailability;
 use App\Services\Inventory\Restrictions;
-use App\Support\Inventory\BackfillClosedDepartureRestrictions;
 use App\Support\Inventory\StaffStayRestrictions;
 use App\Support\Stays\StayDates;
 use Database\Seeders\ConfigSeeder;
@@ -29,6 +25,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Tests\Support\Bookings\ReservationFixtures;
+use Tests\Support\Bookings\StayAnchor;
 use Tests\Support\Inventory\ClaimHolder;
 
 beforeEach(function (): void {
@@ -335,42 +332,6 @@ test('staff can read restrictions and only the inventory permission can write th
     expect(ChangeHistory::query()->where('event', 'restrictions.set')->firstOrFail()->reason)->toBe('Maintenance');
 });
 
-test('closed and hidden departures backfill property-wide stop sell through the last night', function (): void {
-    $property = Property::factory()->create();
-    $itinerary = Itinerary::factory()->create(['nights' => 7, 'days' => 8]);
-
-    foreach ([
-        [DepartureStatus::Closed, '2028-04-02'],
-        [DepartureStatus::Hidden, '2028-05-07'],
-        [DepartureStatus::OnSale, '2028-06-04'],
-        [DepartureStatus::Charter, '2028-07-02'],
-    ] as [$status, $date]) {
-        Departure::factory()->create([
-            'property_id' => $property->id,
-            'itinerary_id' => $itinerary->id,
-            'date' => $date,
-            'status' => $status,
-        ]);
-    }
-
-    expect(BackfillClosedDepartureRestrictions::run())->toBe(2);
-    expect(StayRestriction::query()->count())->toBe(14);
-    expect(StayRestriction::query()->whereNull('room_type_id')->where('stop_sell', true)->count())->toBe(14);
-    expect(StayRestriction::query()->whereDate('night', '2028-04-02')->exists())->toBeTrue();
-    expect(StayRestriction::query()->whereDate('night', '2028-04-08')->exists())->toBeTrue();
-    expect(StayRestriction::query()->whereDate('night', '2028-04-09')->exists())->toBeFalse();
-    expect(StayRestriction::query()->whereDate('night', '2028-06-04')->exists())->toBeFalse();
-    expect(StayRestriction::query()->whereDate('night', '2028-07-02')->exists())->toBeFalse();
-
-    $history = ChangeHistory::query()->where('event', 'restrictions.set')->get();
-
-    expect($history)->toHaveCount(2);
-    expect($history->every(fn (ChangeHistory $entry): bool => $entry->actor_label === 'System'))->toBeTrue();
-
-    expect(BackfillClosedDepartureRestrictions::run())->toBe(2);
-    expect(StayRestriction::query()->count())->toBe(14);
-});
-
 test('a restricted stay is 422 unless staff override with a reason', function (): void {
     $this->seed(InventorySeeder::class);
     $departure = ReservationFixtures::anamaraDeparture();
@@ -417,7 +378,7 @@ test('a restricted stay is 422 unless staff override with a reason', function ()
 test('a request and a move need the same override', function (): void {
     $this->seed(InventorySeeder::class);
     $source = ReservationFixtures::anamaraDeparture();
-    $target = ReservationFixtures::anamaraDeparture('2027-11-14');
+    $target = ReservationFixtures::anamaraDeparture('2026-12-23');
     restrictionsStopDeparture($source);
     restrictionsStopDeparture($target);
 
@@ -442,24 +403,28 @@ test('a request and a move need the same override', function (): void {
     expect($requestedHistory->reason)->toBe('Waitlist conversion')
         ->and($requestedHistory->after['override_restrictions'] ?? null)->toBe(['STOP_SELL']);
 
-    $open = ReservationFixtures::anamaraDeparture('2027-11-21');
+    $open = ReservationFixtures::anamaraDeparture('2026-12-30');
     $manager = managerUser();
     $id = $this->actingAs($manager)
-        ->postJson('/api/rms/bookings', ReservationFixtures::createPayload($open))
+        ->postJson('/api/rms/bookings', ReservationFixtures::createPayload($open, [
+            'check_out' => '2026-12-31',
+        ]))
         ->assertCreated()
         ->json('bookings.0.id');
 
+    restrictionsStopDeparture($open);
+
+    $roomId = $open->property->rooms->firstWhere('code', 'S2')?->id;
+
     $preview = $this->actingAs($manager)
         ->postJson('/api/rms/bookings/'.$id.'/move/preview', [
-            'departure_id' => $target->id,
-            'cabin_code' => 'S1',
+            'room_id' => $roomId,
         ])
         ->assertOk()
         ->json();
 
     $move = [
-        'departure_id' => $target->id,
-        'cabin_code' => 'S1',
+        'room_id' => $roomId,
         'confirm_total' => $preview['new_total'],
     ];
 
@@ -518,7 +483,7 @@ function restrictionsApply(
     app(SetStayRestrictions::class)->handle($payload, managerUser());
 }
 
-function restrictionsStopDeparture(Departure $departure): void
+function restrictionsStopDeparture(StayAnchor $departure): void
 {
     $stay = $departure->stayDates();
 

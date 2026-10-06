@@ -10,7 +10,6 @@ use App\Models\Contact;
 use App\Models\Group;
 use App\Models\Role;
 use App\Models\User;
-use App\Support\Itineraries\Defaults;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -31,13 +30,11 @@ test('users without view_all only see their own bookings', function (): void {
     $other = User::factory()->create(['role_id' => $role->id]);
 
     $mine = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $owner->id,
     ]);
     Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'owner_id' => $other->id,
     ]);
 
@@ -57,8 +54,7 @@ test('can_act follows the own-records rule', function (): void {
     $owner = salesExecUser();
     $other = salesExecUser();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $owner->id,
     ]);
 
@@ -82,11 +78,8 @@ test('can_act follows the own-records rule', function (): void {
         ->assertJsonPath('allowed_transitions.1.reason_required', true)
         ->assertJsonPath('balance', $booking->total)
         ->assertJsonPath('request', null)
-        ->assertJsonPath('departure.date', $departure->date->toDateString())
-        ->assertJsonPath('departure.return_date', $departure->returnDate()->toDateString())
-        ->assertJsonPath('departure.itinerary_name', $departure->itinerary->name)
-        ->assertJsonPath('departure.embark', $departure->itinerary->embark)
-        ->assertJsonPath('departure.festive', $departure->festive);
+        ->assertJsonPath('stay.check_in', $booking->check_in->toDateString())
+        ->assertJsonPath('stay.check_out', $booking->check_out->toDateString());
 });
 
 test('a REQUESTED booking show includes the request summary and notes', function (): void {
@@ -108,8 +101,7 @@ test('a REQUESTED booking show includes the request summary and notes', function
         ->assertJsonPath('request.travel_advisor', true)
         ->assertJsonPath('request.notes', 'Anniversary on board')
         ->assertJsonPath('request.hold.expired', false)
-        ->assertJsonPath('request.hold.rule', $booking->bookingRequest?->hold_rule->value)
-        ->assertJsonPath('departure.embark', Defaults::EMBARK);
+        ->assertJsonPath('request.hold.rule', $booking->bookingRequest?->hold_rule->value);
 
     expect($response->json('request.hold.remaining_business_minutes'))
         ->toBeInt()
@@ -138,41 +130,43 @@ test('groups are scoped like bookings.view_all', function (): void {
     ]);
     $owner = User::factory()->create(['role_id' => $role->id]);
     $other = User::factory()->create(['role_id' => $role->id]);
-    $group = Group::factory()->create(['departure_id' => $departure->id]);
+    $group = Group::factory()->create();
     Booking::factory()->create([
-        'departure_id' => $departure->id,
         'group_id' => $group->id,
         'owner_id' => $owner->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
     ]);
 
     $this->actingAs($owner)
-        ->getJson('/api/rms/groups?departure_id='.$departure->id)
+        ->getJson('/api/rms/groups')
         ->assertOk()
         ->assertJsonCount(1, 'data');
 
     $this->actingAs($other)
-        ->getJson('/api/rms/groups?departure_id='.$departure->id)
+        ->getJson('/api/rms/groups')
         ->assertOk()
         ->assertJsonCount(0, 'data');
 });
 
-test('groups filter by departure date from and to', function (): void {
-    $nov = ReservationFixtures::anamaraDeparture('2027-11-07');
-    $dec = ReservationFixtures::anamaraDeparture('2027-12-19', festive: true);
-    $novGroup = Group::factory()->create(['departure_id' => $nov->id]);
-    $decGroup = Group::factory()->create(['departure_id' => $dec->id]);
+test('groups filter by stay check-in from and to', function (): void {
+    $property = ReservationFixtures::anamaraDeparture();
+    $novGroup = Group::factory()->create();
+    $decGroup = Group::factory()->create();
     Booking::factory()->create([
-        'departure_id' => $nov->id,
         'group_id' => $novGroup->id,
         'owner_id' => adminUser()->id,
-        'room_id' => $nov->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $property->property->rooms->firstWhere('code', 'S1')?->id,
+        'check_in' => '2027-11-07',
+        'check_out' => '2027-11-14',
+        'nights' => 7,
     ]);
     Booking::factory()->create([
-        'departure_id' => $dec->id,
         'group_id' => $decGroup->id,
         'owner_id' => adminUser()->id,
-        'room_id' => $dec->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $property->property->rooms->firstWhere('code', 'S2')?->id,
+        'check_in' => '2027-12-19',
+        'check_out' => '2027-12-26',
+        'nights' => 7,
     ]);
 
     $this->actingAs(adminUser())

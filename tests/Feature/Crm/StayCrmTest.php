@@ -33,8 +33,7 @@ test('segment filters use the stay and do not join departures', function (): voi
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $contact = Contact::factory()->create(['name' => 'Sunday Arrival']);
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
@@ -87,8 +86,7 @@ test('segment filters use the stay and do not join departures', function (): voi
 test('journey anchors measure from check-in and check-out', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
     ]);
     $booking->refresh();
@@ -116,8 +114,7 @@ test('the deal drawer shows the stay and stay searches', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-12-05');
     $contact = Contact::factory()->create();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,

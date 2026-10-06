@@ -44,19 +44,8 @@ function assertDocumentHtmlSnapshot(string $name, string $html): void
 function templateBooking(): Booking
 {
     $departure = ReservationFixtures::anamaraDeparture('2028-11-05');
-    $departure->itinerary->update([
-        'name' => 'Western Realm',
-        'long_description' => 'Isabela and Fernandina — the wild western edge.',
-        'card_description' => 'The wild western edge.',
-        'day_plan' => [['Day 1', 'Embark at SCY.'], ['Day 8', 'Return to SCY.']],
-        'nights' => 7,
-        'days' => 8,
-        'embark' => 'San Cristóbal (SCY)',
-        'disembark' => 'San Cristóbal (SCY)',
-    ]);
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S7')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S7')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-1101',
         'total' => 26600,

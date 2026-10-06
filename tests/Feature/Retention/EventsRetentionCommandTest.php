@@ -23,7 +23,7 @@ function agedEvent(string $occurredAt, ?int $contactId, string $path = '/itinera
 {
     return BehaviouralEvent::factory()->create([
         'contact_id' => $contactId,
-        'name' => BehaviouralEventName::ViewItinerary,
+        'name' => BehaviouralEventName::ViewProperty,
         'params' => ['itinerary_code' => 'WEST', 'page_path' => $path],
         'occurred_at' => $occurredAt,
         'received_at' => $occurredAt,
@@ -39,7 +39,7 @@ test('stitched events older than 24 months are rolled up and deleted', function 
 
     expect(BehaviouralEvent::query()->whereKey($old->id)->exists())->toBeFalse();
     expect(BehaviouralEvent::query()->whereKey($kept->id)->exists())->toBeTrue();
-    expect((int) BehaviouralEventDaily::query()->where('name', BehaviouralEventName::ViewItinerary)->sum('count'))->toBe(1);
+    expect((int) BehaviouralEventDaily::query()->where('name', BehaviouralEventName::ViewProperty)->sum('count'))->toBe(1);
 });
 
 test('unstitched events older than 30 days are rolled up and deleted', function (): void {

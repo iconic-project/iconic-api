@@ -53,7 +53,7 @@ final class InventorySeeder extends Seeder
             $cabins[] = [
                 'code' => 'S'.$index,
                 'label' => 'Suite 0'.$index,
-                'category' => 'SUITE',
+                'category' => 'STD',
                 'sort' => $index,
             ];
         }
@@ -61,7 +61,7 @@ final class InventorySeeder extends Seeder
         $cabins[] = [
             'code' => 'OWNER',
             'label' => "Owner's Suite",
-            'category' => 'OWNER',
+            'category' => 'STE',
             'sort' => 9,
         ];
 

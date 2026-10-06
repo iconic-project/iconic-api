@@ -31,8 +31,7 @@ function chargesCabin(array $overrides = []): Booking
     unset($overrides['departure']);
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S3')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -63,7 +62,6 @@ test('php balance equals balanceSql with extras fees and a refund', function ():
         'is_lead' => true,
         'dob' => '1979-02-14',
         'nationality' => 'DE',
-        'png_category' => PngCategory::ForeignOver12,
         'png_fee' => 200,
     ]);
 

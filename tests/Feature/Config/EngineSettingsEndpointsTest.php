@@ -74,7 +74,7 @@ test('a manager can publish a copy-only change without an approval reference', f
 test('a manager cannot publish a guest-rule change', function (): void {
     $manager = managerUser(['name' => 'Mateo R.']);
     $document = engineSettingsDocument();
-    $document['guests']['max_per_cabin'] = 2;
+    $document['guests']['max_per_property'] = 15;
 
     $this->actingAs($manager)
         ->postJson('/api/rms/engine-settings/versions', [
@@ -85,7 +85,7 @@ test('a manager cannot publish a guest-rule change', function (): void {
         ->assertForbidden()
         ->assertJsonPath(
             'message',
-            'This change includes rule fields (Max guests per cabin). Only users who can edit engine rules can publish it.',
+            'This change includes rule fields (Max guests per property). Only users who can edit engine rules can publish it.',
         );
 
     expect(EngineSettingsVersion::query()->count())->toBe(1);
@@ -130,7 +130,7 @@ test('an admin submitting a document without the guests group gets 422', functio
 test('an admin cannot publish a rule change without an approval reference', function (): void {
     $admin = adminUser(['name' => 'Carolina M.']);
     $document = engineSettingsDocument();
-    $document['guests']['max_per_cabin'] = 2;
+    $document['guests']['max_per_property'] = 15;
 
     $this->actingAs($admin)
         ->postJson('/api/rms/engine-settings/versions', [
@@ -146,7 +146,7 @@ test('an admin cannot publish a rule change without an approval reference', func
 test('validate reports rule_fields_changed for a guest-rule edit', function (): void {
     $admin = adminUser();
     $document = engineSettingsDocument();
-    $document['guests']['max_per_cabin'] = 2;
+    $document['guests']['max_per_property'] = 15;
 
     $this->actingAs($admin)
         ->postJson('/api/rms/engine-settings/validate', [

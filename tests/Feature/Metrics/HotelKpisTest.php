@@ -40,7 +40,6 @@ test('hotel kpis match the hand-computed stay, including a month split, a block,
     ]));
     $roomTypeId = (int) $rooms->first()?->room_type_id;
     $sold = Booking::factory()->create([
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $rooms[0]->id,
         'room_type_id' => $roomTypeId,
@@ -59,7 +58,6 @@ test('hotel kpis match the hand-computed stay, including a month split, a block,
         ],
     ]);
     Booking::factory()->create([
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $rooms[0]->id,
         'room_type_id' => $roomTypeId,
@@ -71,7 +69,6 @@ test('hotel kpis match the hand-computed stay, including a month split, a block,
         'sold_on' => '2026-10-01',
     ]);
     Booking::factory()->create([
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $rooms[0]->id,
         'room_type_id' => $roomTypeId,
@@ -83,7 +80,6 @@ test('hotel kpis match the hand-computed stay, including a month split, a block,
         'sold_on' => '2026-10-01',
     ]);
     $block = Booking::factory()->create([
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $rooms[1]->id,
         'room_type_id' => $roomTypeId,
@@ -183,7 +179,6 @@ test('a booking without night lines splits its total across the stay and is flag
         'sort' => 1,
     ]);
     $booking = Booking::factory()->create([
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $room->id,
         'room_type_id' => $room->room_type_id,
@@ -225,7 +220,6 @@ test('the occupancy report file lists each night and a retired departure report 
     ]);
     $booking = Booking::factory()->create([
         'reference' => 'ANK-KPI-0001',
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $room->id,
         'room_type_id' => $room->room_type_id,

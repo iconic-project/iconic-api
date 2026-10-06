@@ -313,7 +313,7 @@ test('the RMS request list marks engine, portal, and staff sources', function ()
         ]),
         $manager,
     );
-    $session = CheckoutSession::factory()->create(['departure_id' => $departure->id]);
+    $session = CheckoutSession::factory()->create();
     Booking::query()->whereKey($engine->id)->update(['checkout_session_id' => $session->id]);
 
     postPortalRequest($user, portalRequestBody())->assertCreated();

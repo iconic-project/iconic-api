@@ -39,8 +39,7 @@ test('the contacts list is visible to every panel.crm user and includes derived 
 
     $departure = ReservationFixtures::anamaraDeparture('2027-12-05');
     Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $mine->id,
         'owner_id' => $other->id,
         'status' => BookingStatus::Confirmed,
@@ -77,8 +76,7 @@ test('the contact profile reads bookings without sensitive fields', function ():
     $contact = Contact::factory()->create(['name' => 'Profile Guest']);
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,

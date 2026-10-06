@@ -3,20 +3,15 @@
 declare(strict_types=1);
 
 use App\Models\Offer;
-use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
-use Tests\Support\Bookings\ReservationFixtures;
 use Tests\Support\Offers\OfferFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
-    $this->seed(InventorySeeder::class);
-    OfferFixtures::west();
-    OfferFixtures::north();
 });
 
 test('a sales exec can read offers and cannot write', function (): void {
-    $offer = Offer::factory()->create(['itinerary_codes' => ['WEST']]);
+    $offer = Offer::factory()->create();
 
     $this->actingAs(salesExecUser())
         ->getJson('/api/rms/offers')
@@ -33,9 +28,8 @@ test('index filters by channel query and date span', function (): void {
         'code' => 'OPENING-27',
         'name' => 'Opening season credit',
         'channel' => 'D2C',
-        'travel_from' => '2027-11-01',
-        'travel_to' => '2027-12-31',
-        'itinerary_codes' => ['WEST'],
+        'stay_from' => '2027-11-01',
+        'stay_to' => '2027-12-31',
     ]);
     Offer::factory()->create([
         'code' => 'VIRTUOSO-EARLY',
@@ -43,7 +37,6 @@ test('index filters by channel query and date span', function (): void {
         'channel' => 'B2B',
         'booking_from' => '2027-01-01',
         'booking_to' => '2027-03-31',
-        'itinerary_codes' => ['WEST'],
     ]);
 
     $byChannel = $this->actingAs(managerUser())
@@ -69,17 +62,11 @@ test('index filters by channel query and date span', function (): void {
 });
 
 test('show returns prototype derived columns', function (): void {
-    $west = ReservationFixtures::anamaraDeparture('2027-11-14');
-    $west->itinerary()->associate(OfferFixtures::west());
-    $west->save();
-
     $offer = Offer::factory()->live()->create([
         'code' => 'OPENING-27',
         'name' => 'Opening season credit',
         'type' => 'CREDIT',
         'value' => 500,
-        'cabin_types' => ['SUITE'],
-        'itinerary_codes' => ['WEST'],
         'badge' => 'OPENING OFFER',
         'show_on_card' => true,
         'show_on_calendar' => true,
@@ -88,7 +75,7 @@ test('show returns prototype derived columns', function (): void {
     $this->actingAs(managerUser())
         ->getJson('/api/rms/offers/'.$offer->id)
         ->assertOk()
-        ->assertJsonPath('benefit_label', 'USD 500 ancillary credit / cabin')
+        ->assertJsonPath('benefit_label', 'USD 500 ancillary credit per room')
         ->assertJsonPath('booking_window_label', 'Any')
         ->assertJsonPath('stay_window_label', 'Any')
         ->assertJsonPath('engine_placement', 'badge');
@@ -99,8 +86,6 @@ test('derived labels match the prototype wording', function (): void {
         'type' => 'PCT',
         'value' => 10,
         'channel' => 'ALL',
-        'cabin_types' => ['SUITE', 'OWNER'],
-        'itinerary_codes' => ['WEST', 'NORTH'],
         'booking_from' => '2027-01-01',
         'booking_to' => '2027-03-31',
     ]);
@@ -108,7 +93,7 @@ test('derived labels match the prototype wording', function (): void {
     $this->actingAs(managerUser())
         ->getJson('/api/rms/offers/'.$offer->id)
         ->assertOk()
-        ->assertJsonPath('benefit_label', '10% off cabin rate')
+        ->assertJsonPath('benefit_label', '10% off room rate')
         ->assertJsonPath('scope_label', 'All channels · All room types · All rate plans')
         ->assertJsonPath('booking_window_label', '1 Jan 2027 → 31 Mar 2027');
 });

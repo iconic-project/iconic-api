@@ -33,8 +33,7 @@ function snapshotCabin(array $overrides = []): Booking
     unset($overrides['departure']);
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S4')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -58,7 +57,6 @@ test('snapshot totals match a charter and a booking with extras fees refund and 
     $actor = adminUser();
     $charterDep = ReservationFixtures::anamaraDeparture('2028-09-10');
     $charter = Booking::factory()->create([
-        'departure_id' => $charterDep->id,
         'room_id' => null,
         'type' => BookingType::Charter,
         'status' => BookingStatus::Confirmed,
@@ -80,7 +78,6 @@ test('snapshot totals match a charter and a booking with extras fees refund and 
         'last_name' => 'Lovelace',
         'dob' => '1979-02-14',
         'nationality' => 'DE',
-        'png_category' => PngCategory::ForeignOver12,
         'png_fee' => 200,
     ]);
     Guest::factory()->create([
@@ -91,7 +88,6 @@ test('snapshot totals match a charter and a booking with extras fees refund and 
         'last_name' => 'Turing',
         'dob' => '1982-06-23',
         'nationality' => 'GB',
-        'png_category' => PngCategory::ForeignOver12,
         'png_fee' => 200,
     ]);
     app(UpdateBookingFees::class)->handle($booking, ['png_collected' => true, 'tct_collected' => true], $actor);
@@ -126,7 +122,6 @@ test('snapshot totals match a charter and a booking with extras fees refund and 
         'is_lead' => true,
         'first_name' => 'Grace',
         'last_name' => 'Hopper',
-        'png_category' => PngCategory::ForeignOver12,
         'png_fee' => 200,
     ]);
     $infoSnap = SnapshotFactory::build($infoOnly, DocumentKind::Invoice);

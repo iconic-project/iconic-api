@@ -9,17 +9,15 @@ use Tests\Support\Offers\OfferFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
-    OfferFixtures::west();
-    OfferFixtures::festive();
 });
 
-test('a festive itinerary is refused', function (): void {
+test('an unknown room type is refused', function (): void {
     $this->actingAs(managerUser())
         ->postJson('/api/rms/offers', OfferFixtures::payload([
-            'itinerary_codes' => ['FEST'],
+            'applies_to_room_types' => ['NOPE'],
         ]))
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['itinerary_codes']);
+        ->assertJsonValidationErrors(['applies_to_room_types']);
 });
 
 test('b2b and promo codes never get public surfaces', function (): void {

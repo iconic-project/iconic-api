@@ -9,8 +9,8 @@ use App\Enums\ClaimKind;
 use App\Models\Booking;
 use App\Models\ChangeHistory;
 use App\Models\RoomNightClaim;
-use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
+use App\Support\Stays\StayDates;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -52,9 +52,7 @@ test('the job expiring a request hold frees the cabin and keeps REQUESTED', func
     expect($booking->occupiesInventory())->toBeFalse();
     expect($booking->claims()->whereNull('released_at')->count())->toBe(0);
 
-    $snapshot = app(Availability::class)->forDepartures(collect([$booking->departure]))[$booking->departure_id];
-    $cell = collect($snapshot->cabins)->firstWhere('cabin.code', 'S3');
-    expect($cell['state'])->toBe('FREE');
+    expect($booking->claims()->whereNull('released_at')->count())->toBe(0);
 
     expect(ChangeHistory::query()->where('event', 'request.hold_expired')->where('subject_id', $booking->id)->count())->toBe(1);
     expect(ChangeHistory::query()->where('event', 'request.hold_expired')->value('actor_label'))->toBe('System');
@@ -64,8 +62,8 @@ test('the job expiring a request hold frees the cabin and keeps REQUESTED', func
 
 test('pre-insert cleanup expires a request hold the same way', function (): void {
     $booking = seededRequest('S4');
-    $departure = $booking->departure;
-    $cabin = $booking->cabin;
+    $room = $booking->room;
+    $stay = StayDates::of($booking->check_in->toDateString(), $booking->check_out->toDateString());
 
     RoomNightClaim::query()
         ->where('holder_id', $booking->id)
@@ -74,8 +72,8 @@ test('pre-insert cleanup expires a request hold the same way', function (): void
 
     $other = ClaimHolder::query()->create(['reference' => 'NEW', 'name' => 'New']);
 
-    DB::transaction(function () use ($departure, $cabin, $other): void {
-        app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $other, ClaimKind::Booking);
+    DB::transaction(function () use ($stay, $room, $other): void {
+        app(ClaimService::class)->claim($stay, collect([$room]), $other, ClaimKind::Booking);
     });
 
     $booking->refresh()->load('bookingRequest');
@@ -106,13 +104,18 @@ test('confirming after expiry re-claims or 409s when taken', function (): void {
 
     $blocker = ClaimHolder::query()->create(['reference' => 'TKN', 'name' => 'Taken']);
     DB::transaction(function () use ($taken, $blocker): void {
-        app(ClaimService::class)->claim($taken->departure->stayDates(), collect([$taken->cabin]), $blocker, ClaimKind::Booking);
+        app(ClaimService::class)->claim(
+            StayDates::of($taken->check_in->toDateString(), $taken->check_out->toDateString()),
+            collect([$taken->room]),
+            $blocker,
+            ClaimKind::Booking,
+        );
     });
 
     $this->actingAs($taken->owner)
         ->postJson('/api/rms/requests/'.$taken->id.'/confirm')
         ->assertStatus(409)
-        ->assertJsonPath('message', "The cabin was taken after this request's hold expired.");
+        ->assertJsonPath('message', "The room was taken after this request's hold expired.");
 
     expect($taken->fresh()->status)->toBe(BookingStatus::Requested);
 });

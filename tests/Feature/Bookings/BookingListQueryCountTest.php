@@ -76,8 +76,7 @@ test('the bookings list query count does not grow when the extra bookings have p
     $departure = ReservationFixtures::anamaraDeparture('2028-06-04');
 
     $first = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
         'reference' => 'ANK-2026-0601',
     ]);
@@ -102,8 +101,7 @@ test('the bookings list query count does not grow when the extra bookings have p
 
     foreach (['S2' => '0602', 'S3' => '0603', 'S4' => '0604'] as $cabin => $suffix) {
         $booking = Booking::factory()->create([
-            'departure_id' => $departure->id,
-            'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+            'room_id' => $departure->property->rooms->firstWhere('code', $cabin)?->id,
             'owner_id' => $actor->id,
             'reference' => 'ANK-2026-'.$suffix,
         ]);
@@ -131,8 +129,7 @@ test('the bookings list query count does not grow when the extra bookings have e
     $departure = ReservationFixtures::anamaraDeparture('2028-07-02');
 
     $first = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-0701',
@@ -144,7 +141,6 @@ test('the bookings list query count does not grow when the extra bookings have e
         'is_lead' => true,
         'dob' => '1979-02-14',
         'nationality' => 'DE',
-        'png_category' => PngCategory::ForeignOver12,
         'png_fee' => 200,
     ]);
     app(UpdateBookingFees::class)->handle($first, ['png_collected' => true], $actor);
@@ -162,8 +158,7 @@ test('the bookings list query count does not grow when the extra bookings have e
 
     foreach (['S2' => '0702', 'S3' => '0703', 'S4' => '0704'] as $cabin => $suffix) {
         $booking = Booking::factory()->create([
-            'departure_id' => $departure->id,
-            'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+            'room_id' => $departure->property->rooms->firstWhere('code', $cabin)?->id,
             'owner_id' => $actor->id,
             'status' => BookingStatus::Confirmed,
             'reference' => 'ANK-2026-'.$suffix,
@@ -175,7 +170,6 @@ test('the bookings list query count does not grow when the extra bookings have e
             'is_lead' => true,
             'dob' => '1979-02-14',
             'nationality' => 'DE',
-            'png_category' => PngCategory::ForeignOver12,
             'png_fee' => 200,
         ]);
         app(UpdateBookingFees::class)->handle($booking, ['png_collected' => true], $actor);

@@ -23,8 +23,7 @@ function billingBooking(?int $ownerId = null): Booking
     $departure = ReservationFixtures::anamaraDeparture('2028-10-08');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S6')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S6')?->id,
         'status' => BookingStatus::Confirmed,
         'owner_id' => $ownerId ?? adminUser()->id,
     ]);

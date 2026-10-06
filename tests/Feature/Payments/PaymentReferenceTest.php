@@ -27,8 +27,7 @@ function referenceBooking(string $reference = 'ANK-2026-0003'): Booking
     $departure = ReservationFixtures::anamaraDeparture();
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'reference' => $reference,
         'request_reference' => null,
     ]);
@@ -64,8 +63,7 @@ test('payment suffixes increment per booking and kind', function (): void {
 test('a request still on its request reference uses that prefix', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'reference' => null,
         'request_reference' => 'ANK-R-2026-0041',
     ]);

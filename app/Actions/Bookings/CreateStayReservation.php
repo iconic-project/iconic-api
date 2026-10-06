@@ -32,6 +32,7 @@ use App\Services\Inventory\ClaimService;
 use App\Services\Inventory\Restrictions;
 use App\Services\Pricing\GuestsInvalid;
 use App\Services\Pricing\NoRate;
+use App\Services\Pricing\StayQuoteInput;
 use App\Services\Pricing\StayQuoter;
 use App\Services\Pricing\StayReservationQuote;
 use App\Services\Pricing\StayRoomsQuote;
@@ -259,11 +260,7 @@ final class CreateStayReservation extends Action
 
         foreach ($specs as $index => $spec) {
             $stay = $this->stayFor($spec, $top, $index);
-            $type = RoomType::query()
-                ->where('code', $spec['room_type'])
-                ->where('status', RoomTypeStatus::Active)
-                ->orderBy('id')
-                ->first();
+            $type = $this->roomTypeFor($spec);
 
             if (! $type instanceof RoomType) {
                 $errors['rooms.'.$index.'.room_type'] = ['No room type '.$spec['room_type'].'.'];
@@ -279,16 +276,17 @@ final class CreateStayReservation extends Action
                 ? $data['main_channel']
                 : MainChannel::from((string) $data['main_channel']);
             $plan = $this->planCode($spec['rate_plan']);
-            $bundle = $this->quoter->quoteRooms($stay, [[
-                'room_type' => $spec['room_type'],
-                'adults' => $spec['adults'],
-                'child_ages' => $spec['child_ages'],
-                'rate_plan' => $plan,
-                'promo' => $spec['promo'],
-                'online_deposit' => $spec['online_deposit'],
-                'channel' => $channel->segment()->value,
-            ]]);
-            $result = $bundle->rooms[0]['result'] ?? null;
+            $result = $this->quoter->quote($type, new StayQuoteInput(
+                $stay,
+                $type->code,
+                $spec['adults'],
+                $spec['child_ages'],
+                $plan,
+                $spec['promo'],
+                null,
+                $spec['online_deposit'],
+                $channel->segment(),
+            ));
 
             if ($result instanceof StayReservationQuote) {
                 $rows[] = [
@@ -602,6 +600,28 @@ final class CreateStayReservation extends Action
         }
 
         return $specs;
+    }
+
+    /**
+     * A named room decides the type. Otherwise the first active type with that code.
+     *
+     * @param  array{room_type: string, room_id: int|null}  $spec
+     */
+    private function roomTypeFor(array $spec): ?RoomType
+    {
+        if ($spec['room_id'] !== null) {
+            $room = Room::query()->find($spec['room_id']);
+
+            if ($room instanceof Room && $room->roomType instanceof RoomType && $room->roomType->code === $spec['room_type']) {
+                return $room->roomType;
+            }
+        }
+
+        return RoomType::query()
+            ->where('code', $spec['room_type'])
+            ->where('status', RoomTypeStatus::Active)
+            ->orderBy('id')
+            ->first();
     }
 
     /**

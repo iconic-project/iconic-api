@@ -137,25 +137,14 @@ test('patching the agency rate does not change a sold booking', function (): voi
     expect(Booking::query()->findOrFail($id)->commission_pct)->toBe(10);
 });
 
-test('agency show returns net rates and no public suite owner or charter prices', function (): void {
+test('agency show returns an empty year table and the stay rate document', function (): void {
     $agency = Agency::factory()->create(['commission_pct' => 10]);
-    $rates = app(CurrentConfig::class)->rates();
 
-    $response = $this->actingAs(managerUser())
+    $this->actingAs(managerUser())
         ->getJson('/api/rms/agencies/'.$agency->id)
         ->assertOk()
-        ->assertJsonPath('portal_preview.commission_pct', 10);
-
-    $json = $response->json();
-    $encoded = json_encode($json);
-    expect($encoded)->not->toContain('"suite_pp":'.$rates->years[0]->suitePp);
-    expect($encoded)->not->toContain('"owner_pp":'.$rates->years[0]->ownerPp);
-    expect($encoded)->not->toContain('"charter_week":'.$rates->years[0]->charterWeek);
-
-    $net = $json['portal_preview']['net_rates'][0];
-    expect($net['suite_pp'])->toBe(Rounding::halfUp($rates->years[0]->suitePp * 0.9));
-    expect($net['owner_pp'])->toBe(Rounding::halfUp($rates->years[0]->ownerPp * 0.9));
-    expect($net['charter_week'])->toBe(Rounding::halfUp($rates->years[0]->charterWeek * 0.9));
+        ->assertJsonPath('portal_preview.commission_pct', 10)
+        ->assertJsonPath('portal_preview.net_rates', []);
 });
 
 test('agency index windowed stats and kpis count only bookings departing in from to', function (): void {

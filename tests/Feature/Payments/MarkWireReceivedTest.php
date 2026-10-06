@@ -64,8 +64,7 @@ test('marking a wire received settles it, stores the bank reference and confirms
 test('mark wire received is the first path that mutates a ledger row through the append-only trigger', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::PendingPayment,
     ]);
     $payment = Payment::factory()->create([
@@ -96,8 +95,7 @@ test('mark wire received is the first path that mutates a ledger row through the
 test('only an awaiting wire can be marked received', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S3')?->id,
     ]);
     $payment = Payment::factory()->create([
         'booking_id' => $booking->id,

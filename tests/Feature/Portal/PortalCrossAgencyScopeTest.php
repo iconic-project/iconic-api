@@ -28,8 +28,7 @@ test('every list endpoint scoped to agency A never shows agency Bs ids', functio
 
     Booking::factory()->create([
         'reference' => 'ANK-2026-9001',
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'agency_id' => $agencyA->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -39,8 +38,7 @@ test('every list endpoint scoped to agency A never shows agency Bs ids', functio
     ]);
     $bookingB = Booking::factory()->create([
         'reference' => 'ANK-2026-9002',
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'agency_id' => $agencyB->id,
         'commission_pct' => 12,
         'commission_approved' => true,

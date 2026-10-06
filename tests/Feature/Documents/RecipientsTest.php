@@ -37,8 +37,7 @@ function recipientBooking(array $overrides = []): Booking
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S4')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-4100',
         ...$overrides,
@@ -65,7 +64,6 @@ test('a group booking goes to the coordinator', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $coordinator = Contact::factory()->create(['email' => 'coord@group.test']);
     $group = Group::factory()->create([
-        'departure_id' => $departure->id,
         'coordinator_contact_id' => $coordinator->id,
     ]);
     $booking = recipientBooking(['group_id' => $group->id]);

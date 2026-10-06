@@ -77,7 +77,7 @@ test('a near-term departure uses 48 business hours and a long-lead uses 5 busine
 
 test('a claim conflict creates nothing', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
-    $cabin = $departure->property->cabins->firstWhere('code', 'S1');
+    $cabin = $departure->property->rooms->firstWhere('code', 'S1');
     $holder = ClaimHolder::query()->create(['reference' => 'BLK', 'name' => 'Taken']);
 
     DB::transaction(function () use ($departure, $cabin, $holder): void {

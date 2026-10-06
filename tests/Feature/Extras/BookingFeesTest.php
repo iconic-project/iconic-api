@@ -23,8 +23,7 @@ function feesCabin(?int $ownerId = null): Booking
     $departure = ReservationFixtures::anamaraDeparture('2028-04-02');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'owner_id' => $ownerId ?? adminUser()->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
@@ -44,7 +43,6 @@ test('switching png collection on stores known fees and reports a pending guest'
         'last_name' => 'Brandt',
         'dob' => '1979-02-14',
         'nationality' => 'DE',
-        'png_category' => PngCategory::ForeignOver12,
         'png_fee' => 200,
     ]);
     Guest::factory()->create([
@@ -53,7 +51,6 @@ test('switching png collection on stores known fees and reports a pending guest'
         'is_lead' => false,
         'first_name' => '',
         'last_name' => '',
-        'png_category' => PngCategory::Pending,
         'png_fee' => null,
     ]);
 
@@ -83,7 +80,6 @@ test('tct collection snapshots the published per-person amount times guest recor
         'first_name' => 'Anna',
         'dob' => '1970-07-22',
         'nationality' => 'SE',
-        'png_category' => PngCategory::ForeignOver12,
         'png_fee' => 200,
     ]);
     Guest::factory()->create([
@@ -93,7 +89,6 @@ test('tct collection snapshots the published per-person amount times guest recor
         'first_name' => 'Erik',
         'dob' => '1968-01-09',
         'nationality' => 'SE',
-        'png_category' => PngCategory::ForeignOver12,
         'png_fee' => 200,
     ]);
 

@@ -39,8 +39,7 @@ function completeBooking(array $overrides = []): Booking
     $departure = ReservationFixtures::anamaraDeparture('2028-11-05');
 
     return Booking::factory()->create(array_merge([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::PendingPayment,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -74,7 +73,7 @@ test('the token is hashed at rest and GET returns the page without a passport nu
     expect($row->token_hash)->not->toBe($token);
     expect($row->purpose)->toBe(BookingAccessTokenPurpose::Complete);
     expect($row->expires_at->utc()->format('Y-m-d H:i:s'))
-        ->toBe(BusinessTime::dayEndUtc($booking->departure->date->toDateString())->format('Y-m-d H:i:s'));
+        ->toBe(BusinessTime::dayEndUtc($booking->check_in->toDateString())->format('Y-m-d H:i:s'));
 
     $response = $this->getJson('/api/engine/complete/'.$token)
         ->assertOk()
@@ -154,15 +153,15 @@ test('unknown expired revoked cancelled released and deleted tokens 404 identica
 
 test('GET for a group includes every booking and guest', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2028-11-05');
-    $group = Group::factory()->create(['departure_id' => $departure->id]);
+    $group = Group::factory()->create();
     $first = completeBooking([
         'group_id' => $group->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'reference' => 'ANK-2026-8110',
     ]);
     $second = completeBooking([
         'group_id' => $group->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'reference' => 'ANK-2026-8111',
     ]);
     Guest::factory()->create(['booking_id' => $first->id, 'first_name' => 'Ada']);

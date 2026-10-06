@@ -348,8 +348,7 @@ function journeyBookingFor(Contact $contact, User $owner): Booking
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstOrFail()->id,
+        'room_id' => $departure->property->rooms->firstOrFail()->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::Confirmed,

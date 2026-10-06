@@ -153,3 +153,38 @@ None.
 - `composer check` is not green. PHPStan on `app/` is clean. `VocabularyTest` passes. The two new migration tests pass. `php artisan migrate:fresh` on `iconic_test` completes, including the new migrations. A set of feature tests still constructs the deleted yacht types (`Departure`, `Itinerary`, `Availability`, `PngCategory`, `CabinCategory`). They are listed by `rg` of those imports under `tests/`. Shared helpers `tests/Support/Bookings/ReservationFixtures.php` and `tests/Support/Offers/OfferFixtures.php` are in that set, and so are the yacht demo seeders under `database/seeders/`. Those seeders are no longer called from `DatabaseSeeder`.
 - Task 05 regenerates OpenAPI types and should switch the remaining `departure_date` response keys to check-in.
 - The offer stay-window backfill test that built two departures was removed. The backfill still runs inside `2026_10_06_130001`, before the archive rename.
+
+## 22-05 — Frontends cleanup
+
+The four frontends now follow the hotel API. `iconic-ui` is 0.18.0. Generated types no longer include departure, cabin, itinerary, yacht, or manifest aliases. Hotel aliases are property, room, room type, and stay.
+
+The panel no longer has yacht layout, departure, itinerary, or manifest screens. The booking-engine menu has no departures item. Legacy rate year, term, and rule panels are gone. Offers use show on calendar. Engine settings guests use max per property. Fees are the price-panel flag and the footnote. Business rules use the check-out field names and no longer edit manifests.
+
+The public engine keeps `/`, `/rooms/[slug]`, `/book/rooms`, `/book/details`, and `/book/confirmation`. Nitro 301s send `/itineraries` and `/itineraries/**` to `/rooms`, and `/book/cabins` to `/book/rooms`. Confirmation polls the stay checkout status.
+
+A panel ESLint rule (`vocabulary/no-retired-vocabulary`) blocks the same retired words as the API arch test, over `app/`. Allowlisted files are the front desk (guests leaving), `closed_to_departure`, `image/png`, stored history event names, and API fields that still use the old names (`age_at_departure`, `departure_date`, the `png` fee code, the stored sales-material value). A Vitest in each repo walks locale JSON and fails on the words yacht and cabin.
+
+### Files
+
+- Layer: `iconic-ui` `api.d.ts` regenerated, hand aliases in `inventory.ts`, `engine.ts`, `config.ts`, `guests.ts`, `documents.ts`, `bookings.ts`, `index.ts`; `package.json` 0.18.0; `CHANGELOG.md`; `README.md`
+- Panel: deleted yacht pages and helpers; stay overview on `BookingPanel.vue`; rates, rules, engine settings, offers, holds, bookings, guest experience, reports; `eslint/vocabulary.mjs`; locale JSON; `tests/unit/retiredWords.test.ts`
+- Engine: deleted itinerary, cabin, and charter pages; `nuxt.config.ts` redirects; `confirmation.vue`, complete, questionnaire, survey; locale JSON
+- Portal: room class names on the new-request form; booking status tones for in-house and checked-out
+- READMEs in all four repos
+
+### Deviations
+
+- Some API fields still use the old names. The panel reads them and the ESLint rule allowlists those files. The clients do not rename the API.
+- `charter` is not in the vocabulary pattern. Payment KPI copy still shows the charter deposit percent the API returns.
+- Locale JSON was rewritten in place. Unused departure and yacht-layout trees were removed. Live sentences now say room or stay.
+- The style-guide playground labels say Property, Room type, and Check-in.
+
+### Open questions
+
+None.
+
+### Notes for later
+
+- Guest extras still describe the `png` fee, because the API still returns that fee code.
+- History rows for old itinerary and departure events still have those event names. `describe.ts` keeps the cases so old ledger rows stay readable.
+- The signed-out panel sends `/rms/booking-engine/departures` to login. Engine and portal were not running, so the 301s were not clicked in a browser.

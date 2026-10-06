@@ -28,8 +28,7 @@ function issuesCabin(array $booking = []): Booking
     $actor = managerUser();
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
         'adults' => 2,
@@ -92,8 +91,7 @@ test('a minor today who turns 18 before departure still needs guardian consent',
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $actor = managerUser();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
     ]);
@@ -139,7 +137,6 @@ test('children mismatch is not raised on a charter', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $actor = managerUser();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
         'room_id' => null,
         'type' => BookingType::Charter,
         'owner_id' => $actor->id,

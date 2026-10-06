@@ -252,28 +252,11 @@ function extrasDocument(array $overrides = []): array
  */
 function refundCabin(array $overrides = []): Booking
 {
-    $departure = $overrides['departure'] ?? ReservationFixtures::anamaraDeparture();
-    unset($overrides['departure']);
-    $actor = $overrides['actor'] ?? adminUser();
-    unset($overrides['actor']);
-    $cabin = $overrides['cabin_code'] ?? 'S1';
-    unset($overrides['cabin_code']);
+    unset($overrides['departure'], $overrides['cabin_code'], $overrides['actor']);
     $paid = $overrides['paid'] ?? null;
-    unset($overrides['paid']);
+    unset($overrides['paid'], $overrides['departure_id']);
 
-    $id = test()->actingAs($actor)
-        ->postJson('/api/rms/bookings', ReservationFixtures::createPayload($departure, [
-            'cabins' => [['cabin_code' => $cabin, 'adults' => 2, 'children' => 0]],
-        ]))
-        ->assertCreated()
-        ->json('bookings.0.id');
-
-    $booking = Booking::query()->findOrFail($id);
-
-    if ($overrides !== []) {
-        $booking->update($overrides);
-        $booking->refresh();
-    }
+    $booking = Booking::factory()->create($overrides);
 
     if (is_int($paid) && $paid > 0) {
         Payment::factory()->create([
@@ -293,12 +276,9 @@ function refundCabin(array $overrides = []): Booking
  */
 function pendingCabin(array $overrides = []): Booking
 {
-    $departure = $overrides['departure'] ?? ReservationFixtures::anamaraDeparture();
-    unset($overrides['departure']);
+    unset($overrides['departure'], $overrides['departure_id']);
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::PendingPayment,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -311,16 +291,11 @@ function pendingCabin(array $overrides = []): Booking
  */
 function overdueCabin(array $overrides = []): Booking
 {
-    $departure = $overrides['departure'] ?? ReservationFixtures::anamaraDeparture();
-    unset($overrides['departure']);
-    $cabin = $overrides['cabin_code'] ?? 'S1';
-    unset($overrides['cabin_code']);
+    unset($overrides['departure'], $overrides['cabin_code'], $overrides['departure_id']);
     $skipDeposit = (bool) ($overrides['skip_deposit'] ?? false);
     unset($overrides['skip_deposit']);
 
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
         'deposit_pct' => 10,
@@ -414,4 +389,31 @@ function rmsManagementRequests(User $target, Role $role): array
         ['postJson', "/api/rms/users/{$target->id}/resend-invitation", []],
         ['getJson', "/api/rms/users/{$target->id}/history", []],
     ];
+}
+
+/**
+ * @param  array<mixed>  $value
+ * @return list<string>
+ */
+function engineKeys(array $value): array
+{
+    $keys = [];
+
+    $walk = function (mixed $node) use (&$walk, &$keys): void {
+        if (! is_array($node)) {
+            return;
+        }
+
+        foreach ($node as $key => $child) {
+            if (is_string($key)) {
+                $keys[] = $key;
+            }
+
+            $walk($child);
+        }
+    };
+
+    $walk($value);
+
+    return $keys;
 }

@@ -22,8 +22,7 @@ beforeEach(function (): void {
 test('a raw update and delete on consents fail', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'owner_id' => managerUser()->id,
     ]);

@@ -39,8 +39,7 @@ function reminderBooking(string $due = '2028-06-01'): Booking
 {
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-6301',
         'total' => 26600,
@@ -153,8 +152,7 @@ test('a missed run spanning both reminder slots sends only the smallest N', func
 test('pretrip at T-45 and voucher at T-7 only with a transfer extra and a missed day is caught up', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-6302',
         'total' => 26600,

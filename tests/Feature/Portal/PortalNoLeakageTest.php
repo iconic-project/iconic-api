@@ -76,8 +76,7 @@ test('no portal response leaks a public rate, sensitive guest fields, or a payme
 
     $booking = Booking::factory()->create([
         'reference' => 'ANK-2026-6001',
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -98,10 +97,8 @@ test('no portal response leaks a public rate, sensitive guest fields, or a payme
 
     $rates = app(CurrentConfig::class)->rates();
     $publicRates = [];
-    foreach ($rates->years as $year) {
-        $publicRates[] = $year->suitePp;
-        $publicRates[] = $year->ownerPp;
-        $publicRates[] = $year->charterWeek;
+    foreach ($rates->roomRates as $rate) {
+        $publicRates[] = $rate->nightly;
     }
 
     $alwaysForbidden = ['payments', 'guests', 'documents'];

@@ -21,8 +21,7 @@ function completeLinkBooking(?int $ownerId = null): Booking
     $departure = ReservationFixtures::anamaraDeparture('2028-11-12');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S3')?->id,
         'status' => BookingStatus::PendingPayment,
         'owner_id' => $ownerId ?? adminUser()->id,
     ]);

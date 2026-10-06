@@ -136,8 +136,7 @@ test('backfill copies every marketing log row once and leaves other documents al
     $contact = Contact::factory()->create();
     $departure = ReservationFixtures::anamaraDeparture('2027-12-05');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::Confirmed,
@@ -304,8 +303,7 @@ test('the timeline shows a register line and hides the marketing booking-log lin
     $contact = Contact::factory()->create();
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $actor->id,
         'status' => BookingStatus::Confirmed,
@@ -357,7 +355,7 @@ test('stitching records analytics once at the first event time', function (): vo
     BehaviouralEvent::factory()->create([
         'session_id' => $session,
         'contact_id' => null,
-        'name' => BehaviouralEventName::ViewItinerary,
+        'name' => BehaviouralEventName::ViewProperty,
         'occurred_at' => $first->copy()->addHour(),
     ]);
 

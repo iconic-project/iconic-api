@@ -2,16 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Enums\ItineraryStatus;
 use App\Enums\RoomTypeStatus;
 use App\Models\ChangeHistory;
-use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomType;
 use App\Models\User;
 use App\Support\Content\Completeness;
-use App\Support\Content\CopyPublishedItineraryContent;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Http\UploadedFile;
@@ -242,43 +239,4 @@ test('property and room history are readable by a sales exec and hidden without 
     $this->actingAs($outsider)->getJson("/api/rms/properties/{$property->id}/history")->assertForbidden();
     $this->actingAs($outsider)->getJson("/api/rms/room-types/{$type->id}/history")->assertForbidden();
     $this->actingAs($outsider)->getJson("/api/rms/rooms/{$room->id}/history")->assertForbidden();
-});
-
-test('the first published itinerary seeds empty property highlights and faqs', function (): void {
-    Itinerary::factory()->create([
-        'status' => ItineraryStatus::Published,
-        'sort_order' => 2,
-        'highlights' => ['Later'],
-        'faqs' => [['Later?', 'No.']],
-    ]);
-    $first = Itinerary::factory()->create([
-        'status' => ItineraryStatus::Published,
-        'sort_order' => 1,
-        'highlights' => ['Sundeck'],
-        'faqs' => [['When?', 'Sunday.']],
-    ]);
-    Itinerary::factory()->create([
-        'status' => ItineraryStatus::Draft,
-        'sort_order' => 0,
-        'highlights' => ['Draft'],
-        'faqs' => [['Draft?', 'No.']],
-    ]);
-
-    $empty = Property::factory()->create(['highlights' => null, 'faqs' => null]);
-    $kept = Property::factory()->create([
-        'highlights' => ['Already'],
-        'faqs' => null,
-    ]);
-
-    expect(app(CopyPublishedItineraryContent::class)->handle())->toBe(2);
-
-    $empty->refresh();
-    $kept->refresh();
-
-    expect($empty->highlights)->toBe($first->highlights);
-    expect($empty->faqs)->toBe($first->faqs);
-    expect($kept->highlights)->toBe(['Already']);
-    expect($kept->faqs)->toBe($first->faqs);
-
-    expect(app(CopyPublishedItineraryContent::class)->handle())->toBe(0);
 });

@@ -95,7 +95,6 @@ function occupancyHouse(): array
         'sort' => $number,
     ]));
     $holder = Booking::factory()->create([
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $rooms->first()?->id,
         'check_in' => '2020-01-06',

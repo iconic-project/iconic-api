@@ -25,16 +25,14 @@ beforeEach(function (): void {
 test('activity filters, sides and KPIs agree with the list', function (): void {
     $actor = salesExecUser();
     $contact = Contact::factory()->create(['name' => 'E. Harmon']);
-    $departure = ReservationFixtures::anamaraDeparture('2027-11-21');
-    $itinerary = $departure->itinerary;
+    $property = ReservationFixtures::anamaraDeparture()->property;
 
     BehaviouralEvent::factory()->create([
         'contact_id' => $contact->id,
         'name' => BehaviouralEventName::SubmitBookingRequest,
         'params' => [
-            'itinerary_code' => $itinerary->code,
-            'departure_id' => $departure->id,
-            'cabin_count' => 1,
+            'property_code' => $property->code,
+            'rooms' => 1,
         ],
         'occurred_at' => now(),
     ]);
@@ -42,15 +40,14 @@ test('activity filters, sides and KPIs agree with the list', function (): void {
         'contact_id' => $contact->id,
         'name' => BehaviouralEventName::BeginCheckout,
         'params' => [
-            'itinerary_code' => $itinerary->code,
-            'departure_id' => $departure->id,
+            'property_code' => $property->code,
         ],
         'occurred_at' => now()->subMinute(),
     ]);
     BehaviouralEvent::factory()->create([
         'contact_id' => null,
-        'name' => BehaviouralEventName::ViewItinerary,
-        'params' => ['itinerary_code' => $itinerary->code],
+        'name' => BehaviouralEventName::ViewProperty,
+        'params' => ['property_code' => $property->code],
         'occurred_at' => now()->subMinutes(2),
     ]);
     BehaviouralEvent::factory()->create([
@@ -74,7 +71,7 @@ test('activity filters, sides and KPIs agree with the list', function (): void {
     expect($rows->firstWhere('name', 'view_itinerary')['contact_id'])->toBeNull();
     expect($rows->firstWhere('name', 'submit_booking_request')['contact'])->toBe('E. Harmon');
     expect($rows->firstWhere('name', 'submit_booking_request')['contact_id'])->toBe($contact->id);
-    expect($rows->firstWhere('name', 'view_itinerary')['detail'])->toBe($itinerary->name);
+    expect($rows->firstWhere('name', 'view_itinerary')['detail'])->toBe($property->name);
 
     $kpis = $response->json('meta.kpis');
     expect($kpis['identified'])->toBe(3);

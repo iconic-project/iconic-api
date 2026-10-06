@@ -30,8 +30,7 @@ function indexPaymentBooking(User $owner, string $cabin, string $reference): Boo
     $departure = ReservationFixtures::anamaraDeparture();
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', $cabin)?->id,
         'owner_id' => $owner->id,
         'reference' => $reference,
     ]);
@@ -188,11 +187,10 @@ test('ledger kpis reuse paidValues overdue and Accrual and pending includes over
     $pending = pendingCabin([
         'reference' => 'ANK-2026-0602',
         'owner_id' => $sales->id,
-        'room_id' => ReservationFixtures::anamaraDeparture()->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture()->property->rooms->firstWhere('code', 'S2')?->id,
     ]);
     $confirmed = Booking::factory()->create([
-        'departure_id' => ReservationFixtures::anamaraDeparture()->id,
-        'room_id' => ReservationFixtures::anamaraDeparture()->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture()->property->rooms->firstWhere('code', 'S3')?->id,
         'owner_id' => $sales->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-0603',
@@ -293,16 +291,14 @@ test('pending_payment lists owing bookings and excludes requested and paid-off',
     $admin = adminUser();
     $owing = pendingCabin(['reference' => 'ANK-2026-0610']);
     $requested = Booking::factory()->create([
-        'departure_id' => ReservationFixtures::anamaraDeparture()->id,
-        'room_id' => ReservationFixtures::anamaraDeparture()->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture()->property->rooms->firstWhere('code', 'S2')?->id,
         'owner_id' => $admin->id,
         'status' => BookingStatus::Requested,
         'reference' => 'ANK-2026-0611',
         'total' => 26600,
     ]);
     $paid = Booking::factory()->create([
-        'departure_id' => ReservationFixtures::anamaraDeparture()->id,
-        'room_id' => ReservationFixtures::anamaraDeparture()->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture()->property->rooms->firstWhere('code', 'S3')?->id,
         'owner_id' => $admin->id,
         'status' => BookingStatus::FullyPaid,
         'reference' => 'ANK-2026-0612',

@@ -80,13 +80,11 @@ test('each system kind is raised once and the sweep does not raise it again', fu
     expect(CrmTask::query()->where('idempotency_key', 'request:'.$request->id)->count())->toBe(1);
 
     $held = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::OnHoldAgency,
         'reference' => 'ANK-CAP-1',
     ]);
     $overdue = Booking::factory()->create([
-        'departure_id' => ReservationFixtures::anamaraDeparture('2027-12-05')->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-OVER-1',
         'balance_due_date_override' => '2026-09-01',
@@ -221,7 +219,6 @@ test('visibility follows ownership and needs_permission', function (): void {
 
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $overdue = Booking::factory()->create([
-        'departure_id' => $departure->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-OVER-2',
         'balance_due_date_override' => '2026-09-01',

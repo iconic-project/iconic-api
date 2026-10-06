@@ -28,13 +28,16 @@ beforeEach(function (): void {
     $this->seed(ConfigSeeder::class);
 });
 
-function retentionCabin(string $departureDate): Booking
+function retentionCabin(string $checkIn): Booking
 {
-    $departure = ReservationFixtures::anamaraDeparture($departureDate);
+    $anchor = ReservationFixtures::anamaraDeparture($checkIn);
+    $checkOut = CarbonImmutable::parse($checkIn)->addDays(7)->toDateString();
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $anchor->property->rooms->firstWhere('code', 'S1')?->id,
+        'check_in' => $checkIn,
+        'check_out' => $checkOut,
+        'nights' => 7,
         'owner_id' => managerUser()->id,
         'status' => BookingStatus::CheckedOut,
     ]);
@@ -66,7 +69,7 @@ test('29 February 2028 plus 24 months no-overflow is 28 February 2030', function
 
 test('passports are purged the day after the 29 February overflow boundary', function (): void {
     $booking = retentionCabin('2028-02-22');
-    expect($booking->departure->returnDate()->toDateString())->toBe('2028-02-29');
+    expect($booking->check_out->toDateString())->toBe('2028-02-29');
 
     $guest = retentionGuest($booking, [
         'medical_note' => null,
@@ -163,7 +166,6 @@ test('retention follows check-out, and a later check-out is left alone', functio
     $property = Property::factory()->create();
     $room = Room::factory()->create(['property_id' => $property->id]);
     $early = Booking::factory()->create([
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $room->id,
         'check_in' => '2026-01-01',
@@ -174,7 +176,6 @@ test('retention follows check-out, and a later check-out is left alone', functio
         'reference' => 'ANK-RET-EARLY',
     ]);
     $late = Booking::factory()->create([
-        'departure_id' => null,
         'property_id' => $property->id,
         'room_id' => $room->id,
         'check_in' => '2028-06-01',

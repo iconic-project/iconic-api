@@ -23,8 +23,7 @@ beforeEach(function (): void {
 test('isOverdue is false on the due day including 23:30 GALT and true the day after', function (): void {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S4')?->id,
         'status' => BookingStatus::Confirmed,
         'total' => 26600,
         'deposit_pct' => 10,

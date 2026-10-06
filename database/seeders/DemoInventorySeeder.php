@@ -24,6 +24,9 @@ final class DemoInventorySeeder extends Seeder
 {
     public function run(): void
     {
+        // Yacht inventory is retired. Hotel seed is HotelSeeder.
+        return;
+
         if (! app()->environment(['local', 'testing'])) {
             return;
         }

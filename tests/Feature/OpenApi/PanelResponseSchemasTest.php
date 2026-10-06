@@ -494,7 +494,6 @@ test('panel-read OpenAPI schemas have properties', function (): void {
         'medical_note',
         'dietary_note',
         'accessibility_note',
-        'png_category',
         'png_category_label',
         'png_fee',
         'complete',
@@ -795,8 +794,6 @@ test('sprint 11 response schemas name their enums and optional preference fields
         'AlertKind',
         'AlertSeverity',
         'AlertNotificationStatus',
-        'ManifestKind',
-        'ManifestReason',
         'PreferenceSource',
         'PreferenceStatus',
         'PreferenceQuestionType',
@@ -832,40 +829,6 @@ test('sprint 11 response schemas name their enums and optional preference fields
     expect(sprint11SchemaRef($kind['properties']['kind']))->toContain('AlertKind');
     expect(sprint11SchemaRef($kind['properties']['severity']))->toContain('AlertSeverity');
 
-    $version = openApiSchema($spec, 'ManifestVersionResource');
-    expect(sprint11SchemaRef($version['properties']['kind']))->toContain('ManifestKind');
-    expect(sprint11SchemaRef($version['properties']['reason']))->toContain('ManifestReason');
-
-    $issued = openApiSchema($spec, 'ManifestIssuedResource');
-    expect($issued['properties'])->toHaveKeys(['created', 'message', 'data']);
-    expect(sprint11SchemaRef($issued['properties']['data']))->toContain('ManifestVersionResource');
-
-    $generate = $spec['paths']['/rms/departures/{departure}/manifests/{kind}']['post']
-        ?? $spec['paths']['/api/rms/departures/{departure}/manifests/{kind}']['post']
-        ?? null;
-    expect($generate)->toBeArray();
-    foreach (['200', '201'] as $status) {
-        $body = $generate['responses'][$status]['content']['application/json']['schema'] ?? [];
-        expect(sprint11SchemaRef($body))->toContain('ManifestIssuedResource');
-    }
-
-    openApiSchema($spec, 'ManifestDepartureResource');
-
-    $experience = openApiSchema($spec, 'DepartureGuestExperienceResource');
-    $guest = $experience['properties']['guests']['items'] ?? [];
-    expect($guest['properties'] ?? [])->toHaveKeys([
-        'accessibility_provided',
-        'emergency_contact_provided',
-        'accessibility',
-        'emergency_contact',
-        'status',
-        'source',
-    ]);
-    expect($guest['required'] ?? [])->not->toContain('accessibility');
-    expect($guest['required'] ?? [])->not->toContain('emergency_contact');
-    expect(sprint11SchemaRef($guest['properties']['status']))->toContain('PreferenceStatus');
-    expect(sprint11SchemaRef($guest['properties']['source']))->toContain('PreferenceSource');
-
     $preferences = openApiSchema($spec, 'GuestPreferencesResource');
     $current = $preferences['properties']['current'] ?? [];
     $currentProps = $current['properties'] ?? $current['anyOf'][0]['properties'] ?? [];
@@ -895,11 +858,8 @@ test('sprint 11 response schemas name their enums and optional preference fields
     expect($staff['properties'])->toHaveKeys(['id', 'guest_id', 'score', 'source']);
     expect(sprint11SchemaRef($staff['properties']['source']))->toContain('GuestResponseSource');
 
-    $picker = openApiSchema($spec, 'GuestExperienceDepartureResource');
-    expect($picker['properties'])->toHaveKeys(['departure_id', 'date', 'property', 'passengers']);
-
     $surveyGuest = openApiSchema($spec, 'SurveyGuestResource');
-    expect($surveyGuest['properties'])->toHaveKeys(['guest_id', 'name', 'cabin', 'responded']);
+    expect($surveyGuest['properties'])->toHaveKeys(['guest_id', 'name', 'room', 'responded']);
     expect($surveyGuest['properties'])->not->toHaveKeys(['passport_no', 'medical_note', 'dob', 'nationality']);
 
     $commission = openApiSchema($spec, 'CommissionResource');

@@ -37,8 +37,7 @@ function crmBooking(Contact $contact, string $date, BookingStatus $status, int $
     $departure = ReservationFixtures::anamaraDeparture($date);
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', $cabin)?->id,
         'contact_id' => $contact->id,
         'status' => $status,
         'total' => $total,

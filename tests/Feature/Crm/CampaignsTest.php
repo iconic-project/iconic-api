@@ -39,7 +39,6 @@ test('campaigns measure sold bookings by offer code and utm', function (): void 
     Offer::factory()->live()->create([
         'code' => 'OLDWIN',
         'name' => 'Expired window',
-        'travel_to' => $yesterday,
         'booking_to' => $yesterday,
     ]);
     Offer::factory()->create(['code' => 'DRAFT1', 'name' => 'Draft']);

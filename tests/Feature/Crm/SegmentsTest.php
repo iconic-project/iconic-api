@@ -20,7 +20,6 @@ use App\Models\BookingRequest;
 use App\Models\ChangeHistory;
 use App\Models\Contact;
 use App\Models\Delivery;
-use App\Models\Departure;
 use App\Models\ErasureLog;
 use App\Models\Guest;
 use App\Models\GuestResponse;
@@ -35,6 +34,7 @@ use Database\Seeders\RolesSeeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Testing\TestResponse;
 use Tests\Support\Bookings\ReservationFixtures;
+use Tests\Support\Bookings\StayAnchor;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
@@ -45,22 +45,21 @@ beforeEach(function (): void {
 test('each seeded segment count equals the contacts it lists', function (): void {
     $actor = managerUser();
     $dreamer = consentedContact(['country' => 'DE', 'name' => 'Ada Dreamer']);
-    stitchedEvent($dreamer, BehaviouralEventName::ViewItinerary);
-    stitchedEvent($dreamer, BehaviouralEventName::ViewItinerary);
+    stitchedEvent($dreamer, BehaviouralEventName::ViewProperty);
+    stitchedEvent($dreamer, BehaviouralEventName::ViewProperty);
     BehaviouralEvent::factory()->create([
         'contact_id' => null,
-        'name' => BehaviouralEventName::ViewItinerary,
+        'name' => BehaviouralEventName::ViewProperty,
     ]);
 
     $festiveDeparture = ReservationFixtures::anamaraDeparture('2027-11-07', true);
     $festive = consentedContact(['name' => 'Festive Viewer']);
     stitchedEvent($festive, BehaviouralEventName::ViewStay, [
-        'departure_id' => $festiveDeparture->id,
     ]);
 
     $familyDeparture = ReservationFixtures::anamaraDeparture('2027-11-14');
     $family = consentedContact(['name' => 'Family Booker', 'country' => 'US']);
-    $familyBooking = booked($family, $actor, $familyDeparture->id, 'S1', BookingStatus::Confirmed);
+    $familyBooking = booked($family, $actor, $familyDeparture, 'S1', BookingStatus::Confirmed);
     Guest::factory()->create([
         'booking_id' => $familyBooking->id,
         'dob' => '2016-01-15',
@@ -69,7 +68,7 @@ test('each seeded segment count equals the contacts it lists', function (): void
 
     $pastDeparture = ReservationFixtures::anamaraDeparture('2024-01-07');
     $past = consentedContact(['name' => 'Past Guest', 'country' => 'US']);
-    $pastBooking = booked($past, $actor, $pastDeparture->id, 'S1', BookingStatus::CheckedOut);
+    $pastBooking = booked($past, $actor, $pastDeparture, 'S1', BookingStatus::CheckedOut);
     Guest::factory()->create([
         'booking_id' => $pastBooking->id,
         'email' => $past->email,
@@ -119,8 +118,8 @@ test('each seeded segment count equals the contacts it lists', function (): void
 test('withdrawing marketing consent leaves every marketing segment and enters suppression', function (): void {
     $actor = managerUser();
     $dreamer = consentedContact(['country' => 'DE']);
-    stitchedEvent($dreamer, BehaviouralEventName::ViewItinerary);
-    stitchedEvent($dreamer, BehaviouralEventName::ViewItinerary);
+    stitchedEvent($dreamer, BehaviouralEventName::ViewProperty);
+    stitchedEvent($dreamer, BehaviouralEventName::ViewProperty);
 
     expect(memberIds($this, $actor, 'warm_dreamers'))->toContain($dreamer->id)
         ->and(memberIds($this, $actor, 'dach_luxury'))->toContain($dreamer->id);
@@ -249,8 +248,8 @@ test('the segment list query count stays flat as contacts grow', function (): vo
 
     foreach (['S2', 'S3', 'S4'] as $cabin) {
         $contact = consentedContact();
-        stitchedEvent($contact, BehaviouralEventName::ViewItinerary);
-        booked($contact, $actor, $departure->id, $cabin, BookingStatus::Confirmed);
+        stitchedEvent($contact, BehaviouralEventName::ViewProperty);
+        booked($contact, $actor, $departure, $cabin, BookingStatus::Confirmed);
     }
 
     DB::flushQueryLog();
@@ -410,13 +409,16 @@ function stitchedEvent(Contact $contact, BehaviouralEventName $name, array $para
     ]);
 }
 
-function booked(Contact $contact, User $owner, int $departureId, string $cabin, BookingStatus $status): Booking
+function booked(Contact $contact, User $owner, StayAnchor $anchor, string $roomCode, BookingStatus $status): Booking
 {
-    $departure = Departure::query()->with('property.cabins')->findOrFail($departureId);
+    $stay = $anchor->stayDates();
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+        'room_id' => $anchor->property->rooms->firstWhere('code', $roomCode)?->id,
+        'property_id' => $anchor->property_id,
+        'check_in' => $stay->checkIn()->toDateString(),
+        'check_out' => $stay->checkOut()->toDateString(),
+        'nights' => 7,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => $status,

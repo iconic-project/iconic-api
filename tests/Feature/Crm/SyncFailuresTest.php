@@ -49,8 +49,7 @@ test('failed jobs and failed deliveries appear and retry', function (): void {
 
     $departure = ReservationFixtures::anamaraDeparture('2028-11-12');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-7701',
         'billing_email' => 'guest@iconic.test',

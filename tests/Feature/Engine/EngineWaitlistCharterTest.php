@@ -70,16 +70,3 @@ test('the engine waitlist is rate limited', function (): void {
 
     $this->postJson('/api/engine/waitlist', engineWaitlistPayload())->assertStatus(429);
 });
-
-test('checkout create is rate limited at ten per minute', function (): void {
-    $departure = checkoutWestDeparture();
-
-    for ($i = 0; $i < 10; $i++) {
-        $this->postJson('/api/engine/checkout', checkoutHoldPayload($departure, [
-            ['cabin_code' => 'S1', 'adults' => 2, 'children' => 0],
-        ]));
-    }
-
-    $this->postJson('/api/engine/checkout', checkoutHoldPayload($departure))
-        ->assertStatus(429);
-});

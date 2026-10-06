@@ -25,8 +25,7 @@ function recordConsentCabin(): Booking
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => managerUser()->id,
         'status' => BookingStatus::Confirmed,
     ]);

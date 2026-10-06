@@ -14,6 +14,7 @@ use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\DemoUsersSeeder;
 use Database\Seeders\HotelSeeder;
 use Database\Seeders\RolesSeeder;
+use Illuminate\Support\Facades\Schema;
 
 test('the hotel fixture keeps occupancy, rooms, seasons and quote arithmetic consistent', function (): void {
     /** @var list<array<string, mixed>> $types */
@@ -163,7 +164,7 @@ test('the hotel seeder is idempotent and bookings have no departure', function (
         expect(Completeness::engineVisible($type))->toBeTrue();
     }
     expect(Booking::query()->count())->toBe(25);
-    expect(Booking::query()->whereNotNull('departure_id')->count())->toBe(0);
+    expect(Schema::hasColumn('bookings', 'departure_id'))->toBeFalse();
 
     $group = Booking::query()->where('reference', 'HTL-001')->firstOrFail();
     expect($group->status)->toBe(BookingStatus::Confirmed);

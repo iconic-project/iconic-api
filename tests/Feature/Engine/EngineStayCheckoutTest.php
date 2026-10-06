@@ -235,7 +235,6 @@ test('two checkouts on the last room leave one hold', function (): void {
     $stay = StayDates::of('2026-12-21', '2026-12-24');
     $holder = CheckoutSession::query()->create([
         'token_hash' => CheckoutSession::hashToken(bin2hex(random_bytes(32))),
-        'departure_id' => null,
         'cabins' => [],
         'check_in' => '2026-12-21',
         'check_out' => '2026-12-24',

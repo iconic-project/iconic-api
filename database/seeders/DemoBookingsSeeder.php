@@ -47,6 +47,11 @@ final class DemoBookingsSeeder extends Seeder
 
     public function run(): void
     {
+        return;
+    }
+
+    public function runYachtSeedDisabled(): void
+    {
         if (! app()->environment(['local', 'testing'])) {
             return;
         }

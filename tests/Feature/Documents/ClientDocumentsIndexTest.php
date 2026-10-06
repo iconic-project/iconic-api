@@ -24,8 +24,7 @@ function indexCabin(string $date, string $cabin, string $reference): Booking
     $departure = ReservationFixtures::anamaraDeparture($date);
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', $cabin)?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => $reference,
         'total' => 26600,

@@ -36,8 +36,7 @@ function questionnaireFixture(): array
 {
     $departure = ReservationFixtures::anamaraDeparture('2028-09-03');
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::Confirmed,
         'reference' => 'ANK-2026-6408',
     ]);

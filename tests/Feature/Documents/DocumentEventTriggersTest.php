@@ -137,8 +137,7 @@ test('no automatic documents are issued for requested pending on-hold cancelled 
     $departure = ReservationFixtures::anamaraDeparture('2028-03-05');
 
     $requested = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'status' => BookingStatus::Requested,
         'total' => 26600,
     ]);
@@ -147,14 +146,14 @@ test('no automatic documents are issued for requested pending on-hold cancelled 
     $pending = pendingCabin([
         'departure' => ReservationFixtures::anamaraDeparture('2028-03-12'),
         'reference' => 'ANK-2026-6105',
-        'room_id' => ReservationFixtures::anamaraDeparture('2028-03-12')->property->cabins->firstWhere('code', 'S3')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture('2028-03-12')->property->rooms->firstWhere('code', 'S3')?->id,
     ]);
     expect(Document::query()->where('booking_id', $pending->id)->count())->toBe(0);
 
     $held = pendingCabin([
         'departure' => ReservationFixtures::anamaraDeparture('2028-03-19'),
         'reference' => 'ANK-2026-6106',
-        'room_id' => ReservationFixtures::anamaraDeparture('2028-03-19')->property->cabins->firstWhere('code', 'S4')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture('2028-03-19')->property->rooms->firstWhere('code', 'S4')?->id,
         'status' => BookingStatus::OnHoldAgency,
         'commission_pct' => 15,
     ]);
@@ -166,7 +165,7 @@ test('no automatic documents are issued for requested pending on-hold cancelled 
     $cancelled = pendingCabin([
         'departure' => ReservationFixtures::anamaraDeparture('2028-03-26'),
         'reference' => 'ANK-2026-6107',
-        'room_id' => ReservationFixtures::anamaraDeparture('2028-03-26')->property->cabins->firstWhere('code', 'S5')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture('2028-03-26')->property->rooms->firstWhere('code', 'S5')?->id,
     ]);
     app(TransitionBooking::class)->handle($cancelled, [
         'to' => BookingStatus::Cancelled,
@@ -175,8 +174,7 @@ test('no automatic documents are issued for requested pending on-hold cancelled 
     expect(Document::query()->where('booking_id', $cancelled->id)->count())->toBe(0);
 
     $released = Booking::factory()->create([
-        'departure_id' => ReservationFixtures::anamaraDeparture('2028-04-02')->id,
-        'room_id' => ReservationFixtures::anamaraDeparture('2028-04-02')->property->cabins->firstWhere('code', 'S6')?->id,
+        'room_id' => ReservationFixtures::anamaraDeparture('2028-04-02')->property->rooms->firstWhere('code', 'S6')?->id,
         'status' => BookingStatus::Requested,
         'reference' => 'ANK-2026-6108',
         'total' => 26600,

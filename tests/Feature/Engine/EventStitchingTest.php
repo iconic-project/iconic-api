@@ -21,34 +21,6 @@ beforeEach(function (): void {
     adminUser();
 });
 
-test('checkout submit back-fills a session and writes one identity.stitched', function (): void {
-    $session = engineSessionId();
-    $this->postJson('/api/engine/events', [
-        'session_id' => $session,
-        'events' => [
-            engineEvent(BehaviouralEventName::ViewItinerary->value, ['itinerary_code' => 'WEST']),
-            engineEvent(BehaviouralEventName::BeginCheckout->value, ['itinerary_code' => 'WEST', 'cabin_count' => 1]),
-        ],
-    ])->assertOk();
-
-    $departure = checkoutWestDeparture();
-    $hold = createCheckoutHold($departure);
-    $payload = checkoutSubmitPayload($hold['cabins'], (int) $hold['quote']['total'], [
-        'session_id' => $session,
-    ]);
-
-    $this->postJson('/api/engine/checkout/'.$hold['token'].'/submit', $payload)->assertOk();
-
-    $contact = Contact::query()->where('email', $payload['email'])->firstOrFail();
-    $events = BehaviouralEvent::query()->where('session_id', $session)->orderBy('id')->get();
-
-    expect($events->where('name', BehaviouralEventName::IdentityStitched)->count())->toBe(1);
-    expect($events->every(fn (BehaviouralEvent $event): bool => $event->contact_id === $contact->id))->toBeTrue();
-    expect($events->firstWhere('name', BehaviouralEventName::IdentityStitched)?->params['count'])->toBe(2);
-    expect($contact->engine_identified_at)->not->toBeNull();
-    expect(ChangeHistory::query()->where('event', 'identity.stitched')->where('subject_id', $contact->id)->count())->toBe(1);
-});
-
 test('a waitlist stitch with no booking makes the contact MQL', function (): void {
     $this->seed(DemoUsersSeeder::class);
     $this->seed(HotelSeeder::class);
@@ -135,21 +107,6 @@ test('the complete page stitches the booking contact', function (): void {
 
     expect(BehaviouralEvent::query()->where('session_id', $session)->where('contact_id', $booking->contact_id)->count())->toBe(2);
     expect($booking->contact->fresh()?->engine_identified_at)->not->toBeNull();
-});
-
-test('a charter enquiry stitches the session', function (): void {
-    Mail::fake();
-    $session = engineSessionId();
-    $this->postJson('/api/engine/events', [
-        'session_id' => $session,
-        'events' => [engineEvent(BehaviouralEventName::CharterInquirySubmit->value, ['value' => 199500, 'currency' => 'USD'])],
-    ])->assertOk();
-
-    $payload = engineCharterPayload(['session_id' => $session]);
-    $this->postJson('/api/engine/charter-enquiries', $payload)->assertCreated();
-
-    $contact = Contact::query()->where('email', $payload['contact']['email'])->firstOrFail();
-    expect(BehaviouralEvent::query()->where('session_id', $session)->where('contact_id', $contact->id)->count())->toBe(2);
 });
 
 test('submitting the same session twice for one contact writes one stitch', function (): void {

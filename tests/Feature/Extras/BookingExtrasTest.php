@@ -24,8 +24,7 @@ function extrasCabin(?int $ownerId = null, BookingStatus $status = BookingStatus
     $departure = ReservationFixtures::anamaraDeparture('2028-03-05');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $ownerId ?? adminUser()->id,
         'status' => $status,
         'total' => 26600,

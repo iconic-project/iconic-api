@@ -25,8 +25,7 @@ test('the booking ledger is newest first and exposes can_mark_wire', function ()
     $departure = ReservationFixtures::anamaraDeparture();
     $owner = salesExecUser();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $owner->id,
         'reference' => 'ANK-2026-0410',
     ]);
@@ -71,8 +70,7 @@ test('another owner cannot read the booking ledger', function (): void {
     $owner = User::factory()->create(['role_id' => $role->id]);
     $other = User::factory()->create(['role_id' => $role->id]);
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => $owner->id,
     ]);
 
@@ -84,8 +82,7 @@ test('another owner cannot read the booking ledger', function (): void {
 test('a soft-deleted booking payments route is 404', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'owner_id' => adminUser()->id,
     ]);
     $id = $booking->id;
@@ -99,8 +96,7 @@ test('a soft-deleted booking payments route is 404', function (): void {
 test('the booking show exposes real paid pledged and payments_count', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'total' => 26600,
         'deposit_pct' => 10,
         'owner_id' => adminUser()->id,

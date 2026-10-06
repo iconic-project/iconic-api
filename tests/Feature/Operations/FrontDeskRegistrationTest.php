@@ -128,11 +128,10 @@ test('registration export follows the configured fields, hides sensitive columns
 function deskBooking(int $ownerId, string $checkIn, string $checkOut, BookingStatus $status, string $reference): Booking
 {
     $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
-    $room = $departure->property->cabins->firstWhere('code', 'S1');
+    $room = $departure->property->rooms->firstWhere('code', 'S1');
 
     return Booking::factory()->create([
         'reference' => $reference,
-        'departure_id' => $departure->id,
         'property_id' => $departure->property_id,
         'room_id' => $room?->id,
         'owner_id' => $ownerId,

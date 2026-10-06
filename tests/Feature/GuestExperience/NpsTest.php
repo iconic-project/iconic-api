@@ -28,7 +28,6 @@ use App\Models\Contact;
 use App\Models\ContactConsent;
 use App\Models\CrmTask;
 use App\Models\Delivery;
-use App\Models\Departure;
 use App\Models\Guest;
 use App\Models\GuestResponse;
 use App\Models\Role;
@@ -62,7 +61,7 @@ afterEach(function (): void {
 });
 
 /**
- * @return array{departure: Departure, booking: Booking, contact: Contact, lead: Guest, companion: Guest}
+ * @return array{departure: StayAnchor, booking: Booking, contact: Contact, lead: Guest, companion: Guest}
  */
 function npsBooking(
     string $date,
@@ -76,9 +75,13 @@ function npsBooking(
     $departure = ReservationFixtures::anamaraDeparture($date);
     $contact = $existingContact ?? Contact::factory()->create(['email' => $contactEmail]);
     $leadEmail = $existingContact instanceof Contact ? (string) $existingContact->email : $contactEmail;
+    $stay = $departure->stayDates();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
+        'property_id' => $departure->property_id,
+        'check_in' => $stay->checkIn()->toDateString(),
+        'check_out' => $stay->checkOut()->toDateString(),
+        'nights' => 7,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => $status,
@@ -172,9 +175,13 @@ function npsHistoryWhat(Booking $booking): string
 test('completing a voyage raises one post-trip call and a replay does not raise another', function (): void {
     $owner = managerUser();
     $departure = ReservationFixtures::anamaraDeparture('2026-06-07');
+    $stay = $departure->stayDates();
     $booking = Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
+        'property_id' => $departure->property_id,
+        'check_in' => $stay->checkIn()->toDateString(),
+        'check_out' => $stay->checkOut()->toDateString(),
+        'nights' => 7,
         'owner_id' => $owner->id,
         'status' => BookingStatus::FullyPaid,
         'reference' => 'ANK-NPS-CALL',
@@ -186,7 +193,7 @@ test('completing a voyage raises one post-trip call and a replay does not raise 
 
     $tasks = CrmTask::query()->where('kind', TaskKind::PostTripCall)->get();
     $task = $tasks->first();
-    $return = $departure->fresh()?->returnDate()->toDateString() ?? $departure->returnDate()->toDateString();
+    $return = $stay->checkOut()->toDateString();
     $expectedDue = TaskDue::businessDays(
         BusinessTime::calendarDay($return),
         2,
@@ -205,7 +212,7 @@ test('completing a voyage raises one post-trip call and a replay does not raise 
 test('the survey waits until return plus the configured hours, sends once, and does not check consent', function (): void {
     $owner = managerUser();
     $fixture = npsBooking('2028-09-03', 'ANK-NPS-SURVEY', $owner, companionEmail: null);
-    $return = $fixture['departure']->returnDate()->toDateString();
+    $return = $fixture['booking']->check_out->toDateString();
     $due = app(StayClock::class)
         ->postStayAt($fixture['booking']->stay(), $fixture['booking']->checked_out_at)
         ->addHours(24);
@@ -281,12 +288,12 @@ test('the survey link covers only its guests and rejects the wrong purpose, an e
 
     $leadToken = npsPlainToken($fixture['booking'], null);
     $ownToken = npsPlainToken($fixture['booking'], $fixture['lead']->id);
-    $return = $fixture['departure']->returnDate()->toDateString();
+    $return = $fixture['booking']->check_out->toDateString();
 
     $this->getJson('/api/engine/survey/'.$leadToken)
         ->assertOk()
         ->assertJsonPath('reference', 'ANK-NPS-LINK')
-        ->assertJsonPath('departure_date', $fixture['departure']->date->toDateString())
+        ->assertJsonPath('check_in', $fixture['booking']->check_in->toDateString())
         ->assertJsonPath('guests.0.id', $fixture['companion']->id)
         ->assertJsonPath('guests.0.responded', false)
         ->assertJsonMissingPath('guests.0.why');
@@ -303,7 +310,7 @@ test('the survey link covers only its guests and rejects the wrong purpose, an e
 
     $this->postJson('/api/engine/survey/'.$leadToken.'/guests/'.$fixture['companion']->id, npsAnswerBody(7))
         ->assertStatus(409)
-        ->assertJsonPath('message', 'This guest already has a response for this voyage.');
+        ->assertJsonPath('message', 'This guest already has a response for this stay.');
 
     $wrong = BookingAccessToken::query()->create([
         'booking_id' => $fixture['booking']->id,
@@ -527,8 +534,8 @@ test('the nps read returns the average, the bands, the review count and the empt
         $manager,
     );
 
-    $earliest = Departure::query()->orderBy('date')->orderBy('id')->firstOrFail();
-    $expectedFirst = BusinessTime::calendarDay($earliest->returnDate()->toDateString())->addHours(24)->toDateString();
+    $earliest = Booking::query()->whereNotNull('check_out')->orderBy('check_out')->orderBy('id')->firstOrFail();
+    $expectedFirst = app(StayClock::class)->checkOutMoment($earliest->stay())->addHours(24)->toDateString();
 
     $page = $this->actingAs($manager)->getJson('/api/rms/guest-experience/nps?from=2028-12-20&to=2028-12-20')->assertOk();
 
@@ -553,7 +560,11 @@ test('the nps read returns the average, the bands, the review count and the empt
 test('the access export contains the contact own survey answers and not a companion or the call notes', function (): void {
     $admin = adminUser();
     $fixture = npsBooking('2028-12-17', 'ANK-NPS-EXPORT', $admin, contactEmail: 'export-me@example.com', companionEmail: 'export-mate@example.com');
-    $fixture['departure']->forceFill(['date' => '2020-01-05'])->save();
+    $fixture['booking']->forceFill([
+        'check_in' => '2020-01-05',
+        'check_out' => '2020-01-12',
+        'nights' => 7,
+    ])->save();
 
     app(RecordGuestResponse::class)->handle(
         $fixture['booking']->fresh() ?? $fixture['booking'],
@@ -610,7 +621,11 @@ test('the access export contains the contact own survey answers and not a compan
 test('erasure clears the contact own survey text, keeps the score, and leaves the companion', function (): void {
     $admin = adminUser();
     $fixture = npsBooking('2028-12-24', 'ANK-NPS-ERASE', $admin, contactEmail: 'erase-nps@example.com', companionEmail: 'erase-mate@example.com');
-    $fixture['departure']->forceFill(['date' => '2020-01-12'])->save();
+    $fixture['booking']->forceFill([
+        'check_in' => '2020-01-12',
+        'check_out' => '2020-01-19',
+        'nights' => 7,
+    ])->save();
     $booking = $fixture['booking']->fresh() ?? $fixture['booking'];
 
     $own = app(RecordGuestResponse::class)->handle(

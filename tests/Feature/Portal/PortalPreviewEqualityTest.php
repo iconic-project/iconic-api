@@ -32,8 +32,7 @@ test('the portal payloads match the RMS preview figures exactly', function (): v
 
     $paid = Booking::factory()->create([
         'reference' => 'ANK-2026-7001',
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,
@@ -50,8 +49,7 @@ test('the portal payloads match the RMS preview figures exactly', function (): v
 
     $open = Booking::factory()->create([
         'reference' => 'ANK-2026-7002',
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S2')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S2')?->id,
         'agency_id' => $agency->id,
         'commission_pct' => 10,
         'commission_approved' => true,

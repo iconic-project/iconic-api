@@ -66,7 +66,4 @@ test('rates returns the published stay matrix net of commission', function (): v
 
     $encoded = json_encode($response->json());
     expect($encoded)->not->toContain('"nightly":'.$public->nightly);
-    foreach ($rates->years as $year) {
-        expect($encoded)->not->toContain('"suite_pp":'.$year->suitePp);
-    }
 });

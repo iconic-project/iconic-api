@@ -38,8 +38,7 @@ function timelineBooking(Contact $contact, User $owner): Booking
     $departure = ReservationFixtures::anamaraDeparture('2027-12-19');
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', 'S1')?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', 'S1')?->id,
         'contact_id' => $contact->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::Confirmed,
@@ -51,7 +50,7 @@ test('the timeline merges every allowed source newest first and hides sensitive 
     $actor = salesExecUser();
     $contact = Contact::factory()->create(['name' => 'Timeline Guest']);
     $booking = timelineBooking($contact, $actor);
-    $itinerary = $booking->departure->itinerary;
+    $property = $booking->room?->property;
 
     DB::transaction(function () use ($booking): void {
         History::record($booking, 'booking.created', after: [
@@ -116,8 +115,8 @@ test('the timeline merges every allowed source newest first and hides sensitive 
 
     BehaviouralEvent::factory()->create([
         'contact_id' => $contact->id,
-        'name' => BehaviouralEventName::ViewItinerary,
-        'params' => ['itinerary_code' => $itinerary->code],
+        'name' => BehaviouralEventName::ViewProperty,
+        'params' => ['property_code' => $property?->code],
         'occurred_at' => now()->addMinutes(4),
     ]);
 
@@ -166,7 +165,7 @@ test('the timeline merges every allowed source newest first and hides sensitive 
 
     $event = $items->firstWhere('kind', 'behavioural');
     expect($event['title'])->toBe('view_itinerary');
-    expect($event['detail'])->toBe($itinerary->name);
+    expect($event['detail'])->toBe($property?->name);
     expect($event['link'])->toBeNull();
 
     $times = $items->pluck('at')->all();

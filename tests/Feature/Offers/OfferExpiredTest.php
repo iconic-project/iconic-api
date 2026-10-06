@@ -6,11 +6,9 @@ use App\Enums\OfferStatus;
 use App\Models\Offer;
 use Carbon\CarbonImmutable;
 use Database\Seeders\RolesSeeder;
-use Tests\Support\Offers\OfferFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
-    OfferFixtures::west();
 });
 
 test('derived expired uses the later window end on the galapagos date', function (): void {
@@ -18,8 +16,7 @@ test('derived expired uses the later window end on the galapagos date', function
 
     $offer = Offer::factory()->live()->create([
         'booking_to' => '2027-06-01',
-        'travel_to' => '2027-12-01',
-        'itinerary_codes' => ['WEST'],
+        'stay_to' => '2027-12-01',
     ]);
 
     expect($offer->derivedStatus())->toBe(OfferStatus::Live->value);
@@ -34,13 +31,11 @@ test('the index status filter includes derived expired', function (): void {
 
     Offer::factory()->live()->create([
         'code' => 'GONE',
-        'travel_to' => '2027-12-31',
-        'itinerary_codes' => ['WEST'],
+        'stay_to' => '2027-12-31',
     ]);
     Offer::factory()->live()->create([
         'code' => 'OPEN',
-        'travel_to' => '2028-06-01',
-        'itinerary_codes' => ['WEST'],
+        'stay_to' => '2028-06-01',
     ]);
 
     $expired = $this->actingAs(managerUser())

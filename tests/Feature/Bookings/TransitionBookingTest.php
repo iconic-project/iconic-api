@@ -11,8 +11,8 @@ use App\Models\Booking;
 use App\Models\ChangeHistory;
 use App\Models\Payment;
 use App\Models\RoomNightClaim;
-use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
+use App\Support\Stays\StayDates;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -58,13 +58,12 @@ function bookedCabin(array $overrides = []): Booking
 function requestedHold(bool $expired = false, string $cabinCode = 'S2'): Booking
 {
     $departure = ReservationFixtures::anamaraDeparture();
-    $cabin = $departure->property->cabins->firstWhere('code', $cabinCode);
+    $cabin = $departure->property->rooms->firstWhere('code', $cabinCode);
     $actor = managerUser();
     $booking = Booking::factory()->create([
         'reference' => null,
         'request_reference' => 'ANK-R-2026-'.str_pad((string) fake()->unique()->numberBetween(1, 99), 4, '0', STR_PAD_LEFT),
         'status' => BookingStatus::Requested,
-        'departure_id' => $departure->id,
         'room_id' => $cabin?->id,
         'owner_id' => $actor->id,
     ]);
@@ -214,25 +213,28 @@ test('an expired hold is reclaimed or 409 if the cabin was taken', function (): 
     expect($expired->fresh()->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
 
     $taken = requestedHold(expired: true, cabinCode: 'S6');
-    $departure = $taken->departure;
-    $cabin = $taken->cabin;
-    $other = bookedCabin([
-        'departure' => ReservationFixtures::anamaraDeparture('2027-11-14'),
-        'cabin_code' => 'S1',
+    $room = $taken->room;
+    $other = Booking::factory()->create([
+        'room_id' => $room?->id,
+        'property_id' => $taken->property_id,
     ]);
-    $other->update(['room_id' => $cabin?->id, 'departure_id' => $departure->id]);
-    DB::transaction(function () use ($departure, $cabin, $other): void {
+    DB::transaction(function () use ($taken, $room, $other): void {
         $other->claims()->whereNull('released_at')->update([
             'released_at' => now(),
             'release_reason' => ReleaseReason::Moved,
         ]);
-        app(ClaimService::class)->claim($departure->stayDates(), collect([$cabin]), $other, ClaimKind::Booking);
+        app(ClaimService::class)->claim(
+            StayDates::of($taken->check_in->toDateString(), $taken->check_out->toDateString()),
+            collect([$room]),
+            $other,
+            ClaimKind::Booking,
+        );
     });
 
     $this->actingAs($taken->owner)
         ->postJson('/api/rms/bookings/'.$taken->id.'/transition', ['to' => 'CONFIRMED'])
         ->assertStatus(409)
-        ->assertJsonPath('message', "The cabin was taken after this request's hold expired.");
+        ->assertJsonPath('message', "The room was taken after this request's hold expired.");
 
     expect($taken->fresh()->status)->toBe(BookingStatus::Requested);
 });
@@ -247,9 +249,7 @@ test('cancelling a confirmed booking frees the cabin and stores the reason', fun
         ])
         ->assertOk();
 
-    $snapshot = app(Availability::class)->forDepartures(collect([$booking->departure]))[$booking->departure_id];
-    $s1 = collect($snapshot->cabins)->firstWhere('cabin.code', 'S1');
-    expect($s1['state'])->toBe('FREE');
+    expect($booking->fresh()->claims()->whereNull('released_at')->count())->toBe(0);
 
     $history = ChangeHistory::query()->where('event', 'booking.status_changed')->latest('id')->firstOrFail();
     expect($history->reason)->toBe('Guest withdrew');

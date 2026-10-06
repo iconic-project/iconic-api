@@ -33,8 +33,7 @@ function contactsInNatCabin(User $owner, string $cabin, string $date = '2027-11-
     $departure = ReservationFixtures::anamaraDeparture($date);
 
     return Booking::factory()->create([
-        'departure_id' => $departure->id,
-        'room_id' => $departure->property->cabins->firstWhere('code', $cabin)?->id,
+        'room_id' => $departure->property->rooms->firstWhere('code', $cabin)?->id,
         'owner_id' => $owner->id,
         'status' => BookingStatus::Confirmed,
         ...$overrides,

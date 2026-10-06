@@ -20,7 +20,6 @@ beforeEach(function (): void {
 test('a raw delete on payments fails', function (): void {
     $payment = Payment::factory()->create([
         'booking_id' => Booking::factory()->create([
-            'departure_id' => ReservationFixtures::anamaraDeparture()->id,
         ])->id,
     ]);
 
@@ -31,7 +30,6 @@ test('a raw delete on payments fails', function (): void {
 test('a raw update of amount on payments fails', function (): void {
     $payment = Payment::factory()->create([
         'booking_id' => Booking::factory()->create([
-            'departure_id' => ReservationFixtures::anamaraDeparture()->id,
         ])->id,
         'amount' => 2660,
     ]);
@@ -43,7 +41,6 @@ test('a raw update of amount on payments fails', function (): void {
 test('a raw update of status on payments is allowed', function (): void {
     $payment = Payment::factory()->create([
         'booking_id' => Booking::factory()->create([
-            'departure_id' => ReservationFixtures::anamaraDeparture()->id,
         ])->id,
     ]);
 

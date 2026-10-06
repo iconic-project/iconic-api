@@ -175,7 +175,6 @@ test('portal OpenAPI schemas have properties and name their enums', function ():
 
     foreach ([
         'AgencyStatus',
-        'DepartureStatus',
         'BookingStatus',
         'CommissionAccrualStatus',
         'SalesMaterialKind',

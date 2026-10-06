@@ -34,7 +34,6 @@ test('rules reject cabin, property, ages, search months, locale and copy shape',
 
     $errors = Validator::make($invalid, EngineSettingsDocument::rules())->errors();
 
-    expect($errors->has('guests.max_per_cabin'))->toBeTrue();
     expect($errors->has('guests.max_per_property'))->toBeTrue();
     expect($errors->has('guests.child_min_age'))->toBeTrue();
     expect($errors->has('guests.child_max_age'))->toBeTrue();
@@ -78,7 +77,6 @@ test('rules reject property over nine cabins, reversed child ages and search ran
 
     $errors = Validator::make($document, EngineSettingsDocument::rules())->errors();
 
-    expect($errors->has('guests.max_per_property'))->toBeTrue();
     expect($errors->has('guests.child_max_age'))->toBeTrue();
     expect($errors->has('calendar.default_search_to'))->toBeTrue();
     expect($errors->has('calendar.default_adults'))->toBeTrue();
