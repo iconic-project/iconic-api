@@ -192,20 +192,45 @@ final class IconicSchedule
      */
     public static function nightAuditAt(): string
     {
+        $cutoff = '';
+
         try {
             $cutoff = app(CurrentConfig::class)->businessRules()->stay->noShowCutoffTime;
         } catch (Throwable) {
-            $stay = BusinessRulesDocument::initial()['stay'] ?? [];
-            $cutoff = is_array($stay) ? (string) ($stay['no_show_cutoff_time'] ?? '') : '';
+            $cutoff = '';
         }
 
-        $moment = CarbonImmutable::createFromFormat('H:i', $cutoff, BusinessTime::zone());
+        // A published document from before the stay fields, or a blank value,
+        // must not stop Artisan (including migrate) from booting.
+        $moment = self::parseClock($cutoff) ?? self::parseClock(self::defaultNoShowCutoff());
 
         if (! $moment instanceof CarbonImmutable) {
             throw new \InvalidArgumentException('stay.no_show_cutoff_time must be HH:MM.');
         }
 
         return $moment->addMinute()->format('H:i');
+    }
+
+    private static function defaultNoShowCutoff(): string
+    {
+        $stay = BusinessRulesDocument::initial()['stay'] ?? [];
+
+        return is_array($stay) ? (string) ($stay['no_show_cutoff_time'] ?? '') : '';
+    }
+
+    private static function parseClock(string $value): ?CarbonImmutable
+    {
+        try {
+            $moment = CarbonImmutable::createFromFormat('H:i', $value, BusinessTime::zone());
+        } catch (Throwable) {
+            return null;
+        }
+
+        if (! $moment instanceof CarbonImmutable || $moment->format('H:i') !== $value) {
+            return null;
+        }
+
+        return $moment;
     }
 
     private static function alreadyRegistered(Schedule $schedule): bool
