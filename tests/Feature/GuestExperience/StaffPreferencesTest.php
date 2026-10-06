@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Actions\Manifests\IssueManifest;
 use App\Enums\BookingStatus;
+use App\Enums\ManifestKind;
 use App\Enums\ManifestReason;
 use App\Enums\Permission;
 use App\Enums\PreferenceSource;
@@ -153,12 +155,13 @@ test('the departure view hides restricted values without guests.view_sensitive',
         ])->assertOk();
 
     $open = $this->actingAs(salesExecUser())
-        ->getJson('/api/rms/departures/'.$fixture['departure']->id.'/guest-experience')
+        ->getJson('/api/rms/guest-experience?from=2028-09-03&to=2028-09-03')
         ->assertOk()
         ->assertJsonPath('data.kpis.guests', 1)
         ->assertJsonPath('data.kpis.answered', 1)
         ->assertJsonPath('data.kpis.celebrations', 1)
         ->assertJsonPath('data.kpis.accessibility_or_medical', 1)
+        ->assertJsonPath('data.send_date', '2028-07-20')
         ->assertJsonPath('data.send_state', 'sent')
         ->assertJsonPath('data.guests.0.status', 'ANSWERED')
         ->assertJsonPath('data.guests.0.dietary', 'kelp')
@@ -168,7 +171,7 @@ test('the departure view hides restricted values without guests.view_sensitive',
     expect($open->json('data.guests.0'))->not->toHaveKey('accessibility');
 
     $this->actingAs(managerUser())
-        ->getJson('/api/rms/departures/'.$fixture['departure']->id.'/guest-experience')
+        ->getJson('/api/rms/guest-experience?from=2028-09-03&to=2028-09-03')
         ->assertOk()
         ->assertJsonPath('data.guests.0.accessibility', 'ramp');
 });
@@ -177,26 +180,42 @@ test('the brief includes accessibility only with the permission and the pdf is n
     $fixture = experienceFixture();
     $before = count(Storage::disk('manifests')->allFiles()) + count(Storage::disk('documents')->allFiles());
 
+    $fixture['booking']->forceFill(['expected_arrival_time' => '16:30'])->save();
+
     $this->actingAs(managerUser())
         ->putJson('/api/rms/guests/'.$fixture['guest']->id.'/preferences', [
-            'answers' => ['diet' => 'kelp', 'access' => 'ramp', 'pillow' => 'Firm', 'first' => 'Yes'],
+            'answers' => ['diet' => 'kelp', 'celebr' => 'anniversary', 'access' => 'ramp', 'pillow' => 'Firm', 'first' => 'Yes'],
         ])->assertOk();
 
     $hidden = $this->actingAs(salesExecUser())
-        ->get('/api/rms/departures/'.$fixture['departure']->id.'/hotel-manager-brief');
+        ->get('/api/rms/guest-experience/arrivals?date=2028-09-03');
     $hidden->assertOk();
     expect($hidden->getContent())
+        ->toContain('ARRIVALS BRIEF')
+        ->toContain('Expected arrival')
+        ->toContain('16:30')
         ->toContain('kelp')
+        ->toContain('anniversary')
         ->toContain('Firm × 1')
         ->not->toContain('ramp')
         ->not->toContain('Accessibility requirements');
 
     $shown = $this->actingAs(managerUser())
-        ->get('/api/rms/departures/'.$fixture['departure']->id.'/hotel-manager-brief');
+        ->get('/api/rms/guest-experience/arrivals?date=2028-09-03');
     expect($shown->getContent())->toContain('Accessibility requirements')->toContain('ramp');
 
+    $this->actingAs(salesExecUser())
+        ->get('/api/rms/departures/'.$fixture['departure']->id.'/hotel-manager-brief')
+        ->assertStatus(410);
+    $this->actingAs(salesExecUser())
+        ->getJson('/api/rms/departures/'.$fixture['departure']->id.'/guest-experience')
+        ->assertStatus(410);
+    $this->actingAs(salesExecUser())
+        ->getJson('/api/rms/guest-experience/departures')
+        ->assertStatus(410);
+
     $pdf = $this->actingAs(managerUser())
-        ->get('/api/rms/departures/'.$fixture['departure']->id.'/hotel-manager-brief?format=pdf');
+        ->get('/api/rms/guest-experience/arrivals?date=2028-09-03&format=pdf');
     $pdf->assertOk();
     expect($pdf->headers->get('content-type'))->toContain('application/pdf')
         ->and(str_starts_with((string) $pdf->getContent(), '%PDF'))->toBeTrue();
@@ -212,9 +231,7 @@ test('a preference change is a passenger change on the next captain manifest', f
     $fixture = experienceFixture();
     $manager = managerUser();
 
-    $this->actingAs($manager)
-        ->postJson('/api/rms/departures/'.$fixture['departure']->id.'/manifests/CAPTAIN')
-        ->assertCreated();
+    app(IssueManifest::class)->request($fixture['departure'], ManifestKind::Captain, $manager);
 
     $this->actingAs($manager)
         ->putJson('/api/rms/guests/'.$fixture['guest']->id.'/preferences', [
@@ -225,11 +242,9 @@ test('a preference change is a passenger change on the next captain manifest', f
             ],
         ])->assertOk();
 
-    $this->actingAs($manager)
-        ->postJson('/api/rms/departures/'.$fixture['departure']->id.'/manifests/CAPTAIN')
-        ->assertCreated()
-        ->assertJsonPath('data.reason', ManifestReason::PassengerChange->value)
-        ->assertJsonPath('data.version', 2);
+    $issued = app(IssueManifest::class)->request($fixture['departure'], ManifestKind::Captain, $manager);
+    expect($issued['manifest']->reason)->toBe(ManifestReason::PassengerChange)
+        ->and($issued['manifest']->version)->toBe(2);
 
     $passenger = ManifestRoster::passengers($fixture['departure'])->firstOrFail();
     expect($passenger->guest->currentPreference?->accessibility)->toBe('ramp')
@@ -238,19 +253,15 @@ test('a preference change is a passenger change on the next captain manifest', f
         ->toContain('Sam at home')
         ->toContain('ramp');
 
-    $this->actingAs($manager)
-        ->postJson('/api/rms/departures/'.$fixture['departure']->id.'/manifests/DPNG')
-        ->assertCreated();
+    app(IssueManifest::class)->request($fixture['departure'], ManifestKind::Dpng, $manager);
 
     $this->actingAs($manager)
         ->putJson('/api/rms/guests/'.$fixture['guest']->id.'/preferences', [
             'answers' => ['diet' => 'kelp and fruit', 'access' => 'ramp', 'emerg' => 'Sam at home'],
         ])->assertOk();
 
-    $this->actingAs($manager)
-        ->postJson('/api/rms/departures/'.$fixture['departure']->id.'/manifests/DPNG')
-        ->assertOk()
-        ->assertJsonPath('created', false);
+    $again = app(IssueManifest::class)->request($fixture['departure'], ManifestKind::Dpng, $manager);
+    expect($again['created'])->toBeFalse();
 
     expect(ManifestPassenger::captainHeaders())->toContain('Emergency contact');
 });

@@ -266,9 +266,9 @@ test('switching off the pre-trip email still issues the document', function (): 
     CarbonImmutable::setTestNow(BusinessTime::calendarDay('2028-07-21')->setTime(12, 0));
     $this->artisan('iconic:documents-due')->assertSuccessful();
 
-    $delivery = Delivery::query()->where('booking_id', $booking->id)->where('kind', DeliveryKind::Pretrip)->first();
+    $delivery = Delivery::query()->where('booking_id', $booking->id)->where('kind', DeliveryKind::PreArrival)->first();
 
-    expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::Pretrip)->count())->toBe(1)
+    expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::PreArrival)->count())->toBe(1)
         ->and($delivery?->status)->toBe(DeliveryStatus::Blocked)
         ->and($delivery?->blocked_reason)->toBe('Hold the itinerary email');
 

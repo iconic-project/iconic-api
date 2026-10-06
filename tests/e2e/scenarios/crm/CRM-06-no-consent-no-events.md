@@ -11,7 +11,7 @@ Refusal must record nothing and store no session identifier. The booking request
 ## Steps
 1. **Guest** (fresh context, no staff cookies). Open `http://localhost:3000/`. Before any other click, click **Analytics off**.
 2. Open DevTools → Application (storage) and Network (filter `events`). Confirm `localStorage['iconic-engine-analytics']` is `refused` and `iconic-engine-session` is absent.
-3. Same walkthrough as CRM-05 / WEB-07 to `/book/details` (2 adults, 7 Nov 2027 ANAMARA, Suite 03). Browse an itinerary and a departure row.
+3. Same walk as CRM-05 (HENG-01 then HENG-03) to the request. Do not open a departure row.
 4. Contact: First `E2E`, Last `Crm06`, Email `e2e.crm06@iconic.test`, phone `+1 650 253 0006`, preferred **Email**. Guests, fees and declarations as CRM-05.
 5. **Option 1 · Book now, pay later.** `Send booking request`. Read `/book/confirmation`.
 6. **Carolina.** Open `http://localhost:3001/rms/reservations/booking-requests`. Date range **All dates**. Open the new `ANK-R-` row (**ANK-R-2026-0043**).

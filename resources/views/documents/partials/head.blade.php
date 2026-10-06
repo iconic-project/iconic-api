@@ -20,7 +20,7 @@
     <tr>
         <td>
             <div class="dlogo">ICONIC</div>
-            <div class="dtag">Intimate Yacht Expeditions · Galápagos, Ecuador</div>
+            <div class="dtag">Reservations</div>
         </td>
         <td>
             <div class="dtitle">{{ $doc['title'] ?? '' }}</div>

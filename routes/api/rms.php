@@ -22,11 +22,13 @@ use App\Http\Controllers\Rms\DepartureController;
 use App\Http\Controllers\Rms\DocumentController;
 use App\Http\Controllers\Rms\EngineSettingsController;
 use App\Http\Controllers\Rms\ExtrasController;
+use App\Http\Controllers\Rms\FrontDeskController;
 use App\Http\Controllers\Rms\GroupController;
 use App\Http\Controllers\Rms\GuestController;
 use App\Http\Controllers\Rms\GuestExperienceController;
 use App\Http\Controllers\Rms\GuestResponseController;
 use App\Http\Controllers\Rms\HoldController;
+use App\Http\Controllers\Rms\HotelKpisController;
 use App\Http\Controllers\Rms\InternalBlockController;
 use App\Http\Controllers\Rms\ItineraryController;
 use App\Http\Controllers\Rms\ManifestController;
@@ -150,6 +152,9 @@ Route::post('payments/{payment}/mark-received', [PaymentController::class, 'mark
 Route::post('payment-links/{paymentLink}/send', [PaymentLinkController::class, 'send'])->whereNumber('paymentLink');
 Route::post('payment-links/{paymentLink}/cancel', [PaymentLinkController::class, 'cancel'])->whereNumber('paymentLink');
 
+Route::get('front-desk', [FrontDeskController::class, 'index']);
+Route::get('front-desk/registration', [FrontDeskController::class, 'registration']);
+
 Route::get('bookings', [BookingController::class, 'index']);
 Route::get('bookings/audit', [BookingController::class, 'audit']);
 Route::get('bookings/owners', [BookingController::class, 'owners']);
@@ -196,6 +201,7 @@ Route::get('documents/{document}/file', [DocumentController::class, 'file'])->wh
 Route::post('documents/{document}/send', [DocumentController::class, 'send'])->whereNumber('document');
 Route::delete('booking-extras/{extra}', [BookingExtraController::class, 'destroy'])->whereNumber('extra');
 Route::get('metrics', MetricsController::class);
+Route::get('hotel-kpis', HotelKpisController::class);
 Route::get('reports', [ReportController::class, 'index']);
 Route::get('reports/runs', [ReportController::class, 'runs']);
 Route::post('reports/{key}/runs', [ReportController::class, 'store']);
@@ -208,14 +214,16 @@ Route::post('reports/subscriptions/{subscription}/run-now', [ReportSubscriptionC
     ->whereNumber('subscription')
     ->middleware('permission:rules.manage');
 
-Route::get('guest-experience/departures', [GuestExperienceController::class, 'departures']);
+Route::get('guest-experience', [GuestExperienceController::class, 'index']);
+Route::get('guest-experience/arrivals', [GuestExperienceController::class, 'arrivals']);
+Route::get('guest-experience/departures', [GuestExperienceController::class, 'retiredDepartures']);
 Route::get('guest-experience/nps', [GuestResponseController::class, 'index']);
 Route::get('guest-experience/questions', [GuestExperienceController::class, 'questions']);
 Route::get('guest-experience/survey-questions', [GuestResponseController::class, 'questions']);
 Route::get('bookings/{booking}/survey-guests', [GuestResponseController::class, 'surveyGuests'])->whereNumber('booking');
 Route::post('bookings/{booking}/guest-responses', [GuestResponseController::class, 'store'])->whereNumber('booking');
 Route::get('departures/{departure}/guest-experience', [GuestExperienceController::class, 'show'])->whereNumber('departure');
-Route::get('departures/{departure}/hotel-manager-brief', [GuestExperienceController::class, 'brief'])->whereNumber('departure');
+Route::get('departures/{departure}/hotel-manager-brief', [GuestExperienceController::class, 'retiredBrief'])->whereNumber('departure');
 Route::get('guests/{guest}/preferences', [GuestExperienceController::class, 'preferences'])->whereNumber('guest');
 Route::put('guests/{guest}/preferences', [GuestExperienceController::class, 'update'])->whereNumber('guest');
 

@@ -9,6 +9,7 @@ use App\Enums\GuestResponseSource;
 use App\Enums\JourneyEnrolmentStatus;
 use App\Enums\JourneyStepAction;
 use App\Enums\JourneySubject;
+use App\Enums\TemplateVariable;
 use App\Mail\Templates\TemplateTestMail;
 use App\Models\Booking;
 use App\Models\ChangeHistory;
@@ -303,6 +304,44 @@ function marketingDraft(string $paragraph): array
         ],
     ];
 }
+
+test('stay variables render from the booking and departure_date still renders check-in', function (): void {
+    $admin = adminUser();
+    $contact = Contact::factory()->create(['name' => 'Ada Stay']);
+    $booking = journeyBookingFor($contact, $admin)->fresh(['roomType', 'property']);
+    $version = new MessageTemplateVersion([
+        'subject' => 'Arrive {{check_in}}',
+        'body' => [
+            'paragraphs' => ['{{check_out}} {{nights}} {{room_type}} {{property_name}} {{check_in_time}} {{check_out_time}} {{departure_date}}'],
+            'list' => [],
+            'cta' => null,
+        ],
+        'variables' => [
+            'check_in',
+            'check_out',
+            'nights',
+            'room_type',
+            'property_name',
+            'check_in_time',
+            'check_out_time',
+            'departure_date',
+        ],
+    ]);
+
+    $rendered = app(TemplateRenderer::class)->render($version, $contact, $booking);
+    $checkIn = $booking->check_in->toDateString();
+
+    expect($rendered->subject)->toBe('Arrive '.$checkIn)
+        ->and($rendered->html)->toContain($booking->check_out->toDateString())
+        ->and($rendered->html)->toContain((string) $booking->nights)
+        ->and($rendered->html)->toContain((string) $booking->roomType?->name)
+        ->and($rendered->html)->toContain((string) $booking->property?->name)
+        ->and($rendered->html)->toContain('15:00')
+        ->and($rendered->html)->toContain('11:00')
+        ->and($rendered->html)->toContain($checkIn)
+        ->and(TemplateVariable::DepartureDate->isDeprecated())->toBeTrue()
+        ->and(TemplateVariable::CheckIn->isDeprecated())->toBeFalse();
+});
 
 function journeyBookingFor(Contact $contact, User $owner): Booking
 {

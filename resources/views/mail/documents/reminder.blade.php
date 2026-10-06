@@ -1,7 +1,7 @@
 @extends('mail.documents.layout')
 
 @section('body')
-    <p>Your expedition on {{ $booking->departure->date->toDateString() }} is approaching. As a gentle reminder, the cruise balance of <b>{{ $balance }}</b> is due on <b>{{ $dueDate }}</b> — {{ $days }} days from today's reminder.</p>
+    <p>Your stay checking in on {{ $booking->stay()->checkIn()->toDateString() }} is approaching. As a gentle reminder, the stay balance of <b>{{ $balance }}</b> is due on <b>{{ $dueDate }}</b> — {{ $days }} days from today's reminder.</p>
     @if ($payUrl)
         <p style="margin: 18px 0;">
             <a href="{{ $payUrl }}" style="display: inline-block; padding: 10px 18px; background: #2c4a3a; color: #f4efe4; text-decoration: none; letter-spacing: 0.08em; font-size: 13px;">Pay balance securely</a>

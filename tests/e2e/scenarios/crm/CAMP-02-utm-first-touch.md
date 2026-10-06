@@ -10,7 +10,7 @@ Attribution reads the frozen UTM on a sold booking. A request is not sold yet.
 
 ## Steps
 1. Read Attributed first touch on **Opening 2027**.
-2. **Guest.** Open the engine with `?utm_campaign=opening27` and pay later on a free November cabin. Email `e2e.camp02@iconic.test`.
+2. **Guest.** Open the engine with `?utm_campaign=opening27` and pay later on a free stay (HENG-03). Email `e2e.camp02@iconic.test`.
 3. **Carolina.** Reload the campaign. Read first touch.
 4. Confirm that request in the RMS so the booking is **CONFIRMED**. Reload the campaign.
 

@@ -23,7 +23,7 @@ final class DocumentsDueCommand extends Command
 {
     protected $signature = 'iconic:documents-due {--dry-run : List what would be sent and write nothing}';
 
-    protected $description = 'Send due balance reminders, pre-trip itineraries, preference questionnaires and transfer vouchers (J7)';
+    protected $description = 'Send due balance reminders, pre-arrival notes, preference questionnaires and transfer vouchers (J7)';
 
     public function handle(
         CurrentConfig $config,
@@ -36,7 +36,7 @@ final class DocumentsDueCommand extends Command
         $dry = (bool) $this->option('dry-run');
         $rules = $config->businessRules();
         $reminderDays = $rules->payments->balanceReminderDays;
-        $pretripDays = $rules->documents->pretripDaysBefore;
+        $preArrivalDays = $rules->documents->preArrivalDaysBefore;
         $voucherDays = $rules->documents->voucherDaysBefore;
         $sent = 0;
 
@@ -54,7 +54,7 @@ final class DocumentsDueCommand extends Command
                 $today,
                 $dry,
                 $reminderDays,
-                $pretripDays,
+                $preArrivalDays,
                 $voucherDays,
                 $reminders,
                 $issueOnce,
@@ -66,12 +66,12 @@ final class DocumentsDueCommand extends Command
                 $sent += $this->scheduledDocument(
                     $booking,
                     $today,
-                    $pretripDays,
-                    DocumentKind::Pretrip,
+                    $preArrivalDays,
+                    DocumentKind::PreArrival,
                     $dry,
                     $issueOnce,
                 );
-                $sent += $this->questionnaires($booking, $today, $pretripDays, $dry, $questionnaires, $sendQuestionnaires);
+                $sent += $this->questionnaires($booking, $today, $preArrivalDays, $dry, $questionnaires, $sendQuestionnaires);
                 $sent += $this->scheduledDocument(
                     $booking,
                     $today,
@@ -161,16 +161,20 @@ final class DocumentsDueCommand extends Command
             return 0;
         }
 
-        $departure = $booking->stay()->checkIn()->toDateString();
-        $sendDate = BusinessTime::calendarDay($departure)->subDays($daysBefore)->toDateString();
+        $checkIn = $booking->stay()->checkIn()->toDateString();
+        $sendDate = BusinessTime::calendarDay($checkIn)->subDays($daysBefore)->toDateString();
 
         if ($sendDate > $today) {
             return 0;
         }
 
-        $key = $kind === DocumentKind::Pretrip
-            ? DeliveryKey::forPretrip($booking->id, $departure)
-            : DeliveryKey::forVoucher($booking->id, $departure);
+        $key = $kind === DocumentKind::PreArrival
+            ? DeliveryKey::forPreArrival($booking->id, $checkIn)
+            : DeliveryKey::forVoucher($booking->id, $checkIn);
+
+        if ($kind === DocumentKind::PreArrival && $this->preArrivalAlreadySent($booking, $checkIn)) {
+            return 0;
+        }
 
         $existing = $booking->documents
             ->where('kind', $kind)
@@ -198,6 +202,22 @@ final class DocumentsDueCommand extends Command
         return 1;
     }
 
+    private function preArrivalAlreadySent(Booking $booking, string $checkIn): bool
+    {
+        $previous = $booking->documents
+            ->where('kind', DocumentKind::Pretrip)
+            ->sortByDesc('version')
+            ->first();
+
+        if ($previous?->deliveries?->isNotEmpty() ?? false) {
+            return true;
+        }
+
+        return Delivery::query()
+            ->where('idempotency_key', DeliveryKey::forPretrip($booking->id, $checkIn))
+            ->exists();
+    }
+
     private function questionnaires(
         Booking $booking,
         string $today,
@@ -210,8 +230,8 @@ final class DocumentsDueCommand extends Command
             return 0;
         }
 
-        $departure = $booking->stay()->checkIn()->toDateString();
-        $sendDate = BusinessTime::calendarDay($departure)->subDays($daysBefore)->toDateString();
+        $checkIn = $booking->stay()->checkIn()->toDateString();
+        $sendDate = BusinessTime::calendarDay($checkIn)->subDays($daysBefore)->toDateString();
 
         if ($sendDate > $today) {
             return 0;

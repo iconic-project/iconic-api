@@ -64,10 +64,9 @@ final class CampaignMeasures
         $last = self::bookingTouch($campaign, 'utm_last');
 
         return Booking::query()
-            ->leftJoin('departures', 'departures.id', '=', 'bookings.departure_id')
             ->whereRaw("({$redeemed} OR {$first} OR {$last})")
             ->select('bookings.*')
-            ->selectRaw('departures.date as departure_date')
+            ->selectRaw('bookings.check_in as departure_date')
             ->selectRaw("({$charges}) as charges_total")
             ->selectRaw("({$redeemed}) as counts_redeemed")
             ->selectRaw("({$first}) as counts_first")

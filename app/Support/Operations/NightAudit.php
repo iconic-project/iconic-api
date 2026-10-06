@@ -32,7 +32,7 @@ final class NightAudit
 
         $this->each($this->arrivals($today), AlertKind::ArrivalNotCheckedIn, 'Arrival not checked in', AlertKeys::arrivalNotCheckedIn(...));
         $this->each($this->pastCheckOut($today), AlertKind::InHousePastCheckOut, 'In house past check-out', AlertKeys::inHousePastCheckOut(...));
-        $this->each($this->departuresToday($today), AlertKind::DepartureNotCheckedOut, 'Departure today not checked out', AlertKeys::departureNotCheckedOut(...));
+        $this->each($this->departuresToday($today), AlertKind::DepartureNotCheckedOut, 'Check-out today not completed', AlertKeys::checkOutStillOpen(...));
     }
 
     /**

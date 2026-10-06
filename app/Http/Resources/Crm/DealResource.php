@@ -21,6 +21,11 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     booking: array{
  *         reference: string,
  *         status: string,
+ *         check_in: string,
+ *         check_out: string,
+ *         nights: int,
+ *         room_type: string|null,
+ *         property_name: string|null,
  *         departure_date: string,
  *         cabin: string|null,
  *         charges_total: int,
@@ -32,6 +37,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *         channel_of_origin: string,
  *         utm_first: array<string, mixed>|null
  *     }|null,
+ *     searches: list<array{at: string, name: string, detail: string}>,
  *     contact_id: int
  * } $resource
  */
@@ -53,6 +59,11 @@ class DealResource extends JsonResource
      *     booking: array{
      *         reference: string,
      *         status: string,
+     *         check_in: string,
+     *         check_out: string,
+     *         nights: int,
+     *         room_type: string|null,
+     *         property_name: string|null,
      *         departure_date: string,
      *         cabin: string|null,
      *         charges_total: int,
@@ -64,6 +75,7 @@ class DealResource extends JsonResource
      *         channel_of_origin: string,
      *         utm_first: array<string, mixed>|null
      *     }|null,
+     *     searches: list<array{at: string, name: string, detail: string}>,
      *     contact_id: int
      * }
      */

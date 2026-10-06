@@ -81,6 +81,9 @@ test('the guest link returns questions and never echoes restricted answers', fun
         ],
     ])->assertOk()
         ->assertJsonPath('reference', 'ANK-2026-6408')
+        ->assertJsonPath('check_in', '2028-09-03')
+        ->assertJsonPath('check_out', $fixture['booking']->stay()->checkOut()->toDateString())
+        ->assertJsonPath('property_name', $fixture['booking']->property->name)
         ->assertJsonPath('guests.0.first_name', 'Ada')
         ->assertJsonPath('guests.0.answers.diet', 'no shellfish')
         ->assertJsonPath('guests.0.answers.access', 'provided')

@@ -110,27 +110,27 @@ final class Registry
                 data_get($initial, 'charter.proposal_valid_business_days'),
                 'Charter proposal link',
             ),
-            ...self::guestsRows(),
+            ...self::guestsRows($initial),
             self::here(
                 'retention-passport',
                 RuleGroup::DataRetention,
                 '§6.4',
-                'Passport retention after cruise',
+                'Passport retention after check-out',
                 RuleStatus::PendingLegal,
-                ['retention.passport_months_after_cruise'],
-                BusinessRulesDocument::sourceDisplay('retention.passport_months_after_cruise'),
-                data_get($initial, 'retention.passport_months_after_cruise'),
+                ['retention.passport_months_after_check_out'],
+                BusinessRulesDocument::sourceDisplay('retention.passport_months_after_check_out'),
+                data_get($initial, 'retention.passport_months_after_check_out'),
                 'Guests tab, retention jobs',
             ),
             self::here(
                 'retention-medical',
                 RuleGroup::DataRetention,
                 'LEG-002',
-                'Medical notes retention after disembarkation',
+                'Medical notes retention after check-out',
                 RuleStatus::PendingLegal,
-                ['retention.medical_days_after_cruise'],
-                BusinessRulesDocument::sourceDisplay('retention.medical_days_after_cruise'),
-                data_get($initial, 'retention.medical_days_after_cruise'),
+                ['retention.medical_days_after_check_out'],
+                BusinessRulesDocument::sourceDisplay('retention.medical_days_after_check_out'),
+                data_get($initial, 'retention.medical_days_after_check_out'),
                 'Guests tab, retention jobs',
             ),
             self::here(
@@ -161,7 +161,7 @@ final class Registry
                 'O2',
                 'Generated report file retention',
                 RuleStatus::PendingClient,
-                ['reports.retention_days'],
+                ['reports.retention_days', 'reports.pickup_days'],
                 BusinessRulesDocument::sourceDisplay('reports.retention_days'),
                 data_get($initial, 'reports.retention_days'),
                 'Reports, retention job',
@@ -344,7 +344,7 @@ final class Registry
             'extras-due-hours' => data_get($document, 'payments.extras_due_hours').' hours',
             'wire-window-hours' => data_get($document, 'payments.wire_window_hours').' hours',
             'balance-reminders' => implode(' / ', data_get($document, 'payments.balance_reminder_days') ?? []).' days',
-            'pretrip-days-before' => data_get($document, 'documents.pretrip_days_before').' days',
+            'pretrip-days-before' => data_get($document, 'documents.pre_arrival_days_before').' days',
             'voucher-days-before' => data_get($document, 'documents.voucher_days_before').' days',
             'online-deposit-discount' => data_get($document, 'discounts.online_deposit_discount_pct').'%',
             'max-total-discount' => data_get($document, 'discounts.max_total_discount_pct') === null
@@ -365,11 +365,11 @@ final class Registry
             'dpng-manifest' => data_get($document, 'manifests.dpng_fit_days').' / '.data_get($document, 'manifests.dpng_charter_days').' days',
             'captain-manifest' => data_get($document, 'manifests.captain_days').' days',
             'manifest-chase' => data_get($document, 'manifests.chase_days_before_due').' days',
-            'low-occupancy-alert' => data_get($document, 'alerts.low_occupancy_pct').'% / '.data_get($document, 'alerts.low_occupancy_days_before').' days',
-            'nps-survey' => data_get($document, 'nps.survey_hours_after_return').' h · alert < '.data_get($document, 'nps.alert_below').' · review ≥ '.data_get($document, 'nps.review_request_from'),
+            'low-occupancy-alert' => data_get($document, 'alerts.low_occupancy_pct').'% / '.data_get($document, 'alerts.low_occupancy_days_before').' days / '.data_get($document, 'alerts.low_occupancy_min_consecutive_nights').' nights',
+            'nps-survey' => data_get($document, 'nps.survey_hours_after_check_out', data_get($document, 'nps.survey_hours_after_return')).' h · alert < '.data_get($document, 'nps.alert_below').' · review ≥ '.data_get($document, 'nps.review_request_from'),
             'nps-review-url' => (string) data_get($document, 'nps.review_url'),
-            'retention-passport' => data_get($document, 'retention.passport_months_after_cruise').' months',
-            'retention-medical' => data_get($document, 'retention.medical_days_after_cruise').' days',
+            'retention-passport' => data_get($document, 'retention.passport_months_after_check_out', data_get($document, 'retention.passport_months_after_cruise')).' months',
+            'retention-medical' => data_get($document, 'retention.medical_days_after_check_out', data_get($document, 'retention.medical_days_after_cruise')).' days',
             'retention-behavioural-raw' => data_get($document, 'retention.behavioural_raw_months').' months',
             'retention-behavioural-unstitched' => data_get($document, 'retention.behavioural_unstitched_days').' days',
             'report-retention' => data_get($document, 'reports.retention_days').' days',
@@ -415,8 +415,22 @@ final class Registry
             'stay-max-rooms' => data_get($document, 'stay.max_rooms_per_booking').' rooms',
             'stay-check-in-full-payment' => data_get($document, 'stay.check_in_requires_full_payment') === true ? 'Yes' : 'No',
             'stay-booking-horizon' => data_get($document, 'stay.booking_horizon_days').' days',
+            'guest-registration' => self::registrationDisplay($document),
             default => $definition->sourceDisplay,
         };
+    }
+
+    /**
+     * @param  array<string, mixed>  $document
+     */
+    private static function registrationDisplay(array $document): string
+    {
+        $fields = data_get($document, 'registration.fields');
+        $list = is_array($fields) ? implode(', ', $fields) : '';
+        $deadline = data_get($document, 'registration.deadline_hours_after_check_in');
+        $deadlineText = $deadline === null ? 'no deadline' : $deadline.' h after check-in';
+
+        return $list.' · '.$deadlineText;
     }
 
     /**
@@ -854,18 +868,18 @@ final class Registry
                 'pretrip-days-before',
                 $g,
                 'J7',
-                'Pre-trip itinerary — days before departure',
+                'Pre-arrival information — days before check-in',
                 RuleStatus::Confirmed,
-                ['documents.pretrip_days_before'],
-                BusinessRulesDocument::sourceDisplay('documents.pretrip_days_before'),
-                data_get($initial, 'documents.pretrip_days_before'),
+                ['documents.pre_arrival_days_before'],
+                BusinessRulesDocument::sourceDisplay('documents.pre_arrival_days_before'),
+                data_get($initial, 'documents.pre_arrival_days_before'),
                 'Document schedule',
             ),
             self::here(
                 'voucher-days-before',
                 $g,
                 'J7',
-                'Transfer voucher — days before departure',
+                'Transfer voucher — days before check-in',
                 RuleStatus::Confirmed,
                 ['documents.voucher_days_before'],
                 BusinessRulesDocument::sourceDisplay('documents.voucher_days_before'),
@@ -1067,6 +1081,7 @@ final class Registry
                     'manifests.dpng_charter_days' => data_get($initial, 'manifests.dpng_charter_days'),
                 ],
                 'Guest-details reminders, booking drawer',
+                'Retired by 09 H15. Existing files stay readable. Sprint 22 deletes this entry.',
             ),
             self::here(
                 'captain-manifest',
@@ -1078,6 +1093,7 @@ final class Registry
                 BusinessRulesDocument::sourceDisplay('manifests.captain_days'),
                 data_get($initial, 'manifests.captain_days'),
                 'Documents & Manifests',
+                'Retired by 09 H15. Existing files stay readable. Sprint 22 deletes this entry.',
             ),
             self::here(
                 'manifest-chase',
@@ -1089,6 +1105,7 @@ final class Registry
                 BusinessRulesDocument::sourceDisplay('manifests.chase_days_before_due'),
                 data_get($initial, 'manifests.chase_days_before_due'),
                 'Documents & Manifests',
+                'Retired by 09 H15. Existing files stay readable. Sprint 22 deletes this entry.',
             ),
             self::here(
                 'low-occupancy-alert',
@@ -1096,25 +1113,46 @@ final class Registry
                 '§10',
                 'Low-occupancy alert',
                 RuleStatus::Confirmed,
-                ['alerts.low_occupancy_pct', 'alerts.low_occupancy_days_before'],
+                ['alerts.low_occupancy_pct', 'alerts.low_occupancy_days_before', 'alerts.low_occupancy_min_consecutive_nights'],
                 BusinessRulesDocument::sourceDisplay('alerts.low_occupancy_pct'),
                 [
                     'alerts.low_occupancy_pct' => data_get($initial, 'alerts.low_occupancy_pct'),
                     'alerts.low_occupancy_days_before' => data_get($initial, 'alerts.low_occupancy_days_before'),
+                    'alerts.low_occupancy_min_consecutive_nights' => data_get($initial, 'alerts.low_occupancy_min_consecutive_nights'),
                 ],
-                'Departure alerts',
+                'Occupancy alerts',
             ),
         ];
     }
 
     /**
+     * @param  array<string, mixed>  $initial
      * @return list<RuleDefinition>
      */
-    private static function guestsRows(): array
+    private static function guestsRows(array $initial): array
     {
         $g = RuleGroup::GuestsCapacity;
 
         return [
+            self::here(
+                'guest-registration',
+                $g,
+                'HQ9',
+                'Guest registration fields',
+                RuleStatus::PendingClient,
+                [
+                    'registration.fields',
+                    'registration.formats',
+                    'registration.deadline_hours_after_check_in',
+                ],
+                BusinessRulesDocument::sourceDisplay('registration.fields'),
+                [
+                    'registration.fields' => data_get($initial, 'registration.fields'),
+                    'registration.formats' => data_get($initial, 'registration.formats'),
+                    'registration.deadline_hours_after_check_in' => data_get($initial, 'registration.deadline_hours_after_check_in'),
+                ],
+                'Front desk registration export',
+            ),
             new RuleDefinition(
                 'ops-004-child-age',
                 $g,
@@ -1200,10 +1238,10 @@ final class Registry
                 'N8',
                 'Post-trip survey — delay, alert and review thresholds',
                 RuleStatus::Confirmed,
-                ['nps.survey_hours_after_return', 'nps.alert_below', 'nps.review_request_from'],
-                BusinessRulesDocument::sourceDisplay('nps.survey_hours_after_return'),
+                ['nps.survey_hours_after_check_out', 'nps.alert_below', 'nps.review_request_from'],
+                BusinessRulesDocument::sourceDisplay('nps.survey_hours_after_check_out'),
                 [
-                    'nps.survey_hours_after_return' => data_get(BusinessRulesDocument::initial(), 'nps.survey_hours_after_return'),
+                    'nps.survey_hours_after_check_out' => data_get(BusinessRulesDocument::initial(), 'nps.survey_hours_after_check_out'),
                     'nps.alert_below' => data_get(BusinessRulesDocument::initial(), 'nps.alert_below'),
                     'nps.review_request_from' => data_get(BusinessRulesDocument::initial(), 'nps.review_request_from'),
                 ],
@@ -1774,6 +1812,7 @@ final class Registry
         string $sourceDisplay,
         mixed $sourceValue,
         string $usedIn,
+        ?string $note = null,
     ): RuleDefinition {
         return new RuleDefinition(
             $key,
@@ -1786,6 +1825,7 @@ final class Registry
             $sourceDisplay,
             $sourceValue,
             $usedIn,
+            note: $note,
         );
     }
 

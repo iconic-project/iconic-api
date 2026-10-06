@@ -9,6 +9,8 @@ use App\Models\Booking;
 use App\Models\ChangeHistory;
 use App\Models\Guest;
 use App\Models\GuestPreference;
+use App\Models\Property;
+use App\Models\Room;
 use App\Support\BusinessTime;
 use App\Support\Retention\RetentionWindow;
 use Carbon\CarbonImmutable;
@@ -95,7 +97,7 @@ test('passports are purged the day after the 29 February overflow boundary', fun
     expect(json_encode($entry?->after))->not->toContain('C4F7K2L9M');
     expect(json_encode($entry?->context))->not->toContain('C4F7K2L9M');
     expect($entry?->context['what'] ?? null)->toBe(
-        'Retention — passport data anonymised for 1 guests (24 months after the cruise, B4)',
+        'Retention — passport data anonymised for 1 guests (24 months after check-out, B4)',
     );
 });
 
@@ -127,7 +129,7 @@ test('notes are purged the day after the 90-day boundary', function (): void {
     expect($entry?->after['notes_purged'] ?? null)->toBe(1);
     expect(json_encode($entry?->after))->not->toContain('penicillin');
     expect($entry?->context['what'] ?? null)->toBe(
-        'Retention — medical notes purged for 1 guests (90 days after the cruise, B4)',
+        'Retention — medical notes purged for 1 guests (90 days after check-out, B4)',
     );
 });
 
@@ -155,6 +157,54 @@ test('dry-run prints counts and writes nothing', function (): void {
     expect($guest->passport_no)->toBe('C4F7K2L9M');
     expect($guest->medical_note)->toBe('penicillin');
     expect(ChangeHistory::query()->where('event', 'retention.applied')->count())->toBe(0);
+});
+
+test('retention follows check-out, and a later check-out is left alone', function (): void {
+    $property = Property::factory()->create();
+    $room = Room::factory()->create(['property_id' => $property->id]);
+    $early = Booking::factory()->create([
+        'departure_id' => null,
+        'property_id' => $property->id,
+        'room_id' => $room->id,
+        'check_in' => '2026-01-01',
+        'check_out' => '2026-01-08',
+        'nights' => 7,
+        'status' => BookingStatus::CheckedOut,
+        'owner_id' => managerUser()->id,
+        'reference' => 'ANK-RET-EARLY',
+    ]);
+    $late = Booking::factory()->create([
+        'departure_id' => null,
+        'property_id' => $property->id,
+        'room_id' => $room->id,
+        'check_in' => '2028-06-01',
+        'check_out' => '2028-06-08',
+        'nights' => 7,
+        'status' => BookingStatus::CheckedOut,
+        'owner_id' => managerUser()->id,
+        'reference' => 'ANK-RET-LATE',
+    ]);
+    $earlyGuest = retentionGuest($early, [
+        'medical_note' => null,
+        'dietary_note' => null,
+        'accessibility_note' => null,
+    ]);
+    $lateGuest = retentionGuest($late, [
+        'medical_note' => null,
+        'dietary_note' => null,
+        'accessibility_note' => null,
+    ]);
+
+    $this->travelTo(CarbonImmutable::parse('2028-01-08 12:00:00', BusinessTime::zone()));
+    Artisan::call('iconic:retention');
+    expect($earlyGuest->refresh()->passport_no)->toBe('C4F7K2L9M');
+    expect($lateGuest->refresh()->passport_no)->toBe('C4F7K2L9M');
+
+    $this->travelTo(CarbonImmutable::parse('2028-01-09 12:00:00', BusinessTime::zone()));
+    Artisan::call('iconic:retention');
+
+    expect($earlyGuest->refresh()->passport_no)->toBeNull()
+        ->and($lateGuest->refresh()->passport_no)->toBe('C4F7K2L9M');
 });
 
 test('a soft-deleted booking is still purged', function (): void {
@@ -226,7 +276,7 @@ test('preferences are purged on the medical date and leave no answer text', func
     $entry = ChangeHistory::query()->where('event', 'retention.applied')->where('subject_id', $booking->id)->first();
     expect($entry?->after['preferences_purged'] ?? null)->toBe(1);
     expect($entry?->context['what'] ?? null)->toBe(
-        'Retention — guest preferences purged for 1 rows (90 days after the cruise, B4)',
+        'Retention — guest preferences purged for 1 rows (90 days after check-out, B4)',
     );
 });
 

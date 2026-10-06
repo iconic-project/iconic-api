@@ -12,7 +12,7 @@ Pipeline cash is the payments ledger. A deal whose stage follows a booking canno
 2. Read Collected, Scheduled in, Awaiting first payment, Open pipeline, Weighted forecast and Overdue.
 3. Open `http://localhost:3001/rms/commercial/payments`. Read the same cash figures.
 4. Return to the pipeline. Read **Stage map**.
-5. A fresh seed has no deal cards (nothing backfills them). Submit one engine pay-later request on a free November cabin (WEB-07 shape) so a deal appears, or use the deal PIPE-03 just created if this run is not alone.
+5. A fresh seed has no deal cards (nothing backfills them). Submit one engine pay-later request on a free stay (HENG-03) so a deal appears, or use the deal PIPE-03 just created if this run is not alone.
 6. Open that deal. Try to move it. Read the card.
 
 ## Expected

@@ -162,11 +162,11 @@ test('pretrip at T-45 and voucher at T-7 only with a transfer extra and a missed
 
     travelTo('2028-07-19');
     $this->artisan('iconic:documents-due')->assertSuccessful();
-    expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::Pretrip)->count())->toBe(0);
+    expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::PreArrival)->count())->toBe(0);
 
     travelTo('2028-07-21');
     $this->artisan('iconic:documents-due')->assertSuccessful();
-    expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::Pretrip)->count())->toBe(1);
+    expect(Document::query()->where('booking_id', $booking->id)->where('kind', DocumentKind::PreArrival)->count())->toBe(1);
 
     travelTo('2028-08-28');
     $this->artisan('iconic:documents-due')->assertSuccessful();

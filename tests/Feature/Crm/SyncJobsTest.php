@@ -55,9 +55,12 @@ test('doc 07 jobs are catalogued and the new commands keep galapagos time and a 
         'iconic:ledger-check' => '0 2 * * *',
         'iconic:commission-scan' => '30 2 * * *',
         'iconic:occupancy-check' => '0 7 * * *',
-        'iconic:manifests-due' => '0 6 * * *',
         'iconic:document-check' => '0 * * * *',
     ];
+
+    expect($events->contains(
+        fn (Event $event): bool => RecordScheduledRuns::commandName($event) === 'iconic:manifests-due',
+    ))->toBeFalse();
 
     foreach ($expected as $command => $expression) {
         $matches = $events->filter(

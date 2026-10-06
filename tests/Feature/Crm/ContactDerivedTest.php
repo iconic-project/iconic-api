@@ -17,6 +17,7 @@ use App\Models\Consent;
 use App\Models\Contact;
 use App\Models\ContactConsent;
 use App\Support\BusinessTime;
+use App\Support\Crm\ContactDerived;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -145,4 +146,25 @@ test('lifecycle covers each branch including date windows and precedence', funct
     ]);
     Agency::factory()->pending()->create(['email' => 'pending@agency.test']);
     expect(crmDerived($pendingAgent)->lifecycle)->toBe(ContactLifecycle::Prospect->value);
+});
+
+test('derived stay fields come from booking columns', function (): void {
+    $today = BusinessTime::now();
+    $contact = Contact::factory()->create();
+    $past = crmBooking($contact, $today->subDays(40)->toDateString(), BookingStatus::CheckedOut, 10000, 'S1');
+    $next = crmBooking($contact, $today->addDays(21)->toDateString(), BookingStatus::Confirmed, 8000, 'S2');
+    crmBooking($contact, $today->addDays(28)->toDateString(), BookingStatus::Cancelled, 20000, 'S3');
+    $past->refresh()->load('roomType');
+    $next->refresh();
+
+    $row = crmDerived($contact);
+
+    expect(substr((string) $row->last_stay_check_out, 0, 10))->toBe($past->check_out->toDateString())
+        ->and(substr((string) $row->next_stay_check_in, 0, 10))->toBe($next->check_in->toDateString())
+        ->and((int) $row->stays_count)->toBe(2)
+        ->and((int) $row->nights_count)->toBe($past->nights + $next->nights)
+        ->and($row->last_room_type)->toBe($past->roomType->name)
+        ->and((int) $row->lifetime_value)->toBe(18000)
+        ->and(ContactDerived::lifecycleSql($today->toDateString()))->not->toContain('departures')
+        ->and(ContactDerived::lastRoomTypeSql($today->toDateString()))->not->toContain('departures');
 });

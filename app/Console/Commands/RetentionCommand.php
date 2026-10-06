@@ -29,8 +29,8 @@ final class RetentionCommand extends Command
     public function handle(CurrentConfig $config): int
     {
         $rules = $config->businessRules()->retention;
-        $months = $rules->passportMonthsAfterCruise;
-        $days = $rules->medicalDaysAfterCruise;
+        $months = $rules->passportMonthsAfterCheckOut;
+        $days = $rules->medicalDaysAfterCheckOut;
         $today = BusinessTime::now()->toDateString();
         $dry = (bool) $this->option('dry-run');
 
@@ -130,7 +130,7 @@ final class RetentionCommand extends Command
         });
 
         $exports = $this->expireExports($config, $dry);
-        $manifests = $this->purgeManifests($rules->passportMonthsAfterCruise, $rules->medicalDaysAfterCruise, $today, $dry);
+        $manifests = $this->purgeManifests($rules->passportMonthsAfterCheckOut, $rules->medicalDaysAfterCheckOut, $today, $dry);
         $reports = $this->purgeReports($config->businessRules()->reports->retentionDays, $dry);
 
         $verb = $dry ? 'Would change' : 'Changed';
@@ -180,15 +180,15 @@ final class RetentionCommand extends Command
         $parts = [];
 
         if ($passports > 0) {
-            $parts[] = 'passport data anonymised for '.$passports.' guests ('.$months.' months after the cruise, B4)';
+            $parts[] = 'passport data anonymised for '.$passports.' guests ('.$months.' months after check-out, B4)';
         }
 
         if ($notes > 0) {
-            $parts[] = 'medical notes purged for '.$notes.' guests ('.$days.' days after the cruise, B4)';
+            $parts[] = 'medical notes purged for '.$notes.' guests ('.$days.' days after check-out, B4)';
         }
 
         if ($preferences > 0) {
-            $parts[] = 'guest preferences purged for '.$preferences.' rows ('.$days.' days after the cruise, B4)';
+            $parts[] = 'guest preferences purged for '.$preferences.' rows ('.$days.' days after check-out, B4)';
         }
 
         return 'Retention — '.implode('; ', $parts);

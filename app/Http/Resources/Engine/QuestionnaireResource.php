@@ -13,6 +13,9 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @property array{
  *     reference: string,
+ *     check_in: string,
+ *     check_out: string,
+ *     property_name: string,
  *     departure_date: string,
  *     itinerary_name: string,
  *     questions: list<array{key: string, label: string, type: PreferenceQuestionType, options: list<string>, restricted: bool, required: bool}>,
@@ -35,6 +38,9 @@ class QuestionnaireResource extends JsonResource
     /**
      * @return array{
      *     reference: string,
+     *     check_in: string,
+     *     check_out: string,
+     *     property_name: string,
      *     departure_date: string,
      *     itinerary_name: string,
      *     questions: list<array{key: string, label: string, type: PreferenceQuestionType, options: list<string>, restricted: bool, required: bool}>,

@@ -11,7 +11,7 @@ A REQUESTED booking enrols on Request to Deposit. Step one sends. The count on t
 
 ## Steps
 1. **Carolina.** Open `http://localhost:3001/crm/marketing/journeys`. Turn **Request to Deposit — confirm the booking** on. The confirm quotes `The booking request they submitted.` Click **Turn on**.
-2. **Guest.** Dismiss the analytics bar (`Analytics off`, or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Same cabin path as WEB-07: 2 adults, 7 Nov 2027 ANAMARA, Suite 03, pay later. Email `e2e.jrn01@iconic.test`.
+2. **Guest.** Dismiss the analytics bar (`Analytics off`, or set `localStorage['iconic-engine-analytics']` to `refused` and reload). Pay later on a free stay, as HENG-03, not a departure. Email `e2e.jrn01@iconic.test`.
 3. From `iconic-api`, with the running compose project: `docker compose exec app sh -c "php artisan iconic:journeys"`. Hour 0 is already due. Do not wait for the fifteen-minute schedule.
 4. **Carolina.** Reload Journeys. Open **Enrolments** on Request to Deposit. Read the step counts.
 

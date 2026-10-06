@@ -16,7 +16,7 @@ final class SummarySnapshot
     {
         $facts = DocumentFacts::load($booking, $fresh);
         $issuer = $facts->issuer();
-        $cruise = $facts->cruise();
+        $stay = $facts->stay();
 
         return [
             'document' => $facts->document(
@@ -28,7 +28,7 @@ final class SummarySnapshot
             'date' => $facts->invoiceDate(),
             'status_line' => $facts->statusLine(),
             'lead_name' => $facts->leadName(),
-            'cruise' => $cruise,
+            'stay' => $stay,
             'totals' => $facts->totals(),
             'schedule' => $facts->schedule(),
             'balance_due_date' => $facts->shortDate($booking->balanceDueDate()),

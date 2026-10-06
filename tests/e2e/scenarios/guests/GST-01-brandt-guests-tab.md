@@ -12,11 +12,11 @@ The Brandt booking is the complete-party fixture: a lead, a minor with guardian 
 2. Open ANK-2026-0005 (The Brandt Family). **Guests** tab.
 
 ## Expected
-- [ ] E1 · KPI **Complete** `3/3` with subtitle `needed for DPNG list & manifest`. KPI **PNG fees (by nationality)** `USD 500` with subtitle `paid at SCY airport` (`png_collected` is false). ⚠ UNVERIFIED — task 07 browser / seed, not a cloud reset.
+- [ ] E1 · KPI **Complete** `3/3` with subtitle `needed for guest registration`. KPI **PNG fees (by nationality)** `USD 500` with subtitle `paid at SCY airport` (`png_collected` is false). ⚠ UNVERIFIED — task 07 browser / seed, not a cloud reset.
 - [ ] E2 · Markus Brandt has pill `LEAD`. Julia Brandt has no MINOR pill. Leon Brandt has pill `MINOR`. Do **not** copy any passport number into the report; Carolina sees the **full** number on each card (not `••••`).
 - [ ] E3 · Leon’s card shows `Guardian Markus Brandt ✓` and relationship Father is on the form when edited. Age on departure is `12 yrs on departure`. Nationality Germany.
 - [ ] E4 · PNG lines: Markus and Julia `PNG: Foreign adult (>12) · USD 200`. Leon `PNG: Foreign minor (≤12) · USD 100`. Amounts from engine settings `fees.png.foreign_over_12` / `foreign_12_and_under`.
 - [ ] E5 · `＋ Add guest` is hidden (`can_add` false at cabin max 3).
 
 ## Notes
-Values: `fixtures/reference-values.md` (Fee table, Seeded guests). Leon’s `is_minor_now` is calendar age vs **today**, not departure. Reference guests by name only.
+Values: `fixtures/reference-values.md` (Fee table, Seeded guests). Leon’s `is_minor_now` is calendar age vs **today**. The card still prints `12 yrs on departure` (`yearsOnDeparture`). That label is not a departure inventory fact. Reference guests by name only.

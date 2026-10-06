@@ -37,9 +37,9 @@ final class AlertKeys
         return 'delivery:'.$bookingId.':'.$kind->value;
     }
 
-    public static function confirmedAtDeparture(int $bookingId): string
+    public static function confirmedOnCheckIn(int $bookingId): string
     {
-        return 'confirmed-at-departure:'.$bookingId;
+        return 'confirmed-on-check-in:'.$bookingId;
     }
 
     public static function arrivalNotCheckedIn(int $bookingId): string
@@ -52,9 +52,9 @@ final class AlertKeys
         return 'in-house-past-check-out:'.$bookingId;
     }
 
-    public static function departureNotCheckedOut(int $bookingId): string
+    public static function checkOutStillOpen(int $bookingId): string
     {
-        return 'departure-not-checked-out:'.$bookingId;
+        return 'check-out-still-open:'.$bookingId;
     }
 
     public static function ledgerStripe(string $paymentIntent): string
@@ -92,14 +92,14 @@ final class AlertKeys
         return 'leak:terms:'.$agencyId;
     }
 
-    public static function occupancy(int $departureId): string
+    public static function occupancyRun(int $propertyId, string $firstNight, string $lastNight): string
     {
-        return 'occupancy:'.$departureId;
+        return 'occupancy:'.$propertyId.':'.$firstNight.':'.$lastNight;
     }
 
-    public static function manifestData(int $departureId): string
+    public static function manifestData(int $subjectId): string
     {
-        return 'manifest-data:'.$departureId;
+        return 'manifest-data:'.$subjectId;
     }
 
     public static function npsReply(int $guestResponseId): string

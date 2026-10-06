@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Support\Crm;
 
+use App\Enums\BehaviouralEventName;
 use App\Enums\DealStage;
 use App\Models\Agency;
+use App\Models\BehaviouralEvent;
 use App\Models\Booking;
 use App\Models\Deal;
 use App\Services\Config\CurrentConfig;
+use App\Support\Iso;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -45,6 +48,7 @@ final class DealDrawer
             'value_label' => $deal->isBound() ? 'FROM RMS' : 'CRM ESTIMATE',
             'sla' => $sla,
             'booking' => self::booking($deal),
+            'searches' => self::searches($deal),
             'contact_id' => $deal->contact_id,
         ];
     }
@@ -85,7 +89,7 @@ final class DealDrawer
         $sql = DealStages::bookingColumnSql('bookings.id');
         $picked = DB::selectOne('SELECT ('.$sql.') AS booking_id FROM deals WHERE deals.id = ?', [$deal->id]);
         $bookingId = is_object($picked) ? (int) ($picked->booking_id ?? 0) : 0;
-        $booking = $bookingId > 0 ? Booking::query()->with(['departure', 'cabin', 'agency'])->find($bookingId) : null;
+        $booking = $bookingId > 0 ? Booking::query()->with(['roomType', 'property', 'room', 'agency'])->find($bookingId) : null;
 
         if (! $booking instanceof Booking) {
             return null;
@@ -93,12 +97,19 @@ final class DealDrawer
 
         $charges = self::money($booking);
         $codes = self::offerCodes($booking);
+        $stay = $booking->stay();
+        $checkIn = $stay->checkIn()->toDateString();
 
         return [
             'reference' => OpenDealReference::of($booking, $deal),
             'status' => $booking->status->value,
-            'departure_date' => self::departureDate($booking),
-            'cabin' => $booking->cabin?->label,
+            'check_in' => $checkIn,
+            'check_out' => $stay->checkOut()->toDateString(),
+            'nights' => $stay->nights(),
+            'room_type' => $booking->roomType?->name,
+            'property_name' => $booking->property->name,
+            'departure_date' => $checkIn,
+            'cabin' => $booking->room?->label,
             'charges_total' => $charges['charges'],
             'paid' => $charges['paid'],
             'balance' => $charges['balance'],
@@ -133,9 +144,33 @@ final class DealDrawer
         ];
     }
 
-    private static function departureDate(Booking $booking): string
+    /**
+     * @return list<array{at: string, name: string, detail: string}>
+     */
+    private static function searches(Deal $deal): array
     {
-        return $booking->departure->date->format('Y-m-d');
+        $events = BehaviouralEvent::query()
+            ->where('contact_id', $deal->contact_id)
+            ->whereIn('name', [
+                BehaviouralEventName::SearchPerformed->value,
+                BehaviouralEventName::RoomTypeViewed->value,
+            ])
+            ->orderByDesc('occurred_at')
+            ->orderByDesc('id')
+            ->limit(8)
+            ->get();
+
+        $rows = [];
+
+        foreach ($events as $event) {
+            $rows[] = [
+                'at' => Iso::utc($event->occurred_at),
+                'name' => $event->name->value,
+                'detail' => BehaviouralEventDetail::make($event->name, $event->params),
+            ];
+        }
+
+        return $rows;
     }
 
     /**

@@ -10,7 +10,7 @@ A consented visitor’s itinerary and checkout events must land on the new conta
 
 ## Steps
 1. **Guest** (fresh context, no staff cookies). Open `http://localhost:3000/`. Before any other click, click **Analytics on**. Confirm `localStorage['iconic-engine-analytics']` is `accepted` and `localStorage['iconic-engine-session']` exists.
-2. Open DevTools → Network. Filter `events`. Walk WEB-06 / WEB-07 to `/book/details` (2 adults, 7 Nov 2027 ANAMARA, Suite 03): home → Check availability → Western Realm → a departure row (so `page_view` and `view_departure` queue).
+2. Open DevTools → Network. Filter `events`. Walk a stay search (HENG-01) through pay later (HENG-03) so `page_view` queues. `view_departure` still counts when the client sends that name.
 3. Wait until `POST /api/engine/events` appears (flush every few seconds, or hide the tab). Record `session_id` from the request body.
 4. Contact: First `E2E`, Last `Crm05`, Email `e2e.crm05@iconic.test`, phone `+1 650 253 0005`, preferred **Email**. Guests: both nationalities **United States**. Fees: PNG **I will pay at SCY airport**; TCT **Arrange the TCT with the team later**. Declarations: **Privacy policy** and **Travel insurance declaration**.
 5. **Option 1 · Book now, pay later.** `Send booking request`. Read `/book/confirmation` — next request after seed is **ANK-R-2026-0043**.

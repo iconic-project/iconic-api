@@ -84,7 +84,6 @@ final class DealStages
         return "(
             SELECT {$expression}
             FROM bookings
-            INNER JOIN departures ON departures.id = bookings.departure_id
             WHERE {$match}
             ORDER BY FIELD(bookings.status, {$order}), bookings.id
             LIMIT 1

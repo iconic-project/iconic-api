@@ -45,7 +45,7 @@ final class ReportController extends Controller
         $actor = $this->actor();
         $definition = ReportDefinitions::find($key);
 
-        if ($definition === null) {
+        if ($definition === null || ! ReportDefinitions::inCatalogue($key)) {
             abort(404);
         }
 

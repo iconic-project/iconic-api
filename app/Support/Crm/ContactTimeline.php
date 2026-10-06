@@ -187,8 +187,6 @@ final class ContactTimeline
     {
         return DB::table('behavioural_events')
             ->leftJoin('itineraries', 'itineraries.code', '=', DB::raw("JSON_UNQUOTE(JSON_EXTRACT(behavioural_events.params, '$.itinerary_code'))"))
-            ->leftJoin('departures', 'departures.id', '=', DB::raw("CAST(JSON_UNQUOTE(JSON_EXTRACT(behavioural_events.params, '$.departure_id')) AS UNSIGNED)"))
-            ->leftJoin('properties', 'properties.id', '=', 'departures.property_id')
             ->where('behavioural_events.contact_id', $contactId)
             ->select([
                 DB::raw('behavioural_events.occurred_at as `at`'),
@@ -196,9 +194,7 @@ final class ContactTimeline
                 DB::raw("JSON_SET(
                     JSON_OBJECT(
                         'name', behavioural_events.name,
-                        'itinerary_name', itineraries.name,
-                        'departure_date', DATE_FORMAT(departures.date, '%Y-%m-%d'),
-                        'property_name', properties.name
+                        'itinerary_name', itineraries.name
                     ),
                     '$.params', CAST(behavioural_events.params AS JSON)
                 ) as payload"),

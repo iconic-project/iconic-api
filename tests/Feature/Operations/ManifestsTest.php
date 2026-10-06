@@ -7,7 +7,6 @@ use App\Enums\AlertKind;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
 use App\Enums\DeliveryKind;
-use App\Enums\DeliveryStatus;
 use App\Enums\ManifestKind;
 use App\Enums\ManifestReason;
 use App\Models\Alert;
@@ -18,7 +17,6 @@ use App\Models\Departure;
 use App\Models\Guest;
 use App\Models\Manifest;
 use App\Models\Room;
-use App\Support\Alerts\AlertKeys;
 use App\Support\Manifests\ManifestDue;
 use App\Support\Manifests\ManifestFiles;
 use App\Support\Manifests\ManifestPassenger;
@@ -152,7 +150,7 @@ test('an omitted manifest bound is unbounded and a reversed pair is rejected', f
         ->assertUnprocessable();
 });
 
-test('the daily job issues first once until the departure date and then only resolves', function (): void {
+test('the retired command issues nothing and chases nothing', function (): void {
     $departure = manifestDeparture('2026-07-05');
     $booking = manifestBooking($departure, BookingStatus::Confirmed, manifestCabin($departure, 1, 'J1', 'Suite 01'), 'ANK-2026-7201');
     manifestGuest($booking, ['passport_no' => null, 'email' => 'ada@example.com']);
@@ -161,96 +159,33 @@ test('the daily job issues first once until the departure date and then only res
     Artisan::call('iconic:manifests-due');
     Artisan::call('iconic:manifests-due');
 
-    expect(manifestCount($departure, ManifestKind::Dpng))->toBe(1)
-        ->and(manifestCount($departure, ManifestKind::Captain))->toBe(0)
-        ->and(Manifest::query()->where('departure_id', $departure->id)->value('reason'))->toBe(ManifestReason::First);
-
-    $alert = Alert::query()->where('base_key', AlertKeys::manifestData($departure->id))->first();
-    expect($alert)->not->toBeNull()
-        ->and($alert?->kind)->toBe(AlertKind::ManifestDataOverdue)
-        ->and($alert?->resolved_at)->toBeNull()
-        ->and(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(1)
-        ->and(Delivery::query()->where('idempotency_key', 'chase:'.$booking->id.':'.$departure->id)->value('status'))
-        ->toBe(DeliveryStatus::Sent);
-
-    $history = ChangeHistory::query()->where('event', 'manifest.generated')->first();
-    expect($history?->actor_label)->toBe('System · manifests')
-        ->and($history?->after['passport_no'] ?? null)->toBeNull();
-
-    galapagos('2026-07-05');
-    Artisan::call('iconic:manifests-due');
-
-    expect($alert?->fresh()?->resolution)->toBe('Departure sailed')
-        ->and(manifestCount($departure, ManifestKind::Captain))->toBe(1)
-        ->and(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(1);
-
-    $versions = Manifest::query()->where('departure_id', $departure->id)->count();
-    galapagos('2026-07-06');
-    Artisan::call('iconic:manifests-due');
-
-    expect(Manifest::query()->where('departure_id', $departure->id)->count())->toBe($versions)
-        ->and(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(1)
-        ->and(Alert::query()->where('kind', AlertKind::ManifestDataOverdue)->whereNull('resolved_at')->count())->toBe(0);
-});
-
-test('a missed day before sailing still issues first once', function (): void {
-    $departure = manifestDeparture('2026-07-05');
-    $booking = manifestBooking($departure, BookingStatus::Confirmed, manifestCabin($departure, 1, 'M1', 'Suite 01'), 'ANK-2026-7202');
-    manifestGuest($booking);
-
-    galapagos('2026-06-25');
-    Artisan::call('iconic:manifests-due');
-    Artisan::call('iconic:manifests-due');
-
-    expect(manifestCount($departure, ManifestKind::Dpng))->toBe(1)
-        ->and(Manifest::query()->where('departure_id', $departure->id)->where('kind', ManifestKind::Dpng)->value('reason'))
-        ->toBe(ManifestReason::First);
-});
-
-test('a sailed departure gets no first, no alert and no chaser', function (): void {
-    $departure = manifestDeparture('2026-06-01');
-    $booking = manifestBooking($departure, BookingStatus::Confirmed, manifestCabin($departure, 1, 'S1', 'Suite 01'), 'ANK-2026-7203');
-    manifestGuest($booking, ['passport_no' => null, 'email' => 'late@example.com']);
-
-    galapagos('2026-07-06');
-    Artisan::call('iconic:manifests-due');
-
     expect(Manifest::query()->where('departure_id', $departure->id)->count())->toBe(0)
-        ->and(Alert::query()->where('base_key', AlertKeys::manifestData($departure->id))->count())->toBe(0)
-        ->and(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(0);
-});
-
-test('the job on the departure date issues a missed first without an alert or a chaser', function (): void {
-    $departure = manifestDeparture('2026-07-05');
-    $booking = manifestBooking($departure, BookingStatus::Confirmed, manifestCabin($departure, 1, 'D1', 'Suite 01'), 'ANK-2026-7204');
-    manifestGuest($booking, ['passport_no' => null, 'email' => 'sail@example.com']);
-
-    galapagos('2026-07-05');
-    Artisan::call('iconic:manifests-due');
-
-    expect(manifestCount($departure, ManifestKind::Dpng))->toBe(1)
         ->and(Alert::query()->where('kind', AlertKind::ManifestDataOverdue)->count())->toBe(0)
         ->and(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(0);
 });
 
-test('generating and downloading need guests view sensitive and post still works after sailing', function (): void {
+test('create returns 410 and an existing file still needs guests view sensitive', function (): void {
     $departure = manifestDeparture('2026-06-01');
     $booking = manifestBooking($departure, BookingStatus::FullyPaid, manifestCabin($departure, 1, 'P1', 'Suite 01'), 'ANK-2026-7301');
     manifestGuest($booking);
+    $manager = managerUser();
 
     galapagos('2026-07-06');
 
     $this->actingAs(salesExecUser())
         ->postJson('/api/rms/departures/'.$departure->id.'/manifests/DPNG')
-        ->assertForbidden();
+        ->assertStatus(410)
+        ->assertJsonPath('message', 'Manifests are retired.');
 
-    $created = $this->actingAs(managerUser())
+    $this->actingAs($manager)
         ->postJson('/api/rms/departures/'.$departure->id.'/manifests/DPNG')
-        ->assertCreated()
-        ->assertJsonPath('created', true)
-        ->assertJsonPath('data.reason', ManifestReason::Requested->value);
+        ->assertStatus(410);
 
-    $manifestId = $created->json('data.id');
+    $created = app(IssueManifest::class)->request($departure, ManifestKind::Dpng, $manager);
+    expect($created['created'])->toBeTrue()
+        ->and($created['manifest']->reason)->toBe(ManifestReason::Requested);
+
+    $manifestId = $created['manifest']->id;
 
     $this->actingAs(salesExecUser())
         ->get('/api/rms/departures/'.$departure->id.'/manifests/'.$manifestId.'/file/pdf')
@@ -261,12 +196,8 @@ test('generating and downloading need guests view sensitive and post still works
         ->assertOk()
         ->assertJsonPath('data.0.reason', ManifestReason::Requested->value);
 
-    $this->actingAs(managerUser())
-        ->postJson('/api/rms/departures/'.$departure->id.'/manifests/DPNG')
-        ->assertOk()
-        ->assertJsonPath('created', false)
-        ->assertJsonPath('message', 'This manifest is unchanged.');
-
+    $again = app(IssueManifest::class)->request($departure, ManifestKind::Dpng, $manager);
+    expect($again['created'])->toBeFalse();
     expect(manifestCount($departure, ManifestKind::Dpng))->toBe(1);
 });
 
@@ -274,35 +205,27 @@ test('a changed passport issues passenger change and a dietary note does not cha
     $departure = manifestDeparture();
     $booking = manifestBooking($departure, BookingStatus::Confirmed, manifestCabin($departure, 1, 'C1', 'Suite 01'), 'ANK-2026-7302');
     $guest = manifestGuest($booking, ['dietary_note' => 'none']);
+    $manager = managerUser();
 
-    $this->actingAs(managerUser())
-        ->postJson('/api/rms/departures/'.$departure->id.'/manifests/DPNG')
-        ->assertCreated();
-    $this->actingAs(managerUser())
-        ->postJson('/api/rms/departures/'.$departure->id.'/manifests/CAPTAIN')
-        ->assertCreated();
+    expect(app(IssueManifest::class)->request($departure, ManifestKind::Dpng, $manager)['created'])->toBeTrue();
+    expect(app(IssueManifest::class)->request($departure, ManifestKind::Captain, $manager)['created'])->toBeTrue();
 
     $guest->dietary_note = 'no shellfish';
     $guest->save();
 
-    $this->actingAs(managerUser())
-        ->postJson('/api/rms/departures/'.$departure->id.'/manifests/DPNG')
-        ->assertOk()
-        ->assertJsonPath('created', false);
+    expect(app(IssueManifest::class)->request($departure, ManifestKind::Dpng, $manager)['created'])->toBeFalse();
 
-    $this->actingAs(managerUser())
-        ->postJson('/api/rms/departures/'.$departure->id.'/manifests/CAPTAIN')
-        ->assertCreated()
-        ->assertJsonPath('data.reason', ManifestReason::PassengerChange->value);
+    $captain = app(IssueManifest::class)->request($departure, ManifestKind::Captain, $manager);
+    expect($captain['created'])->toBeTrue()
+        ->and($captain['manifest']->reason)->toBe(ManifestReason::PassengerChange);
 
     $guest->passport_no = 'ZZ999999';
     $guest->save();
 
-    $this->actingAs(managerUser())
-        ->postJson('/api/rms/departures/'.$departure->id.'/manifests/DPNG')
-        ->assertCreated()
-        ->assertJsonPath('data.reason', ManifestReason::PassengerChange->value)
-        ->assertJsonPath('data.version', 2);
+    $dpng = app(IssueManifest::class)->request($departure, ManifestKind::Dpng, $manager);
+    expect($dpng['created'])->toBeTrue()
+        ->and($dpng['manifest']->reason)->toBe(ManifestReason::PassengerChange)
+        ->and($dpng['manifest']->version)->toBe(2);
 });
 
 test('csv and xlsx cells match the pdf table including missing and a dash', function (): void {
@@ -315,10 +238,9 @@ test('csv and xlsx cells match the pdf table including missing and a dash', func
         'dob' => null,
         'insurance_declared' => false,
     ]);
+    $manager = managerUser();
 
-    $this->actingAs(managerUser())
-        ->postJson('/api/rms/departures/'.$departure->id.'/manifests/DPNG')
-        ->assertCreated();
+    app(IssueManifest::class)->request($departure, ManifestKind::Dpng, $manager);
 
     $manifest = Manifest::query()->where('departure_id', $departure->id)->where('kind', ManifestKind::Dpng)->firstOrFail();
     $passengers = ManifestRoster::passengers($departure);
@@ -342,16 +264,13 @@ test('csv and xlsx cells match the pdf table including missing and a dash', func
         ->and($expected[1])->toContain('MISSING')
         ->and($expected[1])->toContain('—');
 
-    $captain = $this->actingAs(managerUser())
-        ->postJson('/api/rms/departures/'.$departure->id.'/manifests/CAPTAIN')
-        ->assertCreated()
-        ->json('data.id');
+    $captain = app(IssueManifest::class)->request($departure, ManifestKind::Captain, $manager);
 
-    $this->actingAs(managerUser())
-        ->get('/api/rms/departures/'.$departure->id.'/manifests/'.$captain.'/file/csv')
+    $this->actingAs($manager)
+        ->get('/api/rms/departures/'.$departure->id.'/manifests/'.$captain['manifest']->id.'/file/csv')
         ->assertNotFound();
 
-    $download = $this->actingAs(managerUser())
+    $download = $this->actingAs($manager)
         ->get('/api/rms/departures/'.$departure->id.'/manifests/'.$manifest->id.'/file/csv');
     $download->assertOk();
 
@@ -359,49 +278,6 @@ test('csv and xlsx cells match the pdf table including missing and a dash', func
     expect($downloaded?->actor_id)->not->toBeNull()
         ->and($downloaded?->after['format'] ?? null)->toBe('csv')
         ->and($downloaded?->after['version'] ?? null)->toBe(1);
-});
-
-test('a chaser is sent once per booking and not on or after the departure date', function (): void {
-    $departure = manifestDeparture('2026-07-05');
-    $booking = manifestBooking($departure, BookingStatus::Confirmed, manifestCabin($departure, 1, 'H1', 'Suite 01'), 'ANK-2026-7501');
-    manifestGuest($booking, ['passport_no' => null, 'email' => 'chase@example.com']);
-    $complete = manifestBooking($departure, BookingStatus::Confirmed, manifestCabin($departure, 2, 'H2', 'Suite 02'), 'ANK-2026-7502');
-    manifestGuest($complete, ['email' => 'done@example.com']);
-
-    galapagos('2026-06-10');
-    Artisan::call('iconic:manifests-due');
-    Artisan::call('iconic:manifests-due');
-
-    expect(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(1)
-        ->and(Delivery::query()->where('idempotency_key', 'chase:'.$booking->id.':'.$departure->id)->count())->toBe(1)
-        ->and(Delivery::query()->where('booking_id', $complete->id)->where('kind', DeliveryKind::DataChaser)->count())->toBe(0);
-
-    galapagos('2026-07-05');
-    Artisan::call('iconic:manifests-due');
-    galapagos('2026-07-06');
-    Artisan::call('iconic:manifests-due');
-
-    expect(Delivery::query()->where('kind', DeliveryKind::DataChaser)->count())->toBe(1);
-});
-
-test('a booking with no address records one blocked chaser and is not sent later', function (): void {
-    $departure = manifestDeparture('2026-07-05');
-    $booking = manifestBooking($departure, BookingStatus::Confirmed, manifestCabin($departure, 1, 'B1', 'Suite 01'), 'ANK-2026-7503');
-    $guest = manifestGuest($booking, ['passport_no' => null, 'email' => null]);
-    $booking->contact->forceFill(['email' => null])->save();
-    $booking->forceFill(['billing_email' => null])->save();
-    $guest->forceFill(['email' => null])->save();
-
-    galapagos('2026-06-10');
-    Artisan::call('iconic:manifests-due');
-
-    $guest->email = 'later@example.com';
-    $guest->save();
-    Artisan::call('iconic:manifests-due');
-
-    $delivery = Delivery::query()->where('idempotency_key', 'chase:'.$booking->id.':'.$departure->id)->get();
-    expect($delivery)->toHaveCount(1)
-        ->and($delivery->first()?->status)->toBe(DeliveryStatus::Blocked);
 });
 
 test('captain files purge at the medical date and dpng files at the passport date', function (): void {

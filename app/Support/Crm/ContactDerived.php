@@ -46,11 +46,63 @@ final class ContactDerived
     }
 
     /**
-     * Same rule as Departure::returnDate().
+     * Check-out of the latest sold stay that has already started.
      */
-    public static function returnDateSql(string $departures = 'departures', string $itineraries = 'itineraries'): string
+    public static function lastStayCheckOutSql(?string $today = null): string
     {
-        return "DATE_ADD({$departures}.`date`, INTERVAL IF(COALESCE({$itineraries}.nights, 0) > 0, {$itineraries}.nights, 7) DAY)";
+        $today = self::calendarDay($today);
+
+        return '(
+            SELECT bookings.check_out
+            FROM bookings
+            WHERE '.self::soldWhere().'
+              AND bookings.check_in <= \''.$today.'\'
+            ORDER BY bookings.check_in DESC, bookings.id DESC
+            LIMIT 1
+        )';
+    }
+
+    /**
+     * Check-in of the next sold stay that has not started.
+     */
+    public static function nextStayCheckInSql(?string $today = null): string
+    {
+        $today = self::calendarDay($today);
+
+        return '(
+            SELECT MIN(bookings.check_in)
+            FROM bookings
+            WHERE '.self::soldWhere().'
+              AND bookings.check_in > \''.$today.'\'
+        )';
+    }
+
+    public static function staysCountSql(): string
+    {
+        return '(SELECT COUNT(*) FROM bookings WHERE '.self::soldWhere().')';
+    }
+
+    public static function nightsCountSql(): string
+    {
+        return '(SELECT COALESCE(SUM(bookings.nights), 0) FROM bookings WHERE '.self::soldWhere().')';
+    }
+
+    /**
+     * Room type of the same stay as lastStayCheckOutSql().
+     */
+    public static function lastRoomTypeSql(?string $today = null): string
+    {
+        $today = self::calendarDay($today);
+
+        return '(
+            SELECT room_types.name
+            FROM bookings
+            INNER JOIN room_types ON room_types.id = bookings.room_type_id
+            WHERE '.self::soldWhere().'
+              AND bookings.check_in <= \''.$today.'\'
+            ORDER BY bookings.check_in DESC, bookings.id DESC
+            LIMIT 1
+        )';
     }
 
     public static function lifetimeValueSql(): string
@@ -79,26 +131,15 @@ final class ContactDerived
 
     public static function lifecycleSql(?string $today = null): string
     {
-        $today ??= BusinessTime::now()->toDateString();
-
-        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $today) !== 1) {
-            throw new InvalidArgumentException('Lifecycle SQL needs a Y-m-d Galápagos date.');
-        }
-
+        $today = self::calendarDay($today);
         $sold = self::inList(self::soldStatuses());
         $sql = self::inList(self::sqlStatuses());
-        $midCruise = self::inList([
+        $inStay = self::inList([
             BookingStatus::Confirmed->value,
             BookingStatus::FullyPaid->value,
             BookingStatus::Overdue->value,
         ]);
-        $return = self::returnDateSql();
-        $bookingJoin = '
-            FROM bookings
-            INNER JOIN departures ON departures.id = bookings.departure_id
-            INNER JOIN itineraries ON itineraries.id = departures.itinerary_id
-            WHERE bookings.contact_id = contacts.id
-              AND bookings.deleted_at IS NULL';
+        $owned = 'bookings.contact_id = contacts.id AND bookings.deleted_at IS NULL';
 
         return 'CASE
             WHEN contacts.type = \''.ContactType::TravelAgent->value.'\'
@@ -109,35 +150,35 @@ final class ContactDerived
               ) THEN \''.ContactLifecycle::Agent->value.'\'
             WHEN EXISTS (
                 SELECT 1 FROM bookings
-                WHERE bookings.contact_id = contacts.id
-                  AND bookings.deleted_at IS NULL
+                WHERE '.$owned.'
                   AND bookings.status = \''.BookingStatus::InHouse->value.'\'
             ) OR EXISTS (
-                SELECT 1 '.$bookingJoin.'
-                  AND bookings.status IN ('.$midCruise.')
-                  AND departures.`date` <= \''.$today.'\'
-                  AND ('.$return.') >= \''.$today.'\'
+                SELECT 1 FROM bookings
+                WHERE '.$owned.'
+                  AND bookings.status IN ('.$inStay.')
+                  AND bookings.check_in <= \''.$today.'\'
+                  AND bookings.check_out >= \''.$today.'\'
             ) THEN \''.ContactLifecycle::Guest->value.'\'
             WHEN EXISTS (
-                SELECT 1 '.$bookingJoin.'
+                SELECT 1 FROM bookings
+                WHERE '.$owned.'
                   AND bookings.status IN ('.$sold.')
-                  AND departures.`date` > \''.$today.'\'
+                  AND bookings.check_in > \''.$today.'\'
             ) THEN \''.ContactLifecycle::Booked->value.'\'
             WHEN EXISTS (
                 SELECT 1 FROM bookings
-                WHERE bookings.contact_id = contacts.id
-                  AND bookings.deleted_at IS NULL
+                WHERE '.$owned.'
                   AND bookings.status IN ('.$sql.')
             ) THEN \''.ContactLifecycle::Sql->value.'\'
             WHEN EXISTS (
                 SELECT 1 FROM bookings
-                WHERE bookings.contact_id = contacts.id
-                  AND bookings.deleted_at IS NULL
+                WHERE '.$owned.'
                   AND bookings.status = \''.BookingStatus::CheckedOut->value.'\'
             ) OR EXISTS (
-                SELECT 1 '.$bookingJoin.'
+                SELECT 1 FROM bookings
+                WHERE '.$owned.'
                   AND bookings.status IN ('.$sold.')
-                  AND ('.$return.') < \''.$today.'\'
+                  AND bookings.check_out < \''.$today.'\'
             ) THEN \''.ContactLifecycle::PastGuest->value.'\'
             WHEN (
                 contacts.engine_identified_at IS NOT NULL
@@ -205,6 +246,24 @@ final class ContactDerived
         }
 
         return Contact::query()->whereRaw('LOWER(email) = ?', [$email])->first();
+    }
+
+    private static function soldWhere(): string
+    {
+        return 'bookings.contact_id = contacts.id
+              AND bookings.deleted_at IS NULL
+              AND bookings.status IN ('.self::inList(self::soldStatuses()).')';
+    }
+
+    private static function calendarDay(?string $today): string
+    {
+        $today ??= BusinessTime::now()->toDateString();
+
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $today) !== 1) {
+            throw new InvalidArgumentException('Stay SQL needs a Y-m-d date.');
+        }
+
+        return $today;
     }
 
     /**

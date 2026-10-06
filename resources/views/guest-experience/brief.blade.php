@@ -1,6 +1,6 @@
 @extends('manifests.layout')
 
-@section('title', 'Hotel manager brief')
+@section('title', 'Arrivals brief')
 
 @section('body')
     <style>
@@ -13,11 +13,11 @@
         <tr>
             <td>
                 <div class="dlogo">ICONIC</div>
-                <div class="dtag">INTIMATE YACHT EXPEDITIONS</div>
+                <div class="dtag">GUEST EXPERIENCE</div>
             </td>
             <td>
-                <div class="dtitle">HOTEL MANAGER BRIEF</div>
-                <div class="dsub">{{ $property }} · {{ $departureDate }} · {{ $guests }} guests · {{ $answered }} questionnaires</div>
+                <div class="dtitle">ARRIVALS BRIEF</div>
+                <div class="dsub">{{ $property }} · {{ $arrivalDate }} · {{ $guests }} guests · {{ $answered }} questionnaires</div>
             </td>
         </tr>
     </table>

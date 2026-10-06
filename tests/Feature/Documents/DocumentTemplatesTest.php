@@ -106,7 +106,7 @@ function templateKinds(): array
         'final' => DocumentKind::FinalInvoice,
         'summary' => DocumentKind::Summary,
         'voucher' => DocumentKind::Voucher,
-        'pretrip' => DocumentKind::Pretrip,
+        'pre-arrival' => DocumentKind::PreArrival,
         'wire' => DocumentKind::WireInstructions,
     ];
 }

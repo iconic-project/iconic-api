@@ -86,7 +86,7 @@ class B2bPartnerResource extends JsonResource
             throw new LogicException('B2B partner resource expected an agency.');
         }
 
-        $agency->loadMissing(['bookings.departure', 'bookings.commissionPayout']);
+        $agency->loadMissing(['bookings.commissionPayout']);
         $stats = AgencyBookingWindow::stats($agency->bookings);
         $contact = ContactDerived::contactForAgency($agency);
         $enrolment = $contact instanceof Contact ? $this->enrolmentFor($contact) : null;

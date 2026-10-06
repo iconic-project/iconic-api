@@ -66,8 +66,9 @@ Source: `BusinessRulesDocument::initial()`.
 | manifests.chase_days_before_due | 10 |
 | alerts.low_occupancy_pct | 40 |
 | alerts.low_occupancy_days_before | 90 |
-| retention.passport_months_after_cruise | 24 |
-| retention.medical_days_after_cruise | 90 |
+| alerts.low_occupancy_min_consecutive_nights | 1 |
+| retention.passport_months_after_check_out | 24 |
+| retention.medical_days_after_check_out | 90 |
 | legal.consent_versions.terms | v2026.1 (text pending LEG-001) |
 | legal.consent_versions.cancellation | v2026.1 (pending LEG-001) |
 | legal.consent_versions.privacy | v2026.1 (pending LEG-002) |
@@ -101,12 +102,12 @@ Source: `EngineSettingsDocument::initial()` → `fees` (FIN-004).
 
 Source: `Registry::counts()` and `tests/Feature/Config/BusinessRulesEndpointsTest.php` (API JSON after Sprint 9). On-screen KPI and chip numbers are ⚠ UNVERIFIED — Pest counts, not a reset screen in this task.
 
-- **99** rows total. ⚠ UNVERIFIED — `BusinessRulesEndpointsTest` (`registry` count 99), not a reset screen.
-- After a fresh seed exactly **51** flagged (`counts.differs_or_flagged`). ⚠ UNVERIFIED — same Pest assertion.
-- Breakdown: `here` 74 · `other_pages` 15 · `locked` 10. ⚠ UNVERIFIED — same Pest assertion.
-- On-screen chips (i18n): All · Adjust here · Set in other tabs · Locked · Differs / flagged — counts 99 / 74 / 15 / 10 / 51. ⚠ UNVERIFIED
+- **102** rows total. ⚠ UNVERIFIED — `BusinessRulesEndpointsTest` (`registry` count 102), not a reset screen.
+- After a fresh seed exactly **56** flagged (`counts.differs_or_flagged`). ⚠ UNVERIFIED — same Pest assertion.
+- Breakdown: `here` 77 · `other_pages` 15 · `locked` 10. ⚠ UNVERIFIED — same Pest assertion.
+- On-screen chips (i18n): All · Adjust here · Set in other tabs · Locked · Differs / flagged — counts 102 / 77 / 15 / 10 / 56. ⚠ UNVERIFIED
 
-Sprint 16 adds eight Stay rows (PENDING CLIENT, HQ3 demo) and flags `ops-001-duration` with a retired note (09 H2). That is why the counts are 99 / 74 / 15 / 10 / 51. ⚠ UNVERIFIED — `Registry.php` + Pest, not a reset screen.
+Sprint 16 adds eight Stay rows (PENDING CLIENT, HQ3 demo) and flags `ops-001-duration` with a retired note (09 H2). Sprint 21 adds guest registration (PENDING CLIENT, HQ9) and retired notes on the DPNG and captain manifest rows (09 H15). That is why the counts are 102 / 77 / 15 / 10 / 56. ⚠ UNVERIFIED — `Registry.php` + Pest, not a reset screen.
 
 Sprint 9 flagged additions on top of the leftover 21: two L6 retention rows (PENDING LEGAL) and two L2 CRM segment thresholds (PENDING CLIENT). Sprint 10 adds `consent-analytics` (PENDING CLIENT, LEG-002), eight `crm-pipeline-*` rows (PENDING CLIENT, M4) and `privacy-request-sla` (PENDING LEG-002, M7). Sprint 11 adds `captain-manifest` (CONFIRMED, N4) and `manifest-chase` (PENDING CLIENT, N5). Sprint 12 adds `report-retention` (PENDING CLIENT, O2), `cancellation-charter-bands` (PENDING CLIENT, O6), `charter-deposit-business-days` (CONFIRMED, FIN-003) and `charter-proposal-valid-days` (PENDING CLIENT, O5). Those additions predate Sprint 16. Current counts are the line above.
 
@@ -423,7 +424,6 @@ Source: `routes/console.php` and `tests/Feature/Crm/SyncJobsTest.php`. On-screen
 | `iconic:night-audit` | daily at 00:00 (`0 0 * * *`), one minute after `stay.no_show_cutoff_time` 23:59 | `Pacific/Galapagos` |
 | `iconic:ledger-check` | nightly 02:00 (`0 2 * * *`) | `Pacific/Galapagos` |
 | `iconic:commission-scan` | nightly 02:30 (`30 2 * * *`) | `Pacific/Galapagos` |
-| `iconic:manifests-due` | daily at 06:00 (`0 6 * * *`) | `Pacific/Galapagos` |
 | `iconic:occupancy-check` | daily at 07:00 (`0 7 * * *`) | `Pacific/Galapagos` |
 | `iconic:document-check` | hourly (`0 * * * *`) | `Pacific/Galapagos` |
 | `telescope:prune --hours=48` | daily | — (only when Telescope is installed) |

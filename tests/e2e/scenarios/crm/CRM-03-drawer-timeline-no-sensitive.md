@@ -23,6 +23,7 @@ The drawer is the CRM profile. Bookings open in the RMS. The timeline must list 
 - [ ] E5 · **Not held here**: `Passport, date of birth, nationality, and medical, dietary or mobility notes stay in the RMS.`
 - [ ] E6 · The drawer shows none of: passport number, date of birth, nationality, medical / dietary / accessibility note. `GET /api/crm/contacts/{id}` (the open request) has none of those keys.
 - [ ] E7 · **Journeys** is on the drawer. Fresh seed shows `No enrolments.`
+- [ ] E8 · **Stays** reads `{stays} stays · {nights} nights` with stays at least 1, and **Next check-in** for ANK-2026-0003. It does not call that date a departure. Detail is HCRM-01.
 
 ## Cross-checks
 - `bin/db-check.sh 'App\Models\Contact::query()->where("name","Harrison & Whitfield")->withDerived()->first()'` → `lifetime_value` 26600, `segment` `HIGH`, `lifecycle` `BOOKED`. ⚠ UNVERIFIED — sold Suite · 2 adults.

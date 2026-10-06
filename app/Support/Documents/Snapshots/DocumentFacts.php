@@ -12,8 +12,14 @@ use App\Models\Booking;
 use App\Models\BookingExtra;
 use App\Models\Guest;
 use App\Models\Payment;
+use App\Models\Property;
+use App\Models\Room;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
+use App\Support\Config\Documents\BusinessRulesDocument;
+use App\Support\Config\Documents\CancellationBand;
+use App\Support\Config\Documents\Rates\RatePlan;
+use App\Support\Config\Documents\RatesDocument;
 use App\Support\Payments\CancellationPenalty;
 use App\Support\Payments\Ledger;
 use Carbon\CarbonImmutable;
@@ -21,7 +27,7 @@ use Illuminate\Support\Collection;
 
 final class DocumentFacts
 {
-    public const INSURANCE = 'Travel insurance is the sole responsibility of the passenger. Iconic does not sell or intermediate travel insurance.';
+    public const INSURANCE = 'Travel insurance is the sole responsibility of the guest. Iconic does not sell or intermediate travel insurance.';
 
     public const CAPTURED_AT_PAYMENT_LINK = '[captured at payment link]';
 
@@ -42,9 +48,10 @@ final class DocumentFacts
     public static function load(Booking $booking, bool $fresh): self
     {
         $booking->loadMissing([
-            'departure.property',
-            'departure.itinerary',
-            'cabin',
+            'property',
+            'roomType',
+            'room.roomType',
+            'ratesVersion',
             'contact',
             'group.coordinator',
             'agency',
@@ -233,49 +240,90 @@ final class DocumentFacts
     }
 
     /**
+     * Stay facts frozen into a document. The room number is included when a
+     * room is allocated. Rate plans have no separate flag that hides it (09 H8).
+     *
      * @return array{
      *     property: string,
-     *     embark: string,
-     *     disembark: string,
-     *     departure_date: string,
-     *     departure_date_short: string,
-     *     return_date: string,
+     *     address: string,
+     *     phone: string,
+     *     room_type: string,
+     *     room: array{code: string, label: string}|null,
+     *     check_in: string,
+     *     check_in_time: string,
+     *     check_out: string,
+     *     check_out_time: string,
      *     nights: int,
-     *     days: int,
-     *     itinerary: string,
-     *     guests: list<string>,
-     *     guest_count: int,
-     *     cabin_label: string,
-     *     occupancy: string,
-     *     charter: bool
+     *     party: array{adults: int, children: int, child_ages: list<int>, guests: list<string>},
+     *     rate_plan: string,
+     *     meal_plan: string,
+     *     nights_by_season: list<array{season: string, name: string, nights: int, amount: int}>,
+     *     taxes: array{charged: list<array{concept: string, qty: string, rate: int|null, amount: int}>, information: list<array{concept: string, qty: string, rate: int|null, amount: int}>},
+     *     entire_property: bool
      * }
      */
-    public function cruise(): array
+    public function stay(): array
     {
         $booking = $this->booking;
-        $itinerary = $booking->departure->itinerary;
-        $departure = $booking->departure->date;
-        $return = $booking->departure->returnDate();
+        $property = $booking->property;
+        $stay = $booking->stay();
+        $times = app(CurrentConfig::class)->businessRules()->stay;
+        $plan = $this->ratePlan();
         $names = $this->guestNames();
-        $count = $names === [] ? $booking->adults + $booking->children : count($names);
-        $nights = $itinerary->nights;
-        $days = $itinerary->days > 0 ? $itinerary->days : $nights;
+        $ages = $booking->child_ages ?? [];
+        $roomType = $booking->roomType ?? $booking->room?->roomType;
 
         return [
-            'property' => $booking->departure->property->name,
-            'embark' => $itinerary->embark,
-            'disembark' => $itinerary->disembark,
-            'departure_date' => $this->longDate($departure),
-            'departure_date_short' => $this->shortDate($departure),
-            'return_date' => $this->longDate($return),
-            'nights' => $nights,
-            'days' => $days,
-            'itinerary' => $itinerary->name,
-            'guests' => $names,
-            'guest_count' => $count,
-            'cabin_label' => $booking->cabinLabel(),
-            'occupancy' => $this->occupancy($count),
-            'charter' => $booking->type === BookingType::Charter,
+            'property' => $property->name,
+            'address' => $this->propertyAddress($property),
+            'phone' => (string) ($property->phone ?? ''),
+            'room_type' => $roomType === null ? '' : $roomType->name,
+            'room' => $this->roomFact(),
+            'check_in' => $this->longDate($stay->checkIn()),
+            'check_in_time' => 'from '.$times->checkInTime,
+            'check_out' => $this->longDate($stay->checkOut()),
+            'check_out_time' => 'until '.$times->checkOutTime,
+            'nights' => $stay->nights(),
+            'party' => [
+                'adults' => $booking->adults,
+                'children' => $booking->children,
+                'child_ages' => $ages,
+                'guests' => $names,
+            ],
+            'rate_plan' => $plan->name ?? '',
+            'meal_plan' => $plan->mealPlan ?? '',
+            'nights_by_season' => $this->nightsBySeason(),
+            'taxes' => $this->taxRows(),
+            'entire_property' => $booking->type === BookingType::Charter,
+        ];
+    }
+
+    /**
+     * @return array{charged: list<array{concept: string, qty: string, rate: int|null, amount: int}>, information: list<array{concept: string, qty: string, rate: int|null, amount: int}>}
+     */
+    public function taxRows(): array
+    {
+        $charged = [];
+        $information = [];
+
+        foreach ($this->booking->tax_lines ?? [] as $line) {
+            $row = [
+                'concept' => is_string($line['label'] ?? null) ? $line['label'] : (string) ($line['code'] ?? ''),
+                'qty' => '',
+                'rate' => null,
+                'amount' => (int) ($line['amount'] ?? 0),
+            ];
+
+            if (($line['charged'] ?? false) === true) {
+                $charged[] = $row;
+            } else {
+                $information[] = $row;
+            }
+        }
+
+        return [
+            'charged' => $charged,
+            'information' => $information,
         ];
     }
 
@@ -376,7 +424,7 @@ final class DocumentFacts
     {
         $rules = app(CurrentConfig::class)->businessRules();
         $hours = $rules->payments->extrasDueHours;
-        $bands = $rules->bands;
+        $bands = $this->planBands($rules);
         $labels = [];
 
         foreach ($bands as $band) {
@@ -442,13 +490,6 @@ final class DocumentFacts
     public function hasTransferVoucherExtra(): bool
     {
         return self::bookingHasTransferVoucher($this->booking);
-    }
-
-    public function hasPreCruiseHotel(): bool
-    {
-        return $this->booking->extras->contains(
-            fn (BookingExtra $extra): bool => $extra->code === 'HPRE',
-        );
     }
 
     public function wireAmount(): int
@@ -567,16 +608,142 @@ final class DocumentFacts
             $total += $rate * $count;
         }
 
+        foreach ($booking->tax_lines ?? [] as $line) {
+            if (($line['charged'] ?? false) === true) {
+                continue;
+            }
+
+            $total += (int) ($line['amount'] ?? 0);
+        }
+
         return $total;
     }
 
-    private function occupancy(int $count): string
+    /**
+     * @return array{code: string, label: string}|null
+     */
+    private function roomFact(): ?array
     {
-        return match ($count) {
-            1 => 'Single occupancy',
-            2 => 'Double occupancy',
-            3 => 'Triple occupancy',
-            default => $count.' occupancy',
-        };
+        $room = $this->booking->room;
+
+        if (! $room instanceof Room) {
+            return null;
+        }
+
+        return [
+            'code' => $room->code,
+            'label' => $room->label,
+        ];
+    }
+
+    private function propertyAddress(Property $property): string
+    {
+        $parts = array_filter(
+            [
+                $property->address_line_1,
+                $property->address_line_2,
+                $property->city,
+                $property->postcode,
+                $property->country,
+            ],
+            fn (?string $part): bool => is_string($part) && trim($part) !== '',
+        );
+
+        return implode(', ', $parts);
+    }
+
+    private function ratePlan(): ?RatePlan
+    {
+        $code = $this->booking->rate_plan_code;
+
+        if (! is_string($code) || $code === '') {
+            return null;
+        }
+
+        foreach ($this->ratesDocument()->ratePlans as $plan) {
+            if ($plan->code === $code) {
+                return $plan;
+            }
+        }
+
+        return null;
+    }
+
+    private function ratesDocument(): RatesDocument
+    {
+        $versionId = $this->booking->getAttribute('rates_version_id');
+
+        if (! is_int($versionId)) {
+            return app(CurrentConfig::class)->rates();
+        }
+
+        return RatesDocument::fromArray($this->booking->ratesVersion->document);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function seasonNames(): array
+    {
+        $names = [];
+
+        foreach ($this->ratesDocument()->seasons as $season) {
+            $names[$season->code] = $season->name;
+        }
+
+        return $names;
+    }
+
+    /**
+     * @return list<array{season: string, name: string, nights: int, amount: int}>
+     */
+    private function nightsBySeason(): array
+    {
+        $names = $this->seasonNames();
+        $groups = [];
+        $order = [];
+
+        foreach ($this->booking->night_lines ?? [] as $line) {
+            $code = is_string($line['season'] ?? null) ? $line['season'] : '';
+
+            if ($code === '') {
+                continue;
+            }
+
+            if (! isset($groups[$code])) {
+                $order[] = $code;
+                $groups[$code] = [
+                    'season' => $code,
+                    'name' => $names[$code] ?? $code,
+                    'nights' => 0,
+                    'amount' => 0,
+                ];
+            }
+
+            $groups[$code]['nights']++;
+            $groups[$code]['amount'] += (int) ($line['total'] ?? 0);
+        }
+
+        $rows = [];
+
+        foreach ($order as $code) {
+            $rows[] = $groups[$code];
+        }
+
+        return $rows;
+    }
+
+    /**
+     * @return list<CancellationBand>
+     */
+    private function planBands(BusinessRulesDocument $rules): array
+    {
+        $plan = $this->ratePlan();
+
+        if ($plan instanceof RatePlan && isset($rules->cancellationSets[$plan->cancellation])) {
+            return $rules->cancellationSets[$plan->cancellation];
+        }
+
+        return $rules->bands;
     }
 }

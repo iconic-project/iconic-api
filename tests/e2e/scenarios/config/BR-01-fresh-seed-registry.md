@@ -12,9 +12,9 @@ The registry counts are the contract for “are we still seeding the documented 
 2. Read the four KPIs and the filter chips. Open **Differs / flagged**.
 
 ## Expected
-- [ ] E1 · KPIs: `Rules tracked` = **99**; `Adjusted here` = **74**; `Set in other tabs` = **15**; `Differ from source / flagged` = **51**. ⚠ UNVERIFIED — `BusinessRulesEndpointsTest` / `Registry::counts()`, not a reset screen.
-- [ ] E2 · Chip counts match: All 99 · Adjust here 74 · Set in other tabs 15 · Locked 10 · Differs / flagged 51. ⚠ UNVERIFIED — same source.
-- [ ] E3 · Flagged rows are the pending statuses plus two confirmed notes: `TEXT IN DRAFTING`, four × `PENDING LEGAL` (passport, medical, behavioural raw, unstitched anonymous), forty-four × `PENDING CLIENT` (the previous pending-client set, including manifest chase and the NPS review URL, plus eight Stay rows: check-in time, check-out time, no-show cutoff, minimum nights, maximum nights, maximum rooms per booking, check-in requires full payment, booking horizon — all HQ3 demo). OPS-006 is `CONFIRMED` with a note (⚠). OPS-001 duration is `CONFIRMED` with a retired note pointing at 09 H2. ⚠ UNVERIFIED — `Registry.php` + Pest (`differs_or_flagged` 51), not a reset screen.
+- [ ] E1 · KPIs: `Rules tracked` = **102**; `Adjusted here` = **77**; `Set in other tabs` = **15**; `Differ from source / flagged` = **56**. ⚠ UNVERIFIED — `BusinessRulesEndpointsTest` / `Registry::counts()`, not a reset screen.
+- [ ] E2 · Chip counts match: All 102 · Adjust here 77 · Set in other tabs 15 · Locked 10 · Differs / flagged 56. ⚠ UNVERIFIED — same source.
+- [ ] E3 · Flagged rows are the pending statuses plus confirmed notes: `TEXT IN DRAFTING`, four × `PENDING LEGAL` (passport, medical, behavioural raw, unstitched anonymous), forty-five × `PENDING CLIENT` (the previous pending-client set, including manifest chase and the NPS review URL, eight Stay rows, and guest registration — HQ9). OPS-006 is `CONFIRMED` with a note (⚠). OPS-001 duration is `CONFIRMED` with a retired note pointing at 09 H2. DPNG manifest and the captain's manifest are `CONFIRMED` with a retired note pointing at 09 H15. ⚠ UNVERIFIED — `Registry.php` + Pest (`differs_or_flagged` 56), not a reset screen.
 - [ ] E4 · No confirmed `here` row shows `≠ differs from source` on a fresh seed.
 
 ## Notes

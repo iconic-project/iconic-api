@@ -16,11 +16,11 @@ final class NpsSurveyCommand extends Command
 {
     protected $signature = 'iconic:nps-survey';
 
-    protected $description = 'Send the post-trip survey once the configured hours after return have passed';
+    protected $description = 'Send the survey once the configured hours after check-out have passed';
 
     public function handle(SendSurveys $send, CurrentConfig $config, StayClock $clock): int
     {
-        $hours = $config->businessRules()->nps->surveyHoursAfterReturn;
+        $hours = $config->businessRules()->nps->surveyHoursAfterCheckOut;
         $sent = 0;
 
         Booking::query()

@@ -12,6 +12,7 @@ enum DeliveryKind: string
     case Receipt = 'RECEIPT';
     case Reminder = 'REMINDER';
     case Voucher = 'VOUCHER';
+    case PreArrival = 'PRE_ARRIVAL';
     case Pretrip = 'PRETRIP';
     case PaymentLink = 'PAYMENT_LINK';
     case WireInstructions = 'WIRE_INSTRUCTIONS';
@@ -33,6 +34,7 @@ enum DeliveryKind: string
             self::Receipt => 'Payment Confirmation',
             self::Reminder => 'Balance reminder',
             self::Voucher => 'Transfer Voucher',
+            self::PreArrival => 'Pre-arrival information',
             self::Pretrip => 'Pre-trip Itinerary',
             self::PaymentLink => 'Payment link',
             self::WireInstructions => 'Wire Instructions',
@@ -81,6 +83,7 @@ enum DeliveryKind: string
             self::Summary => DocumentKind::Summary,
             self::Receipt => DocumentKind::Receipt,
             self::Voucher => DocumentKind::Voucher,
+            self::PreArrival => DocumentKind::PreArrival,
             self::Pretrip => DocumentKind::Pretrip,
             self::WireInstructions => DocumentKind::WireInstructions,
             self::Reminder, self::PaymentLink, self::DataChaser, self::Questionnaire, self::Survey, self::ReviewRequest, self::WaitlistOffer, self::CharterProposal, self::PortalInvite, self::Journey => null,
@@ -95,6 +98,7 @@ enum DeliveryKind: string
             DocumentKind::Summary => self::Summary,
             DocumentKind::Receipt => self::Receipt,
             DocumentKind::Voucher => self::Voucher,
+            DocumentKind::PreArrival => self::PreArrival,
             DocumentKind::Pretrip => self::Pretrip,
             DocumentKind::WireInstructions => self::WireInstructions,
             DocumentKind::CharterProposal => self::CharterProposal,

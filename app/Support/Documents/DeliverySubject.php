@@ -21,7 +21,7 @@ final class DeliverySubject
             DeliveryKind::Summary => 'Your Iconic booking summary — '.$ref,
             DeliveryKind::Receipt => 'Payment confirmation — '.$ref,
             DeliveryKind::Voucher => 'Transfer voucher — '.$ref,
-            DeliveryKind::Pretrip => 'Your expedition itinerary — '.$ref,
+            DeliveryKind::PreArrival, DeliveryKind::Pretrip => 'Before you arrive — '.$ref,
             DeliveryKind::WireInstructions => 'Wire transfer instructions — '.$ref,
             DeliveryKind::Reminder, DeliveryKind::PaymentLink => $kind->label().' — '.$ref,
             DeliveryKind::DataChaser => 'Passenger details needed — '.$ref,

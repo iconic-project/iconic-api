@@ -16,10 +16,9 @@ final class VoucherSnapshot
     {
         $facts = DocumentFacts::load($booking, $fresh);
         $issuer = $facts->issuer();
-        $preHotel = $facts->hasPreCruiseHotel();
-        $arrival = $preHotel
-            ? $booking->departure->date->subDay()
-            : $booking->departure->date;
+        $services = $booking->extras->pluck('name')->filter(
+            fn (mixed $name): bool => is_string($name) && $name !== '',
+        )->values()->all();
 
         return [
             'document' => $facts->document(
@@ -29,11 +28,9 @@ final class VoucherSnapshot
             ),
             'reference' => $booking->displayReference(),
             'guests' => $facts->guestNames() === [] ? [$booking->contact->name] : $facts->guestNames(),
-            'arrival' => $facts->shortDate($arrival),
-            'transfer' => $preHotel
-                ? 'Airport → hotel (pre-cruise night) → Puerto Baquerizo Moreno pier'
-                : 'Airport → Puerto Baquerizo Moreno pier',
-            'services' => $booking->extras->pluck('name')->values()->all(),
+            'arrival' => $facts->shortDate($booking->stay()->checkIn()),
+            'transfer' => $services === [] ? 'Arrival transfer' : implode(' · ', $services),
+            'services' => $services,
             'footer' => [
                 'email' => $issuer['email'],
                 'website' => $issuer['website'],

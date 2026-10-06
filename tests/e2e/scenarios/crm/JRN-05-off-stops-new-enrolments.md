@@ -11,7 +11,7 @@ An inactive journey refuses a new enrolment. An enrolment that already exists st
 
 ## Steps
 1. **Carolina.** Open `http://localhost:3001/crm/marketing/journeys`. Turn **Request to Deposit — confirm the booking** on.
-2. **Guest context.** Dismiss the analytics bar. Pay later, same cabin path as WEB-07, email `e2e.jrn05a@iconic.test`.
+2. **Guest context.** Dismiss the analytics bar. Pay later on a free stay (HENG-03), email `e2e.jrn05a@iconic.test`.
 3. From `iconic-api`: `docker compose exec app sh -c "php artisan iconic:journeys"`.
 4. **Carolina.** Open Enrolments. Confirm one row. Turn the journey off. The confirm quotes `The booking request they submitted.` Click **Turn off**.
 5. **Guest context.** A second pay later, email `e2e.jrn05b@iconic.test`, on a different cabin so the first hold is not the blocker. Suite 04 on the same departure if Suite 03 is held.

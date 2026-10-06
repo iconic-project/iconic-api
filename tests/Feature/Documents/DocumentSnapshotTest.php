@@ -68,7 +68,7 @@ test('snapshot totals match a charter and a booking with extras fees refund and 
     $charterSnap = SnapshotFactory::build($charter, DocumentKind::Invoice);
     expect($charterSnap['totals']['vessel'])->toBe($charter->total);
     expect($charterSnap['totals']['charges_total'])->toBe($charter->chargesTotal());
-    expect($charterSnap['cruise']['charter'])->toBeTrue();
+    expect($charterSnap['stay']['entire_property'])->toBeTrue();
 
     $booking = snapshotCabin();
     app(AddBookingExtra::class)->handle($booking, ['code' => 'FLT', 'qty' => 2], $actor);

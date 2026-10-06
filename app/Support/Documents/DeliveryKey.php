@@ -32,6 +32,11 @@ final class DeliveryKey
         return 'reminder:'.$bookingId.':'.$dueDate.':'.$days;
     }
 
+    public static function forPreArrival(int $bookingId, string $checkIn): string
+    {
+        return 'pre-arrival:'.$bookingId.':'.$checkIn;
+    }
+
     public static function forPretrip(int $bookingId, string $departureDate): string
     {
         return 'pretrip:'.$bookingId.':'.$departureDate;

@@ -53,8 +53,8 @@ final class EraseContact extends Action
 
         $this->guard($contact);
 
-        $months = $this->config->businessRules()->retention->passportMonthsAfterCruise;
-        $outcome = 'Erased the contact. Kept issued documents, payments, the booking consent log, the consent register and the bookings, which stay linked to this contact id. Guest passport data is anonymised '.$months.' months after each cruise returns; medical notes follow the published retention window. Survey text (why, best, better, crew, call_notes) was cleared on this contact\'s own responses; the score was kept. A later booking with the same email is a new contact and inherits no consent.';
+        $months = $this->config->businessRules()->retention->passportMonthsAfterCheckOut;
+        $outcome = 'Erased the contact. Kept issued documents, payments, the booking consent log, the consent register and the bookings, which stay linked to this contact id. Guest passport data is anonymised '.$months.' months after check-out; medical notes follow the published retention window. Survey text (why, best, better, crew, call_notes) was cleared on this contact\'s own responses; the score was kept. A later booking with the same email is a new contact and inherits no consent.';
 
         return $this->transaction(function () use ($request, $actor, $verifiedHow, $contact, $email, $outcome): SubjectRequest {
             $sessions = BehaviouralEvent::query()

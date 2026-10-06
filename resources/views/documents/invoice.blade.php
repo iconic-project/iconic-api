@@ -8,13 +8,13 @@
             <td>@include('documents.partials.guest-billing')</td>
         </tr>
     </table>
-    @include('documents.partials.cruise')
-    <div class="dsec">Vessel charges</div>
+    @include('documents.partials.stay')
+    <div class="dsec">Stay charges</div>
     @include('documents.partials.lines', [
         'rows' => $snapshot['vessel_rows'] ?? [],
-        'headers' => ['Concept', '# PAX', 'Per person (USD)', 'Amount (USD)'],
+        'headers' => ['Concept', 'Nights', 'Rate (USD)', 'Amount (USD)'],
     ])
-    <table class="dsubt"><tr><td>VESSEL SUBTOTAL</td><td>{{ \App\Support\Money::formatDocument((int) ($snapshot['totals']['vessel'] ?? 0)) }}</td></tr></table>
+    <table class="dsubt"><tr><td>STAY SUBTOTAL</td><td>{{ \App\Support\Money::formatDocument((int) ($snapshot['totals']['vessel'] ?? 0)) }}</td></tr></table>
     @include('documents.partials.fees')
     @include('documents.partials.ancillary')
     @include('documents.partials.totals')

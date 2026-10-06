@@ -236,6 +236,11 @@ class Contact extends Model
 
         $query
             ->selectRaw('('.ContactDerived::lifetimeValueSql().') as lifetime_value')
+            ->selectRaw('('.ContactDerived::lastStayCheckOutSql().') as last_stay_check_out')
+            ->selectRaw('('.ContactDerived::nextStayCheckInSql().') as next_stay_check_in')
+            ->selectRaw('('.ContactDerived::staysCountSql().') as stays_count')
+            ->selectRaw('('.ContactDerived::nightsCountSql().') as nights_count')
+            ->selectRaw('('.ContactDerived::lastRoomTypeSql().') as last_room_type')
             ->selectRaw('('.ContactDerived::segmentSql($crm).') as segment')
             ->selectRaw('('.ContactDerived::lifecycleSql().') as lifecycle')
             ->selectRaw('('.ContactDerived::marketingConsentSql().') as marketing_consent')

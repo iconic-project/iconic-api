@@ -5,7 +5,7 @@
 - **Start:** reset
 
 ## Why
-OPS / DPNG need a passport valid through the Sunday return. Saving an expiry before `Departure::returnDate()` must flag the guest without blocking the save.
+A passport must be valid through check-out. Saving an expiry before check-out flags the guest and does not block the save.
 
 ## Steps
 1. Sign in as Carolina. Open ANK-2026-0005. **Guests** tab.
@@ -14,7 +14,7 @@ OPS / DPNG need a passport valid through the Sunday return. Saving an expiry bef
 
 ## Expected
 - [ ] E1 · Toast `Guest saved` — the save is not blocked.
-- [ ] E2 · Warnbox includes `✕ Julia Brandt's passport expires before the return date (14 Nov 2027).`
+- [ ] E2 · Warnbox includes `✕ Julia Brandt's passport expires before check-out (14 Nov 2027).`
 
 ## Notes
-Cruise is 7 Nov → 14 Nov 2027 (DEP-001). Never write Julia’s passport number into the report. Reference her by name.
+The stay checks out 14 Nov 2027. Never write Julia’s passport number into the report. Reference her by name.

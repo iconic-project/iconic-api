@@ -100,7 +100,7 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | DOC-06 | Remove billing email → BLOCKED; restore → resend | sprint-7, documents | P2 | — | Carolina | [documents/DOC-06-blocked-restore-resend.md](documents/DOC-06-blocked-restore-resend.md) |
 | DOC-07 | Send a payment link by email | sprint-7, documents | P2 | — | Carolina | [documents/DOC-07-payment-link-email.md](documents/DOC-07-payment-link-email.md) |
 | DOC-08 | Wire instructions: LEG-004 warning and placeholder PDF | sprint-7, documents | P2 | — | Carolina | [documents/DOC-08-wire-instructions.md](documents/DOC-08-wire-instructions.md) |
-| DOC-09 | Documents & Manifests: filter and open the booking | sprint-7, documents | P2 | — | Carolina | [documents/DOC-09-documents-manifests.md](documents/DOC-09-documents-manifests.md) |
+| DOC-09 | Documents: filter and open the booking | sprint-7, documents | P2 | — | Carolina | [documents/DOC-09-documents-manifests.md](documents/DOC-09-documents-manifests.md) |
 | DOC-10 | Balance reminder: documents-due once, then nothing | sprint-7, documents | P2 | — | Carolina | [documents/DOC-10-balance-reminder.md](documents/DOC-10-balance-reminder.md) |
 | WEB-01 | November search matches the RMS | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-01-november-search-matches-rms.md](web/WEB-01-november-search-matches-rms.md) |
 | WEB-02 | Drafts, hidden, paused and promo codes never leak | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-02-drafts-hidden-paused-promo-never-leak.md](web/WEB-02-drafts-hidden-paused-promo-never-leak.md) |
@@ -209,3 +209,12 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | HPOR-01 | Agency availability and rates | sprint-20, portal | P1 | B26 | Ada Agent | [portal/HPOR-01-availability-and-rates.md](portal/HPOR-01-availability-and-rates.md) |
 | HPOR-02 | Agency request, hold visible in the RMS | sprint-20, portal | P1 | B26 | Ada Agent + Carolina | [portal/HPOR-02-request-hold-on-timeline.md](portal/HPOR-02-request-hold-on-timeline.md) |
 | HPOR-03 | Commission payable date is after check-out | sprint-20, portal | P2 | B26 | Ada Agent | [portal/HPOR-03-commission-payable-after-checkout.md](portal/HPOR-03-commission-payable-after-checkout.md) |
+| HOPS-01 | Confirmation shows the stay | sprint-21, hotel, documents | P1 | B27 | Carolina | [hotel/HOPS-01-confirmation-shows-the-stay.md](hotel/HOPS-01-confirmation-shows-the-stay.md) |
+| HOPS-02 | Registration export hides sensitive columns | sprint-21, hotel, guests | P1 | B27 | Carolina, Lucía | [hotel/HOPS-02-registration-export.md](hotel/HOPS-02-registration-export.md) |
+| HOPS-03 | Arrivals brief for tomorrow | sprint-21, hotel, guests | P2 | B27 | Carolina | [hotel/HOPS-03-arrivals-brief-tomorrow.md](hotel/HOPS-03-arrivals-brief-tomorrow.md) |
+| HOPS-04 | Low occupancy groups consecutive nights | sprint-21, hotel, alerts | P2 | B27 | Carolina | [hotel/HOPS-04-low-occupancy-groups-nights.md](hotel/HOPS-04-low-occupancy-groups-nights.md) |
+| HOPS-05 | Dashboard occupancy, ADR, RevPAR | sprint-21, hotel, reports | P1 | B27 | Carolina | [hotel/HOPS-05-dashboard-occupancy-adr-revpar.md](hotel/HOPS-05-dashboard-occupancy-adr-revpar.md) |
+| HOPS-06 | Modify a stay, document plan follows | sprint-21, hotel, documents | P2 | B27 | Carolina | [hotel/HOPS-06-modify-stay-updates-the-plan.md](hotel/HOPS-06-modify-stay-updates-the-plan.md) |
+| HCRM-01 | Contact shows last and next stay | sprint-21, crm | P1 | B27 | Carolina | [crm/HCRM-01-contact-last-and-next-stay.md](crm/HCRM-01-contact-last-and-next-stay.md) |
+| HCRM-02 | Segment by length of stay | sprint-21, crm | P2 | B27 | Carolina | [crm/HCRM-02-segment-by-length-of-stay.md](crm/HCRM-02-segment-by-length-of-stay.md) |
+| HCRM-03 | Journey email three days before arrival | sprint-21, crm | P2 | B27 | Carolina | [crm/HCRM-03-journey-three-days-before-arrival.md](crm/HCRM-03-journey-three-days-before-arrival.md) |

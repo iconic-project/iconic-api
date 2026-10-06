@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Support\Operations\ManifestsDue;
 use Illuminate\Console\Command;
 
 final class ManifestsDueCommand extends Command
 {
     protected $signature = 'iconic:manifests-due';
 
-    protected $description = 'Issue due manifests, warn on missing passenger data, and chase it once before sailing';
+    protected $description = 'Retired (09 H15). Does not issue or chase a manifest.';
 
-    public function handle(ManifestsDue $manifests): int
+    public function handle(): int
     {
-        $manifests->run();
-        $this->info('Manifests checked.');
+        $this->info('Manifests are retired (09 H15). Nothing was issued or chased.');
 
         return self::SUCCESS;
     }

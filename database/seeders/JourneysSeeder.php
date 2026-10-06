@@ -116,9 +116,9 @@ class JourneysSeeder extends Seeder
                 [['fact' => 'departed', 'after_template' => 'extras_on_board']],
                 [
                     $this->send(1, 'Curated additions to your expedition', 'extras_offer', ['anchor' => 'enrolment', 'amount' => 7, 'unit' => 'days']),
-                    $this->send(2, 'Second window — pre/post hotel and flights', 'extras_second_window', ['anchor' => 'departure', 'amount' => -60, 'unit' => 'days']),
-                    $this->send(3, 'Last call: extras close before departure', 'extras_closing', ['anchor' => 'departure', 'unit' => 'hours', 'rule' => 'extras_due_hours']),
-                    $this->task(4, 'Purser sells on board — added to the RMS, invoiced after the cruise', 'extras_on_board', ['anchor' => 'departure', 'amount' => 0, 'unit' => 'days']),
+                    $this->send(2, 'Second window — pre/post hotel and flights', 'extras_second_window', ['anchor' => 'arrival', 'amount' => -60, 'unit' => 'days']),
+                    $this->send(3, 'Last call: extras close before departure', 'extras_closing', ['anchor' => 'arrival', 'unit' => 'hours', 'rule' => 'extras_due_hours']),
+                    $this->task(4, 'Purser sells on board — added to the RMS, invoiced after the cruise', 'extras_on_board', ['anchor' => 'arrival', 'amount' => 0, 'unit' => 'days']),
                 ],
             ),
             $this->journey(
@@ -132,11 +132,11 @@ class JourneysSeeder extends Seeder
                 'A confirmed or fully paid booking and the documents that booking needs.',
                 [['fact' => 'embarked']],
                 [
-                    $this->pointer(1, 'Pre-trip package + preferences questionnaire', 'pretrip', ['anchor' => 'departure', 'unit' => 'days', 'rule' => 'pretrip_days_before'], ['pretrip', 'questionnaire']),
-                    $this->pointer(2, 'Complete-your-reservation chase if passports missing', 'data_chaser', ['anchor' => 'departure', 'unit' => 'days', 'rule' => 'manifest_chase'], ['data_chaser']),
-                    $this->pointer(3, 'Ops alert if passenger data is incomplete', 'manifest_data_overdue', ['anchor' => 'departure', 'unit' => 'days', 'rule' => 'dpng_due'], ['alert:MANIFEST_DATA_OVERDUE']),
-                    $this->send(4, 'Questionnaire reminder + San Cristóbal arrival guide', 'questionnaire_reminder', ['anchor' => 'departure', 'amount' => -14, 'unit' => 'days'], ['fact' => 'questionnaire_incomplete']),
-                    $this->send(5, 'Final instructions — see you Sunday', 'arrival_instructions', ['anchor' => 'departure', 'amount' => -3, 'unit' => 'days']),
+                    $this->pointer(1, 'Pre-trip package + preferences questionnaire', 'pretrip', ['anchor' => 'arrival', 'unit' => 'days', 'rule' => 'pretrip_days_before'], ['pretrip', 'questionnaire']),
+                    $this->pointer(2, 'Complete-your-reservation chase if passports missing', 'data_chaser', ['anchor' => 'arrival', 'unit' => 'days', 'rule' => 'manifest_chase'], ['data_chaser']),
+                    $this->pointer(3, 'Ops alert if passenger data is incomplete', 'manifest_data_overdue', ['anchor' => 'arrival', 'unit' => 'days', 'rule' => 'dpng_due'], ['alert:MANIFEST_DATA_OVERDUE']),
+                    $this->send(4, 'Questionnaire reminder + San Cristóbal arrival guide', 'questionnaire_reminder', ['anchor' => 'arrival', 'amount' => -14, 'unit' => 'days'], ['fact' => 'questionnaire_incomplete']),
+                    $this->send(5, 'Final instructions — see you Sunday', 'arrival_instructions', ['anchor' => 'arrival', 'amount' => -3, 'unit' => 'days']),
                 ],
             ),
             $this->journey(

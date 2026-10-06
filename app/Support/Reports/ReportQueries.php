@@ -17,20 +17,23 @@ use App\Support\BusinessTime;
 use App\Support\Commissions\Accrual;
 use App\Support\Crm\ContactDerived;
 use App\Support\Metrics\CommercialMetrics;
+use App\Support\Metrics\HotelKpis;
 use App\Support\Metrics\MetricScope;
 use App\Support\Metrics\MetricWindow;
 use App\Support\Payments\PaymentsKpis;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 /**
- * Tabular bodies for the ten report definitions. Cells are bookings, agencies, departures and money (O9).
+ * Tabular bodies for the report catalogue. Cells are bookings, agencies and money.
  */
 class ReportQueries
 {
     public function __construct(
         private readonly CommercialMetrics $metrics,
         private readonly CurrentConfig $config,
+        private readonly HotelKpis $hotel,
     ) {}
 
     /**
@@ -46,6 +49,9 @@ class ReportQueries
             'commissions-payable' => $this->commissionsPayable($window, $scope),
             'gateway-reconciliation' => $this->gateway($window, $scope),
             'commercial-summary' => $this->commercialSummary($window, $scope, $actor),
+            'occupancy-revenue' => $this->occupancyRevenue($window, $scope),
+            'pace' => $this->pace($window, $scope),
+            'arrivals-forecast' => $this->arrivalsForecast($window, $scope),
             'occupancy' => $this->occupancy($window, $scope),
             'pipeline-summary' => $this->pipelineSummary($window, $scope, $actor),
             'agency-report' => $this->agencyReport($window, $scope),
@@ -265,6 +271,138 @@ class ReportQueries
         }
 
         return ['headers' => ['figure', 'value'], 'rows' => $rows];
+    }
+
+    /**
+     * @return array{headers: list<string>, rows: list<list<int|string>>}
+     */
+    private function occupancyRevenue(MetricWindow $window, MetricScope $scope): array
+    {
+        $measured = $this->hotelWindow($window, $scope);
+        $rows = [];
+
+        foreach ($measured['nights'] as $night) {
+            $rows[] = [
+                $night['night'],
+                $night['room_nights_sold'],
+                $night['room_nights_available'],
+                (string) ($night['occupancy'] ?? ''),
+                $night['room_revenue'],
+                (string) ($night['adr'] ?? ''),
+                (string) ($night['revpar'] ?? ''),
+            ];
+        }
+
+        return [
+            'headers' => ['night', 'room_nights_sold', 'room_nights_available', 'occupancy', 'room_revenue', 'adr', 'revpar'],
+            'rows' => $rows,
+        ];
+    }
+
+    /**
+     * @return array{headers: list<string>, rows: list<list<int|string>>}
+     */
+    private function pace(MetricWindow $window, MetricScope $scope): array
+    {
+        $measured = $this->hotelWindow($window, $scope);
+        $lastFrom = CarbonImmutable::parse($window->from)->subYear()->toDateString();
+        $lastTo = CarbonImmutable::parse($window->to)->subYear()->toDateString();
+        $last = $this->hotel->measure(
+            $lastFrom,
+            CarbonImmutable::parse($lastTo)->addDay()->toDateString(),
+            BusinessTime::now()->toDateString(),
+            $this->pickupDays(),
+            $scope->propertyId,
+            null,
+            $scope->channel,
+        );
+        $lastSold = [];
+
+        foreach ($last['nights'] as $night) {
+            $lastSold[$night['night']] = $night['room_nights_sold'];
+        }
+
+        $rows = [];
+
+        foreach ($measured['nights'] as $index => $night) {
+            $lastNight = $last['nights'][$index]['night'] ?? null;
+            $rows[] = [
+                $night['night'],
+                $night['room_nights_sold'],
+                $night['pickup_room_nights'],
+                $last['has_activity'] && is_string($lastNight) ? (string) ($lastSold[$lastNight] ?? 0) : '',
+            ];
+        }
+
+        return [
+            'headers' => ['night', 'room_nights_sold', 'pickup_room_nights', 'last_year_sold'],
+            'rows' => $rows,
+        ];
+    }
+
+    /**
+     * @return array{headers: list<string>, rows: list<list<int|string>>}
+     */
+    private function arrivalsForecast(MetricWindow $window, MetricScope $scope): array
+    {
+        $statuses = [
+            BookingStatus::Confirmed->value,
+            BookingStatus::FullyPaid->value,
+            BookingStatus::InHouse->value,
+            BookingStatus::CheckedOut->value,
+            BookingStatus::Overdue->value,
+        ];
+        $bookings = Booking::query()
+            ->with('roomType')
+            ->whereNull('deleted_at')
+            ->whereIn('status', $statuses)
+            ->whereDate('check_in', '>=', $window->from)
+            ->whereDate('check_in', '<=', $window->to)
+            ->when($scope->propertyId !== null, fn ($inner) => $inner->where('property_id', $scope->propertyId))
+            ->when($scope->channel !== null, fn ($inner) => $inner->whereIn('channel_of_origin', ChannelOfOrigin::valuesInGroup($scope->channel)))
+            ->orderBy('check_in')
+            ->orderBy('id')
+            ->get();
+
+        $rows = [];
+
+        foreach ($bookings as $booking) {
+            $checkIn = $booking->getAttributes()['check_in'] ?? '';
+            $rows[] = [
+                is_string($checkIn) ? substr($checkIn, 0, 10) : '',
+                (string) ($booking->reference ?? $booking->request_reference ?? ''),
+                (string) $booking->roomType->name,
+                (int) $booking->nights,
+                $booking->status->value,
+                $booking->channel_of_origin->value,
+            ];
+        }
+
+        return [
+            'headers' => ['check_in', 'booking', 'room_type', 'nights', 'status', 'channel'],
+            'rows' => $rows,
+        ];
+    }
+
+    /**
+     * @return array{nights: list<array{night: string, room_nights_sold: int, room_nights_available: int, occupancy: string|null, room_revenue: int, adr: int|null, revpar: int|null, pickup_room_nights: int}>}
+     */
+    private function hotelWindow(MetricWindow $window, MetricScope $scope): array
+    {
+        return $this->hotel->measure(
+            $window->from,
+            CarbonImmutable::parse($window->to)->addDay()->toDateString(),
+            BusinessTime::now()->toDateString(),
+            $this->pickupDays(),
+            $scope->propertyId,
+            null,
+            $scope->channel,
+        );
+    }
+
+    private function pickupDays(): int
+    {
+        return $this->config->businessRules()->reports->pickupDays;
     }
 
     /**

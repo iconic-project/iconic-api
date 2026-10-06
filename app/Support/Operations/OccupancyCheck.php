@@ -7,11 +7,11 @@ namespace App\Support\Operations;
 use App\Actions\Alerts\RaiseAlert;
 use App\Actions\Alerts\ResolveAlert;
 use App\Enums\AlertKind;
-use App\Enums\DepartureStatus;
+use App\Enums\PropertyStatus;
 use App\Models\Alert;
-use App\Models\Departure;
+use App\Models\Property;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\Availability;
+use App\Services\Inventory\NightAvailability;
 use App\Support\Alerts\AlertKeys;
 use App\Support\BusinessTime;
 
@@ -21,52 +21,84 @@ final class OccupancyCheck
         private readonly RaiseAlert $raise,
         private readonly ResolveAlert $resolve,
         private readonly CurrentConfig $config,
-        private readonly Availability $availability,
+        private readonly NightAvailability $nights,
     ) {}
 
     public function run(): void
     {
         $rules = $this->config->businessRules()->alerts;
-        $today = BusinessTime::now()->toDateString();
-        $until = BusinessTime::calendarDay($today)->addDays($rules->lowOccupancyDaysBefore)->toDateString();
-
-        $departures = Departure::query()
-            ->where('status', DepartureStatus::OnSale)
-            ->where('date', '>', $today)
-            ->where('date', '<=', $until)
-            ->orderBy('id')
-            ->get();
-
-        $snapshots = $this->availability->forDepartures($departures);
+        $start = BusinessTime::calendarDay(BusinessTime::now()->toDateString())->addDay();
         $keys = [];
 
-        foreach ($departures as $departure) {
-            $counts = $snapshots[$departure->id]->counts;
-            $sellable = $counts['sold'] + $counts['held'] + $counts['free'];
+        Property::query()
+            ->where('status', PropertyStatus::Active)
+            ->orderBy('id')
+            ->each(function (Property $property) use ($rules, $start, &$keys): void {
+                /** @var list<array{night: string, pct: int}> $run */
+                $run = [];
 
-            if ($sellable === 0) {
-                continue;
-            }
+                for ($offset = 0; $offset < $rules->lowOccupancyDaysBefore; $offset++) {
+                    $night = $start->addDays($offset);
+                    $row = $this->nights->occupancy($property, $night, $night->addDay());
+                    $low = $row['room_nights_available'] > 0 && $row['pct'] < $rules->lowOccupancyPct;
 
-            $percent = intdiv($counts['sold'] * 100, $sellable);
+                    if ($low) {
+                        $run[] = [
+                            'night' => $night->toDateString(),
+                            'pct' => $row['pct'],
+                        ];
 
-            if ($percent >= $rules->lowOccupancyPct) {
-                continue;
-            }
+                        continue;
+                    }
 
-            $key = AlertKeys::occupancy($departure->id);
+                    $raised = $this->raiseRun($property, $run, $rules->lowOccupancyMinConsecutiveNights, $rules->lowOccupancyPct);
 
-            $this->raise->handle(
-                AlertKind::LowOccupancy,
-                $key,
-                'Low occupancy '.$departure->reference,
-                $departure->reference.' is '.$percent.'% sold ('.$counts['sold'].' of '.$sellable.' cabins), below the '.$rules->lowOccupancyPct.'% threshold.',
-                departureId: $departure->id,
-            );
-            $keys[] = $key;
-        }
+                    if ($raised !== null) {
+                        $keys[] = $raised;
+                    }
+
+                    $run = [];
+                }
+
+                $raised = $this->raiseRun($property, $run, $rules->lowOccupancyMinConsecutiveNights, $rules->lowOccupancyPct);
+
+                if ($raised !== null) {
+                    $keys[] = $raised;
+                }
+            });
 
         $this->resolveCleared($keys);
+    }
+
+    /**
+     * @param  list<array{night: string, pct: int}>  $run
+     */
+    private function raiseRun(Property $property, array $run, int $minimum, int $threshold): ?string
+    {
+        if ($run === [] || count($run) < $minimum) {
+            return null;
+        }
+
+        $first = $run[0]['night'];
+        $last = $run[count($run) - 1]['night'];
+        $lowest = $run[0]['pct'];
+
+        foreach ($run as $night) {
+            if ($night['pct'] < $lowest) {
+                $lowest = $night['pct'];
+            }
+        }
+        $key = AlertKeys::occupancyRun($property->id, $first, $last);
+        $span = $first === $last ? $first : $first.' to '.$last;
+
+        $this->raise->handle(
+            AlertKind::LowOccupancy,
+            $key,
+            'Low occupancy '.$property->code.' '.$span,
+            $property->code.' '.$span.' is '.$lowest.'% sold, below the '.$threshold.'% threshold for '.count($run).' nights.',
+        );
+
+        return $key;
     }
 
     /**
@@ -84,7 +116,7 @@ final class OccupancyCheck
         }
 
         $query->each(function (Alert $alert): void {
-            $this->resolve->handle($alert, 'occupancy is no longer below the threshold, or the departure has sailed');
+            $this->resolve->handle($alert, 'the run is no longer below the threshold');
         });
     }
 }

@@ -62,6 +62,7 @@ final class DocumentCheck
             DocumentKind::Summary,
             DocumentKind::Receipt,
             DocumentKind::FinalInvoice,
+            DocumentKind::PreArrival,
             DocumentKind::Pretrip,
             DocumentKind::Voucher,
         ];

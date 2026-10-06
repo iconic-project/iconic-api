@@ -87,11 +87,11 @@ class SegmentsSeeder extends Seeder
             $this->row(
                 'festive_prospects',
                 'Festive prospects',
-                'Viewed a festive departure.',
+                'Viewed a departure.',
                 [
                     'match' => 'all',
                     'items' => [
-                        ['field' => 'festive_departure_views', 'operator' => 'gte', 'value' => 1, 'within_days' => null],
+                        ['field' => 'event_count', 'operator' => 'gte', 'value' => 1, 'event' => 'view_departure', 'within_days' => null],
                     ],
                 ],
                 [
@@ -105,7 +105,7 @@ class SegmentsSeeder extends Seeder
             $this->row(
                 'families_6_17',
                 'Families 6–17',
-                'A guest on one of their bookings is aged 6 to 17 at departure.',
+                'A guest on one of their bookings is aged 6 to 17 at arrival.',
                 [
                     'match' => 'all',
                     'items' => [

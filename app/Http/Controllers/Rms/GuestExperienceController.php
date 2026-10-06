@@ -8,18 +8,18 @@ use App\Actions\GuestExperience\RecordBriefPrinted;
 use App\Actions\GuestExperience\RecordGuestPreferences;
 use App\Enums\PreferenceSource;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Rms\ArrivalRangeRequest;
+use App\Http\Requests\Rms\ArrivalsBriefRequest;
 use App\Http\Requests\Rms\UpdateGuestPreferencesRequest;
 use App\Http\Resources\Rms\DepartureGuestExperienceResource;
-use App\Http\Resources\Rms\GuestExperienceDepartureResource;
 use App\Http\Resources\Rms\GuestPreferencesResource;
 use App\Http\Resources\Rms\PreferenceQuestionResource;
 use App\Models\Departure;
 use App\Models\Guest;
 use App\Models\GuestPreference;
 use App\Models\User;
+use App\Support\GuestExperience\ArrivalsBrief;
 use App\Support\GuestExperience\DepartureGuestExperience;
-use App\Support\GuestExperience\DepartureList;
-use App\Support\GuestExperience\HotelManagerBrief;
 use App\Support\GuestExperience\PreferenceHistory;
 use Dedoc\Scramble\Attributes\Response as DocumentedResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -27,12 +27,18 @@ use Illuminate\Http\Response;
 
 final class GuestExperienceController extends Controller
 {
-    #[DocumentedResponse(status: 200, type: GuestExperienceDepartureResource::class)]
-    public function departures(): AnonymousResourceCollection
+    public function index(ArrivalRangeRequest $request, DepartureGuestExperience $experience): DepartureGuestExperienceResource
     {
         $this->authorize('viewAny', GuestPreference::class);
 
-        return GuestExperienceDepartureResource::collection(DepartureList::withPassengers());
+        return new DepartureGuestExperienceResource(
+            $experience->forArrivals($request->from(), $request->to(), $this->sensitive()),
+        );
+    }
+
+    public function retiredDepartures(): never
+    {
+        abort(410, 'Guest experience is listed by arrival date.');
     }
 
     #[DocumentedResponse(status: 200, type: PreferenceQuestionResource::class)]
@@ -43,13 +49,9 @@ final class GuestExperienceController extends Controller
         return PreferenceQuestionResource::collection(PreferenceQuestionResource::questions());
     }
 
-    public function show(Departure $departure, DepartureGuestExperience $experience): DepartureGuestExperienceResource
+    public function show(Departure $departure): never
     {
-        $this->authorize('viewAny', GuestPreference::class);
-
-        return new DepartureGuestExperienceResource(
-            $experience->forDeparture($departure, $this->sensitive()),
-        );
+        abort(410, 'Guest experience is listed by arrival date.');
     }
 
     public function preferences(Guest $guest): GuestPreferencesResource
@@ -84,28 +86,32 @@ final class GuestExperienceController extends Controller
         );
     }
 
-    public function brief(
-        Departure $departure,
-        HotelManagerBrief $brief,
+    public function retiredBrief(Departure $departure): never
+    {
+        abort(410, 'The hotel manager brief is retired. Use the arrivals brief.');
+    }
+
+    public function arrivals(
+        ArrivalsBriefRequest $request,
+        ArrivalsBrief $brief,
         RecordBriefPrinted $printed,
     ): Response {
         $this->authorize('viewAny', GuestPreference::class);
-        $actor = request()->user();
+        $actor = $request->user();
         assert($actor instanceof User);
-        $format = request()->query('format') === 'pdf' ? 'pdf' : 'html';
+        $date = $request->arrivalDate();
+        $format = $request->briefFormat();
         $sensitive = $this->sensitive();
-        $printed->handle($departure, $actor, $format);
+        $printed->handle($date, $actor, $format);
 
         if ($format === 'pdf') {
-            $filename = 'hotel-manager-brief-'.$departure->reference.'.pdf';
-
-            return new Response($brief->pdf($departure, $sensitive), 200, [
+            return new Response($brief->pdf($date, $sensitive), 200, [
                 'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'inline; filename="'.$filename.'"',
+                'Content-Disposition' => 'inline; filename="arrivals-brief-'.$date.'.pdf"',
             ]);
         }
 
-        return new Response($brief->html($departure, $sensitive), 200, [
+        return new Response($brief->html($date, $sensitive), 200, [
             'Content-Type' => 'text/html; charset=UTF-8',
         ]);
     }

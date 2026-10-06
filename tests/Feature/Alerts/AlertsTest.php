@@ -580,7 +580,10 @@ test('kinds lists the registry and a guest response references the response row'
         ->assertOk()
         ->assertJsonCount(16, 'data')
         ->assertJsonPath('data.0.emails', false)
-        ->assertJsonPath('data.0.section', 'rms');
+        ->assertJsonPath('data.0.section', 'rms')
+        ->assertJsonFragment(['kind' => AlertKind::ArrivalNotCheckedIn->value])
+        ->assertJsonFragment(['kind' => AlertKind::InHousePastCheckOut->value])
+        ->assertJsonFragment(['kind' => AlertKind::DepartureNotCheckedOut->value]);
 
     expect(AlertRegistry::all())->toHaveCount(16);
 

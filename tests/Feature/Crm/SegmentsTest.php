@@ -222,7 +222,11 @@ test('the vocabulary lists every operator the seeded definitions use', function 
         'last_activity_days',
         'erasure',
         'hard_bounce',
-        'festive_departure_views',
+        'stay_date',
+        'arrival_weekday',
+        'length_of_stay',
+        'room_type',
+        'rate_plan',
     );
 
     foreach (Segment::query()->get() as $segment) {

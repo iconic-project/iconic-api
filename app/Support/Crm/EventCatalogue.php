@@ -7,6 +7,7 @@ namespace App\Support\Crm;
 use App\Actions\Agencies\DecideAgency;
 use App\Actions\Bookings\CreateBookingRequest;
 use App\Actions\Bookings\CreateReservation;
+use App\Actions\Bookings\ModifyStay;
 use App\Actions\Bookings\MoveBooking;
 use App\Actions\Bookings\TransitionBooking;
 use App\Actions\Charter\CreateCharterEnquiry;
@@ -42,6 +43,7 @@ use App\Events\HoldExpired;
 use App\Events\PaymentAwaitingWire;
 use App\Events\PaymentSettled;
 use App\Events\RefundRequested;
+use App\Events\StayModified;
 use App\Jobs\SendDeliveryJob;
 use App\Listeners\BumpEngineFeedVersion;
 use App\Listeners\ClearCurrentConfigCache;
@@ -220,6 +222,12 @@ final class EventCatalogue
                     self::short(MoveBooking::class),
                 ]),
                 'listeners' => [self::short(SendOnBookingChargesChanged::class)],
+            ],
+            [
+                'class' => StayModified::class,
+                'name' => 'StayModified',
+                'producer' => self::short(ModifyStay::class),
+                'listeners' => [],
             ],
             [
                 'class' => BookingOverdueFlagged::class,

@@ -12,6 +12,7 @@ use App\Models\BookingAccessToken;
 use App\Models\Contact;
 use App\Models\MessageTemplateVersion;
 use App\Models\PaymentLink;
+use App\Services\Config\CurrentConfig;
 use App\Support\Documents\IssuerMail;
 use Illuminate\Support\Facades\View;
 
@@ -75,7 +76,13 @@ final class TemplateRenderer
         return match ($variable) {
             TemplateVariable::FirstName => $this->firstName($contact),
             TemplateVariable::BookingReference => $booking?->displayReference(),
-            TemplateVariable::DepartureDate => $this->departureDate($booking),
+            TemplateVariable::CheckIn, TemplateVariable::DepartureDate => $this->checkIn($booking),
+            TemplateVariable::CheckOut => $this->checkOut($booking),
+            TemplateVariable::Nights => $booking instanceof Booking ? (string) $booking->nights : null,
+            TemplateVariable::RoomType => $this->roomType($booking),
+            TemplateVariable::PropertyName => $this->propertyName($booking),
+            TemplateVariable::CheckInTime => app(CurrentConfig::class)->businessRules()->stay->checkInTime,
+            TemplateVariable::CheckOutTime => app(CurrentConfig::class)->businessRules()->stay->checkOutTime,
             TemplateVariable::ItineraryName => $this->itineraryName($booking),
             TemplateVariable::BalanceDueDate => $booking instanceof Booking ? $booking->balanceDueDate()->toDateString() : null,
             TemplateVariable::DepositLink => $this->depositLink($booking),
@@ -101,15 +108,46 @@ final class TemplateRenderer
         return $parts[0];
     }
 
-    private function departureDate(?Booking $booking): ?string
+    private function checkIn(?Booking $booking): ?string
     {
         if (! $booking instanceof Booking) {
             return null;
         }
 
-        $booking->loadMissing('departure');
+        return $booking->stay()->checkIn()->toDateString();
+    }
 
-        return $booking->departure->date->toDateString();
+    private function checkOut(?Booking $booking): ?string
+    {
+        if (! $booking instanceof Booking) {
+            return null;
+        }
+
+        return $booking->stay()->checkOut()->toDateString();
+    }
+
+    private function roomType(?Booking $booking): ?string
+    {
+        if (! $booking instanceof Booking) {
+            return null;
+        }
+
+        $booking->loadMissing('roomType');
+        $name = $booking->roomType?->name;
+
+        return is_string($name) && $name !== '' ? $name : null;
+    }
+
+    private function propertyName(?Booking $booking): ?string
+    {
+        if (! $booking instanceof Booking) {
+            return null;
+        }
+
+        $booking->loadMissing('property');
+        $name = $booking->property->name;
+
+        return $name !== '' ? $name : null;
     }
 
     private function itineraryName(?Booking $booking): ?string

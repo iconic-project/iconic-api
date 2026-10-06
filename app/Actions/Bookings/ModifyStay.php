@@ -17,6 +17,7 @@ use App\Enums\TaxBasis;
 use App\Events\BookingChargesChanged;
 use App\Events\BookingStatusChanged;
 use App\Events\RefundRequested;
+use App\Events\StayModified;
 use App\Exceptions\RoomUnavailableException;
 use App\Models\Booking;
 use App\Models\RefundRequest;
@@ -188,6 +189,8 @@ final class ModifyStay extends Action
                 BookingChargesChanged::dispatch($booking, 'Stay modified');
             }
 
+            StayModified::dispatch($booking);
+
             $this->refundOverpayment($booking, $quote, $actor);
 
             return $booking->refresh()->load(['room', 'roomType', 'property', 'contact', 'owner']);
@@ -257,6 +260,7 @@ final class ModifyStay extends Action
         ], reason: $reason, actor: $actor);
 
         BookingChargesChanged::dispatch($booking, 'Early departure credit');
+        StayModified::dispatch($booking);
 
         return $booking;
     }

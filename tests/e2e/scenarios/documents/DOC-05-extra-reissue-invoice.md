@@ -10,7 +10,7 @@ An issued invoice is immutable (J2). Adding a charge after issue must create ver
 
 ## Steps
 1. Sign in as Carolina. Open ANK-2026-0003. **Overview** → **Billing** → `Edit billing`. Set Email `e2e.doc05@iconic.test`. Save.
-2. **Documents**: note invoice `v1`. **Preview** it and record Vessel charges / Ancillary / INVOICE TOTAL (expect `26,600.00` / `0.00` / `USD 26,600.00`). Close.
+2. **Documents**: note invoice `v1`. **Preview** it and record Stay charges / Other services / INVOICE TOTAL (expect `26,600.00` / `0.00` / `USD 26,600.00`). Close.
 3. **Extras** tab. Confirm the notice `This booking already has an invoice — changes here re-issue an updated invoice to the client.`
 4. Clear Mailpit: `curl -sS -X DELETE http://localhost:8025/api/v1/messages`.
 5. Under **Add a service**, Service `Domestic flights GYE/UIO ↔ SCY (round-trip)`. Qty `2`. Rate (USD) `420`. `Add to booking`.
@@ -22,8 +22,8 @@ An issued invoice is immutable (J2). Adding a charge after issue must create ver
 ## Expected
 - [ ] E1 · Extras notice is visible before the add (0003 already has a seeded invoice `document_id`).
 - [ ] E2 · Toast `Extra added`. Documents invoice row shows `v2 · Extra added — Domestic flights GYE/UIO ↔ SCY (round-trip) × 2` and status `SENT` (or QUEUED then SENT). ⚠ UNVERIFIED — BookingChargesChanged reason + SendOnBookingChargesChanged.
-- [ ] E3 · v2 preview: Ancillary services `840.00`, INVOICE TOTAL `USD 27,440.00`. Vessel charges still `26,600.00`.
-- [ ] E4 · v1 preview still shows Ancillary `0.00` and `USD 26,600.00` — the issued snapshot, not today’s charges.
+- [ ] E3 · v2 preview: Other services `840.00`, INVOICE TOTAL `USD 27,440.00`. Stay charges still `26,600.00`.
+- [ ] E4 · v1 preview still shows Other services `0.00` and `USD 26,600.00` — the issued snapshot, not today’s charges.
 - [ ] E5 · Mailpit: one invoice mail after the add (v2). Attachment sha256 matches the **latest** invoice row’s `file_sha256`, not v1.
 
 ## Notes

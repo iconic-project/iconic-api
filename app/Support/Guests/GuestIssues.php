@@ -7,11 +7,14 @@ namespace App\Support\Guests;
 use App\Enums\BookingType;
 use App\Enums\ConsentDocument;
 use App\Enums\PngCategory;
+use App\Enums\RegistrationField;
 use App\Models\Booking;
 use App\Models\Consent;
 use App\Models\Guest;
 use App\Services\Config\CurrentConfig;
+use App\Support\BusinessTime;
 use App\Support\Dates\Format;
+use Carbon\CarbonImmutable;
 
 final class GuestIssues
 {
@@ -22,22 +25,27 @@ final class GuestIssues
      */
     public function for(Booking $booking): array
     {
-        $booking->loadMissing(['departure', 'guests', 'consents']);
+        $booking->loadMissing(['guests', 'consents']);
         $settings = $this->config->engineSettings()->guests;
-        $departure = $booking->departure->date;
-        $returnDate = $booking->departure->returnDate();
+        $checkIn = $booking->stay()->checkIn();
+        $checkOut = $booking->stay()->checkOut();
         $issues = [];
+        $registrationSeverity = $this->registrationSeverity($checkIn);
 
         foreach ($booking->guests as $guest) {
+            if ($guest->first_name === '' && $guest->last_name === '') {
+                continue;
+            }
+
             $name = $guest->displayName();
-            $age = Age::at($guest->dob, $departure);
+            $age = Age::at($guest->dob, $checkIn);
 
             if ($age !== null && $age < $settings->childMinAge) {
                 $issues[] = $this->issue(
                     'error',
                     'under_min_age',
                     $guest->id,
-                    $name.' is '.$age.' on departure — minimum age is '.$settings->childMinAge.' (OPS-004).',
+                    $name.' is '.$age.' on check-in — minimum age is '.$settings->childMinAge.' (OPS-004).',
                 );
             }
 
@@ -50,12 +58,12 @@ final class GuestIssues
                 );
             }
 
-            if ($guest->passport_expiry !== null && $guest->passport_expiry->toDateString() < $returnDate->toDateString()) {
+            if ($guest->passport_expiry !== null && $guest->passport_expiry->toDateString() < $checkOut->toDateString()) {
                 $issues[] = $this->issue(
                     'error',
                     'passport_expired',
                     $guest->id,
-                    $name."'s passport expires before the return date (".Format::calendar($returnDate).').',
+                    $name."'s passport expires before check-out (".Format::calendar($checkOut).').',
                 );
             }
 
@@ -67,6 +75,32 @@ final class GuestIssues
                     $name.' has no travel-insurance declaration (OPS-005).',
                 );
             }
+
+            foreach ($this->registrationFields() as $field) {
+                if (! $field->onGuest() || $field->present($guest, $booking)) {
+                    continue;
+                }
+
+                $issues[] = $this->issue(
+                    $registrationSeverity,
+                    'registration_missing',
+                    $guest->id,
+                    $name.' is missing '.$field->label().' for guest registration.',
+                );
+            }
+        }
+
+        foreach ($this->registrationFields() as $field) {
+            if ($field->onGuest() || $field->presentOnBooking($booking)) {
+                continue;
+            }
+
+            $issues[] = $this->issue(
+                $registrationSeverity,
+                'registration_missing',
+                null,
+                ucfirst($field->label()).' is missing for guest registration.',
+            );
         }
 
         if ($booking->type === BookingType::Cabin) {
@@ -74,8 +108,8 @@ final class GuestIssues
             $dated = $guests->filter(fn (Guest $guest): bool => $guest->dob !== null)->count();
 
             if ($guests->isNotEmpty() && $dated === $guests->count()) {
-                $kids = $guests->filter(function (Guest $guest) use ($departure, $settings): bool {
-                    $age = Age::at($guest->dob, $departure);
+                $kids = $guests->filter(function (Guest $guest) use ($checkIn, $settings): bool {
+                    $age = Age::at($guest->dob, $checkIn);
 
                     return $age !== null
                         && $age >= $settings->childMinAge
@@ -134,9 +168,25 @@ final class GuestIssues
         $guests = $booking->guests;
         $total = $guests->count();
         $max = GuestCapacity::max($booking->type, $this->config->engineSettings()->guests);
+        $guestFields = array_values(array_filter(
+            $this->registrationFields(),
+            fn (RegistrationField $field): bool => $field->onGuest(),
+        ));
 
         return [
-            'complete_count' => $guests->filter(fn (Guest $guest): bool => $guest->isComplete())->count(),
+            'complete_count' => $guests->filter(function (Guest $guest) use ($guestFields, $booking): bool {
+                if ($guest->first_name === '' && $guest->last_name === '') {
+                    return false;
+                }
+
+                foreach ($guestFields as $field) {
+                    if (! $field->present($guest, $booking)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            })->count(),
             'total' => $total,
             'png_known_total' => (int) $guests->sum(fn (Guest $guest): int => $guest->png_fee ?? 0),
             'png_pending_count' => $guests
@@ -145,6 +195,27 @@ final class GuestIssues
             'max' => $max,
             'can_add' => $total < $max,
         ];
+    }
+
+    /**
+     * @return list<RegistrationField>
+     */
+    private function registrationFields(): array
+    {
+        return $this->config->businessRules()->registration->fieldEnums();
+    }
+
+    private function registrationSeverity(CarbonImmutable $checkIn): string
+    {
+        $hours = $this->config->businessRules()->registration->deadlineHoursAfterCheckIn;
+
+        if ($hours === null) {
+            return 'warning';
+        }
+
+        $deadline = CarbonImmutable::parse($checkIn->toDateString(), BusinessTime::zone())->startOfDay()->addHours($hours);
+
+        return BusinessTime::now()->greaterThan($deadline) ? 'error' : 'warning';
     }
 
     /**

@@ -10,7 +10,7 @@ enum DocumentPlanKind: string
     case Summary = 'SUMMARY';
     case Receipt = 'RECEIPT';
     case Reminder = 'REMINDER';
-    case Pretrip = 'PRETRIP';
+    case PreArrival = 'PRE_ARRIVAL';
     case Questionnaire = 'QUESTIONNAIRE';
     case Voucher = 'VOUCHER';
     case FinalInvoice = 'FINAL_INVOICE';
@@ -23,7 +23,7 @@ enum DocumentPlanKind: string
             self::Summary => 'Booking Summary (guest version)',
             self::Receipt => 'Payment Confirmation',
             self::Reminder => 'Balance reminder',
-            self::Pretrip => 'Detailed pre-trip itinerary',
+            self::PreArrival => 'Pre-arrival information',
             self::Questionnaire => 'Guest preferences questionnaire',
             self::Voucher => 'Transfer voucher',
             self::FinalInvoice => 'Final invoice',
@@ -37,7 +37,7 @@ enum DocumentPlanKind: string
             self::Invoice => DocumentKind::Invoice,
             self::Summary => DocumentKind::Summary,
             self::Receipt => DocumentKind::Receipt,
-            self::Pretrip => DocumentKind::Pretrip,
+            self::PreArrival => DocumentKind::PreArrival,
             self::Voucher => DocumentKind::Voucher,
             self::FinalInvoice => DocumentKind::FinalInvoice,
             self::WireInstructions => DocumentKind::WireInstructions,

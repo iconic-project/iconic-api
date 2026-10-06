@@ -11,6 +11,7 @@ enum DocumentKind: string
     case Summary = 'SUMMARY';
     case Receipt = 'RECEIPT';
     case Voucher = 'VOUCHER';
+    case PreArrival = 'PRE_ARRIVAL';
     case Pretrip = 'PRETRIP';
     case WireInstructions = 'WIRE_INSTRUCTIONS';
     case CharterProposal = 'CHARTER_PROPOSAL';
@@ -23,6 +24,7 @@ enum DocumentKind: string
             self::Summary => 'Booking Summary',
             self::Receipt => 'Payment Confirmation',
             self::Voucher => 'Transfer Voucher',
+            self::PreArrival => 'Pre-arrival information',
             self::Pretrip => 'Pre-trip Itinerary',
             self::WireInstructions => 'Wire Instructions',
             self::CharterProposal => 'Charter proposal',

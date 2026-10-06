@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
 use App\Support\Metrics\CommercialMetrics;
+use App\Support\Metrics\HotelKpis;
 use App\Support\Metrics\MetricScope;
 use App\Support\Metrics\MetricWindow;
 use App\Support\Reports\ReportQueries;
@@ -72,16 +73,16 @@ test('each cadence fires at its Galápagos moment, catches up once, and does not
     expect(ReportRun::query()->where('definition_key', 'commercial-summary')->count())->toBe(2);
 
     ReportSubscription::query()->update(['active' => false]);
-    onlyReport('occupancy');
+    onlyReport('occupancy-revenue');
     atGalapagos('2027-11-07 09:00:00');
     $this->artisan('iconic:reports-send')->assertSuccessful();
-    expect(ReportRun::query()->where('definition_key', 'occupancy')->count())->toBe(0);
+    expect(ReportRun::query()->where('definition_key', 'occupancy-revenue')->count())->toBe(0);
     atGalapagos('2027-11-08 08:59:00');
     $this->artisan('iconic:reports-send')->assertSuccessful();
-    expect(ReportRun::query()->where('definition_key', 'occupancy')->count())->toBe(0);
+    expect(ReportRun::query()->where('definition_key', 'occupancy-revenue')->count())->toBe(0);
     atGalapagos('2027-11-08 09:00:00');
     $this->artisan('iconic:reports-send')->assertSuccessful();
-    $weekly = ReportRun::query()->where('definition_key', 'occupancy')->first();
+    $weekly = ReportRun::query()->where('definition_key', 'occupancy-revenue')->first();
     expect($weekly?->window_from->toDateString())->toBe('2027-11-01')
         ->and($weekly?->window_to->toDateString())->toBe('2027-11-07');
 
@@ -138,6 +139,7 @@ test('a failed generation raises a warning that a later run resolves, and a fail
         return new FlakyReportQueries(
             $app->make(CommercialMetrics::class),
             $app->make(CurrentConfig::class),
+            $app->make(HotelKpis::class),
         );
     });
 
@@ -156,7 +158,7 @@ test('a failed generation raises a warning that a later run resolves, and a fail
     expect($alert?->fresh()?->resolved_at)->not->toBeNull();
 
     ReportSubscription::query()->update(['active' => false]);
-    onlyReport('occupancy');
+    onlyReport('occupancy-revenue');
     $sends = 0;
     Mail::shouldReceive('to')->andReturnUsing(function () use (&$sends) {
         $sends++;
@@ -169,7 +171,7 @@ test('a failed generation raises a warning that a later run resolves, and a fail
     $this->artisan('iconic:reports-send')->assertSuccessful();
     $note = ReportRunNotification::query()->whereHas(
         'run',
-        fn ($query) => $query->where('definition_key', 'occupancy'),
+        fn ($query) => $query->where('definition_key', 'occupancy-revenue'),
     )->first();
     expect($sends)->toBe(1)
         ->and($note?->status)->toBe(AlertNotificationStatus::Failed)
@@ -178,7 +180,7 @@ test('a failed generation raises a warning that a later run resolves, and a fail
     $this->artisan('iconic:reports-send')->assertSuccessful();
     $occupancyNote = ReportRunNotification::query()->whereHas(
         'run',
-        fn ($query) => $query->where('definition_key', 'occupancy'),
+        fn ($query) => $query->where('definition_key', 'occupancy-revenue'),
     )->first();
     expect($sends)->toBe(2)
         ->and($occupancyNote?->attempts)->toBe(2)
@@ -186,7 +188,7 @@ test('a failed generation raises a warning that a later run resolves, and a fail
 
     $this->artisan('iconic:reports-send')->assertSuccessful();
     expect($sends)->toBe(2)
-        ->and(ReportRun::query()->where('definition_key', 'occupancy')->count())->toBe(1);
+        ->and(ReportRun::query()->where('definition_key', 'occupancy-revenue')->count())->toBe(1);
 });
 
 test('subscriptions are listed to panel.rms, changed with rules.manage, and run-now is manual', function (): void {

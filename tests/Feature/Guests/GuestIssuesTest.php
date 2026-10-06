@@ -41,7 +41,7 @@ function issuesCabin(array $booking = []): Booking
 test('each guest issue is returned with prototype wording', function (): void {
     $booking = issuesCabin(['children' => 0]);
     $actor = $booking->owner;
-    $return = Format::calendar($booking->departure->returnDate());
+    $return = Format::calendar($booking->stay()->checkOut());
 
     $this->actingAs($actor)
         ->postJson('/api/rms/bookings/'.$booking->id.'/guests', [
@@ -76,9 +76,9 @@ test('each guest issue is returned with prototype wording', function (): void {
     expect($codes)->toContain('consents_missing');
 
     $messages = collect($response->json('issues'))->pluck('message')->all();
-    expect($messages)->toContain('Tiny One is 3 on departure — minimum age is 6 (OPS-004).');
+    expect($messages)->toContain('Tiny One is 3 on check-in — minimum age is 6 (OPS-004).');
     expect($messages)->toContain('Leon Brandt is under 18 — guardian consent required (§6.4).');
-    expect($messages)->toContain("Tiny One's passport expires before the return date ({$return}).");
+    expect($messages)->toContain("Tiny One's passport expires before check-out ({$return}).");
     expect($messages)->toContain('Tiny One has no travel-insurance declaration (OPS-005).');
     expect($messages)->toContain('Guests aged 6–17: 1 · priced as children: 0 — check the quote.');
     expect($messages)->toContain(
@@ -188,4 +188,99 @@ test('missing marketing is never a consent warning and an outdated version still
         ->json('issues'))->pluck('code');
 
     expect($codes)->not->toContain('consents_missing');
+});
+
+test('guest issues follow registration fields and check-in', function (): void {
+    $booking = issuesCabin();
+    $actor = $booking->owner;
+
+    $this->actingAs($actor)
+        ->postJson('/api/rms/bookings/'.$booking->id.'/guests', [
+            'first_name' => 'Ada',
+            'last_name' => 'Lovelace',
+        ])
+        ->assertCreated();
+
+    $issues = collect($this->actingAs($actor)
+        ->getJson('/api/rms/bookings/'.$booking->id.'/guests')
+        ->assertOk()
+        ->assertJsonPath('complete_count', 0)
+        ->json('issues'));
+
+    $messages = $issues->pluck('message')->all();
+
+    expect($issues->pluck('code'))->toContain('registration_missing');
+    expect($messages)->toContain('Ada Lovelace is missing nationality for guest registration.');
+    expect($messages)->toContain('Ada Lovelace is missing date of birth for guest registration.');
+    expect($messages)->toContain('Ada Lovelace is missing document number for guest registration.');
+    expect($messages)->not->toContain('Ada Lovelace is missing address for guest registration.');
+    expect($issues->where('code', 'registration_missing')->every(
+        fn (array $issue): bool => $issue['severity'] === 'warning',
+    ))->toBeTrue();
+});
+
+test('a registration field that is not configured is not an issue', function (): void {
+    $document = businessRulesDocument();
+    $document['registration']['fields'] = ['full_name'];
+
+    $this->actingAs(adminUser())
+        ->postJson('/api/rms/business-rules/versions', [
+            'document' => $document,
+            'base_version' => 1,
+            'approval_reference' => 'HQ9-FIELDS',
+        ])
+        ->assertCreated();
+
+    $booking = issuesCabin();
+    $actor = $booking->owner;
+
+    $this->actingAs($actor)
+        ->postJson('/api/rms/bookings/'.$booking->id.'/guests', [
+            'first_name' => 'Ada',
+            'last_name' => 'Lovelace',
+        ])
+        ->assertCreated();
+
+    $this->actingAs($actor)
+        ->getJson('/api/rms/bookings/'.$booking->id.'/guests')
+        ->assertOk()
+        ->assertJsonPath('complete_count', 1)
+        ->assertJsonMissing(['code' => 'registration_missing']);
+});
+
+test('a passed registration deadline raises missing fields as errors', function (): void {
+    Carbon::setTestNow(CarbonImmutable::parse('2027-11-07 12:00:00', 'Pacific/Galapagos'));
+
+    $document = businessRulesDocument();
+    $document['registration']['deadline_hours_after_check_in'] = 0;
+
+    $this->actingAs(adminUser())
+        ->postJson('/api/rms/business-rules/versions', [
+            'document' => $document,
+            'base_version' => 1,
+            'approval_reference' => 'HQ9-DEADLINE',
+        ])
+        ->assertCreated();
+
+    $booking = issuesCabin();
+    $actor = $booking->owner;
+
+    $this->actingAs($actor)
+        ->postJson('/api/rms/bookings/'.$booking->id.'/guests', [
+            'first_name' => 'Ada',
+            'last_name' => 'Lovelace',
+            'nationality' => 'GB',
+            'dob' => '1980-01-01',
+        ])
+        ->assertCreated();
+
+    $missing = collect($this->actingAs($actor)
+        ->getJson('/api/rms/bookings/'.$booking->id.'/guests')
+        ->json('issues'))
+        ->where('code', 'registration_missing');
+
+    expect($missing)->not->toBeEmpty();
+    expect($missing->every(fn (array $issue): bool => $issue['severity'] === 'error'))->toBeTrue();
+
+    Carbon::setTestNow();
 });

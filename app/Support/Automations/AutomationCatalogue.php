@@ -58,6 +58,7 @@ final class AutomationCatalogue
         'RECEIPT' => 'payment_receipt',
         'FINAL_INVOICE' => 'final_invoice',
         'PRETRIP' => self::PRETRIP,
+        'PRE_ARRIVAL' => self::PRETRIP,
         'QUESTIONNAIRE' => 'questionnaire',
         'VOUCHER' => 'voucher',
         'DATA_CHASER' => self::DATA_CHASER,
@@ -119,14 +120,14 @@ final class AutomationCatalogue
             self::row('extras_second_window', 'd', 'Extras second window', 'Pre and post travel, if you would like it', 'Sixty calendar days before departure.', 'T−60 of extras_ancillaries.', 'journey:extras_ancillaries', AutomationAudience::Customer, true, journeyKey: 'extras_ancillaries'),
             self::row('extras_closing', 'd', 'Extras closing notice', 'Last call for additions — [ID]', 'Departure is inside the extras window.', 'payments.extras_due_hours before departure.', 'journey:extras_ancillaries', AutomationAudience::Customer, true, journeyKey: 'extras_ancillaries'),
 
-            self::row('pretrip', 'e', 'Pre-trip package', 'Your expedition itinerary — {reference}', 'Departure is inside documents.pretrip_days_before and the booking is confirmed or later.', 'iconic:documents-due. The itinerary PDF is issued, then this email.', 'iconic:documents-due', AutomationAudience::Customer, true),
+            self::row('pretrip', 'e', 'Pre-arrival package', 'Before you arrive — {reference}', 'Check-in is inside documents.pre_arrival_days_before and the booking is confirmed or later.', 'iconic:documents-due. The pre-arrival PDF is issued, then this email.', 'iconic:documents-due', AutomationAudience::Customer, true),
             self::row('questionnaire', 'e', 'Preferences questionnaire', 'Your preferences questionnaire — {reference}', 'The same pre-trip date, for each guest the plan still owes a questionnaire.', 'iconic:documents-due. One send, not a later reminder.', 'iconic:documents-due', AutomationAudience::Customer, true),
             self::row('questionnaire_reminder', 'e', 'Questionnaire reminder', '14 days to go — complete your questionnaire', 'The pre-trip questionnaire is still incomplete.', 'T−14 of ready_to_depart, only while a questionnaire is incomplete.', 'journey:ready_to_depart', AutomationAudience::Customer, true, journeyKey: 'ready_to_depart'),
-            self::row('data_chaser', 'e', 'Passport chase', 'Passenger details needed — {reference}', 'A departure is past its DPNG due date with incomplete passenger data.', 'iconic:manifests-due. The chase is the rule (N5).', SendDataChaser::class, AutomationAudience::Customer, false),
+            self::row('data_chaser', 'e', 'Passport chase', 'Passenger details needed — {reference}', 'Retired with manifests (09 H15). Not scheduled.', 'Retired with manifests (09 H15). Not scheduled.', SendDataChaser::class, AutomationAudience::Customer, false),
             self::row('voucher', 'e', 'Transfer voucher', 'Transfer voucher — {reference}', 'A contracted transfer extra and departure is inside documents.voucher_days_before.', 'iconic:documents-due. The voucher PDF is issued, then this email.', 'iconic:documents-due', AutomationAudience::Customer, true),
             self::row('arrival_instructions', 'e', 'Arrival instructions', 'Almost time! Final instructions for your arrival in San Cristóbal', 'Departure is three days away.', 'T−3 of ready_to_depart.', 'journey:ready_to_depart', AutomationAudience::Customer, true, journeyKey: 'ready_to_depart'),
 
-            self::row('survey', 'f', 'NPS survey', 'Your post-trip survey — {reference}', 'The cruise is completed and nps.survey_hours_after_return have passed.', 'iconic:nps-survey. Transactional, about the cruise they took.', 'iconic:nps-survey', AutomationAudience::Customer, true),
+            self::row('survey', 'f', 'NPS survey', 'Your post-trip survey — {reference}', 'Check-out has passed by nps.survey_hours_after_check_out. A no-show is never surveyed.', 'iconic:nps-survey. The anchor is checked_out_at, otherwise check-out at stay.check_out_time.', 'iconic:nps-survey', AutomationAudience::Customer, true),
             self::row('review_request', 'f', 'Public review request', 'Would you share a review? — {reference}', 'A post-trip score is at least nps.review_request_from and the guest is the contact.', 'When the score is recorded. Marketing: ConsentGate is checked as well, and always.', RecordGuestResponse::class, AutomationAudience::Customer, true, AutomationKind::Marketing),
             self::row('reengagement_6_months', 'f', 'Re-engagement — 6 months', 'Back to Galápagos? A new expedition awaits you', 'Six months after the cruise, with no active booking.', 'Month 6 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
             self::row('reengagement_month_7', 'f', 'Re-engagement — month 7', 'Owner\'s Suite early access', 'Seven months after the cruise, with no active booking.', 'Month 7 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
@@ -271,7 +272,7 @@ final class AutomationCatalogue
             AlertKind::WireNotReceived => 'Wire not received {reference}',
             AlertKind::SlaBreach => 'SLA breach {task}',
             AlertKind::DeliveryFailed => 'Delivery failed {reference}',
-            AlertKind::ConfirmedAtDeparture => 'Confirmed at departure {reference}',
+            AlertKind::ConfirmedAtDeparture => 'Confirmed at check-in {reference}',
             AlertKind::LedgerDrift => 'Ledger drift {reference}',
             AlertKind::CommissionLeakage => 'Commission leakage {reference}',
             AlertKind::LowOccupancy => 'Low occupancy {reference}',
@@ -281,7 +282,7 @@ final class AutomationCatalogue
             AlertKind::CharterDepositDue => 'Charter deposit due · {reference}',
             AlertKind::ArrivalNotCheckedIn => 'Arrival not checked in {reference}',
             AlertKind::InHousePastCheckOut => 'In house past check-out {reference}',
-            AlertKind::DepartureNotCheckedOut => 'Departure not checked out {reference}',
+            AlertKind::DepartureNotCheckedOut => 'Check-out not completed {reference}',
         };
     }
 

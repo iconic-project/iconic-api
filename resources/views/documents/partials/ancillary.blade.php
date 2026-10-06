@@ -2,7 +2,7 @@
     $rows = $snapshot['extras_rows'] ?? [];
     $totals = $snapshot['totals'] ?? [];
 @endphp
-<div class="dsec">Ancillary services</div>
+<div class="dsec">Other services</div>
 @if($rows === [])
     <div class="dnote">No additional services contracted.</div>
 @else
@@ -11,4 +11,4 @@
         'headers' => ['Service', 'Qty', 'Rate (USD)', 'Amount (USD)'],
     ])
 @endif
-<table class="dsubt"><tr><td>ANCILLARY SUBTOTAL</td><td>{{ \App\Support\Money::formatDocument((int) ($totals['extras'] ?? 0)) }}</td></tr></table>
+<table class="dsubt"><tr><td>OTHER SERVICES SUBTOTAL</td><td>{{ \App\Support\Money::formatDocument((int) ($totals['extras'] ?? 0)) }}</td></tr></table>

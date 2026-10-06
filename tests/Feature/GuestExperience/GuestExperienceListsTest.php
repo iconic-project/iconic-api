@@ -11,6 +11,8 @@ use App\Models\Guest;
 use App\Models\GuestResponse;
 use App\Models\Role;
 use App\Models\User;
+use App\Support\BusinessTime;
+use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
@@ -22,7 +24,7 @@ beforeEach(function (): void {
     $this->seed(ConfigSeeder::class);
 });
 
-test('the departure picker lists sold departures with passengers and is open to panel.rms', function (): void {
+test('the arrival list is a check-in range and the questionnaire sends before check-in', function (): void {
     $early = pickerDeparture('2028-06-04', 'Ada', 'Lovelace', BookingStatus::Confirmed);
     $later = pickerDeparture('2028-06-11', 'Grace', 'Hopper', BookingStatus::CheckedOut);
     Guest::factory()->create([
@@ -32,27 +34,36 @@ test('the departure picker lists sold departures with passengers and is open to 
         'first_name' => 'Sam',
         'last_name' => 'Hopper',
     ]);
-    $empty = ReservationFixtures::anamaraDeparture('2028-06-18');
-    $cancelled = pickerDeparture('2028-06-25', 'Alan', 'Turing', BookingStatus::Cancelled);
+    pickerDeparture('2028-06-25', 'Alan', 'Turing', BookingStatus::Cancelled);
+    ReservationFixtures::anamaraDeparture('2028-06-18');
+
+    $this->travelTo(CarbonImmutable::parse('2028-04-20 12:00:00', BusinessTime::zone()));
 
     $response = $this->actingAs(salesExecUser())
-        ->getJson('/api/rms/guest-experience/departures')
+        ->getJson('/api/rms/guest-experience?from=2028-06-04&to=2028-06-11')
         ->assertOk();
 
-    $rows = $response->json('data');
-    expect($rows)->toHaveCount(2)
-        ->and($rows[0]['departure_id'])->toBe($early['departure']->id)
-        ->and($rows[0]['date'])->toBe('2028-06-04')
-        ->and($rows[0]['property'])->toBe($early['departure']->property->name)
-        ->and($rows[0]['passengers'])->toBe(1)
-        ->and($rows[1]['departure_id'])->toBe($later['departure']->id)
-        ->and($rows[1]['passengers'])->toBe(2)
-        ->and(collect($rows)->pluck('departure_id'))->not->toContain($empty->id, $cancelled['departure']->id);
+    $guests = $response->json('data.guests');
+    expect($guests)->toHaveCount(3)
+        ->and($guests[0]['name'])->toBe('Ada Lovelace')
+        ->and($guests[0]['send_date'])->toBe('2028-04-20')
+        ->and($guests[0]['status'])->toBe('SENT_NO_REPLY')
+        ->and($guests[1]['name'])->toBe('Grace Hopper')
+        ->and($guests[1]['send_date'])->toBe('2028-04-27')
+        ->and($guests[1]['status'])->toBe('SCHEDULED')
+        ->and(collect($guests)->pluck('name'))->not->toContain('Alan Turing')
+        ->and($response->json('data.send_date'))->toBe('2028-04-20')
+        ->and($response->json('data.kpis.bookings'))->toBe(2)
+        ->and($early['booking']->stay()->checkIn()->toDateString())->toBe('2028-06-04');
 
-    expect(array_keys($rows[0]))->toBe(['departure_id', 'date', 'property', 'passengers']);
+    $this->actingAs(salesExecUser())
+        ->getJson('/api/rms/guest-experience?from=2028-06-04&to=2028-06-04')
+        ->assertOk()
+        ->assertJsonPath('data.kpis.guests', 1)
+        ->assertJsonPath('data.guests.0.send_date', '2028-04-20');
 
     $crm = pickerUser([Permission::PanelCrm]);
-    $this->actingAs($crm)->getJson('/api/rms/guest-experience/departures')->assertForbidden();
+    $this->actingAs($crm)->getJson('/api/rms/guest-experience?from=2028-06-04&to=2028-06-11')->assertForbidden();
 });
 
 test('survey guests are names and cabins, and a user without guest_experience.manage is refused', function (): void {

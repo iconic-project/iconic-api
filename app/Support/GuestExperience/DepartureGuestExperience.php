@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Support\GuestExperience;
 
+use App\Enums\BookingStatus;
 use App\Enums\PreferenceSource;
 use App\Enums\PreferenceStatus;
-use App\Models\Departure;
+use App\Models\Booking;
 use App\Models\Guest;
 use App\Models\GuestPreference;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
 use App\Support\Iso;
 use App\Support\Manifests\ManifestRoster;
+use Illuminate\Database\Eloquent\Collection;
 
 final class DepartureGuestExperience
 {
@@ -45,50 +47,91 @@ final class DepartureGuestExperience
      *     }>
      * }
      */
-    public function forDeparture(Departure $departure, bool $sensitive): array
+    public function forArrivals(string $from, string $to, bool $sensitive): array
     {
-        $days = $this->config->businessRules()->documents->pretripDaysBefore;
-        $sendDate = BusinessTime::calendarDay($departure->date->toDateString())->subDays($days)->toDateString();
+        $days = $this->config->businessRules()->documents->preArrivalDaysBefore;
         $today = BusinessTime::now()->toDateString();
-        $passengers = ManifestRoster::passengers($departure);
+        $bookings = $this->arrivals($from, $to);
         $answered = 0;
         $celebrations = 0;
         $restricted = 0;
         $rows = [];
+        $sendDates = [];
 
-        foreach ($passengers as $passenger) {
-            $guest = $passenger->guest;
-            $preference = $guest->currentPreference;
-            $status = $this->status($preference, $sendDate, $today);
+        foreach ($bookings as $booking) {
+            $sendDate = $this->sendDate($booking, $days);
+            $sendDates[] = $sendDate;
 
-            if ($status === PreferenceStatus::Answered) {
-                $answered++;
+            foreach ($booking->guests->sortBy([['position', 'asc'], ['id', 'asc']]) as $guest) {
+                $guest->setRelation('booking', $booking);
+                $preference = $guest->currentPreference;
+                $status = $this->status($preference, $sendDate, $today);
+
+                if ($status === PreferenceStatus::Answered) {
+                    $answered++;
+                }
+
+                if ($preference?->answer('celebr') !== null) {
+                    $celebrations++;
+                }
+
+                if (trim((string) $preference?->accessibility) !== '' || trim((string) $guest->medical_note) !== '') {
+                    $restricted++;
+                }
+
+                $rows[] = $this->row($guest, $preference, $status, $sendDate, $sensitive);
             }
-
-            if ($preference?->answer('celebr') !== null) {
-                $celebrations++;
-            }
-
-            if (trim((string) $preference?->accessibility) !== '' || trim((string) $guest->medical_note) !== '') {
-                $restricted++;
-            }
-
-            $rows[] = $this->row($guest, $preference, $status, $sendDate, $sensitive);
         }
+
+        $sendDate = $sendDates === []
+            ? $this->sendDateFor($from, $days)
+            : min($sendDates);
+        $guests = count($rows);
 
         return [
             'send_date' => $sendDate,
             'send_state' => $sendDate <= $today ? 'sent' : 'scheduled',
             'kpis' => [
-                'guests' => $passengers->count(),
-                'bookings' => $passengers->map(fn ($passenger): int => $passenger->guest->booking_id)->unique()->count(),
+                'guests' => $guests,
+                'bookings' => $bookings->count(),
                 'answered' => $answered,
-                'total' => $passengers->count(),
+                'total' => $guests,
                 'celebrations' => $celebrations,
                 'accessibility_or_medical' => $restricted,
             ],
             'guests' => $rows,
         ];
+    }
+
+    /**
+     * @return Collection<int, Booking>
+     */
+    public function arrivals(string $from, string $to): Collection
+    {
+        $statuses = array_map(
+            fn (BookingStatus $status): string => $status->value,
+            ManifestRoster::COUNTED,
+        );
+
+        return Booking::query()
+            ->arrivingBetween($from, $to)
+            ->whereIn('status', $statuses)
+            ->with(['guests.currentPreference', 'room', 'property'])
+            ->orderBy('check_in')
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function sendDate(Booking $booking, ?int $days = null): string
+    {
+        $days ??= $this->config->businessRules()->documents->preArrivalDaysBefore;
+
+        return $this->sendDateFor($booking->stay()->checkIn()->toDateString(), $days);
+    }
+
+    private function sendDateFor(string $checkIn, int $days): string
+    {
+        return BusinessTime::calendarDay($checkIn)->subDays($days)->toDateString();
     }
 
     private function status(?GuestPreference $preference, string $sendDate, string $today): PreferenceStatus

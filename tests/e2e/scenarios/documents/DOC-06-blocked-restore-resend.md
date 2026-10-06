@@ -10,7 +10,7 @@ With no usable address the delivery is BLOCKED with the reason, never skipped (J
 
 ## Steps
 1. Sign in as Carolina. Open ANK-2026-0003. **Overview** → **Billing** → `Edit billing`. Set Email `e2e.doc06@iconic.test`. Save.
-2. **Documents**. Read reminder / pre-trip rows — they must no longer be BLOCKED (expect `SCHEDULED` and `to e2e.doc06@iconic.test`).
+2. **Documents**. Read reminder / pre-arrival rows — they must no longer be BLOCKED (expect `SCHEDULED` and `to e2e.doc06@iconic.test`).
 3. **Billing** → `Edit billing`. Clear Email. Save.
 4. **Documents**. Read those same rows.
 5. Restore Email `e2e.doc06@iconic.test`. Save. Clear Mailpit: `curl -sS -X DELETE http://localhost:8025/api/v1/messages`.
@@ -21,7 +21,7 @@ With no usable address the delivery is BLOCKED with the reason, never skipped (J
    Compare sha256 to the stored invoice `file_sha256`.
 
 ## Expected
-- [ ] E1 · After step 2: reminder 1, reminder 2 and pre-trip are not `BLOCKED`. Status `SCHEDULED` (send dates still in the future). Recipient line `to e2e.doc06@iconic.test`. ⚠ UNVERIFIED — plan + Recipients after billing PATCH.
+- [ ] E1 · After step 2: reminder 1, reminder 2 and pre-arrival are not `BLOCKED`. Status `SCHEDULED` (send dates still in the future). Recipient line `to e2e.doc06@iconic.test`. ⚠ UNVERIFIED — plan + Recipients after billing PATCH.
 - [ ] E2 · After clearing Email: those rows (and any other due/scheduled row without a delivery) show `BLOCKED` and `No email address for the client of record` plus `Edit billing details`. Seeded SENT invoice / summary / receipt stay `SENT` (a delivery row already exists).
 - [ ] E3 · After restore + Resend: toast `Document sent`. Mailpit has the invoice once. Attachment sha256 matches the stored file (resend attaches the issued PDF, never re-renders).
 - [ ] E4 · db-check: more than one delivery for that document (`resend:{document_id}:{uuid}` plus the original `invoice:{document_id}`). The original key is unchanged.

@@ -54,13 +54,14 @@ final class JourneyClock
         }
 
         if ($rule === 'extras_due_hours') {
-            return $this->departureDay($booking)->subHours($rules->payments->extrasDueHours);
+            return $this->checkInDay($booking)->subHours($rules->payments->extrasDueHours);
         }
 
         if ($rule === 'pretrip_days_before') {
-            return $this->departureDay($booking)->subDays($rules->documents->pretripDaysBefore);
+            return $this->checkInDay($booking)->subDays($rules->documents->preArrivalDaysBefore);
         }
 
+        $booking->loadMissing('departure');
         $manifest = ManifestDue::forDeparture(
             $booking->departure,
             ManifestRoster::passengers($booking->departure),
@@ -73,7 +74,7 @@ final class JourneyClock
     private function reengagement(JourneyEnrolment $enrolment, int $months): CarbonImmutable
     {
         if ($enrolment->booking_id !== null) {
-            return $this->shift($this->returnDay($this->booking($enrolment)), $months, 'months');
+            return $this->shift($this->checkOutDay($this->booking($enrolment)), $months, 'months');
         }
 
         return $this->shift($this->instant($enrolment->enrolled_at), $months - 6, 'months');
@@ -95,8 +96,12 @@ final class JourneyClock
             return $this->instant($enrolment->enrolled_at);
         }
 
-        if ($anchor === 'departure') {
-            return $this->departureDay($this->booking($enrolment));
+        if ($anchor === 'arrival' || $anchor === 'departure') {
+            return $this->checkInDay($this->booking($enrolment));
+        }
+
+        if ($anchor === 'check_out' || $anchor === 'return') {
+            return $this->checkOutDay($this->booking($enrolment));
         }
 
         if ($anchor === 'balance_due') {
@@ -120,7 +125,7 @@ final class JourneyClock
 
     private function booking(JourneyEnrolment $enrolment): Booking
     {
-        $enrolment->loadMissing('booking.departure.itinerary');
+        $enrolment->loadMissing('booking');
         $booking = $enrolment->booking;
 
         if (! $booking instanceof Booking) {
@@ -130,18 +135,14 @@ final class JourneyClock
         return $booking;
     }
 
-    private function departureDay(Booking $booking): CarbonImmutable
+    private function checkInDay(Booking $booking): CarbonImmutable
     {
-        $booking->loadMissing('departure');
-
-        return BusinessTime::calendarDay($booking->departure->date->toDateString());
+        return BusinessTime::calendarDay($booking->stay()->checkIn()->toDateString());
     }
 
-    private function returnDay(Booking $booking): CarbonImmutable
+    private function checkOutDay(Booking $booking): CarbonImmutable
     {
-        $booking->loadMissing('departure.itinerary');
-
-        return BusinessTime::calendarDay($booking->departure->returnDate()->toDateString());
+        return BusinessTime::calendarDay($booking->stay()->checkOut()->toDateString());
     }
 
     private function balanceDue(Booking $booking): CarbonImmutable

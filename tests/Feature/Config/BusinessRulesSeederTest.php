@@ -41,12 +41,13 @@ test('the seeded business rules document matches seed-data.json plus the new fie
     expect($document['manifests']['dpng_charter_days'])->toBe($policies['manifestCh']);
     expect($document['alerts']['low_occupancy_pct'])->toBe(40);
     expect($document['alerts']['low_occupancy_days_before'])->toBe(90);
-    expect($document['nps']['survey_hours_after_return'])->toBe(24);
+    expect($document['alerts']['low_occupancy_min_consecutive_nights'])->toBe(1);
+    expect($document['nps']['survey_hours_after_check_out'])->toBe(24);
     expect($document['nps']['alert_below'])->toBe(7);
     expect($document['nps']['review_request_from'])->toBe(8);
     expect($document['nps']['review_url'])->toBe('PENDING CLIENT');
-    expect($document['retention']['passport_months_after_cruise'])->toBe(24);
-    expect($document['retention']['medical_days_after_cruise'])->toBe(90);
+    expect($document['retention']['passport_months_after_check_out'])->toBe(24);
+    expect($document['retention']['medical_days_after_check_out'])->toBe(90);
     expect($document['retention']['behavioural_raw_months'])->toBe(24);
     expect($document['retention']['behavioural_unstitched_days'])->toBe(30);
     expect($document['legal_entity']['name'])->toBe('PONTOS LLC (a limited liability company)');
@@ -64,7 +65,7 @@ test('the seeded business rules document matches seed-data.json plus the new fie
         'routing' => '[TBD]',
         'swift' => '[TBD]',
     ]);
-    expect($document['documents']['pretrip_days_before'])->toBe(45);
+    expect($document['documents']['pre_arrival_days_before'])->toBe(45);
     expect($document['documents']['voucher_days_before'])->toBe(7);
     expect($document['crm']['segment_high_ltv'])->toBe(20000);
     expect($document['crm']['segment_mid_ltv'])->toBe(8000);

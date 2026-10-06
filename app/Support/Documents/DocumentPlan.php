@@ -49,11 +49,11 @@ final class DocumentPlan
 
         $canAct = $actor instanceof User && $actor->can('issueDocument', $booking);
         $rules = $this->config->businessRules();
-        $pretripDays = $rules->documents->pretripDaysBefore;
+        $preArrivalDays = $rules->documents->preArrivalDaysBefore;
         $voucherDays = $rules->documents->voucherDaysBefore;
         $reminderSlots = $rules->payments->balanceReminderDays;
         $today = BusinessTime::now()->toDateString();
-        $departure = $booking->stay()->checkIn()->toDateString();
+        $checkIn = $booking->stay()->checkIn()->toDateString();
         $due = $booking->balanceDueDate()->toDateString();
         $confirmed = $booking->status->isConfirmedOrLater();
         $fullyPaid = in_array($booking->status, [
@@ -120,21 +120,21 @@ final class DocumentPlan
             );
         }
 
-        $pretripDate = BusinessTime::calendarDay($departure)->subDays($pretripDays)->toDateString();
+        $preArrivalDate = BusinessTime::calendarDay($checkIn)->subDays($preArrivalDays)->toDateString();
         $rows[] = $this->documentRow(
             $booking,
-            DocumentPlanKind::Pretrip,
-            'T−'.$pretripDays,
-            $pretripDate,
-            $this->scheduleStatus($confirmed, $pretripDate, $today),
+            DocumentPlanKind::PreArrival,
+            'T−'.$preArrivalDays,
+            $preArrivalDate,
+            $this->scheduleStatus($confirmed, $preArrivalDate, $today),
             $canAct,
-            DeliveryKind::Pretrip,
+            DeliveryKind::PreArrival,
         );
 
-        $rows[] = $this->questionnaireRow($booking, $pretripDays, $pretripDate, $today, $confirmed);
+        $rows[] = $this->questionnaireRow($booking, $preArrivalDays, $preArrivalDate, $today, $confirmed);
 
         $hasVoucher = DocumentFacts::bookingHasTransferVoucher($booking);
-        $voucherDate = BusinessTime::calendarDay($departure)->subDays($voucherDays)->toDateString();
+        $voucherDate = BusinessTime::calendarDay($checkIn)->subDays($voucherDays)->toDateString();
         $rows[] = $this->documentRow(
             $booking,
             DocumentPlanKind::Voucher,
@@ -268,15 +268,17 @@ final class DocumentPlan
         bool $canAct,
         DeliveryKind $deliveryKind,
     ): DocumentPlanRow {
-        $documentKind = $kind->documentKind();
-        $document = $documentKind instanceof DocumentKind
-            ? $this->latestDocument($booking, $documentKind)
-            : null;
+        $document = $this->latestIssued($booking, $kind);
         $delivery = $document instanceof Document
             ? $this->lastDelivery($document->deliveries)
             : $this->lastBookingDelivery($booking, $deliveryKind);
+
+        if (! $delivery instanceof Delivery && $kind === DocumentPlanKind::PreArrival) {
+            $delivery = $this->lastBookingDelivery($booking, DeliveryKind::Pretrip);
+        }
         $recipients = $this->recipients->resolve($booking, $deliveryKind);
         $status = $this->statusFromFacts($delivery, $recipients, $fallback);
+        $documentKind = $kind->documentKind();
         $canPreview = $documentKind instanceof DocumentKind;
         $canIssue = $canAct && $documentKind instanceof DocumentKind && $kind !== DocumentPlanKind::Receipt;
         $canResend = $document instanceof Document && $delivery instanceof Delivery
@@ -476,6 +478,23 @@ final class DocumentPlan
         $to = implode(', ', $set->to);
 
         return $set->cc === [] ? $to : $to.' + '.implode(', ', $set->cc);
+    }
+
+    private function latestIssued(Booking $booking, DocumentPlanKind $kind): ?Document
+    {
+        $primary = $kind->documentKind();
+
+        if (! $primary instanceof DocumentKind) {
+            return null;
+        }
+
+        $document = $this->latestDocument($booking, $primary);
+
+        if ($document instanceof Document || $kind !== DocumentPlanKind::PreArrival) {
+            return $document;
+        }
+
+        return $this->latestDocument($booking, DocumentKind::Pretrip);
     }
 
     private function latestDocument(Booking $booking, DocumentKind $kind): ?Document

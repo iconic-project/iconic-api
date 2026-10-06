@@ -346,7 +346,7 @@ final class JourneyEngine
 
     private function step(JourneyEnrolment $enrolment): string
     {
-        $enrolment->load(['journey.steps', 'contact', 'booking.departure']);
+        $enrolment->load(['journey.steps', 'contact', 'booking']);
         $journey = $enrolment->journey;
         $step = $journey->steps
             ->where('branch', $enrolment->branch)
@@ -473,7 +473,13 @@ final class JourneyEngine
             return true;
         }
 
-        return BusinessTime::now()->toDateString() >= $booking->departure->date->toDateString();
+        $checkIn = $booking->getAttributes()['check_in'] ?? null;
+
+        if (! is_string($checkIn) || $checkIn === '') {
+            return false;
+        }
+
+        return BusinessTime::now()->toDateString() >= substr($checkIn, 0, 10);
     }
 
     private function conditionHolds(JourneyEnrolment $enrolment, JourneyStep $step): bool

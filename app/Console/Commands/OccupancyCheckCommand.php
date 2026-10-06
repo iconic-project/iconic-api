@@ -11,7 +11,7 @@ final class OccupancyCheckCommand extends Command
 {
     protected $signature = 'iconic:occupancy-check';
 
-    protected $description = 'Raise low-occupancy alerts for open departures inside the configured window';
+    protected $description = 'Raise one low-occupancy alert per run of nights below the threshold';
 
     public function handle(OccupancyCheck $occupancy): int
     {

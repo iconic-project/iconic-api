@@ -38,7 +38,7 @@ test('night audit raises front-desk alerts and writes no status', function (): v
     expect(Alert::query()->where('kind', AlertKind::ArrivalNotCheckedIn)->count())->toBe(1);
     expect(Alert::query()->where('base_key', AlertKeys::arrivalNotCheckedIn($arrival->id))->count())->toBe(1);
     expect(Alert::query()->where('base_key', AlertKeys::inHousePastCheckOut($late->id))->count())->toBe(1);
-    expect(Alert::query()->where('base_key', AlertKeys::departureNotCheckedOut($leaving->id))->count())->toBe(1);
+    expect(Alert::query()->where('base_key', AlertKeys::checkOutStillOpen($leaving->id))->count())->toBe(1);
     expect(CrmTask::query()->where('booking_id', $arrival->id)->count())->toBe(1);
     expect(CrmTask::query()->where('booking_id', $late->id)->count())->toBe(1);
     expect(CrmTask::query()->where('booking_id', $leaving->id)->count())->toBe(1);

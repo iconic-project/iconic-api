@@ -96,7 +96,7 @@ final class ContactController extends Controller
             ->withDerived()
             ->with(['bookings' => function ($query): void {
                 $query->withChargesSummary()
-                    ->with(['departure', 'owner'])
+                    ->with(['roomType', 'owner'])
                     ->orderBy('id');
             }])
             ->whereKey($contact->id)

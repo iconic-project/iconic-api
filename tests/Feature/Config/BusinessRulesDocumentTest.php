@@ -45,6 +45,7 @@ test('rules reject ranges, default above cap, reminder order and band shape', fu
         'alerts' => [
             'low_occupancy_pct' => 0,
             'low_occupancy_days_before' => 366,
+            'low_occupancy_min_consecutive_nights' => 0,
         ],
         'retention' => [
             'passport_months_after_cruise' => 0,
@@ -79,6 +80,7 @@ test('rules reject ranges, default above cap, reminder order and band shape', fu
     expect($errors->has('manifests.chase_days_before_due'))->toBeTrue();
     expect($errors->has('alerts.low_occupancy_pct'))->toBeTrue();
     expect($errors->has('alerts.low_occupancy_days_before'))->toBeTrue();
+    expect($errors->has('alerts.low_occupancy_min_consecutive_nights'))->toBeTrue();
     expect($errors->has('retention.passport_months_after_cruise'))->toBeTrue();
     expect($errors->has('retention.medical_days_after_cruise'))->toBeTrue();
     expect($errors->has('retention.behavioural_raw_months'))->toBeTrue();

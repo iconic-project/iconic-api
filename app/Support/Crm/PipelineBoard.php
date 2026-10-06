@@ -152,7 +152,7 @@ final class PipelineBoard
             ->selectRaw('('.DealStages::valueLabelSql().') as value_label')
             ->selectRaw(DealStages::bookingColumnSql('COALESCE(bookings.reference, bookings.request_reference)').' as booking_reference')
             ->selectRaw(DealStages::bookingColumnSql('bookings.status').' as booking_status')
-            ->selectRaw(DealStages::bookingColumnSql('departures.date').' as departure_date')
+            ->selectRaw(DealStages::bookingColumnSql('bookings.check_in').' as departure_date')
             ->orderBy('deals.id');
 
         $owner = $filters['owner'] ?? null;

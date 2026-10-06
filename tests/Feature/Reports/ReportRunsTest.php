@@ -109,8 +109,8 @@ test('each definition runs in every format, repeats, and carries no personal dat
         expect($run['rows'])->toBeInt();
 
         match ($definition->key) {
-            'payments-received', 'gateway-reconciliation', 'revenue-monthly', 'agency-report' => expect($run['rows'])->toBe(1),
-            'occupancy', 'commercial-summary', 'pipeline-summary' => expect($run['rows'])->toBeGreaterThan(0),
+            'payments-received', 'gateway-reconciliation', 'agency-report', 'arrivals-forecast' => expect($run['rows'])->toBe(1),
+            'occupancy-revenue', 'pace', 'commercial-summary', 'pipeline-summary' => expect($run['rows'])->toBeGreaterThan(0),
             default => expect($run['rows'])->toBeGreaterThanOrEqual(0),
         };
 
@@ -174,10 +174,10 @@ test('report permissions follow the definition, and a purged file is gone', func
     test()->actingAs($crm)->getJson('/api/rms/reports')->assertForbidden();
 
     $registry = test()->actingAs($desk)->getJson('/api/rms/reports')->assertOk()->json('data');
-    expect($registry)->toHaveCount(10);
+    expect($registry)->toHaveCount(9);
     $allowed = collect($registry)->mapWithKeys(fn (array $row): array => [$row['key'] => $row['allowed']]);
     expect($allowed['commercial-summary'])->toBeTrue()
-        ->and($allowed['occupancy'])->toBeTrue()
+        ->and($allowed['occupancy-revenue'])->toBeTrue()
         ->and($allowed['pipeline-summary'])->toBeTrue()
         ->and($allowed['payments-received'])->toBeFalse()
         ->and($allowed['agency-report'])->toBeFalse();

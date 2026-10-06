@@ -35,6 +35,11 @@ class ContactResource extends JsonResource
      *     first_touch: array{source?: string, medium?: string, campaign?: string, content?: string, term?: string, landing_path?: string, captured_at?: string}|null,
      *     last_touch: array{source?: string, medium?: string, campaign?: string, content?: string, term?: string, landing_path?: string, captured_at?: string}|null,
      *     lifetime_value: int,
+     *     last_stay_check_out: string|null,
+     *     next_stay_check_in: string|null,
+     *     stays_count: int,
+     *     nights_count: int,
+     *     last_room_type: string|null,
      *     segment: ContactSegment,
      *     lifecycle: string,
      *     nps: int|null,
@@ -60,6 +65,11 @@ class ContactResource extends JsonResource
      *     first_touch: array<string, string>|null,
      *     last_touch: array<string, string>|null,
      *     lifetime_value: int,
+     *     last_stay_check_out: string|null,
+     *     next_stay_check_in: string|null,
+     *     stays_count: int,
+     *     nights_count: int,
+     *     last_room_type: string|null,
      *     segment: string,
      *     lifecycle: string,
      *     nps: int|null,
@@ -89,6 +99,11 @@ class ContactResource extends JsonResource
             'first_touch' => AttributionTouch::from($this->first_touch),
             'last_touch' => AttributionTouch::from($this->last_touch),
             'lifetime_value' => (int) $this->getAttribute('lifetime_value'),
+            'last_stay_check_out' => $this->calendarValue('last_stay_check_out'),
+            'next_stay_check_in' => $this->calendarValue('next_stay_check_in'),
+            'stays_count' => (int) $this->getAttribute('stays_count'),
+            'nights_count' => (int) $this->getAttribute('nights_count'),
+            'last_room_type' => $this->nullableString($this->getAttribute('last_room_type')),
             'segment' => $this->contactSegment(),
             'lifecycle' => (string) $this->getAttribute('lifecycle'),
             'nps' => $this->getAttribute('nps') === null ? null : (int) $this->getAttribute('nps'),
@@ -121,5 +136,20 @@ class ContactResource extends JsonResource
     private function nullableString(mixed $value): ?string
     {
         return is_string($value) && $value !== '' ? $value : null;
+    }
+
+    private function calendarValue(string $attribute): ?string
+    {
+        $value = $this->getAttribute($attribute);
+
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+
+        if (! is_string($value) || $value === '') {
+            return null;
+        }
+
+        return substr($value, 0, 10);
     }
 }

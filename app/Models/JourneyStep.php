@@ -98,11 +98,11 @@ class JourneyStep extends Model
         }
 
         if ($rule === 'extras_due_hours') {
-            return 'extras due hours before departure';
+            return 'extras due hours before check-in';
         }
 
         if ($rule === 'pretrip_days_before') {
-            return 'pre-trip days before departure';
+            return 'pre-arrival days before check-in';
         }
 
         if ($rule === 'manifest_chase') {
@@ -121,7 +121,7 @@ class JourneyStep extends Model
             return 'Every 3 months';
         }
 
-        if ($anchor === 'departure' && $amount < 0 && $unit === 'days') {
+        if (($anchor === 'arrival' || $anchor === 'departure') && $amount < 0 && $unit === 'days') {
             return 'T−'.abs($amount);
         }
 

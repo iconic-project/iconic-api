@@ -293,9 +293,9 @@ test('the register counts match the marketing list filter and never return an ip
 
     $map = $this->actingAs(salesExecUser())->getJson('/api/crm/consents/data-map')->assertOk();
     assertNoSensitiveFields($map);
-    $passport = collect($map->json('data'))->firstWhere('rule_key', 'retention.passport_months_after_cruise');
+    $passport = collect($map->json('data'))->firstWhere('rule_key', 'retention.passport_months_after_check_out');
     expect($passport['in_crm'])->toBe('never');
-    expect($passport['rule_value'])->toBe(app(CurrentConfig::class)->businessRules()->retention->passportMonthsAfterCruise);
+    expect($passport['rule_value'])->toBe(app(CurrentConfig::class)->businessRules()->retention->passportMonthsAfterCheckOut);
     expect(collect($map->json('data'))->firstWhere('rule_key', 'retention.behavioural_raw_months'))->not->toBeNull();
 });
 

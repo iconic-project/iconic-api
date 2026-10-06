@@ -80,7 +80,7 @@ final class ReportMailer
     private function attempt(ReportRun $run, User $user, ?ReportRunNotification $existing): void
     {
         $attempts = $existing instanceof ReportRunNotification ? 2 : 1;
-        $definition = ReportDefinitions::get($run->definition_key);
+        $definition = ReportDefinitions::find($run->definition_key) ?? ReportDefinitions::get($run->definition_key);
         $url = rtrim((string) config('iconic.panel_url'), '/').'/rms/reports/runs/'.$run->id;
         [$path, $name] = $this->attachment($run);
 
@@ -124,7 +124,7 @@ final class ReportMailer
 
     private function sentence(ReportRun $run): string
     {
-        $definition = ReportDefinitions::get($run->definition_key);
+        $definition = ReportDefinitions::find($run->definition_key) ?? ReportDefinitions::get($run->definition_key);
 
         return $definition->sentence.' '.$run->window_from->toDateString().' to '.$run->window_to->toDateString().'. '.$run->rows.' rows.';
     }

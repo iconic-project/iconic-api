@@ -59,7 +59,7 @@ final class AlertSweep
             && ! in_array($to, [BookingStatus::Confirmed, BookingStatus::OnHoldAgency], true)
         ) {
             $this->resolveBase(
-                AlertKeys::confirmedAtDeparture($booking->id),
+                AlertKeys::confirmedOnCheckIn($booking->id),
                 'the booking left '.$from->value,
             );
         }
@@ -106,7 +106,7 @@ final class AlertSweep
     {
         $this->resolveOverdueLeftScope();
         $this->resolveOverdueDueDateChanged();
-        $this->resolveConfirmedAtDeparture();
+        $this->resolveConfirmedOnCheckIn();
         $this->resolveCaps();
         $this->resolveWires();
         $this->resolveSlas();
@@ -290,7 +290,7 @@ final class AlertSweep
             });
     }
 
-    private function resolveConfirmedAtDeparture(): void
+    private function resolveConfirmedOnCheckIn(): void
     {
         Alert::query()
             ->where('kind', AlertKind::ConfirmedAtDeparture)

@@ -2,22 +2,20 @@
 
 @section('body')
     @include('documents.partials.head')
-    <p style="margin:18px 0">{{ $snapshot['description'] ?? '' }}</p>
-    <div class="dsec">Day by day</div>
+    @include('documents.partials.stay')
+    @if(! empty($snapshot['description']))
+        <p style="margin:18px 0">{{ $snapshot['description'] }}</p>
+    @endif
     @foreach($snapshot['day_plan'] ?? [] as $day)
         <table class="dkv">
             <tr><td>{{ $day[0] ?? '' }}</td><td>{{ $day[1] ?? '' }}</td></tr>
         </table>
     @endforeach
-    <div class="dsec">Included</div>
-    @foreach($snapshot['included'] ?? [] as $item)
-        <div class="dnote">· {{ $item }}</div>
-    @endforeach
-    <div class="dsec">Not included</div>
-    @foreach($snapshot['excluded'] ?? [] as $item)
-        <div class="dnote">· {{ $item }}</div>
-    @endforeach
-    <div class="dsec">Before you travel</div>
-    <div class="dnote">{{ $snapshot['before_you_travel'] ?? '' }}</div>
+    @if(! empty($snapshot['policies']))
+        <div class="dsec">House policies</div>
+        <div class="dnote">{{ $snapshot['policies'] }}</div>
+    @endif
+    <div class="dsec">Before you arrive</div>
+    <div class="dnote">{{ $snapshot['before_you_arrive'] ?? '' }}</div>
     <div class="dfoot">ICONIC · {{ $snapshot['reference'] ?? '' }}</div>
 @endsection

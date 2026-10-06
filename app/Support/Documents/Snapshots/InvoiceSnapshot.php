@@ -28,7 +28,7 @@ final class InvoiceSnapshot
             'status_line' => $final ? 'PAID IN FULL' : $facts->statusLine(),
             'issuer' => $issuer,
             'billing' => $facts->billing(),
-            'cruise' => $facts->cruise(),
+            'stay' => $facts->stay(),
             'vessel_rows' => $facts->vesselRows(),
             'fees' => $fees,
             'extras_rows' => $facts->extrasRows(),

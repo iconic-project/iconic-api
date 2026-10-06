@@ -14,6 +14,9 @@ final class QuestionnairePage
     /**
      * @return array{
      *     reference: string,
+     *     check_in: string,
+     *     check_out: string,
+     *     property_name: string,
      *     departure_date: string,
      *     itinerary_name: string,
      *     questions: list<array{key: string, label: string, type: PreferenceQuestionType, options: list<string>, restricted: bool, required: bool}>,
@@ -23,7 +26,10 @@ final class QuestionnairePage
     public static function forToken(BookingAccessToken $token): array
     {
         $booking = $token->booking;
-        $booking->loadMissing(['departure.itinerary', 'departure.property']);
+        $booking->loadMissing(['property', 'room']);
+        $stay = $booking->stay();
+        $checkIn = $stay->checkIn()->toDateString();
+        $propertyName = $booking->property->name;
         $ids = array_map(intval(...), $token->covered_guest_ids ?? []);
 
         $guests = Guest::query()
@@ -42,8 +48,11 @@ final class QuestionnairePage
 
         return [
             'reference' => (string) ($booking->reference ?? ''),
-            'departure_date' => $booking->departure->date->toDateString(),
-            'itinerary_name' => $booking->departure->itinerary->name,
+            'check_in' => $checkIn,
+            'check_out' => $stay->checkOut()->toDateString(),
+            'property_name' => $propertyName,
+            'departure_date' => $checkIn,
+            'itinerary_name' => $propertyName,
             'questions' => array_map(
                 fn (PreferenceQuestion $question): array => $question->toArray(),
                 PreferenceQuestions::all(),

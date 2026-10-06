@@ -105,6 +105,39 @@ test('activity filters, sides and KPIs agree with the list', function (): void {
         ->assertUnprocessable();
 });
 
+test('a stay search is described from its dates and room type', function (): void {
+    $actor = salesExecUser();
+    $contact = Contact::factory()->create(['name' => 'Stay Searcher']);
+
+    BehaviouralEvent::factory()->create([
+        'contact_id' => $contact->id,
+        'name' => BehaviouralEventName::SearchPerformed,
+        'params' => [
+            'check_in' => '2027-11-07',
+            'check_out' => '2027-11-14',
+            'adults' => 2,
+            'children' => 0,
+            'rooms' => 1,
+        ],
+        'occurred_at' => now(),
+    ]);
+    BehaviouralEvent::factory()->create([
+        'contact_id' => $contact->id,
+        'name' => BehaviouralEventName::RoomTypeViewed,
+        'params' => ['room_type' => 'STE'],
+        'occurred_at' => now()->subMinute(),
+    ]);
+
+    $response = $this->actingAs($actor)->getJson('/api/crm/activity')->assertOk();
+    assertNoSensitiveFields($response);
+
+    $rows = collect($response->json('data'));
+    expect($rows->firstWhere('name', 'search_performed')['detail'])->toContain('7 Nov 2027')
+        ->and($rows->firstWhere('name', 'search_performed')['detail'])->toContain('14 Nov 2027')
+        ->and($rows->firstWhere('name', 'search_performed')['detail'])->toContain('1 room')
+        ->and($rows->firstWhere('name', 'room_type_viewed')['detail'])->toBe('STE');
+});
+
 test('events today uses the Galapagos calendar day', function (): void {
     Carbon::setTestNow(CarbonImmutable::parse('2026-09-22 03:00:00', 'UTC'));
 

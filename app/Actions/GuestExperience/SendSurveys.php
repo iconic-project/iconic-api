@@ -6,6 +6,7 @@ namespace App\Actions\GuestExperience;
 
 use App\Actions\Action;
 use App\Actions\Documents\RecordDelivery;
+use App\Enums\BookingStatus;
 use App\Enums\DeliveryKind;
 use App\Enums\DeliveryStatus;
 use App\Enums\DeliveryTriggeredBy;
@@ -26,6 +27,10 @@ final class SendSurveys extends Action
 
     public function handle(Booking $booking): int
     {
+        if ($booking->status === BookingStatus::NoShow) {
+            return 0;
+        }
+
         /** @var int $created */
         $created = $this->transaction(function () use ($booking): int {
             $count = 0;

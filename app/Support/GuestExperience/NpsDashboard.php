@@ -23,7 +23,7 @@ final class NpsDashboard
      * @return array{
      *     kpis: array{average_score: string|null, responses: int, alerts_below: int, review_requests_sent: int},
      *     responses: list<array{booking_reference: string, guest: string, score: int, score_class: 'low'|'neutral'|'high', recommend: int|null, best: string|null, better: string|null, crew: string|null}>,
-     *     facts: array{first_expected_survey_on: string|null, survey_hours_after_return: int, alert_below: int, review_request_from: int}
+     *     facts: array{first_expected_survey_on: string|null, survey_hours_after_check_out: int, alert_below: int, review_request_from: int}
      * }
      */
     public function present(?string $from, ?string $to): array
@@ -53,7 +53,7 @@ final class NpsDashboard
             ])->all(),
             'facts' => [
                 'first_expected_survey_on' => self::firstExpected($rules),
-                'survey_hours_after_return' => $rules->surveyHoursAfterReturn,
+                'survey_hours_after_check_out' => $rules->surveyHoursAfterCheckOut,
                 'alert_below' => $rules->alertBelow,
                 'review_request_from' => $rules->reviewRequestFrom,
             ],
@@ -86,7 +86,7 @@ final class NpsDashboard
 
         return app(StayClock::class)
             ->checkOutMoment($departure->stayDates())
-            ->addHours($rules->surveyHoursAfterReturn)
+            ->addHours($rules->surveyHoursAfterCheckOut)
             ->toDateString();
     }
 

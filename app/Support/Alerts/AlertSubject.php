@@ -8,7 +8,6 @@ use App\Models\Alert;
 use App\Models\Booking;
 use App\Models\CrmTask;
 use App\Models\Delivery;
-use App\Models\Departure;
 use App\Models\Payment;
 use App\Support\Crm\TaskSweep;
 
@@ -68,18 +67,6 @@ final class AlertSubject
                 'id' => $alert->crm_task_id,
                 'reference' => $reference,
                 'href' => '/crm/sales/tasks',
-            ];
-        }
-
-        if ($alert->departure_id !== null) {
-            $departure = $alert->relationLoaded('departure') ? $alert->departure : $alert->departure()->first();
-            $reference = $departure instanceof Departure ? $departure->reference : 'departure '.$alert->departure_id;
-
-            return [
-                'type' => 'departure',
-                'id' => $alert->departure_id,
-                'reference' => $reference,
-                'href' => '/rms/operations/documents',
             ];
         }
 

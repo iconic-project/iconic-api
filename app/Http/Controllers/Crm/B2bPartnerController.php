@@ -22,7 +22,7 @@ final class B2bPartnerController extends Controller
         $this->authorize('viewAny', Contact::class);
 
         $agencies = Agency::query()
-            ->with(['bookings.departure', 'bookings.commissionPayout'])
+            ->with(['bookings.commissionPayout'])
             ->orderBy('name')
             ->get();
 
@@ -34,7 +34,7 @@ final class B2bPartnerController extends Controller
     {
         $this->authorize('viewAny', Contact::class);
 
-        $agency->load(['bookings.departure', 'bookings.commissionPayout']);
+        $agency->load(['bookings.commissionPayout']);
 
         $resource = new B2bPartnerResource($agency);
         $resource->detailed = true;

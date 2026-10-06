@@ -43,13 +43,35 @@ final class SegmentVocabulary
                     ],
                 ],
                 [
-                    'field' => 'festive_departure_views',
-                    'label' => 'Festive departure views',
+                    'field' => 'stay_date',
+                    'label' => 'Stay date',
+                    'operators' => $compare,
+                    'value' => 'date',
+                ],
+                [
+                    'field' => 'arrival_weekday',
+                    'label' => 'Arrival weekday',
+                    'operators' => ['eq', 'in'],
+                    'value' => 'weekday',
+                    'values' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                ],
+                [
+                    'field' => 'length_of_stay',
+                    'label' => 'Length of stay',
                     'operators' => $compare,
                     'value' => 'integer',
-                    'params' => [
-                        ['name' => 'within_days', 'type' => 'integer_or_null'],
-                    ],
+                ],
+                [
+                    'field' => 'room_type',
+                    'label' => 'Room type',
+                    'operators' => ['eq', 'in'],
+                    'value' => 'code',
+                ],
+                [
+                    'field' => 'rate_plan',
+                    'label' => 'Rate plan',
+                    'operators' => ['eq', 'in'],
+                    'value' => 'code',
                 ],
                 [
                     'field' => 'booking_count',
@@ -117,7 +139,7 @@ final class SegmentVocabulary
                 ],
                 [
                     'field' => 'guest_age',
-                    'label' => 'Guest age at departure',
+                    'label' => 'Guest age at arrival',
                     'operators' => ['between'],
                     'value' => 'age_range',
                 ],
@@ -253,9 +275,11 @@ final class SegmentVocabulary
             'boolean' => is_bool($value),
             'string' => is_string($value) && trim($value) !== '' && strlen($value) <= 120,
             'consent' => in_array($value, $spec['values'] ?? [], true),
-            'booking_status', 'lifecycle', 'ltv_band' => self::enumValue($operator, $value, $spec['values'] ?? []),
+            'booking_status', 'lifecycle', 'ltv_band', 'weekday' => self::enumValue($operator, $value, $spec['values'] ?? []),
             'country' => self::countryValue($operator, $value),
             'age_range' => self::ageRange($value),
+            'date' => is_string($value) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) === 1,
+            'code' => self::codeValue($operator, $value),
             default => false,
         };
 
@@ -342,6 +366,27 @@ final class SegmentVocabulary
         $max = $value[1];
 
         return is_int($min) && is_int($max) && $min >= 0 && $max <= 120 && $min <= $max;
+    }
+
+    private static function codeValue(string $operator, mixed $value): bool
+    {
+        $valid = fn (mixed $code): bool => is_string($code) && $code !== '' && strlen($code) <= 32;
+
+        if ($operator === 'eq') {
+            return $valid($value);
+        }
+
+        if (! is_array($value) || $value === [] || array_is_list($value) === false || count($value) > 50) {
+            return false;
+        }
+
+        foreach ($value as $code) {
+            if (! $valid($code)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static function agencyValue(string $operator, mixed $value): bool

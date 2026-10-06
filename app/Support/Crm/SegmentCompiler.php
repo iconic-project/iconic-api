@@ -50,7 +50,12 @@ final class SegmentCompiler
 
         return match ($field) {
             'event_count' => self::eventCount($item),
-            'festive_departure_views' => self::festiveViews($item),
+            'stay_date' => self::stayDate($item),
+            'arrival_weekday' => self::arrivalWeekday($item),
+            'length_of_stay' => self::lengthOfStay($item),
+            'room_type' => self::roomType($item),
+            'rate_plan' => self::ratePlan($item),
+            'festive_departure_views' => self::departureViews($item),
             'booking_count' => self::bookingCount($item),
             'booking_status' => self::bookingStatus($item),
             'active_hold' => self::activeHold($item),
@@ -89,24 +94,80 @@ final class SegmentCompiler
     }
 
     /**
+     * Stored segments still name this field. It counts departure-view events.
+     * Festive is a date supplement now, so the count does not read departures.
+     *
      * @param  array<string, mixed>  $item
      * @return array{0: string, 1: list<mixed>}
      */
-    private static function festiveViews(array $item): array
+    private static function departureViews(array $item): array
     {
-        $names = "'".BehaviouralEventName::ViewDeparture->value."', '".BehaviouralEventName::SelectDeparture->value."'";
-        $window = self::window('behavioural_events.occurred_at', $item['within_days'] ?? null);
-        $sql = '(
-            SELECT COUNT(*)
-            FROM behavioural_events
-            INNER JOIN departures ON departures.id = CAST(JSON_UNQUOTE(JSON_EXTRACT(behavioural_events.params, \'$.departure_id\')) AS UNSIGNED)
-            WHERE behavioural_events.contact_id = contacts.id
-              AND behavioural_events.name IN ('.$names.')
-              AND departures.festive = 1
-              '.$window['sql'].'
-        ) '.self::operator($item).' ?';
+        $item['event'] = BehaviouralEventName::ViewDeparture->value;
 
-        return [$sql, [...$window['bindings'], self::intValue($item)]];
+        return self::eventCount($item);
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function stayDate(array $item): array
+    {
+        return self::bookingCompare('bookings.check_in', $item, self::dateValue($item));
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function lengthOfStay(array $item): array
+    {
+        return self::bookingCompare('bookings.nights', $item, self::intValue($item));
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function arrivalWeekday(array $item): array
+    {
+        $days = self::weekdayNumbers($item);
+
+        return [
+            self::existsIn('WEEKDAY(bookings.check_in)', $days, 'bookings.contact_id = contacts.id AND bookings.deleted_at IS NULL'),
+            $days,
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function roomType(array $item): array
+    {
+        $codes = self::listValue($item);
+
+        return [self::existsJoined(
+            'room_types',
+            'room_types.id = bookings.room_type_id',
+            'room_types.code',
+            $codes,
+        ), $codes];
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function ratePlan(array $item): array
+    {
+        $codes = self::listValue($item);
+
+        return [self::existsIn(
+            'bookings.rate_plan_code',
+            $codes,
+            'bookings.contact_id = contacts.id AND bookings.deleted_at IS NULL',
+        ), $codes];
     }
 
     /**
@@ -248,13 +309,12 @@ final class SegmentCompiler
             SELECT 1
             FROM guests
             INNER JOIN bookings ON bookings.id = guests.booking_id
-            INNER JOIN departures ON departures.id = bookings.departure_id
             WHERE bookings.contact_id = contacts.id
               AND bookings.deleted_at IS NULL
               AND guests.dob IS NOT NULL
               AND (
-                YEAR(departures.`date`) - YEAR(guests.dob)
-                - (DATE_FORMAT(departures.`date`, \'%m%d\') < DATE_FORMAT(guests.dob, \'%m%d\'))
+                YEAR(bookings.check_in) - YEAR(guests.dob)
+                - (DATE_FORMAT(bookings.check_in, \'%m%d\') < DATE_FORMAT(guests.dob, \'%m%d\'))
               ) BETWEEN ? AND ?
         )';
 
@@ -437,6 +497,83 @@ final class SegmentCompiler
 
     /**
      * @param  list<int|string>  $values
+     */
+    /**
+     * @param  array<string, mixed>  $item
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private static function bookingCompare(string $column, array $item, int|string $value): array
+    {
+        $sql = 'EXISTS (
+            SELECT 1 FROM bookings
+            WHERE bookings.contact_id = contacts.id
+              AND bookings.deleted_at IS NULL
+              AND '.$column.' '.self::operator($item).' ?
+        )';
+
+        return [$sql, [$value]];
+    }
+
+    /**
+     * @param  list<int|string>  $values
+     */
+    private static function existsJoined(string $table, string $on, string $column, array $values): string
+    {
+        $placeholders = implode(', ', array_fill(0, count($values), '?'));
+
+        return 'EXISTS (
+            SELECT 1 FROM bookings
+            INNER JOIN '.$table.' ON '.$on.'
+            WHERE bookings.contact_id = contacts.id
+              AND bookings.deleted_at IS NULL
+              AND '.$column.' IN ('.$placeholders.')
+        )';
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    private static function dateValue(array $item): string
+    {
+        $value = $item['value'] ?? null;
+
+        if (! is_string($value) || preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+            throw new InvalidArgumentException('Stay date needs a Y-m-d value.');
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     * @return list<int>
+     */
+    private static function weekdayNumbers(array $item): array
+    {
+        $names = [
+            'Monday' => 0,
+            'Tuesday' => 1,
+            'Wednesday' => 2,
+            'Thursday' => 3,
+            'Friday' => 4,
+            'Saturday' => 5,
+            'Sunday' => 6,
+        ];
+        $numbers = [];
+
+        foreach (self::listValue($item) as $name) {
+            if (! is_string($name) || ! array_key_exists($name, $names)) {
+                throw new InvalidArgumentException('Arrival weekday needs an English day name.');
+            }
+
+            $numbers[] = $names[$name];
+        }
+
+        return $numbers;
+    }
+
+    /**
+     * @param  list<mixed>  $values
      */
     private static function existsExpression(string $expression, array $values): string
     {

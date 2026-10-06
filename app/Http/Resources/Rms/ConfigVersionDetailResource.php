@@ -59,8 +59,8 @@ class ConfigVersionDetailResource extends JsonResource
      *         holds: array{web_minutes: int, web_extension_minutes: int, near_term_business_hours: int, long_lead_business_days: int, business_days: list<int>, business_day_start: string, business_day_end: string, holidays: list<string>, near_term_max_days: int},
      *         sla: array{response_hours: int, refund_business_days: int, agency_approval_business_days: int},
      *         manifests: array{dpng_fit_days: int, dpng_charter_days: int, captain_days: int, chase_days_before_due: int},
-     *         alerts: array{low_occupancy_pct: int, low_occupancy_days_before: int},
-     *         retention: array{passport_months_after_cruise: int, medical_days_after_cruise: int},
+     *         alerts: array{low_occupancy_pct: int, low_occupancy_days_before: int, low_occupancy_min_consecutive_nights: int},
+     *         retention: array{passport_months_after_check_out?: int, passport_months_after_cruise?: int, medical_days_after_check_out?: int, medical_days_after_cruise?: int},
      *         cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, sets: array<string, list<array{min_days: int, penalty_pct: int}>>},
      *         taxes: list<array{code: string, label: string, basis: string, amount: int, child_exempt_under_age: int|null, charged: bool, shown_in_price_panel: bool}>
      *     }|array{

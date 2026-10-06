@@ -31,7 +31,7 @@ enum AlertKind: string
             self::WireNotReceived => 'Wire not received',
             self::SlaBreach => 'SLA breach',
             self::DeliveryFailed => 'Delivery failed',
-            self::ConfirmedAtDeparture => 'Confirmed at departure',
+            self::ConfirmedAtDeparture => 'Confirmed at check-in',
             self::LedgerDrift => 'Ledger drift',
             self::CommissionLeakage => 'Commission leakage',
             self::LowOccupancy => 'Low occupancy',
@@ -41,7 +41,7 @@ enum AlertKind: string
             self::CharterDepositDue => 'Charter deposit due',
             self::ArrivalNotCheckedIn => 'Arrival not checked in',
             self::InHousePastCheckOut => 'In house past check-out',
-            self::DepartureNotCheckedOut => 'Departure not checked out',
+            self::DepartureNotCheckedOut => 'Check-out not completed',
         };
     }
 }

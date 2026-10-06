@@ -107,7 +107,7 @@ function npsBooking(
 function npsSendSurveys(Booking $booking): void
 {
     $booking = $booking->fresh() ?? $booking;
-    $hours = app(CurrentConfig::class)->businessRules()->nps->surveyHoursAfterReturn;
+    $hours = app(CurrentConfig::class)->businessRules()->nps->surveyHoursAfterCheckOut;
     $due = app(StayClock::class)->postStayAt($booking->stay(), $booking->checked_out_at)->addHours($hours);
     test()->travelTo($due->addMinute());
     test()->artisan('iconic:nps-survey')->assertSuccessful();
@@ -537,7 +537,7 @@ test('the nps read returns the average, the bands, the review count and the empt
         ->and($page->json('kpis.alerts_below'))->toBe(1)
         ->and($page->json('kpis.review_requests_sent'))->toBe(1)
         ->and($page->json('facts.first_expected_survey_on'))->toBe($expectedFirst)
-        ->and($page->json('facts.survey_hours_after_return'))->toBe(24)
+        ->and($page->json('facts.survey_hours_after_check_out'))->toBe(24)
         ->and($page->json('facts.alert_below'))->toBe(7)
         ->and($page->json('facts.review_request_from'))->toBe(8)
         ->and(collect($page->json('responses'))->pluck('score_class')->sort()->values()->all())->toBe(['high', 'low'])
@@ -719,4 +719,49 @@ test('the survey question list is served to the engine and to panel.rms, and the
         ...npsAnswerBody(9),
         'guest_id' => $fixture['companion']->id,
     ])->assertForbidden();
+});
+
+test('the survey uses checked_out_at when set, otherwise check-out time, and never a no-show', function (): void {
+    $owner = managerUser();
+    $early = npsBooking('2028-08-07', 'ANK-NPS-EARLY', $owner, contactEmail: 'early-out@example.com', companionEmail: null);
+    $late = npsBooking('2028-08-14', 'ANK-NPS-LATE', $owner, contactEmail: 'late-out@example.com', companionEmail: null);
+    $missed = npsBooking('2028-08-21', 'ANK-NPS-MISS', $owner, BookingStatus::NoShow, contactEmail: 'no-show@example.com', companionEmail: null);
+
+    $early['booking']->forceFill([
+        'checked_out_at' => CarbonImmutable::parse('2028-08-12 09:00:00', BusinessTime::zone()),
+    ])->save();
+    $late['booking']->forceFill(['checked_out_at' => null])->save();
+    $missed['booking']->forceFill([
+        'checked_out_at' => CarbonImmutable::parse('2028-08-01 09:00:00', BusinessTime::zone()),
+    ])->save();
+
+    $clock = app(StayClock::class);
+    $hours = app(CurrentConfig::class)->businessRules()->nps->surveyHoursAfterCheckOut;
+    $earlyFresh = $early['booking']->fresh() ?? $early['booking'];
+    $lateFresh = $late['booking']->fresh() ?? $late['booking'];
+    $earlyDue = $clock->postStayAt($earlyFresh->stay(), $earlyFresh->checked_out_at)->addHours($hours);
+    $lateDue = $clock->postStayAt($lateFresh->stay(), $lateFresh->checked_out_at)->addHours($hours);
+
+    expect($earlyFresh->checked_out_at)->not->toBeNull()
+        ->and($lateFresh->checked_out_at)->toBeNull()
+        ->and($lateDue->greaterThan($earlyDue))->toBeTrue();
+
+    $this->travelTo($earlyDue->subMinute());
+    $this->artisan('iconic:nps-survey')->assertSuccessful();
+    expect(Delivery::query()->where('kind', DeliveryKind::Survey)->count())->toBe(0);
+
+    $this->travelTo($earlyDue->addMinute());
+    $this->artisan('iconic:nps-survey')->assertSuccessful();
+    expect(Delivery::query()->where('booking_id', $early['booking']->id)->where('kind', DeliveryKind::Survey)->count())->toBeGreaterThan(0)
+        ->and(Delivery::query()->where('booking_id', $late['booking']->id)->where('kind', DeliveryKind::Survey)->count())->toBe(0)
+        ->and(Delivery::query()->where('booking_id', $missed['booking']->id)->where('kind', DeliveryKind::Survey)->count())->toBe(0);
+
+    $this->travelTo($lateDue->subMinute());
+    $this->artisan('iconic:nps-survey')->assertSuccessful();
+    expect(Delivery::query()->where('booking_id', $late['booking']->id)->where('kind', DeliveryKind::Survey)->count())->toBe(0);
+
+    $this->travelTo($lateDue->addMinute());
+    $this->artisan('iconic:nps-survey')->assertSuccessful();
+    expect(Delivery::query()->where('booking_id', $late['booking']->id)->where('kind', DeliveryKind::Survey)->count())->toBeGreaterThan(0)
+        ->and(Delivery::query()->where('booking_id', $missed['booking']->id)->where('kind', DeliveryKind::Survey)->count())->toBe(0);
 });

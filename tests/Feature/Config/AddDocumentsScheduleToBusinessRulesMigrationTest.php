@@ -62,7 +62,8 @@ test('config-verify fails on a latest document missing documents schedule, then 
     expect($v2->version)->toBe(2);
     expect($v2->created_by)->toBeNull();
     expect($v2->approval_reference)->toBe(DOCUMENTS_SCHEDULE_APPROVAL);
-    expect($v2->document['documents']['pretrip_days_before'])->toBe(45);
+    expect($v2->document['documents']['pre_arrival_days_before'])->toBe(45);
+    expect($v2->document['documents'])->not->toHaveKey('pretrip_days_before');
     expect($v2->document['documents']['voucher_days_before'])->toBe(7);
 
     $history = ChangeHistory::query()
@@ -79,7 +80,19 @@ test('config-verify fails on a latest document missing documents schedule, then 
 });
 
 test('the migration is a no-op when documents schedule is already present', function (): void {
-    $this->seed(ConfigSeeder::class);
+    $document = BusinessRulesDocument::initial();
+    $document['documents']['pretrip_days_before'] = 45;
+
+    $row = new BusinessRuleVersion([
+        'version' => 1,
+        'document' => $document,
+        'changes' => [],
+        'approval_reference' => 'ALREADY',
+        'published_at' => now(),
+        'created_by' => null,
+        'updated_by' => null,
+    ]);
+    $row->save();
 
     runDocumentsScheduleMigration();
 
@@ -93,6 +106,6 @@ test('fromArray defaults missing documents schedule keys', function (): void {
 
     $lenient = BusinessRulesDocument::fromArray($missing);
 
-    expect($lenient->documents->pretripDaysBefore)->toBe(0);
+    expect($lenient->documents->preArrivalDaysBefore)->toBe(0);
     expect($lenient->documents->voucherDaysBefore)->toBe(0);
 });

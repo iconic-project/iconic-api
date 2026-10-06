@@ -165,10 +165,46 @@ final class ConfigPublisher extends Action
         $prefixed = [];
 
         foreach ($rules as $path => $rule) {
-            $prefixed['document.'.$path] = $rule;
+            $prefixed['document.'.$path] = $this->prefixDependentRules($rule);
         }
 
         Validator::validate(['document' => $document], $prefixed);
+    }
+
+    /**
+     * Rules are declared against the document. Validation here wraps that
+     * document, so a dependent rule has to name the same wrapped path.
+     */
+    private function prefixDependentRules(mixed $rule): mixed
+    {
+        if (is_string($rule)) {
+            return $this->prefixDependentRule($rule);
+        }
+
+        if (! is_array($rule)) {
+            return $rule;
+        }
+
+        return array_map(
+            fn (mixed $item): mixed => is_string($item) ? $this->prefixDependentRule($item) : $item,
+            $rule,
+        );
+    }
+
+    private function prefixDependentRule(string $rule): string
+    {
+        $marker = 'required_without:';
+
+        if (! str_starts_with($rule, $marker)) {
+            return $rule;
+        }
+
+        $fields = array_map(
+            fn (string $field): string => str_starts_with($field, 'document.') ? $field : 'document.'.$field,
+            explode(',', substr($rule, strlen($marker))),
+        );
+
+        return $marker.implode(',', $fields);
     }
 
     private function staleConflict(?int $version): ConflictException

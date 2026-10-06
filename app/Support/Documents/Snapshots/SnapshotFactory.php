@@ -26,7 +26,8 @@ final class SnapshotFactory
             DocumentKind::Summary => SummarySnapshot::build($booking, $fresh),
             DocumentKind::Receipt => self::receipt($booking, $payment, $fresh),
             DocumentKind::Voucher => VoucherSnapshot::build($booking, $fresh),
-            DocumentKind::Pretrip => PretripSnapshot::build($booking, $fresh),
+            DocumentKind::PreArrival => PreArrivalSnapshot::build($booking, $fresh),
+            DocumentKind::Pretrip => PreArrivalSnapshot::build($booking, $fresh, DocumentKind::Pretrip),
             DocumentKind::WireInstructions => WireInstructionsSnapshot::build($booking, $fresh),
             DocumentKind::CharterProposal => throw new InvalidArgumentException('A charter proposal is not built from a booking.'),
         };
