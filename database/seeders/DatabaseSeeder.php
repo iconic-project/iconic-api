@@ -29,5 +29,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(DemoUsersSeeder::class);
         $this->call(HotelSeeder::class);
+        $this->call(DemoConversationsSeeder::class);
     }
 }

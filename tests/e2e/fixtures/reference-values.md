@@ -559,9 +559,16 @@ Nothing in this section was read off a reset screen. Heads when this section was
 
 ### Inbox
 
-No seeder inserts `conversations` or `messages`. A fresh reset has an empty inbox.
+`DemoConversationsSeeder` (local and testing, after `HotelSeeder`) inserts four threads. Inbound rows go through `CaptureInboundMessage`. Staff replies are stored and are not mailed. A second seed does not duplicate them (`message_id`).
 
-Matched sender: Anna Whitfield, `whitfield.anna@iconic.test` (`DemoRequestsSeeder::seedWaitlist`). Unlinked sender used by the scenarios: `unlinked.inbox@iconic.test`. That address is not in the seed. `inject-inbound-email` refuses any from-address that does not end `@iconic.test`.
+| Subject | Contact | Status | Unread | Messages |
+|---|---|---|---|---|
+| Late dinner | Hotel seed HTL-019, `htl-019@hotel-demo.test` | OPEN | yes | guest, Carolina, guest |
+| Request for 2 June | Hotel seed HTL-008, `htl-008@hotel-demo.test` | OPEN | yes | guest |
+| Invoice for the stay | Hotel seed HTL-011, `htl-011@hotel-demo.test` | CLOSED | no | guest, Carolina |
+| September dates | none (`demo.unlinked@iconic.test`) | OPEN | yes | guest |
+
+Matched sender still available for injected mail: Anna Whitfield, `whitfield.anna@iconic.test` (`DemoRequestsSeeder::seedWaitlist`), when that seeder has run. Unlinked sender used by the scenarios: `unlinked.inbox@iconic.test`. That address is not in the seed. `inject-inbound-email` refuses any from-address that does not end `@iconic.test`.
 
 Opening a thread marks it read. Timeline kind is `conversation.message`. Title is `Email received` for `IN` and `Reply sent` for `OUT`. Detail is the subject (`ContactTimeline`).
 
