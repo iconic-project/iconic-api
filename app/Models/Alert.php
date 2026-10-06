@@ -25,8 +25,6 @@ use LogicException;
  * @property string $title
  * @property string $sentence
  * @property int|null $booking_id
- * @property int|null $departure_id
- * @property-read Departure|null $departure
  * @property int|null $agency_id
  * @property int|null $payment_id
  * @property int|null $delivery_id
@@ -52,7 +50,6 @@ use LogicException;
     'title',
     'sentence',
     'booking_id',
-    'departure_id',
     'agency_id',
     'payment_id',
     'delivery_id',
@@ -130,14 +127,6 @@ class Alert extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
-    }
-
-    /**
-     * @return BelongsTo<Departure, $this>
-     */
-    public function departure(): BelongsTo
-    {
-        return $this->belongsTo(Departure::class);
     }
 
     /**

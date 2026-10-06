@@ -12,7 +12,6 @@ use App\Events\BookingChargesChanged;
 use App\Events\BookingCreated;
 use App\Events\BookingOverdueFlagged;
 use App\Events\BookingStatusChanged;
-use App\Events\CharterEnquiryReceived;
 use App\Events\ConfigPublished;
 use App\Events\DealMarkedLost;
 use App\Events\DeliveryOutcomeRecorded;
@@ -26,7 +25,6 @@ use App\Listeners\ExpireWebCheckoutSession;
 use App\Listeners\MarkRequestHoldExpired;
 use App\Listeners\OfferWaitlistRooms;
 use App\Listeners\OpenDealOnBookingCreated;
-use App\Listeners\OpenDealOnCharterEnquiryReceived;
 use App\Listeners\RaiseAlertsOnBookingCreated;
 use App\Listeners\RaiseAlertsOnBookingOverdueFlagged;
 use App\Listeners\RaiseAlertsOnBookingStatusChanged;
@@ -35,7 +33,6 @@ use App\Listeners\RaiseAlertsOnPaymentAwaitingWire;
 use App\Listeners\RaiseAlertsOnPaymentSettled;
 use App\Listeners\RaiseTasksOnBookingCreated;
 use App\Listeners\RaiseTasksOnBookingStatusChanged;
-use App\Listeners\RaiseTasksOnCharterEnquiry;
 use App\Listeners\RaiseTasksOnPaymentAwaitingWire;
 use App\Listeners\RaiseTasksOnRefundRequested;
 use App\Listeners\SendOnBookingChargesChanged;
@@ -45,6 +42,7 @@ use App\Listeners\SyncJourneys;
 use App\Listeners\SyncJourneysOnHoldExpired;
 use App\Models\Agency;
 use App\Models\Alert;
+use App\Models\Archive\LegacyMorphs;
 use App\Models\AutomationSetting;
 use App\Models\Booking;
 use App\Models\BookingRequest;
@@ -60,14 +58,12 @@ use App\Models\ContactMerge;
 use App\Models\Conversation;
 use App\Models\CrmTask;
 use App\Models\Deal;
-use App\Models\Departure;
 use App\Models\Document;
 use App\Models\EngineSettingsVersion;
 use App\Models\ExtraVersion;
 use App\Models\Group;
 use App\Models\Guest;
 use App\Models\InternalBlock;
-use App\Models\Itinerary;
 use App\Models\Journey;
 use App\Models\JourneyEnrolment;
 use App\Models\Manifest;
@@ -183,10 +179,6 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(5)->by($request->ip() ?? 'unknown');
         });
 
-        RateLimiter::for('engine-charter', function (Request $request): Limit {
-            return Limit::perMinute(5)->by($request->ip() ?? 'unknown');
-        });
-
         RateLimiter::for('engine-complete', function (Request $request): array {
             $token = (string) $request->route('token');
 
@@ -245,8 +237,7 @@ class AppServiceProvider extends ServiceProvider
             'business_rule_version' => BusinessRuleVersion::class,
             'engine_settings_version' => EngineSettingsVersion::class,
             'extra_version' => ExtraVersion::class,
-            'itinerary' => Itinerary::class,
-            'departure' => Departure::class,
+            ...LegacyMorphs::map(),
             'property' => Property::class,
             'room' => Room::class,
             'room_type' => RoomType::class,
@@ -337,8 +328,6 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(BookingCreated::class, RaiseTasksOnBookingCreated::class);
         Event::listen(BookingCreated::class, RaiseAlertsOnBookingCreated::class);
         Event::listen(BookingCreated::class, SyncJourneys::class);
-        Event::listen(CharterEnquiryReceived::class, OpenDealOnCharterEnquiryReceived::class);
-        Event::listen(CharterEnquiryReceived::class, RaiseTasksOnCharterEnquiry::class);
         Event::listen(BookingStatusChanged::class, RaiseTasksOnBookingStatusChanged::class);
         Event::listen(BookingStatusChanged::class, RaiseAlertsOnBookingStatusChanged::class);
         Event::listen(BookingStatusChanged::class, SyncJourneys::class);

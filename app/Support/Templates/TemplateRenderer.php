@@ -76,14 +76,13 @@ final class TemplateRenderer
         return match ($variable) {
             TemplateVariable::FirstName => $this->firstName($contact),
             TemplateVariable::BookingReference => $booking?->displayReference(),
-            TemplateVariable::CheckIn, TemplateVariable::DepartureDate => $this->checkIn($booking),
+            TemplateVariable::CheckIn => $this->checkIn($booking),
             TemplateVariable::CheckOut => $this->checkOut($booking),
             TemplateVariable::Nights => $booking instanceof Booking ? (string) $booking->nights : null,
             TemplateVariable::RoomType => $this->roomType($booking),
             TemplateVariable::PropertyName => $this->propertyName($booking),
             TemplateVariable::CheckInTime => app(CurrentConfig::class)->businessRules()->stay->checkInTime,
             TemplateVariable::CheckOutTime => app(CurrentConfig::class)->businessRules()->stay->checkOutTime,
-            TemplateVariable::ItineraryName => $this->itineraryName($booking),
             TemplateVariable::BalanceDueDate => $booking instanceof Booking ? $booking->balanceDueDate()->toDateString() : null,
             TemplateVariable::DepositLink => $this->depositLink($booking),
             TemplateVariable::CompleteLink => $this->completeLink($booking),
@@ -146,18 +145,6 @@ final class TemplateRenderer
 
         $booking->loadMissing('property');
         $name = $booking->property->name;
-
-        return $name !== '' ? $name : null;
-    }
-
-    private function itineraryName(?Booking $booking): ?string
-    {
-        if (! $booking instanceof Booking) {
-            return null;
-        }
-
-        $booking->loadMissing('departure.itinerary');
-        $name = $booking->departure->itinerary->name;
 
         return $name !== '' ? $name : null;
     }

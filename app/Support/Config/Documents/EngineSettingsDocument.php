@@ -19,8 +19,9 @@ final class EngineSettingsDocument extends ConfigDocument
         public readonly LocaleSettings $locale,
         public readonly FeesSettings $fees,
         public readonly CopySettings $copy,
-        public readonly CharterSettings $charter,
         public readonly AvailabilitySettings $availability,
+        /** @var array<string, mixed>|null Retained so the charter-key migration can diff the group out. */
+        public readonly ?array $charter = null,
     ) {}
 
     /**
@@ -38,11 +39,6 @@ final class EngineSettingsDocument extends ConfigDocument
             'copy.confirmation_steps',
             'copy.online_deposit_advantage',
             'copy.online_deposit_perk',
-            'charter.headline',
-            'charter.intro',
-            'charter.itinerary_label',
-            'charter.group_contexts',
-            'charter.thank_you',
         ];
     }
 
@@ -62,7 +58,6 @@ final class EngineSettingsDocument extends ConfigDocument
     {
         return [
             'guests' => [
-                'max_per_cabin' => 3,
                 'max_per_property' => 16,
                 'child_min_age' => 6,
                 'child_max_age' => 17,
@@ -81,47 +76,25 @@ final class EngineSettingsDocument extends ConfigDocument
                 'currency' => 'USD',
             ],
             'fees' => [
-                'tct_pp' => 20,
-                'png' => [
-                    'foreign_over_12' => 200,
-                    'foreign_12_and_under' => 100,
-                    'can_adult' => 100,
-                    'can_minor' => 30,
-                    'national_or_resident' => 30,
-                    'exempt_under_age' => 2,
-                ],
                 'show_in_price_panel' => true,
-                'footnote' => 'Informational — regulatory Galápagos fees, not charged today. PNG is paid at SCY airport; TCT is arranged with our team.',
+                'footnote' => 'Informational — local fees are not charged today.',
             ],
             'copy' => [
-                'book_now_pay_later' => 'We will hold the cabins for you, obligation-free. Our team confirms availability and sends your deposit link — nothing is charged today.',
-                'traveling_with_children' => 'A 15% discount applies to children aged 6–17. One discount per adult, maximum two per couple. Not available on festive departures.',
-                'solo_and_triple' => 'Single occupancy +75% ppdo · triple sharing −10% ppdo. Shown live in the next step.',
-                'pay_today' => 'We will hold your cabins for you, obligation-free. Our team confirms availability and sends your deposit link (10%) — nothing is charged until you decide.',
-                'details_note' => 'Full guest details (passports, dietary preferences) and payment are arranged after we confirm your cabins — no card is required today. Travel insurance is the sole responsibility of the passenger. Iconic does not sell or intermediate travel insurance.',
+                'book_now_pay_later' => 'We will hold the rooms for you, obligation-free. Our team confirms availability and sends your deposit link — nothing is charged today.',
+                'traveling_with_children' => 'Children aged 6–17 are welcome. One adult must travel with them.',
+                'solo_and_triple' => 'Single occupancy and extra guests are priced per night. Shown live in the next step.',
+                'pay_today' => 'We will hold the rooms for you, obligation-free. Our team confirms availability and sends your deposit link (10%) — nothing is charged until you decide.',
+                'details_note' => 'Full guest details (passports, dietary preferences) and payment are arranged after we confirm your rooms — no card is required today. Travel insurance is the sole responsibility of the passenger. Iconic does not sell or intermediate travel insurance.',
                 'confirmation_steps' => [
-                    'Within 24 hours a member of our team confirms your cabins and answers any questions — by your preferred channel.',
-                    'You receive your booking confirmation and deposit link (10%). Your cabins stay held while you decide, per our hold policy.',
-                    'After the deposit, we gather guest details and preferences, and our concierge curates flights, stays and on-board touches.',
+                    'Within 24 hours a member of our team confirms your rooms and answers any questions — by your preferred channel.',
+                    'You receive your booking confirmation and deposit link (10%). Your rooms stay held while you decide, per our hold policy.',
+                    'After the deposit, we gather guest details and preferences, and our concierge curates flights, stays and in-house touches.',
                 ],
                 'online_deposit_advantage' => 'Online deposit advantage',
                 'online_deposit_perk' => 'Complimentary spa access aboard',
             ],
             'availability' => [
                 'low_availability_threshold' => 3,
-            ],
-            'charter' => [
-                'headline' => 'The property, entirely yours',
-                'intro' => 'One property, sixteen guests of your choosing, and an itinerary shaped around your group within the protected waters of the Galápagos. From USD 199,500 per week. Our team responds to every charter enquiry within 24 hours.',
-                'itinerary_label' => 'Customizable',
-                'response_sla_hours' => 24,
-                'group_contexts' => [
-                    'Family',
-                    'Friends',
-                    'Corporate / Incentive',
-                    'Celebration',
-                ],
-                'thank_you' => 'Thank you — your charter enquiry has been received. A dedicated member of our team will contact you within 24 hours to schedule a discovery call.',
             ],
         ];
     }
@@ -135,9 +108,8 @@ final class EngineSettingsDocument extends ConfigDocument
         $calendar = is_array($data['calendar'] ?? null) ? $data['calendar'] : [];
         $locale = is_array($data['locale'] ?? null) ? $data['locale'] : [];
         $fees = is_array($data['fees'] ?? null) ? $data['fees'] : [];
-        $png = is_array($fees['png'] ?? null) ? $fees['png'] : [];
         $copy = is_array($data['copy'] ?? null) ? $data['copy'] : [];
-        $charter = is_array($data['charter'] ?? null) ? $data['charter'] : [];
+        $charter = is_array($data['charter'] ?? null) ? $data['charter'] : null;
         $availability = is_array($data['availability'] ?? null) ? $data['availability'] : [];
 
         $live = [];
@@ -154,16 +126,8 @@ final class EngineSettingsDocument extends ConfigDocument
             }
         }
 
-        $contexts = [];
-        foreach ($charter['group_contexts'] ?? [] as $context) {
-            if (is_string($context)) {
-                $contexts[] = $context;
-            }
-        }
-
         return new self(
             new GuestsSettings(
-                (int) ($guests['max_per_cabin'] ?? 0),
                 (int) ($guests['max_per_property'] ?? 0),
                 (int) ($guests['child_min_age'] ?? 0),
                 (int) ($guests['child_max_age'] ?? 0),
@@ -182,15 +146,6 @@ final class EngineSettingsDocument extends ConfigDocument
                 (string) ($locale['currency'] ?? ''),
             ),
             new FeesSettings(
-                (int) ($fees['tct_pp'] ?? 0),
-                new PngFees(
-                    (int) ($png['foreign_over_12'] ?? 0),
-                    (int) ($png['foreign_12_and_under'] ?? 0),
-                    (int) ($png['can_adult'] ?? 0),
-                    (int) ($png['can_minor'] ?? 0),
-                    (int) ($png['national_or_resident'] ?? 0),
-                    (int) ($png['exempt_under_age'] ?? 0),
-                ),
                 (bool) ($fees['show_in_price_panel'] ?? false),
                 (string) ($fees['footnote'] ?? ''),
             ),
@@ -204,26 +159,18 @@ final class EngineSettingsDocument extends ConfigDocument
                 (string) ($copy['online_deposit_advantage'] ?? ''),
                 (string) ($copy['online_deposit_perk'] ?? ''),
             ),
-            new CharterSettings(
-                (string) ($charter['headline'] ?? ''),
-                (string) ($charter['intro'] ?? ''),
-                (string) ($charter['itinerary_label'] ?? ''),
-                (int) ($charter['response_sla_hours'] ?? 0),
-                $contexts,
-                (string) ($charter['thank_you'] ?? ''),
-            ),
             new AvailabilitySettings(
                 array_key_exists('low_availability_threshold', $availability)
                     ? (int) $availability['low_availability_threshold']
                     : 3,
             ),
+            $charter,
         );
     }
 
     /**
      * @return array{
      *     guests: array{
-     *         max_per_cabin: int,
      *         max_per_property: int,
      *         child_min_age: int,
      *         child_max_age: int,
@@ -238,15 +185,6 @@ final class EngineSettingsDocument extends ConfigDocument
      *     },
      *     locale: array{default: string, live: list<string>, currency: string},
      *     fees: array{
-     *         tct_pp: int,
-     *         png: array{
-     *             foreign_over_12: int,
-     *             foreign_12_and_under: int,
-     *             can_adult: int,
-     *             can_minor: int,
-     *             national_or_resident: int,
-     *             exempt_under_age: int
-     *         },
      *         show_in_price_panel: bool,
      *         footnote: string
      *     },
@@ -260,28 +198,26 @@ final class EngineSettingsDocument extends ConfigDocument
      *         online_deposit_advantage: string,
      *         online_deposit_perk: string
      *     },
-     *     charter: array{
-     *         headline: string,
-     *         intro: string,
-     *         itinerary_label: string,
-     *         response_sla_hours: int,
-     *         group_contexts: list<string>,
-     *         thank_you: string
-     *     },
-     *     availability: array{low_availability_threshold: int}
+     *     availability: array{low_availability_threshold: int},
+     *     charter?: array<string, mixed>
      * }
      */
     public function toArray(): array
     {
-        return [
+        $document = [
             'guests' => $this->guests->toArray(),
             'calendar' => $this->calendar->toArray(),
             'locale' => $this->locale->toArray(),
             'fees' => $this->fees->toArray(),
             'copy' => $this->copy->toArray(),
-            'charter' => $this->charter->toArray(),
             'availability' => $this->availability->toArray(),
         ];
+
+        if ($this->charter !== null) {
+            $document['charter'] = $this->charter;
+        }
+
+        return $document;
     }
 
     /**
@@ -293,8 +229,7 @@ final class EngineSettingsDocument extends ConfigDocument
 
         return [
             'guests' => ['required', 'array'],
-            'guests.max_per_cabin' => ['required', 'integer', 'min:1', 'max:4'],
-            'guests.max_per_property' => ['required', 'integer', 'min:1', 'max:36', new EngineSettingsConstraint('property_fits_cabins')],
+            'guests.max_per_property' => ['required', 'integer', 'min:1', 'max:36'],
             'guests.child_min_age' => ['required', 'integer', 'min:0', 'max:17'],
             'guests.child_max_age' => ['required', 'integer', 'min:0', 'max:17', new EngineSettingsConstraint('child_ages_ordered')],
             'guests.adult_required_with_children' => ['required', 'boolean'],
@@ -310,14 +245,6 @@ final class EngineSettingsDocument extends ConfigDocument
             'locale.live.0' => ['required', 'string', Rule::in(['en'])],
             'locale.currency' => ['required', 'string', Rule::in(['USD'])],
             'fees' => ['required', 'array'],
-            'fees.tct_pp' => ['required', 'integer', 'min:0'],
-            'fees.png' => ['required', 'array'],
-            'fees.png.foreign_over_12' => ['required', 'integer', 'min:0'],
-            'fees.png.foreign_12_and_under' => ['required', 'integer', 'min:0'],
-            'fees.png.can_adult' => ['required', 'integer', 'min:0'],
-            'fees.png.can_minor' => ['required', 'integer', 'min:0'],
-            'fees.png.national_or_resident' => ['required', 'integer', 'min:0'],
-            'fees.png.exempt_under_age' => ['required', 'integer', 'min:0', 'max:12'],
             'fees.show_in_price_panel' => ['required', 'boolean'],
             'fees.footnote' => ['required', 'string', 'min:1', 'max:320'],
             'copy' => ['required', 'array'],
@@ -330,14 +257,6 @@ final class EngineSettingsDocument extends ConfigDocument
             'copy.online_deposit_advantage' => ['required', 'string', 'min:1', 'max:80'],
             'copy.online_deposit_perk' => ['required', 'string', 'min:1', 'max:120'],
             'copy.confirmation_steps.*' => ['required', 'string', 'min:1', 'max:320'],
-            'charter' => ['required', 'array'],
-            'charter.headline' => ['required', 'string', 'min:1', 'max:60'],
-            'charter.intro' => ['required', 'string', 'min:1', 'max:320'],
-            'charter.itinerary_label' => ['required', 'string', 'min:1', 'max:30'],
-            'charter.response_sla_hours' => ['required', 'integer', 'min:1', 'max:72'],
-            'charter.group_contexts' => ['required', 'array', 'min:1', 'max:8'],
-            'charter.group_contexts.*' => ['required', 'string', 'min:1', 'distinct'],
-            'charter.thank_you' => ['required', 'string', 'min:1', 'max:320'],
             'availability' => ['required', 'array'],
             'availability.low_availability_threshold' => ['required', 'integer', 'min:0', 'max:99'],
         ];
@@ -349,7 +268,6 @@ final class EngineSettingsDocument extends ConfigDocument
     public static function labels(): array
     {
         return [
-            'guests.max_per_cabin' => 'Max guests per cabin',
             'guests.max_per_property' => 'Max guests per property',
             'guests.child_min_age' => 'Child minimum age',
             'guests.child_max_age' => 'Child maximum age',
@@ -362,13 +280,6 @@ final class EngineSettingsDocument extends ConfigDocument
             'locale.default' => 'Locale',
             'locale.live' => 'Live locales',
             'locale.currency' => 'Currency',
-            'fees.tct_pp' => 'Legacy (yacht) TCT transit card',
-            'fees.png.foreign_over_12' => 'Legacy (yacht) PNG fee — foreign visitor over 12',
-            'fees.png.foreign_12_and_under' => 'Legacy (yacht) PNG fee — foreign visitor 12 and under',
-            'fees.png.can_adult' => 'Legacy (yacht) PNG fee — CAN adult',
-            'fees.png.can_minor' => 'Legacy (yacht) PNG fee — CAN minor',
-            'fees.png.national_or_resident' => 'Legacy (yacht) PNG fee — national or resident',
-            'fees.png.exempt_under_age' => 'Legacy (yacht) PNG fee — exempt under age',
             'fees.show_in_price_panel' => 'Show fees in price panel',
             'fees.footnote' => 'Fee footnote',
             'copy.book_now_pay_later' => 'Note — Book now, pay later',
@@ -379,12 +290,6 @@ final class EngineSettingsDocument extends ConfigDocument
             'copy.confirmation_steps' => 'Confirmation steps',
             'copy.online_deposit_advantage' => 'Online-deposit advantage label',
             'copy.online_deposit_perk' => 'Online-deposit perk',
-            'charter.headline' => 'Charter headline',
-            'charter.intro' => 'Charter intro',
-            'charter.itinerary_label' => 'Charter itinerary label',
-            'charter.response_sla_hours' => 'Charter response SLA',
-            'charter.group_contexts' => 'Charter group contexts',
-            'charter.thank_you' => 'Charter thank-you message',
             'availability.low_availability_threshold' => 'Low availability threshold',
         ];
     }
@@ -413,21 +318,7 @@ final class EngineSettingsDocument extends ConfigDocument
      */
     public function publishErrors(?ConfigDocument $published): array
     {
-        if (! $published instanceof self) {
-            return [];
-        }
-
-        $errors = [];
-
-        if ($this->fees->tctPp !== $published->fees->tctPp) {
-            $errors['fees.tct_pp'] = ['Legacy (yacht) — this value cannot be changed.'];
-        }
-
-        if ($this->fees->png->toArray() !== $published->fees->png->toArray()) {
-            $errors['fees.png'] = ['Legacy (yacht) — this value cannot be changed.'];
-        }
-
-        return $errors;
+        return [];
     }
 
     /**
@@ -440,7 +331,7 @@ final class EngineSettingsDocument extends ConfigDocument
         if ($this->guests->maxPerProperty !== 16) {
             $warnings[] = new Warning(
                 'guests.max_per_property',
-                'Charter capacity will show '.$this->guests->maxPerProperty.' guests (follows max per property).',
+                'The property guest cap will show '.$this->guests->maxPerProperty.' guests (follows max per property).',
             );
         }
 
@@ -462,63 +353,24 @@ final class EngineSettingsDocument extends ConfigDocument
             );
         }
 
-        $introSla = self::firstInt($this->charter->intro, '/within (\d+) hours/i');
-        if ($introSla !== null && $introSla !== $this->charter->responseSlaHours) {
-            $warnings[] = new Warning(
-                'charter.intro',
-                'Charter intro says "within '.$introSla.' hours" but the SLA is '.$this->charter->responseSlaHours.' h.',
-            );
-        }
-
-        $thanksSla = self::firstInt($this->charter->thankYou, '/within (\d+) hours/i');
-        if ($thanksSla !== null && $thanksSla !== $this->charter->responseSlaHours) {
-            $warnings[] = new Warning(
-                'charter.thank_you',
-                'Charter thank-you says "within '.$thanksSla.' hours" but the SLA is '.$this->charter->responseSlaHours.' h.',
-            );
-        }
-
         $rates = self::publishedRates();
 
         if ($rates instanceof RatesDocument) {
-            $childPct = self::firstInt($this->copy->travelingWithChildren, '/(\d+)%/');
-            if ($childPct !== null && $childPct !== $rates->rules->childDiscountPct) {
-                $warnings[] = new Warning(
-                    'copy.traveling_with_children',
-                    '"Traveling with children" says '.$childPct.'% — the child discount is '.$rates->rules->childDiscountPct.'%.',
-                );
-            }
-
-            $singlePct = self::firstInt($this->copy->soloAndTriple, '/\+(\d+)%/');
-            if ($singlePct !== null && $singlePct !== $rates->rules->singleSupplementPct) {
-                $warnings[] = new Warning(
-                    'copy.solo_and_triple',
-                    '"Solo & triple" says +'.$singlePct.'% — the single supplement is '.$rates->rules->singleSupplementPct.'%.',
-                );
-            }
-
-            $triplePct = self::firstInt($this->copy->soloAndTriple, '/[−-](\d+)%/u');
-            if ($triplePct !== null && $triplePct !== $rates->rules->tripleDiscountPct) {
-                $warnings[] = new Warning(
-                    'copy.solo_and_triple',
-                    '"Solo & triple" says −'.$triplePct.'% — the triple discount is '.$rates->rules->tripleDiscountPct.'%.',
-                );
-            }
-
             $depositPct = self::firstInt($this->copy->payToday, '/\((\d+)%\)/');
-            if ($depositPct !== null && $depositPct !== $rates->terms->cabinDepositPct) {
+            $planDeposit = null;
+
+            foreach ($rates->ratePlans as $plan) {
+                if ($plan->isDefault) {
+                    $planDeposit = $plan->depositPct;
+
+                    break;
+                }
+            }
+
+            if ($depositPct !== null && $planDeposit !== null && $depositPct !== $planDeposit) {
                 $warnings[] = new Warning(
                     'copy.pay_today',
-                    '"Pay today" box says '.$depositPct.'% deposit — the cabin deposit is '.$rates->terms->cabinDepositPct.'%.',
-                );
-            }
-
-            $quoted = self::quotedUsd($this->charter->intro);
-            $firstYear = $rates->years[0] ?? null;
-            if ($quoted !== null && $firstYear instanceof RateYear && $quoted !== $firstYear->charterWeek) {
-                $warnings[] = new Warning(
-                    'charter.intro',
-                    'Charter intro quotes USD '.number_format($quoted).'; the '.$firstYear->year.' charter rate is USD '.number_format($firstYear->charterWeek).'.',
+                    '"Pay today" box says '.$depositPct.'% deposit — the default rate plan deposit is '.$planDeposit.'%.',
                 );
             }
         }
@@ -573,20 +425,5 @@ final class EngineSettingsDocument extends ConfigDocument
         }
 
         return (int) $matches[1];
-    }
-
-    private static function quotedUsd(string $text): ?int
-    {
-        if (preg_match('/USD\s?([\d,]+)/', $text, $matches) !== 1) {
-            return null;
-        }
-
-        $digits = str_replace(',', '', $matches[1]);
-
-        if ($digits === '' || ! ctype_digit($digits)) {
-            return null;
-        }
-
-        return (int) $digits;
     }
 }

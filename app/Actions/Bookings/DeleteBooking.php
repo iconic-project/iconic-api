@@ -26,8 +26,7 @@ final class DeleteBooking extends Action
     public function handle(Booking $booking, array $data, User $actor): void
     {
         $this->transaction(function () use ($booking, $data, $actor): void {
-            $expectedDepartureId = (int) $booking->departure_id;
-            $booking = BookingMutationLock::acquire($booking, $expectedDepartureId);
+            $booking = BookingMutationLock::acquire($booking);
             $booking->load('contact');
 
             $reason = trim((string) ($data['reason'] ?? ''));

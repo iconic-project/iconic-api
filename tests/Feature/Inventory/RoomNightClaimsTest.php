@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Services\Inventory\ClaimService;
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
@@ -12,6 +11,7 @@ use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomNightClaim;
+use App\Services\Inventory\ClaimService;
 use App\Support\Inventory\BackfillRoomNightClaims;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Database\QueryException;

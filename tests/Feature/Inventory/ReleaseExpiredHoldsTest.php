@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Services\Inventory\ClaimService;
 use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Enums\ItineraryStatus;
@@ -12,6 +11,7 @@ use App\Models\Departure;
 use App\Models\Itinerary;
 use App\Models\Property;
 use App\Models\RoomNightClaim;
+use App\Services\Inventory\ClaimService;
 use Database\Seeders\InventorySeeder;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\DB;

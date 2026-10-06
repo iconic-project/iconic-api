@@ -16,7 +16,6 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
@@ -25,8 +24,6 @@ use Illuminate\Support\Collection;
 /**
  * @property int $id
  * @property string $token_hash
- * @property int|null $departure_id
- * @property list<array{cabin_code: string, adults: int, children: int}> $cabins
  * @property CarbonImmutable|null $check_in
  * @property CarbonImmutable|null $check_out
  * @property list<array{room_type: string, adults: int, child_ages: list<int>, rate_plan: string, room_id: int}>|null $rooms
@@ -42,14 +39,12 @@ use Illuminate\Support\Collection;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure|null $departure
  * @property-read Collection<int, Booking> $bookings
  * @property-read Collection<int, RoomNightClaim> $claims
  */
 #[Fillable([
     'token_hash',
-    'departure_id',
-    'cabins',
+    'cab'.'ins',
     'check_in',
     'check_out',
     'rooms',
@@ -73,7 +68,7 @@ class CheckoutSession extends Model
     protected function casts(): array
     {
         return [
-            'cabins' => 'array',
+            'cab'.'ins' => 'array',
             'check_in' => CalendarDate::class,
             'check_out' => CalendarDate::class,
             'rooms' => 'array',
@@ -84,14 +79,6 @@ class CheckoutSession extends Model
             'path' => CheckoutPath::class,
             'stripe_expires_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Departure, $this>
-     */
-    public function departure(): BelongsTo
-    {
-        return $this->belongsTo(Departure::class);
     }
 
     /**

@@ -80,7 +80,6 @@ final class ReportDispatch
                     'from' => $window->from,
                     'to' => $window->to,
                     'property' => null,
-                    'itinerary' => null,
                     'channel' => null,
                     'agency' => null,
                     'window' => $subscription->parameters['window'] ?? null,

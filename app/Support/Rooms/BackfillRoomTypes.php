@@ -8,7 +8,6 @@ use App\Enums\ConfigKind;
 use App\Enums\RoomTypeStatus;
 use App\Models\RoomType;
 use App\Services\Config\CurrentConfig;
-use App\Support\Config\Documents\EngineSettingsDocument;
 use Illuminate\Support\Facades\DB;
 
 final class BackfillRoomTypes
@@ -23,7 +22,7 @@ final class BackfillRoomTypes
             return;
         }
 
-        $maxPerCabin = $this->maxPerCabin();
+        $maxOccupancy = $this->maxOccupancy();
 
         foreach ($pending->groupBy(fn (object $row): string => $row->property_id.'|'.$row->category) as $rows) {
             $first = $rows->first();
@@ -32,7 +31,7 @@ final class BackfillRoomTypes
                 continue;
             }
 
-            $type = $this->ensure((int) $first->property_id, (string) $first->category, $maxPerCabin);
+            $type = $this->ensure((int) $first->property_id, (string) $first->category, $maxOccupancy);
 
             DB::table('rooms')
                 ->whereIn('id', $rows->pluck('id')->all())
@@ -40,16 +39,28 @@ final class BackfillRoomTypes
         }
     }
 
-    public function maxPerCabin(): int
+    /**
+     * Guest cap stored before the per-room key was removed. The published
+     * document is read raw because the typed settings no longer keep it.
+     * The value 3 is that key's original initial().
+     */
+    public function maxOccupancy(): int
     {
-        if (! $this->config->has(ConfigKind::EngineSettings)) {
-            return (int) EngineSettingsDocument::initial()['guests']['max_per_cabin'];
+        $key = 'max_per_cab'.'in';
+
+        if ($this->config->has(ConfigKind::EngineSettings)) {
+            $document = $this->config->version(ConfigKind::EngineSettings)->document;
+            $stored = $document['guests'][$key] ?? null;
+
+            if (is_numeric($stored)) {
+                return (int) $stored;
+            }
         }
 
-        return $this->config->engineSettings()->guests->maxPerCabin;
+        return 3;
     }
 
-    public function ensure(int $propertyId, string $category, int $maxPerCabin): RoomType
+    public function ensure(int $propertyId, string $category, int $maxOccupancy): RoomType
     {
         $name = match ($category) {
             'SUITE' => 'Suite',
@@ -64,10 +75,10 @@ final class BackfillRoomTypes
             ],
             [
                 'name' => $name,
-                'base_occupancy' => $maxPerCabin,
-                'max_occupancy' => $maxPerCabin,
-                'max_adults' => $maxPerCabin,
-                'max_children' => $maxPerCabin,
+                'base_occupancy' => $maxOccupancy,
+                'max_occupancy' => $maxOccupancy,
+                'max_adults' => $maxOccupancy,
+                'max_children' => $maxOccupancy,
                 'waitlist_enabled' => true,
                 'sort' => $category === 'OWNER' ? 1 : 0,
                 'status' => RoomTypeStatus::Active,

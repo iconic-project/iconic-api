@@ -12,7 +12,7 @@ final class ReleaseExpiredHoldsCommand extends Command
 {
     protected $signature = 'inventory:release-expired-holds';
 
-    protected $description = 'Release expired cabin holds';
+    protected $description = 'Release expired room holds';
 
     public function handle(ClaimService $claims): int
     {

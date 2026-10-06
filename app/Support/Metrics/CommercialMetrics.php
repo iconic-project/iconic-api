@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Every commercial figure, computed in SQL and never stored (O1).
- * Cruise revenue is bookings.total — the cabin charge — and never extras or fees (I9).
+ * Stay revenue is bookings.total — the room charge — and never extras or fees (I9).
  */
 final class CommercialMetrics
 {
@@ -30,11 +30,11 @@ final class CommercialMetrics
     /**
      * @return array{
      *     window: array{from: string, to: string},
-     *     scope: array{property: int|null, itinerary: int|null, channel: string|null, agency: int|null},
+     *     scope: array{property: int|null, channel: string|null, agency: int|null},
      *     metrics: array{
      *         occupancy: array{sold_berths: int, sellable_berths: int, occupancy: string|null, departures: list<array{id: int, date: string, property_code: string, sold_berths: int, sellable_berths: int, occupancy: string|null}>, definition: array{sentence: string, filters_on: string, excludes: string}},
-     *         revpab: array{cruise_revenue: int, sellable_berths: int, revpab: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
-     *         adr: array{cruise_revenue: int, berths_sold: int, adr: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
+     *         revpab: array{stay_revenue: int, sellable_berths: int, revpab: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
+     *         adr: array{stay_revenue: int, berths_sold: int, adr: int|null, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         lead_time: array{average_days: string|null, median_days: string|null, bookings: int, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         channel_mix: array{rows: list<array{channel: string, group: string, bookings: int, revenue: int}>, definition: array{sentence: string, filters_on: string, excludes: string}},
      *         nationality_mix: array{rows: list<array{country_code: string, guests: int}>, unknown: int, definition: array{sentence: string, filters_on: string, excludes: string}},
@@ -92,8 +92,8 @@ final class CommercialMetrics
 
     /**
      * Filters on the departure date. Sold berths follow Availability: an active booking claim.
-     * A charter (a booking claim status, not a request hold) counts as every cabin on the property.
-     * Sellable berths are cabins that are not blocked.
+     * A charter (a booking claim status, not a request hold) counts as every room on the property.
+     * Sellable berths are rooms that are not blocked.
      *
      * @return array{
      *     sold_berths: int,
@@ -127,32 +127,32 @@ final class CommercialMetrics
     }
 
     /**
-     * Filters on the departure date. Cruise revenue excludes extras and fees.
+     * Filters on the departure date. Stay revenue excludes extras and fees.
      *
-     * @return array{cruise_revenue: int, sellable_berths: int, revpab: int|null}
+     * @return array{stay_revenue: int, sellable_berths: int, revpab: int|null}
      */
     public function revpab(MetricWindow $window, MetricScope $scope): array
     {
         $totals = $this->revenueAndBerths($window, $scope);
 
         return [
-            'cruise_revenue' => $totals['revenue'],
+            'stay_revenue' => $totals['revenue'],
             'sellable_berths' => $totals['sellable'],
             'revpab' => $totals['sellable'] === 0 ? null : Rounding::halfUp($totals['revenue'] / $totals['sellable']),
         ];
     }
 
     /**
-     * Filters on the departure date. Cruise revenue excludes extras and fees.
+     * Filters on the departure date. Stay revenue excludes extras and fees.
      *
-     * @return array{cruise_revenue: int, berths_sold: int, adr: int|null}
+     * @return array{stay_revenue: int, berths_sold: int, adr: int|null}
      */
     public function adr(MetricWindow $window, MetricScope $scope): array
     {
         $totals = $this->revenueAndBerths($window, $scope);
 
         return [
-            'cruise_revenue' => $totals['revenue'],
+            'stay_revenue' => $totals['revenue'],
             'berths_sold' => $totals['sold'],
             'adr' => $totals['sold'] === 0 ? null : Rounding::halfUp($totals['revenue'] / $totals['sold']),
         ];
@@ -168,7 +168,7 @@ final class CommercialMetrics
         [$from, $bindings] = $this->soldBookingFrom($window, $scope);
         $sql = 'WITH days AS (
             SELECT bookings.id AS id,
-                DATEDIFF(departures.`date`, DATE(CONVERT_TZ(bookings.created_at, \'+00:00\', \'-06:00\'))) AS lead_days
+                DATEDIFF(bookings.check_in, DATE(CONVERT_TZ(bookings.created_at, \'+00:00\', \'-06:00\'))) AS lead_days
             '.$from.'
         )
         SELECT
@@ -193,7 +193,7 @@ final class CommercialMetrics
     }
 
     /**
-     * Filters on the departure date. Cruise revenue excludes extras and fees.
+     * Filters on the departure date. Stay revenue excludes extras and fees.
      *
      * @return array{rows: list<array{channel: string, group: string, bookings: int, revenue: int}>}
      */
@@ -234,7 +234,6 @@ final class CommercialMetrics
         $sql = 'SELECT COALESCE(NULLIF(guests.nationality, \'\'), \'\') AS country_code, COUNT(*) AS guests
             FROM guests
             INNER JOIN bookings ON bookings.id = guests.booking_id
-            INNER JOIN departures ON departures.id = bookings.departure_id
             WHERE '.$where.'
             GROUP BY country_code
             ORDER BY guests DESC, country_code ASC';
@@ -285,8 +284,7 @@ final class CommercialMetrics
         $bindings = [$alert, $alert, $review, $alert, $review];
 
         if ($scope->restrictsBookings()) {
-            $sql .= ' INNER JOIN bookings ON bookings.id = guest_responses.booking_id
-                INNER JOIN departures ON departures.id = bookings.departure_id';
+            $sql .= ' INNER JOIN bookings ON bookings.id = guest_responses.booking_id';
         }
 
         $sql .= ' WHERE guest_responses.responded_at >= ? AND guest_responses.responded_at <= ?';
@@ -295,13 +293,8 @@ final class CommercialMetrics
 
         if ($scope->restrictsBookings()) {
             if ($scope->propertyId !== null) {
-                $sql .= ' AND departures.property_id = ?';
+                $sql .= ' AND bookings.property_id = ?';
                 $bindings[] = $scope->propertyId;
-            }
-
-            if ($scope->itineraryId !== null) {
-                $sql .= ' AND departures.itinerary_id = ?';
-                $bindings[] = $scope->itineraryId;
             }
 
             [$scopeSql, $scopeBindings] = $this->bookingScopeSql('bookings', $scope);
@@ -344,11 +337,9 @@ final class CommercialMetrics
                 SELECT ('.$status.') AS accrual, '.$amount.' AS amount, commission_payouts.amount AS paid_amount
                 FROM bookings
                 INNER JOIN agencies ON agencies.id = bookings.agency_id
-                INNER JOIN departures ON departures.id = bookings.departure_id
-                INNER JOIN itineraries ON itineraries.id = departures.itinerary_id
                 LEFT JOIN commission_payouts ON commission_payouts.booking_id = bookings.id
                 WHERE agencies.status = ?
-                  AND departures.`date` >= ? AND departures.`date` <= ?';
+                  AND bookings.check_in >= ? AND bookings.check_in <= ?';
 
         $bindings = [
             $rules->commission->capPct,
@@ -360,13 +351,8 @@ final class CommercialMetrics
         ];
 
         if ($scope->propertyId !== null) {
-            $sql .= ' AND departures.property_id = ?';
+            $sql .= ' AND bookings.property_id = ?';
             $bindings[] = $scope->propertyId;
-        }
-
-        if ($scope->itineraryId !== null) {
-            $sql .= ' AND departures.itinerary_id = ?';
-            $bindings[] = $scope->itineraryId;
         }
 
         $sql .= $scopeSql.') accruals';
@@ -411,8 +397,8 @@ final class CommercialMetrics
 
         $sql = 'SELECT
             (SELECT COALESCE(SUM(bookings.total), 0) '.$from.') AS revenue,
-            COALESCE(SUM(CASE WHEN is_charter = 1 THEN cabins ELSE sold_claims END), 0) AS sold,
-            COALESCE(SUM(GREATEST(cabins - blocked, 0)), 0) AS sellable
+            COALESCE(SUM(CASE WHEN is_charter = 1 THEN rooms ELSE sold_claims END), 0) AS sold,
+            COALESCE(SUM(GREATEST(rooms - blocked, 0)), 0) AS sellable
             FROM ('.$berths.') berths';
 
         $row = DB::selectOne($sql, [...$revenueBindings, ...$berthBindings]);
@@ -434,32 +420,40 @@ final class CommercialMetrics
         $statuses = $this->charterSoldStatuses();
         $statusIn = implode(', ', array_fill(0, count($statuses), '?'));
 
-        $sql = 'SELECT departures.id AS id, departures.`date` AS departure_date, properties.code AS property_code,
-            (SELECT COUNT(*) FROM rooms WHERE rooms.property_id = departures.property_id) AS cabins,
+        $propertySql = '';
+        $propertyBindings = [];
+
+        if ($scope->propertyId !== null) {
+            $propertySql = ' AND bookings.property_id = ?';
+            $propertyBindings[] = $scope->propertyId;
+        }
+
+        $sql = 'SELECT stays.property_id AS id, stays.check_in AS departure_date, properties.code AS property_code,
+            (SELECT COUNT(*) FROM rooms WHERE rooms.property_id = stays.property_id) AS rooms,
             (SELECT COUNT(DISTINCT rnc.room_id) FROM room_night_claims rnc
                 INNER JOIN rooms ON rooms.id = rnc.room_id
-                INNER JOIN itineraries itin ON itin.id = departures.itinerary_id
-                WHERE rooms.property_id = departures.property_id
-                  AND rnc.night >= departures.`date`
-                  AND rnc.night < DATE_ADD(departures.`date`, INTERVAL itin.nights DAY)
+                WHERE rooms.property_id = stays.property_id
+                  AND rnc.night = stays.check_in
                   AND rnc.released_at IS NULL AND rnc.kind = ?) AS blocked,
             (SELECT COUNT(DISTINCT rnc.room_id) FROM room_night_claims rnc
                 INNER JOIN rooms ON rooms.id = rnc.room_id
-                INNER JOIN itineraries itin ON itin.id = departures.itinerary_id
                 INNER JOIN bookings sb ON sb.id = rnc.holder_id AND rnc.holder_type = ?
-                WHERE rooms.property_id = departures.property_id
-                  AND rnc.night >= departures.`date`
-                  AND rnc.night < DATE_ADD(departures.`date`, INTERVAL itin.nights DAY)
+                WHERE rooms.property_id = stays.property_id
+                  AND rnc.night = stays.check_in
                   AND rnc.released_at IS NULL AND rnc.kind = ?
                   AND sb.deleted_at IS NULL'.$soldScope.') AS sold_claims,
             (CASE WHEN EXISTS (
                 SELECT 1 FROM bookings cb
-                WHERE cb.departure_id = departures.id AND cb.deleted_at IS NULL
+                WHERE cb.property_id = stays.property_id AND cb.check_in = stays.check_in AND cb.deleted_at IS NULL
                   AND cb.type = ? AND cb.status IN ('.$statusIn.')'.$charterScope.'
             ) THEN 1 ELSE 0 END) AS is_charter
-            FROM departures
-            INNER JOIN properties ON properties.id = departures.property_id
-            WHERE departures.`date` >= ? AND departures.`date` <= ?';
+            FROM (
+                SELECT DISTINCT bookings.property_id AS property_id, bookings.check_in AS check_in
+                FROM bookings
+                WHERE bookings.deleted_at IS NULL
+                  AND bookings.check_in >= ? AND bookings.check_in <= ?'.$propertySql.'
+            ) stays
+            INNER JOIN properties ON properties.id = stays.property_id';
 
         $bindings = [
             ClaimKind::Block->value,
@@ -471,17 +465,8 @@ final class CommercialMetrics
             ...$charterBindings,
             $window->from,
             $window->to,
+            ...$propertyBindings,
         ];
-
-        if ($scope->propertyId !== null) {
-            $sql .= ' AND departures.property_id = ?';
-            $bindings[] = $scope->propertyId;
-        }
-
-        if ($scope->itineraryId !== null) {
-            $sql .= ' AND departures.itinerary_id = ?';
-            $bindings[] = $scope->itineraryId;
-        }
 
         return [$sql, $bindings];
     }
@@ -495,7 +480,7 @@ final class CommercialMetrics
     {
         [$where, $bindings] = $this->soldBookingWhere($window, $scope);
 
-        return ['FROM bookings INNER JOIN departures ON departures.id = bookings.departure_id WHERE '.$where, $bindings];
+        return ['FROM bookings WHERE '.$where, $bindings];
     }
 
     /**
@@ -507,17 +492,12 @@ final class CommercialMetrics
         $statusIn = implode(', ', array_fill(0, count($statuses), '?'));
         [$scopeSql, $scopeBindings] = $this->bookingScopeSql('bookings', $scope);
 
-        $sql = 'bookings.deleted_at IS NULL AND departures.`date` >= ? AND departures.`date` <= ?';
+        $sql = 'bookings.deleted_at IS NULL AND bookings.check_in >= ? AND bookings.check_in <= ?';
         $bindings = [$window->from, $window->to];
 
         if ($scope->propertyId !== null) {
-            $sql .= ' AND departures.property_id = ?';
+            $sql .= ' AND bookings.property_id = ?';
             $bindings[] = $scope->propertyId;
-        }
-
-        if ($scope->itineraryId !== null) {
-            $sql .= ' AND departures.itinerary_id = ?';
-            $bindings[] = $scope->itineraryId;
         }
 
         $sql .= $scopeSql;
@@ -526,12 +506,9 @@ final class CommercialMetrics
         $sql .= ' AND (
             EXISTS (
                 SELECT 1 FROM room_night_claims rnc
-                INNER JOIN rooms ON rooms.id = rnc.room_id
-                INNER JOIN itineraries itin ON itin.id = departures.itinerary_id
                 WHERE rnc.holder_type = ? AND rnc.holder_id = bookings.id
-                  AND rooms.property_id = departures.property_id
-                  AND rnc.night >= departures.`date`
-                  AND rnc.night < DATE_ADD(departures.`date`, INTERVAL itin.nights DAY)
+                  AND rnc.night >= bookings.check_in
+                  AND rnc.night < bookings.check_out
                   AND rnc.released_at IS NULL AND rnc.kind = ?
             )
             OR (bookings.type = ? AND bookings.status IN ('.$statusIn.'))
@@ -542,7 +519,7 @@ final class CommercialMetrics
     }
 
     /**
-     * Agency and channel only. Property and itinerary filter the departure.
+     * Agency and channel only. Property filters the stay.
      *
      * @return array{0: string, 1: list<int|string>}
      */
@@ -589,10 +566,10 @@ final class CommercialMetrics
      */
     private function berthRow(object $row): array
     {
-        $cabins = (int) $row->cabins;
+        $rooms = (int) $row->rooms;
         $blocked = (int) $row->blocked;
-        $sold = (int) $row->is_charter === 1 ? $cabins : (int) $row->sold_claims;
-        $sellable = max(0, $cabins - $blocked);
+        $sold = (int) $row->is_charter === 1 ? $rooms : (int) $row->sold_claims;
+        $sellable = max(0, $rooms - $blocked);
 
         return [
             'id' => (int) $row->id,

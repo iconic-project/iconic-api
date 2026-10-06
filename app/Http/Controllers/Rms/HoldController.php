@@ -34,7 +34,7 @@ final class HoldController extends Controller
                 'holder' => function (Relation $morph): void {
                     if ($morph instanceof MorphTo) {
                         $morph->morphWith([
-                            Booking::class => ['contact', 'cabin', 'departure.property', 'bookingRequest', 'claims'],
+                            Booking::class => ['contact', 'room.roomType', 'property', 'bookingRequest', 'claims'],
                         ]);
                     }
                 },
@@ -42,17 +42,15 @@ final class HoldController extends Controller
             ->when(
                 $request->filled('from') || $request->filled('to'),
                 function (Builder $query) use ($request): void {
-                    $query->whereExists(function ($departure) use ($request): void {
-                        $departure->selectRaw('1')
-                            ->from('departures')
-                            ->join('rooms', 'rooms.id', '=', 'room_night_claims.room_id')
-                            ->join('itineraries', 'itineraries.id', '=', 'departures.itinerary_id')
-                            ->whereColumn('departures.property_id', 'rooms.property_id')
-                            ->whereRaw('`room_night_claims`.`night` >= `departures`.`date`')
-                            ->whereRaw('`room_night_claims`.`night` < DATE_ADD(`departures`.`date`, INTERVAL `itineraries`.`nights` DAY)')
-                            ->when($request->filled('from'), fn ($inner) => $inner->whereDate('departures.date', '>=', (string) $request->validated('from')))
-                            ->when($request->filled('to'), fn ($inner) => $inner->whereDate('departures.date', '<=', (string) $request->validated('to')));
-                    });
+                    $query->whereHasMorph(
+                        'holder',
+                        [Booking::class],
+                        function (Builder $booking) use ($request): void {
+                            $booking
+                                ->when($request->filled('from'), fn (Builder $inner) => $inner->whereDate('check_in', '>=', (string) $request->validated('from')))
+                                ->when($request->filled('to'), fn (Builder $inner) => $inner->whereDate('check_in', '<=', (string) $request->validated('to')));
+                        },
+                    );
                 },
             )
             ->orderBy('expires_at')

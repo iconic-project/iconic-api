@@ -18,7 +18,7 @@ final class RemoveBookingExtra extends Action
     {
         $this->transaction(function () use ($extra, $actor): void {
             $extra->load('booking');
-            $booking = BookingMutationLock::acquire($extra->booking, (int) $extra->booking->departure_id);
+            $booking = BookingMutationLock::acquire($extra->booking);
             BookingCharges::assertWritable($booking);
 
             $extra = BookingExtra::query()->whereKey($extra->getKey())->lockForUpdate()->firstOrFail();

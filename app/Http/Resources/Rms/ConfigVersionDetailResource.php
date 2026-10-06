@@ -26,24 +26,6 @@ class ConfigVersionDetailResource extends JsonResource
      *     document: array{
      *         currency: string,
      *         schema_version: int,
-     *         years: list<array{year: int, suite_pp: int, owner_pp: int, charter_week: int}>,
-     *         terms: array{
-     *             cabin_deposit_pct: int,
-     *             cabin_balance_days: int,
-     *             charter_deposit_pct: int,
-     *             charter_deposit_business_days: int,
-     *             charter_balance_days: int
-     *         },
-     *         rules: array{
-     *             single_supplement_pct: int,
-     *             triple_discount_pct: int,
-     *             child_discount_pct: int,
-     *             child_discounts_per_adult: int,
-     *             child_discounts_per_cabin: int,
-     *             back_to_back_pct: int,
-     *             festive_supplement_pp: int,
-     *             festive_supplement_charter: int
-     *         },
      *         seasons: list<array{code: string, name: string, from: string, to: string}>,
      *         room_rates: list<array{room_type: string, season: string, nightly: int}>,
      *         occupancy: array{extra_adult_nightly: int, extra_child_nightly: int, single_occupancy_pct: int},
@@ -58,14 +40,23 @@ class ConfigVersionDetailResource extends JsonResource
      *         discounts: array{online_deposit_discount_pct: int, max_total_discount_pct: int|null},
      *         holds: array{web_minutes: int, web_extension_minutes: int, near_term_business_hours: int, long_lead_business_days: int, business_days: list<int>, business_day_start: string, business_day_end: string, holidays: list<string>, near_term_max_days: int},
      *         sla: array{response_hours: int, refund_business_days: int, agency_approval_business_days: int},
-     *         manifests: array{dpng_fit_days: int, dpng_charter_days: int, captain_days: int, chase_days_before_due: int},
+     *         registration: array{fields: list<string>, formats: list<string>, deadline_hours_after_check_in: int|null},
      *         alerts: array{low_occupancy_pct: int, low_occupancy_days_before: int, low_occupancy_min_consecutive_nights: int},
-     *         retention: array{passport_months_after_check_out?: int, passport_months_after_cruise?: int, medical_days_after_check_out?: int, medical_days_after_cruise?: int},
-     *         cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, sets: array<string, list<array{min_days: int, penalty_pct: int}>>},
-     *         taxes: list<array{code: string, label: string, basis: string, amount: int, child_exempt_under_age: int|null, charged: bool, shown_in_price_panel: bool}>
+     *         nps: array{survey_hours_after_check_out?: int, survey_hours_after_return?: int, alert_below: int, review_request_from: int, review_url: string},
+     *         retention: array{passport_months_after_check_out: int, medical_days_after_check_out: int, behavioural_raw_months: int, behavioural_unstitched_days: int},
+     *         legal: array{consent_versions: array{terms: string, cancellation: string, privacy: string, insurance: string, marketing: string, analytics: string, checkout_marketing: string}},
+     *         legal_entity: array{name: string, address_lines: list<string>, email: string, website: string, ein: string, bank: array{bank_name: string, account_name: string, account_number: string, routing: string, swift: string}},
+     *         documents: array{pre_arrival_days_before: int, voucher_days_before: int},
+     *         crm: array{segment_high_ltv: int, segment_mid_ltv: int, pipeline: array{sla_new_lead_business_hours: int, sla_qualifying_business_days: int, sla_negotiation_business_days: int, probability_new_lead: int, probability_qualifying: int, probability_quoted: int, probability_negotiation: int, probability_deposit_pending: int}},
+     *         privacy: array{request_sla_days: int},
+     *         reports: array{retention_days: int, pickup_days: int},
+     *         charter?: array<string, mixed>,
+     *         portal: array{invite_valid_days: int},
+     *         stay: array{check_in_time: string, check_out_time: string, no_show_cutoff_time: string, min_nights: int, max_nights: int, max_rooms_per_booking: int, check_in_requires_full_payment: bool, booking_horizon_days: int},
+     *         cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, charter_bands: list<array{min_days: int, penalty_pct: int}>, sets: array<string, list<array{min_days: int, penalty_pct: int}>>},
+     *         taxes?: list<array{code: string, label: string, basis: string, amount: int, child_exempt_under_age: int|null, charged: bool, shown_in_price_panel: bool}>
      *     }|array{
      *         guests: array{
-     *             max_per_cabin: int,
      *             max_per_property: int,
      *             child_min_age: int,
      *             child_max_age: int,
@@ -80,15 +71,6 @@ class ConfigVersionDetailResource extends JsonResource
      *         },
      *         locale: array{default: string, live: list<string>, currency: string},
      *         fees: array{
-     *             tct_pp: int,
-     *             png: array{
-     *                 foreign_over_12: int,
-     *                 foreign_12_and_under: int,
-     *                 can_adult: int,
-     *                 can_minor: int,
-     *                 national_or_resident: int,
-     *                 exempt_under_age: int
-     *             },
      *             show_in_price_panel: bool,
      *             footnote: string
      *         },
@@ -102,14 +84,8 @@ class ConfigVersionDetailResource extends JsonResource
      *             online_deposit_advantage: string,
      *             online_deposit_perk: string
      *         },
-     *         charter: array{
-     *             headline: string,
-     *             intro: string,
-     *             itinerary_label: string,
-     *             response_sla_hours: int,
-     *             group_contexts: list<string>,
-     *             thank_you: string
-     *         }
+     *         availability: array{low_availability_threshold: int},
+     *         charter?: array<string, mixed>
      *     },
      *     published_at: string,
      *     published_by: array{id: int, name: string}|null,

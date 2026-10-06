@@ -27,8 +27,8 @@ class HoldResource extends JsonResource
      * @return array{
      *     type: string,
      *     client: string,
-     *     departure: array{date: string, property: array{code: string, name: string}},
-     *     cabin: string,
+     *     stay: array{check_in: string, property: array{code: string, name: string}},
+     *     room: string,
      *     expires_at: string|null,
      *     remaining_business_minutes: int,
      *     rule: string,
@@ -43,8 +43,8 @@ class HoldResource extends JsonResource
         return [
             'type' => $payload['type'],
             'client' => $payload['client'],
-            'departure' => $payload['departure'],
-            'cabin' => $payload['cabin'],
+            'stay' => $payload['stay'],
+            'room' => $payload['room'],
             'expires_at' => Iso::utc($payload['expires_at']),
             'remaining_business_minutes' => $payload['remaining_business_minutes'],
             'rule' => $payload['rule'],
@@ -57,8 +57,8 @@ class HoldResource extends JsonResource
      * @return array{
      *     type: string,
      *     client: string,
-     *     departure: array{date: string, property: array{code: string, name: string}},
-     *     cabin: string,
+     *     stay: array{check_in: string, property: array{code: string, name: string}},
+     *     room: string,
      *     expires_at: DateTimeInterface|null,
      *     remaining_business_minutes: int,
      *     rule: string,
@@ -68,7 +68,7 @@ class HoldResource extends JsonResource
      */
     public static function fromBooking(Booking $booking): array
     {
-        $booking->loadMissing(['departure.property', 'cabin', 'contact', 'bookingRequest', 'claims']);
+        $booking->loadMissing(['property', 'room', 'contact', 'bookingRequest', 'claims']);
         $rules = app(CurrentConfig::class)->businessRules();
         $hours = BusinessHours::fromDocument($rules);
         $hold = $booking->claims
@@ -82,14 +82,14 @@ class HoldResource extends JsonResource
         return [
             'type' => $holdType instanceof HoldType ? $holdType->value : 'REQUEST',
             'client' => $booking->contact->name,
-            'departure' => [
-                'date' => $booking->departure->date->toDateString(),
+            'stay' => [
+                'check_in' => $booking->stay()->checkIn()->toDateString(),
                 'property' => [
-                    'code' => $booking->departure->property->code,
-                    'name' => $booking->departure->property->name,
+                    'code' => $booking->property->code,
+                    'name' => $booking->property->name,
                 ],
             ],
-            'cabin' => $booking->cabinLabel(),
+            'room' => $booking->roomLabel(),
             'expires_at' => $expiresAt,
             'remaining_business_minutes' => $expiresAt instanceof DateTimeInterface
                 ? $hours->remainingBusinessMinutes(now(), $expiresAt)

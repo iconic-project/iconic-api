@@ -80,7 +80,7 @@ class AgencyResource extends JsonResource
      *     commission_accrued: int,
      *     bookings_count: int,
      *     held_bookings_count: int,
-     *     bookings: list<array{id: int, reference: string|null, status: string, total: int, commission_pct: int|null, commission_amount: int, commission_approved: bool, departure_date: string, client: string, payable_date: string, accrual_status: string, payout: array{amount: int, paid_on: string, bank_reference: string}|null}>,
+     *     bookings: list<array{id: int, reference: string|null, status: string, total: int, commission_pct: int|null, commission_amount: int, commission_approved: bool, check_in: string, client: string, payable_date: string, accrual_status: string, payout: array{amount: int, paid_on: string, bank_reference: string}|null}>,
      *     portal_preview: array{commission_pct: int, net_rates: list<array{year: int, suite_pp: int, owner_pp: int, charter_week: int}>}
      * }
      */
@@ -131,7 +131,7 @@ class AgencyResource extends JsonResource
             ])->values()->all(),
         ];
 
-        $this->resource->loadMissing(['bookings.departure']);
+        $this->resource->loadMissing(['bookings.room.roomType', 'bookings.property']);
         $from = is_string($request->query('from')) ? $request->query('from') : null;
         $to = is_string($request->query('to')) ? $request->query('to') : null;
         $forStats = $this->detailed
@@ -143,7 +143,7 @@ class AgencyResource extends JsonResource
             return $payload;
         }
 
-        $this->resource->loadMissing(['bookings.contact', 'bookings.departure.itinerary', 'bookings.commissionPayout']);
+        $this->resource->loadMissing(['bookings.contact', 'bookings.room.roomType', 'bookings.property', 'bookings.commissionPayout']);
 
         $bookings = $this->bookings;
         $payload['bookings'] = $bookings->map(fn (Booking $booking): array => [
@@ -154,7 +154,7 @@ class AgencyResource extends JsonResource
             'commission_pct' => $booking->commission_pct,
             'commission_amount' => $booking->commissionAmount(),
             'commission_approved' => $booking->commission_approved,
-            'departure_date' => $booking->departure->date->toDateString(),
+            'check_in' => $booking->stay()->checkIn()->toDateString(),
             'client' => $booking->contact->name,
             'payable_date' => Accrual::payableDate($booking, $rules)->toDateString(),
             'accrual_status' => Accrual::status($booking, $rules)->value,

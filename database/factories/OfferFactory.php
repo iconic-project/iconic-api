@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\CabinCategory;
 use App\Enums\OfferChannel;
 use App\Enums\OfferStatus;
 use App\Enums\OfferType;
@@ -30,17 +29,13 @@ class OfferFactory extends Factory
             'value_text' => null,
             'channel' => OfferChannel::D2C,
             'partner' => null,
-            'cabin_types' => [CabinCategory::Suite->value],
-            'itinerary_codes' => ['WEST'],
             'booking_from' => null,
             'booking_to' => null,
-            'travel_from' => null,
-            'travel_to' => null,
             'combinable' => false,
             'is_promo_code' => false,
             'badge' => 'TEST OFFER',
             'show_on_card' => true,
-            'show_on_departures' => true,
+            'show_on_calendar' => true,
             'price_line' => 'Test offer line',
             'terms' => 'Test terms.',
             'status' => OfferStatus::Draft,
@@ -82,7 +77,7 @@ class OfferFactory extends Factory
         return $this->state(fn (): array => [
             'is_promo_code' => true,
             'show_on_card' => false,
-            'show_on_departures' => false,
+            'show_on_calendar' => false,
             'badge' => null,
         ]);
     }

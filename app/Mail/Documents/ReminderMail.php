@@ -47,7 +47,7 @@ final class ReminderMail extends Mailable
                 'booking' => $this->booking,
                 'days' => $this->days,
                 'dueDate' => $this->booking->balanceDueDate()->toDateString(),
-                'balance' => Money::format($this->booking->cruiseOutstanding()),
+                'balance' => Money::format($this->booking->stayOutstanding()),
                 'payUrl' => $this->completeUrl,
                 'replyTo' => IssuerMail::replyTo(),
             ],

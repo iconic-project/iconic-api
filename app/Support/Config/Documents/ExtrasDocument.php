@@ -40,7 +40,7 @@ final class ExtrasDocument extends ConfigDocument
                 ],
                 [
                     'code' => 'HPRE',
-                    'name' => 'Pre-cruise hotel — San Cristóbal (1 night, double)',
+                    'name' => 'Pre-arrival hotel — San Cristóbal (1 night, double)',
                     'unit' => 'per room-night',
                     'price_usd' => 320,
                     'triggers_transfer_voucher' => true,
@@ -48,7 +48,7 @@ final class ExtrasDocument extends ConfigDocument
                 ],
                 [
                     'code' => 'HPOST',
-                    'name' => 'Post-cruise hotel — San Cristóbal (1 night, double)',
+                    'name' => 'Post-stay hotel — San Cristóbal (1 night, double)',
                     'unit' => 'per room-night',
                     'price_usd' => 320,
                     'triggers_transfer_voucher' => true,

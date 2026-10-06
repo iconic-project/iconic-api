@@ -16,6 +16,6 @@ final class RequestParty
             $party .= ' + '.$children.' children';
         }
 
-        return $party.' · 1 cabin';
+        return $party.' · 1 room';
     }
 }

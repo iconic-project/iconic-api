@@ -24,22 +24,19 @@ final class BookingExtraController extends Controller
 {
     #[DocumentedResponse(
         status: 200,
-        type: 'array{data: list<App\\Http\\Resources\\Rms\\BookingExtraResource>, extras_total: int, png_collected: bool, tct_collected: bool, png_known_total: int, png_pending_count: int, tct_pp: int, tct_count: int, extras_due_hours: int, extras_due_at: string}',
+        type: 'array{data: list<App\\Http\\Resources\\Rms\\BookingExtraResource>, extras_total: int, tct_collected: bool, png_known_total: int, png_pending_count: int, tct_pp: int, tct_count: int, extras_due_hours: int, extras_due_at: string}',
     )]
     public function index(Booking $booking, GuestIssues $issues, CurrentConfig $config): AnonymousResourceCollection
     {
         $this->authorize('view', $booking);
 
-        $booking->load(['extras', 'guests', 'departure']);
+        $booking->load(['extras', 'guests']);
         $summary = $issues->summary($booking);
-        $tctPp = $booking->tct_collected
-            ? (int) ($booking->tct_rate_usd ?? $config->engineSettings()->fees->tctPp)
-            : $config->engineSettings()->fees->tctPp;
+        $tctPp = (int) ($booking->tct_rate_usd ?? 0);
 
         return BookingExtraResource::collection($booking->extras)
             ->additional([
                 'extras_total' => $booking->extrasTotal(),
-                'png_collected' => $booking->png_collected,
                 'tct_collected' => $booking->tct_collected,
                 'png_known_total' => $summary['png_known_total'],
                 'png_pending_count' => $summary['png_pending_count'],

@@ -9,20 +9,16 @@ use App\Enums\ClaimKind;
 use App\Enums\ReferenceType;
 use App\Enums\RoomStatus;
 use App\Enums\RoomTypeStatus;
-use App\Exceptions\CabinUnavailableException;
 use App\Exceptions\RoomUnavailableException;
 use App\Models\InternalBlock;
 use App\Models\Property;
 use App\Models\Room;
-use App\Models\RoomNightClaim;
 use App\Models\RoomType;
 use App\Services\Inventory\ClaimService;
 use App\Services\References\ReferenceService;
-use App\Support\Blocks\ConflictMessage;
 use App\Support\History\History;
 use App\Support\Stays\StayDates;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 
@@ -36,7 +32,7 @@ final class CreateInternalBlock extends Action
     /**
      * @param  array<string, mixed>  $data
      *
-     * @throws CabinUnavailableException
+     * @throws RoomUnavailableException
      */
     public function handle(array $data): InternalBlock
     {
@@ -59,7 +55,7 @@ final class CreateInternalBlock extends Action
                         ? $this->claims->claim($stay, $resolved['rooms'], $block, ClaimKind::Block)
                         : $this->claims->claimType($stay, $resolved['type'], $resolved['count'], $block, ClaimKind::Block);
                 } catch (RoomUnavailableException $exception) {
-                    throw $this->conflict($stay, $resolved['search'], $exception);
+                    throw $exception;
                 }
 
                 $roomIds = $claimed->pluck('room_id')->unique()->values()->all();
@@ -169,77 +165,5 @@ final class CreateInternalBlock extends Action
         }
 
         return $rooms->sortBy([['sort', 'asc'], ['id', 'asc']])->values();
-    }
-
-    /**
-     * @param  EloquentCollection<int, Room>  $rooms
-     */
-    private function conflict(StayDates $stay, EloquentCollection $rooms, RoomUnavailableException $exception): CabinUnavailableException
-    {
-        $claim = $this->firstConflict($stay, $rooms);
-
-        if (! $claim instanceof RoomNightClaim) {
-            return new CabinUnavailableException([], $exception->getMessage());
-        }
-
-        $reference = $this->holderReference($claim->holder);
-
-        return new CabinUnavailableException(
-            [[
-                'cabin' => [
-                    'id' => $claim->room->id,
-                    'code' => $claim->room->code,
-                    'label' => $claim->room->label,
-                ],
-                'held_by' => [
-                    'kind' => $claim->kind->value,
-                    'holder_type' => $claim->holder_type,
-                    'reference' => $reference,
-                ],
-            ]],
-            ConflictMessage::line($claim->room->label, $claim->night, $claim->kind, $reference),
-        );
-    }
-
-    /**
-     * @param  EloquentCollection<int, Room>  $rooms
-     */
-    private function firstConflict(StayDates $stay, EloquentCollection $rooms): ?RoomNightClaim
-    {
-        if ($rooms->isEmpty()) {
-            return null;
-        }
-
-        $claims = RoomNightClaim::query()
-            ->whereIn('room_id', $rooms->modelKeys())
-            ->whereDate('night', '>=', $stay->checkIn()->toDateString())
-            ->whereDate('night', '<=', $stay->lastNight()->toDateString())
-            ->whereNull('released_at')
-            ->where(function ($query): void {
-                $query->where('kind', '!=', ClaimKind::Hold->value)
-                    ->orWhereNull('expires_at')
-                    ->orWhere('expires_at', '>=', now());
-            })
-            ->with(['room', 'holder'])
-            ->get();
-
-        $first = $claims->sortBy([
-            fn (RoomNightClaim $claim): string => $claim->night->toDateString(),
-            fn (RoomNightClaim $claim): int => $claim->room->sort,
-            fn (RoomNightClaim $claim): int => $claim->room->id,
-        ])->first();
-
-        return $first instanceof RoomNightClaim ? $first : null;
-    }
-
-    private function holderReference(mixed $holder): ?string
-    {
-        if (! $holder instanceof Model) {
-            return null;
-        }
-
-        $reference = $holder->getAttribute('reference');
-
-        return is_string($reference) && $reference !== '' ? $reference : null;
     }
 }

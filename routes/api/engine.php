@@ -4,14 +4,10 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Engine\AvailabilityController;
 use App\Http\Controllers\Engine\CalendarController;
-use App\Http\Controllers\Engine\CharterEnquiryController;
-use App\Http\Controllers\Engine\CharterProposalController;
 use App\Http\Controllers\Engine\CheckoutController;
 use App\Http\Controllers\Engine\CompleteReservationController;
 use App\Http\Controllers\Engine\CountryController;
-use App\Http\Controllers\Engine\DepartureCabinController;
 use App\Http\Controllers\Engine\EngineEventsController;
-use App\Http\Controllers\Engine\FeedController;
 use App\Http\Controllers\Engine\MarketingLeadController;
 use App\Http\Controllers\Engine\PromoCheckController;
 use App\Http\Controllers\Engine\PropertyFeedController;
@@ -24,12 +20,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('events', EngineEventsController::class)->middleware('throttle:engine-events');
 
-Route::get('feed', FeedController::class);
 Route::get('property', PropertyFeedController::class);
 Route::get('calendar', CalendarController::class);
 Route::get('availability', AvailabilityController::class);
 Route::get('countries', CountryController::class);
-Route::get('departures/{departure}/cabins', DepartureCabinController::class);
 Route::post('promo/check', PromoCheckController::class)->middleware('throttle:engine-promo');
 Route::post('quote', QuoteController::class);
 
@@ -41,12 +35,8 @@ Route::post('checkout/{token}/submit', [CheckoutController::class, 'submit'])->m
 Route::post('marketing-leads', [MarketingLeadController::class, 'store'])->middleware('throttle:engine-checkout');
 
 Route::post('waitlist', WaitlistController::class)->middleware('throttle:engine-waitlist');
-Route::post('charter-enquiries', CharterEnquiryController::class)->middleware('throttle:engine-charter');
 
 Route::middleware(['throttle:engine-complete', 'noindex'])->group(function (): void {
-    Route::get('charter-proposal/{token}', [CharterProposalController::class, 'show']);
-    Route::post('charter-proposal/{token}/accept', [CharterProposalController::class, 'accept']);
-    Route::post('charter-proposal/{token}/decline', [CharterProposalController::class, 'decline']);
     Route::get('complete/{token}', [CompleteReservationController::class, 'show']);
     Route::put('complete/{token}/billing', [CompleteReservationController::class, 'updateBilling']);
     Route::put('complete/{token}/guests/{guest}', [CompleteReservationController::class, 'updateGuest'])->whereNumber('guest');

@@ -59,7 +59,7 @@ test('two payment draws on one booking wait 1205 never 1213 and stay distinct', 
 
     $first = onPaymentReferenceConnection('mysql', function () use ($booking): string {
         DB::beginTransaction();
-        $locked = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+        $locked = BookingMutationLock::acquire($booking);
 
         return app(InsertLedgerRow::class)->handle($locked, [
             'kind' => PaymentKind::Deposit,
@@ -75,7 +75,7 @@ test('two payment draws on one booking wait 1205 never 1213 and stay distinct', 
         DB::beginTransaction();
 
         try {
-            $locked = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+            $locked = BookingMutationLock::acquire($booking);
             app(InsertLedgerRow::class)->handle($locked, [
                 'kind' => PaymentKind::Deposit,
                 'method' => PaymentMethod::CardStripe,
@@ -96,7 +96,7 @@ test('two payment draws on one booking wait 1205 never 1213 and stay distinct', 
 
     $second = onPaymentReferenceConnection('mysql_lock', function () use ($booking): string {
         DB::beginTransaction();
-        $locked = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+        $locked = BookingMutationLock::acquire($booking);
         $reference = app(InsertLedgerRow::class)->handle($locked, [
             'kind' => PaymentKind::Deposit,
             'method' => PaymentMethod::CardStripe,

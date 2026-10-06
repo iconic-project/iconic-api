@@ -25,7 +25,7 @@ final class PriceChangedExceptionToResponseExtension extends ExceptionToResponse
     {
         $body = (new OpenApiTypes\ObjectType)
             ->addProperty('message', new OpenApiTypes\StringType)
-            ->addProperty('quote', new Reference('schemas', 'EngineQuoteResource', $this->components))
+            ->addProperty('quote', new Reference('schemas', 'StayRoomsQuoteResource', $this->components))
             ->setRequired(['message', 'quote']);
 
         return Response::make(409)

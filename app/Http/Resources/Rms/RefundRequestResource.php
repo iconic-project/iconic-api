@@ -29,7 +29,7 @@ class RefundRequestResource extends JsonResource
      *     booking: array{id: int, reference: string|null, display_reference: string|null},
      *     client: string,
      *     cancelled_at: string,
-     *     days_before_departure: int,
+     *     days_before_arrival: int,
      *     band_min_days: int,
      *     band_label: string,
      *     penalty_pct: int,
@@ -49,7 +49,7 @@ class RefundRequestResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing(['booking.contact', 'booking.departure', 'decidedBy']);
+        $this->resource->loadMissing(['booking.contact', 'booking.property', 'decidedBy']);
 
         $config = app(CurrentConfig::class);
         $rules = $config->businessRules();
@@ -75,7 +75,7 @@ class RefundRequestResource extends JsonResource
             ],
             'client' => $this->booking->contact->name,
             'cancelled_at' => Iso::utc($this->cancelled_at),
-            'days_before_departure' => $this->days_before_departure,
+            'days_before_arrival' => $this->days_before_arrival,
             'band_min_days' => $this->band_min_days,
             'band_source' => $this->band_source,
             'band_label' => $label,

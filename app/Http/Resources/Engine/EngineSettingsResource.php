@@ -16,7 +16,6 @@ class EngineSettingsResource extends JsonResource
     /**
      * @return array{
      *     guests: array{
-     *         max_per_cabin: int,
      *         max_per_property: int,
      *         child_min_age: int,
      *         child_max_age: int,
@@ -62,26 +61,8 @@ class EngineSettingsResource extends JsonResource
      *         online_deposit_perk: string
      *     },
      *     fees: array{
-     *         tct_pp: int,
-     *         png: array{
-     *             foreign_over_12: int,
-     *             foreign_12_and_under: int,
-     *             can_adult: int,
-     *             can_minor: int,
-     *             national_or_resident: int,
-     *             exempt_under_age: int
-     *         },
      *         show_in_price_panel: bool,
      *         footnote: string
-     *     },
-     *     charter: array{
-     *         headline: string,
-     *         intro: string,
-     *         itinerary_label: string,
-     *         response_sla_hours: int,
-     *         group_contexts: list<string>,
-     *         thank_you: string,
-     *         capacity: int
      *     }
      * }
      */
@@ -92,7 +73,6 @@ class EngineSettingsResource extends JsonResource
         $settings = $row['settings'];
         $rules = $row['rules'];
         $calendar = $settings->calendar->toArray();
-        $charter = $settings->charter->toArray();
 
         return [
             'guests' => $settings->guests->toArray(),
@@ -115,10 +95,6 @@ class EngineSettingsResource extends JsonResource
             'locale' => $settings->locale->toArray(),
             'copy' => $settings->copy->toArray(),
             'fees' => $settings->fees->toArray(),
-            'charter' => [
-                ...$charter,
-                'capacity' => $settings->guests->maxPerProperty,
-            ],
         ];
     }
 }

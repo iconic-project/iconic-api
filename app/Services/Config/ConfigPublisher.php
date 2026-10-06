@@ -11,7 +11,7 @@ use App\Exceptions\ConflictException;
 use App\Models\ConfigVersion;
 use App\Models\User;
 use App\Support\Config\Change;
-use App\Support\Config\Documents\RatesDocument;
+use App\Support\Config\DocumentDiff;
 use App\Support\History\History;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Validator;
@@ -19,8 +19,6 @@ use Illuminate\Validation\ValidationException;
 
 final class ConfigPublisher extends Action
 {
-    public function __construct(private DepartureConfigChecks $departureChecks) {}
-
     /**
      * @param  array<string, mixed>  $document
      */
@@ -30,15 +28,17 @@ final class ConfigPublisher extends Action
         int $baseVersion,
         ?string $approvalReference,
         ?User $actor,
+        bool $recordDroppedKeys = false,
     ): ConfigVersion {
         try {
-            return $this->transaction(function () use ($kind, $document, $baseVersion, $approvalReference, $actor): ConfigVersion {
+            return $this->transaction(function () use ($kind, $document, $baseVersion, $approvalReference, $actor, $recordDroppedKeys): ConfigVersion {
                 return $this->publishInsideTransaction(
                     $kind,
                     $document,
                     $baseVersion,
                     $approvalReference,
                     $actor,
+                    $recordDroppedKeys,
                 );
             });
         } catch (UniqueConstraintViolationException) {
@@ -55,6 +55,7 @@ final class ConfigPublisher extends Action
         int $baseVersion,
         ?string $approvalReference,
         ?User $actor,
+        bool $recordDroppedKeys = false,
     ): ConfigVersion {
         $modelClass = $kind->modelClass();
         $documentClass = $kind->documentClass();
@@ -77,23 +78,6 @@ final class ConfigPublisher extends Action
             ? $current->asDocument()
             : null;
 
-        if ($kind === ConfigKind::Rates && $typed instanceof RatesDocument) {
-            $yearErrors = $this->departureChecks->rateYearErrors(
-                $typed,
-                $published instanceof RatesDocument ? $published : null,
-            );
-
-            if ($yearErrors !== []) {
-                $prefixed = [];
-
-                foreach ($yearErrors as $path => $messages) {
-                    $prefixed['document.'.$path] = $messages;
-                }
-
-                throw ValidationException::withMessages($prefixed);
-            }
-        }
-
         $publishErrors = $typed->publishErrors($published);
 
         if ($publishErrors !== []) {
@@ -107,6 +91,14 @@ final class ConfigPublisher extends Action
         }
 
         $changes = $typed->changesAgainst($published);
+
+        if ($changes === [] && $recordDroppedKeys && $current instanceof ConfigVersion) {
+            $changes = DocumentDiff::compare(
+                $current->document,
+                $typed->toArray(),
+                $documentClass::labels(),
+            );
+        }
 
         if ($changes === []) {
             throw ValidationException::withMessages([

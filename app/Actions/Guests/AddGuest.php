@@ -12,7 +12,6 @@ use App\Models\Guest;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
 use App\Support\Bookings\BookingMutationLock;
-use App\Support\Guests\ApplyPng;
 use App\Support\Guests\GuestCapacity;
 use App\Support\History\History;
 use Illuminate\Validation\ValidationException;
@@ -21,7 +20,6 @@ final class AddGuest extends Action
 {
     public function __construct(
         private CurrentConfig $config,
-        private ApplyPng $png,
         private ApplyGuestFields $fields,
     ) {}
 
@@ -31,9 +29,8 @@ final class AddGuest extends Action
     public function handle(Booking $booking, array $data, User $actor): Guest
     {
         return $this->transaction(function () use ($booking, $data, $actor): Guest {
-            $expectedDepartureId = (int) $booking->departure_id;
-            $booking = BookingMutationLock::acquire($booking, $expectedDepartureId);
-            $booking->load(['departure', 'guests']);
+            $booking = BookingMutationLock::acquire($booking);
+            $booking->load(['guests']);
 
             $this->assertWithinLimit($booking);
 
@@ -44,10 +41,9 @@ final class AddGuest extends Action
             $guest->ecuador_resident = false;
             $guest->insurance_declared = false;
 
-            $feesBefore = $booking->png_collected ? $booking->feesCollectedFresh() : 0;
+            $feesBefore = $booking->feesCollectedFresh();
 
             $this->fields->apply($guest, $data, $actor);
-            $this->png->toGuest($guest, $booking);
             $guest->save();
 
             $count = $booking->guests()->count();
@@ -58,8 +54,8 @@ final class AddGuest extends Action
                 'what' => 'Guest slot added ('.$count.' guests)',
             ], actor: $actor);
 
-            if ($booking->png_collected && $booking->feesCollectedFresh() !== $feesBefore) {
-                BookingChargesChanged::dispatch($booking, 'PNG fee changed');
+            if ($booking->feesCollectedFresh() !== $feesBefore) {
+                BookingChargesChanged::dispatch($booking, 'Fee changed');
             }
 
             return $guest->fresh() ?? $guest;
@@ -68,7 +64,8 @@ final class AddGuest extends Action
 
     private function assertWithinLimit(Booking $booking): void
     {
-        $max = GuestCapacity::max($booking->type, $this->config->engineSettings()->guests);
+        $booking->loadMissing('roomType');
+        $max = GuestCapacity::max($booking->type, $this->config->engineSettings()->guests, $booking->roomType);
 
         if ($booking->guests->count() >= $max) {
             $message = $booking->type === BookingType::Charter

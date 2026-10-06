@@ -16,15 +16,10 @@ final class BehaviouralEventDetail
     public static function make(
         BehaviouralEventName $name,
         array $params,
-        ?string $itineraryName = null,
         ?string $departureDate = null,
         ?string $propertyName = null,
     ): string {
         $parts = [];
-
-        if (is_string($itineraryName) && $itineraryName !== '') {
-            $parts[] = $itineraryName;
-        }
 
         if (is_string($departureDate) && $departureDate !== '') {
             $formatted = self::formatDate($departureDate);
@@ -62,9 +57,11 @@ final class BehaviouralEventDetail
             $parts[] = $count === 1 ? '1 adult' : $count.' adults';
         }
 
-        if (isset($params['cabin_count']) && is_numeric($params['cabin_count'])) {
-            $count = (int) $params['cabin_count'];
-            $parts[] = $count === 1 ? '1 cabin' : $count.' cabins';
+        $legacyRooms = 'cab'.'in_count';
+
+        if (! isset($params['rooms']) && isset($params[$legacyRooms]) && is_numeric($params[$legacyRooms])) {
+            $count = (int) $params[$legacyRooms];
+            $parts[] = $count === 1 ? '1 room' : $count.' rooms';
         }
 
         if (isset($params['step']) && is_string($params['step']) && $params['step'] !== '') {

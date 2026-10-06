@@ -163,7 +163,7 @@ final class DemoRequestsSeeder extends Seeder
             'email' => $email,
         ]);
         $types = app(BackfillRoomTypes::class);
-        $type = $types->ensure((int) $departure->property_id, $category->value, $types->maxPerCabin());
+        $type = $types->ensure((int) $departure->property_id, $category->value, $types->maxOccupancy());
         $stay = $departure->stayDates();
 
         WaitlistEntry::query()->firstOrCreate(

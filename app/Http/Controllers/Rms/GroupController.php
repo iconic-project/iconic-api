@@ -29,26 +29,21 @@ final class GroupController extends Controller
             ->visibleTo($actor)
             ->with([
                 'coordinator',
-                'departure.property',
-                'bookings' => fn ($bookings) => $bookings->withLedgerAggregates()->with('cabin'),
+                'bookings' => fn ($bookings) => $bookings->withLedgerAggregates()->with(['room', 'property']),
             ])
             ->when(
                 $request->filled('from'),
                 fn (Builder $query) => $query->whereHas(
-                    'departure',
-                    fn (Builder $departure) => $departure->whereDate('date', '>=', (string) $request->validated('from')),
+                    'bookings',
+                    fn (Builder $bookings) => $bookings->whereDate('check_in', '>=', (string) $request->validated('from')),
                 ),
             )
             ->when(
                 $request->filled('to'),
                 fn (Builder $query) => $query->whereHas(
-                    'departure',
-                    fn (Builder $departure) => $departure->whereDate('date', '<=', (string) $request->validated('to')),
+                    'bookings',
+                    fn (Builder $bookings) => $bookings->whereDate('check_in', '<=', (string) $request->validated('to')),
                 ),
-            )
-            ->when(
-                $request->filled('departure_id'),
-                fn (Builder $query) => $query->where('departure_id', $request->validated('departure_id')),
             )
             ->orderBy('reference')
             ->get();

@@ -36,7 +36,6 @@ final class GenerateReport
             $window = new MetricWindow($run->window_from->toDateString(), $run->window_to->toDateString());
             $scope = new MetricScope(
                 propertyId: $this->intOrNull($parameters['property'] ?? null),
-                itineraryId: $this->intOrNull($parameters['itinerary'] ?? null),
                 channel: is_string($parameters['channel'] ?? null) && $parameters['channel'] !== ''
                     ? ChannelOfOriginGroup::from($parameters['channel'])
                     : null,

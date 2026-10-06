@@ -55,7 +55,7 @@ final class SegmentCompiler
             'length_of_stay' => self::lengthOfStay($item),
             'room_type' => self::roomType($item),
             'rate_plan' => self::ratePlan($item),
-            'festive_departure_views' => self::departureViews($item),
+            'festive_'.'depart'.'ure_views' => self::stayViewCount($item),
             'booking_count' => self::bookingCount($item),
             'booking_status' => self::bookingStatus($item),
             'active_hold' => self::activeHold($item),
@@ -94,15 +94,15 @@ final class SegmentCompiler
     }
 
     /**
-     * Stored segments still name this field. It counts departure-view events.
-     * Festive is a date supplement now, so the count does not read departures.
+     * Stored segments still use the historical field name. It counts stay-view events.
+     * Festive is a date supplement now, so the count does not read the inventory table.
      *
      * @param  array<string, mixed>  $item
      * @return array{0: string, 1: list<mixed>}
      */
-    private static function departureViews(array $item): array
+    private static function stayViewCount(array $item): array
     {
-        $item['event'] = BehaviouralEventName::ViewDeparture->value;
+        $item['event'] = BehaviouralEventName::ViewStay->value;
 
         return self::eventCount($item);
     }

@@ -23,31 +23,22 @@ final class PortalPreview
         'Fact sheet',
         'Brand deck',
         'High-res photography',
-        'Itinerary PDFs',
+        'Property PDFs',
         'Video',
     ];
 
     public const MATERIALS_NOTE = 'assets pending upload';
 
     /**
-     * @return array{commission_pct: int, net_rates: list<array{year: int, suite_pp: int, owner_pp: int, charter_week: int}>}
+     * Year tables are gone. Hotel net rates are stay_rates on the preview.
+     *
+     * @return array{commission_pct: int, net_rates: list<empty>}
      */
     public static function for(Agency $agency, RatesDocument $rates): array
     {
-        $net = [];
-
-        foreach ($rates->years as $year) {
-            $net[] = [
-                'year' => (int) $year->year,
-                'suite_pp' => $agency->netOf($year->suitePp),
-                'owner_pp' => $agency->netOf($year->ownerPp),
-                'charter_week' => $agency->netOf($year->charterWeek),
-            ];
-        }
-
         return [
             'commission_pct' => $agency->commission_pct,
-            'net_rates' => $net,
+            'net_rates' => [],
         ];
     }
 
@@ -57,7 +48,7 @@ final class PortalPreview
      *
      * @return array{
      *     commission_pct: int,
-     *     net_rates: list<array{year: int, suite_pp: int, owner_pp: int, charter_week: int}>,
+     *     net_rates: list<empty>,
      *     bookings: list<array{reference: string|null, lead_guest: string, check_in: string, check_out: string, departure_date: string, status: string, net_due: int}>,
      *     commissions: list<array{reference: string|null, check_in: string, check_out: string, rate: int|null, commission_amount: int, payable_date: string, status: CommissionAccrualStatus, payout: array{paid_on: string, reference: string|null}|null}>,
      *     stay_rates: array<string, mixed>,
@@ -67,7 +58,7 @@ final class PortalPreview
     public static function view(Agency $agency, RatesDocument $rates, BusinessRulesDocument $rules): array
     {
         $agency->loadMissing([
-            'bookings.departure.itinerary',
+            'bookings.property',
             'bookings.contact',
             'bookings.guests',
             'bookings.commissionPayout',
@@ -136,7 +127,7 @@ final class PortalPreview
     }
 
     /**
-     * Prototype formula. Commission is on the cabin total, so this also discounts
+     * Prototype formula. Commission is on the room total, so this also discounts
      * extras and fees, and it drifts once part of the balance has been paid.
      */
     public static function netDue(Booking $booking): int

@@ -42,7 +42,7 @@ final class BindDeal extends Action
 
                 if ($booking->group_id !== null) {
                     throw ValidationException::withMessages([
-                        'booking_id' => ['Bind the group, not one cabin of it.'],
+                        'booking_id' => ['Bind the group, not one room of it.'],
                     ]);
                 }
 

@@ -15,6 +15,7 @@ return [
     'supplement' => ':label',
     'rate_plan' => ':name',
     'online_deposit' => ':label',
+    'offer' => ':label',
     'length_of_stay' => 'Length of stay',
     'adult' => 'adult',
     'adults' => 'adults',

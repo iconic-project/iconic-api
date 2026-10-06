@@ -12,7 +12,7 @@
     </tr>
     <tr>
         <td>Stay balance ({{ $schedule['balance_pct'] ?? 0 }}%)</td>
-        <td>USD {{ \App\Support\Money::formatDocument((int) ($totals['cruise_balance_amount'] ?? 0)) }} — due {{ $schedule['balance_days'] ?? '' }} days before check-in: {{ $snapshot['balance_due_date'] ?? '' }}@if(! empty($schedule['cruise_received'])) ✓ RECEIVED @endif</td>
+        <td>USD {{ \App\Support\Money::formatDocument((int) ($totals['stay_balance_amount'] ?? 0)) }} — due {{ $schedule['balance_days'] ?? '' }} days before check-in: {{ $snapshot['balance_due_date'] ?? '' }}@if(! empty($schedule['stay_received'])) ✓ RECEIVED @endif</td>
     </tr>
     @if(((int) ($totals['extras_and_fees'] ?? 0)) > 0)
         <tr>

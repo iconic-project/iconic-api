@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services\Pricing;
 
-use App\Enums\BookingType;
-use App\Services\Config\CurrentConfig;
 use App\Support\Config\Documents\CancellationBand;
 use App\Support\Config\Documents\Rates\RatePlan;
 use App\Support\Payments\CancellationPenalty;
@@ -25,28 +23,6 @@ final readonly class QuoteTerms
         public ?string $cancellationSet = null,
         public array $bands = [],
     ) {}
-
-    public static function fromConfig(CurrentConfig $config, BookingType $type): self
-    {
-        $rates = $config->rates()->terms;
-
-        if ($type === BookingType::Charter) {
-            return new self(
-                balanceDays: $rates->charterBalanceDays,
-                charter: [
-                    'deposit_pct' => $rates->charterDepositPct,
-                    'deposit_business_days' => $rates->charterDepositBusinessDays,
-                    'balance_days' => $rates->charterBalanceDays,
-                    'dpng_manifest_days' => $config->businessRules()->manifests->dpngCharterDays,
-                ],
-            );
-        }
-
-        return new self(
-            balanceDays: $rates->cabinBalanceDays,
-            charter: null,
-        );
-    }
 
     /**
      * Stay terms come from the plan. Pass the plan's cancellation set when a penalty is needed.

@@ -18,7 +18,7 @@ final class UpdateBookingBilling extends Action
     public function handle(Booking $booking, array $data, ?User $actor = null, ?string $actorLabel = null): Booking
     {
         return $this->transaction(function () use ($booking, $data, $actor, $actorLabel): Booking {
-            $booking = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+            $booking = BookingMutationLock::acquire($booking);
 
             $fields = ['billing_name', 'billing_address', 'billing_email', 'billing_phone'];
             $before = [];
@@ -43,9 +43,8 @@ final class UpdateBookingBilling extends Action
 
             if ($after === []) {
                 return $booking->refresh()->load([
-                    'departure.property',
-                    'departure.itinerary',
-                    'cabin',
+                    'property',
+                    'room.roomType',
                     'contact',
                     'group.coordinator',
                     'owner',
@@ -59,9 +58,8 @@ final class UpdateBookingBilling extends Action
             History::record($booking, 'booking.billing_changed', before: $before, after: $after, actor: $actor, actorLabel: $actorLabel);
 
             return $booking->refresh()->load([
-                'departure.property',
-                'departure.itinerary',
-                'cabin',
+                'property',
+                'room.roomType',
                 'contact',
                 'group.coordinator',
                 'owner',

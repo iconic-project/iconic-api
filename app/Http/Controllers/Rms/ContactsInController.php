@@ -33,7 +33,7 @@ final class ContactsInController extends Controller
         $bookings = $this->visibleInWindow($actor, $request->fromDate(), $request->toDate())
             ->withChargesSummary()
             ->with(['contact', 'owner', 'bookingRequest'])
-            ->orderBy('departures.date')
+            ->orderBy('bookings.check_in')
             ->orderBy('bookings.reference')
             ->paginate($request->integer('per_page', 50));
 
@@ -117,7 +117,6 @@ final class ContactsInController extends Controller
     {
         return Booking::query()
             ->select('bookings.*')
-            ->join('departures', 'departures.id', '=', 'bookings.departure_id')
             ->visibleTo($actor)
             ->departingBetween($from, $to);
     }

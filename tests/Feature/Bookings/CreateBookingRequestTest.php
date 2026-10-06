@@ -8,11 +8,11 @@ use App\Enums\ClaimKind;
 use App\Enums\HoldRule;
 use App\Enums\HoldType;
 use App\Enums\PreferredChannel;
-use App\Exceptions\CabinUnavailableException;
+use App\Exceptions\RoomUnavailableException;
 use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\RoomNightClaim;
 use App\Models\ChangeHistory;
+use App\Models\RoomNightClaim;
 use App\Services\Inventory\ClaimService;
 use App\Support\HoldExpiry;
 use Database\Seeders\ConfigSeeder;
@@ -87,7 +87,7 @@ test('a claim conflict creates nothing', function (): void {
     expect(fn () => app(CreateBookingRequest::class)->handle(
         ReservationFixtures::requestPayload($departure),
         managerUser(),
-    ))->toThrow(CabinUnavailableException::class);
+    ))->toThrow(RoomUnavailableException::class);
 
     expect(Booking::query()->count())->toBe(0);
     expect(BookingRequest::query()->count())->toBe(0);

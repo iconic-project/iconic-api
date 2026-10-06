@@ -109,7 +109,7 @@ final class DealDrawer
             'room_type' => $booking->roomType?->name,
             'property_name' => $booking->property->name,
             'departure_date' => $checkIn,
-            'cabin' => $booking->room?->label,
+            'room' => $booking->room?->label,
             'charges_total' => $charges['charges'],
             'paid' => $charges['paid'],
             'balance' => $charges['balance'],

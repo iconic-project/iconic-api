@@ -55,7 +55,7 @@ final class AgencyController extends Controller
         $to = self::dateQuery($request->validated('to'));
 
         $agencies = Agency::query()
-            ->with(['users', 'decidedBy', 'bookings.departure', 'bookings.commissionPayout'])
+            ->with(['users', 'decidedBy', 'bookings.property', 'bookings.commissionPayout'])
             ->when(
                 $request->filled('status'),
                 fn (Builder $query) => $query->where('status', AgencyStatus::from((string) $request->validated('status'))),
@@ -76,7 +76,7 @@ final class AgencyController extends Controller
             ->values();
 
         $rules = $config->businessRules();
-        $approved = Agency::query()->where('status', AgencyStatus::Approved)->with('bookings.departure')->get();
+        $approved = Agency::query()->where('status', AgencyStatus::Approved)->with('bookings.property')->get();
         $totals = AgencyBookingWindow::stats(
             $approved->flatMap(
                 fn (Agency $agency) => AgencyBookingWindow::inRange($agency->bookings, $from, $to),

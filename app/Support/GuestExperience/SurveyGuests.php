@@ -12,13 +12,13 @@ use Illuminate\Support\Collection;
 final class SurveyGuests
 {
     /**
-     * Names and cabins for the staff post-trip form. No passport or notes.
+     * Names and rooms for the staff post-trip form. No passport or notes.
      *
-     * @return Collection<int, array{guest_id: int, name: string, cabin: string, responded: bool}>
+     * @return Collection<int, array{guest_id: int, name: string, room: string, responded: bool}>
      */
     public static function forBooking(Booking $booking): Collection
     {
-        $booking->loadMissing(['guests', 'cabin']);
+        $booking->loadMissing(['guests', 'room']);
 
         $responded = GuestResponse::query()
             ->where('booking_id', $booking->id)
@@ -34,7 +34,7 @@ final class SurveyGuests
                 return [
                     'guest_id' => $guest->id,
                     'name' => $guest->displayName(),
-                    'cabin' => GuestCabin::label($guest),
+                    'room' => $guest->booking->roomLabel(),
                     'responded' => in_array($guest->id, $responded, true),
                 ];
             });

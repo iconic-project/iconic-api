@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Support\Bookings;
 
 use App\Services\Config\CurrentConfig;
+use App\Support\Config\Documents\Rates\RatePlan;
 
 final class RequestQueueRules
 {
@@ -24,7 +25,7 @@ final class RequestQueueRules
      *     near_term_max_days: int,
      *     response_hours: int,
      *     business_day_minutes: int,
-     *     cabin_deposit_pct: int
+     *     deposit_pct: int
      * }
      */
     public static function fromConfig(CurrentConfig $config): array
@@ -37,7 +38,26 @@ final class RequestQueueRules
             'near_term_max_days' => $holds->nearTermMaxDays,
             'response_hours' => $config->businessRules()->sla->responseHours,
             'business_day_minutes' => self::businessDayMinutes($config),
-            'cabin_deposit_pct' => $config->rates()->terms->cabinDepositPct,
+            'deposit_pct' => self::defaultPlan($config)->depositPct,
         ];
+    }
+
+    private static function defaultPlan(CurrentConfig $config): RatePlan
+    {
+        $plans = $config->rates()->ratePlans;
+
+        foreach ($plans as $plan) {
+            if ($plan->isDefault) {
+                return $plan;
+            }
+        }
+
+        $first = $plans[0] ?? null;
+
+        if (! $first instanceof RatePlan) {
+            throw new \RuntimeException('No rate plan is published.');
+        }
+
+        return $first;
     }
 }

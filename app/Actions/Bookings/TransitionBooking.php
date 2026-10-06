@@ -12,25 +12,16 @@ use App\Enums\ClaimKind;
 use App\Enums\ReferenceType;
 use App\Enums\ReleaseReason;
 use App\Events\BookingStatusChanged;
-use App\Exceptions\CabinUnavailableException;
-use App\Exceptions\RoomUnavailableException;
 use App\Models\Booking;
 use App\Models\BookingRequest;
-use App\Models\Departure;
-use App\Models\Room;
-use App\Models\RoomNightClaim;
 use App\Models\User;
 use App\Services\Inventory\ClaimService;
 use App\Services\References\ReferenceService;
 use App\Support\Bookings\BookingMutationLock;
 use App\Support\Bookings\ConfirmRequestRooms;
-use App\Support\Bookings\FrontDeskLock;
 use App\Support\Bookings\Transitions;
 use App\Support\History\History;
-use App\Support\Inventory\CabinConflict;
-use App\Support\Inventory\DepartureLocks;
 use App\Support\Money;
-use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 final class TransitionBooking extends Action
@@ -45,19 +36,12 @@ final class TransitionBooking extends Action
 
     /**
      * @param  array<string, mixed>  $data
-     *
-     * @throws CabinUnavailableException
      */
     public function handle(Booking $booking, array $data, ?User $actor, bool $system = false, ?string $actorLabel = null): Booking
     {
         return $this->transaction(function () use ($booking, $data, $actor, $system, $actorLabel): Booking {
-            $stay = $booking->departure_id === null;
-            $booking = $stay
-                ? FrontDeskLock::acquire($booking)
-                : BookingMutationLock::acquire($booking, (int) $booking->departure_id);
-            $booking->load($stay
-                ? ['room', 'roomType', 'contact', 'claims']
-                : ['departure.property.cabins', 'cabin', 'contact', 'claims']);
+            $booking = BookingMutationLock::acquire($booking);
+            $booking->load(['property', 'room', 'roomType', 'contact', 'claims']);
 
             $to = $data['to'] instanceof BookingStatus
                 ? $data['to']
@@ -74,7 +58,7 @@ final class TransitionBooking extends Action
             $reason = $this->reason($data);
             $from = $booking->status;
 
-            $this->applyClaims($booking, $from, $to, $actor, $system, $data, $stay);
+            $this->applyClaims($booking, $from, $to, $actor, $system, $data);
 
             if ($to === BookingStatus::Confirmed && $booking->reference === null) {
                 $booking->reference = $this->references->next(ReferenceType::Booking);
@@ -101,8 +85,9 @@ final class TransitionBooking extends Action
             }
 
             return $booking->refresh()->load([
-                'departure.property',
-                'cabin',
+                'property',
+                'room',
+                'roomType',
                 'contact',
                 'group.coordinator',
                 'owner',
@@ -138,7 +123,7 @@ final class TransitionBooking extends Action
         if ($to === BookingStatus::Released) {
             return $from === BookingStatus::Requested
                 ? 'Request released — hold returned to inventory'
-                : 'Reservation released — cabin returned to inventory';
+                : 'Reservation released — room returned to inventory';
         }
 
         $what = 'Status '.Transitions::statusLabel($from).' → '.Transitions::statusLabel($to);
@@ -170,16 +155,11 @@ final class TransitionBooking extends Action
         ?User $actor,
         bool $system,
         array $data,
-        bool $stay,
     ): void {
         if ($from === BookingStatus::Requested
             && in_array($to, [BookingStatus::PendingPayment, BookingStatus::Confirmed], true)
         ) {
-            if ($stay) {
-                $this->confirmStay($booking, $actor, $data);
-            } else {
-                $this->confirmRequest($booking);
-            }
+            $this->confirmStay($booking, $actor, $data);
 
             return;
         }
@@ -226,53 +206,5 @@ final class TransitionBooking extends Action
             $booking->setRelation('room', $room);
             $booking->save();
         }
-    }
-
-    private function confirmRequest(Booking $booking): void
-    {
-        $needed = $this->cabinsFor($booking)->count();
-        $activeHold = $booking->claims
-            ->first(fn (RoomNightClaim $claim): bool => $claim->released_at === null && $claim->kind === ClaimKind::Hold);
-
-        if ($activeHold instanceof RoomNightClaim) {
-            $converted = $this->roomClaims->convert($booking, $booking, ClaimKind::Booking);
-
-            if ($converted >= $needed) {
-                return;
-            }
-        }
-
-        $departure = $booking->departure;
-
-        if (! $departure instanceof Departure) {
-            throw ValidationException::withMessages([
-                'departure_id' => ['This request has no departure.'],
-            ]);
-        }
-
-        $stay = $departure->stayDates();
-        $cabins = $this->cabinsFor($booking);
-
-        try {
-            DepartureLocks::lock((int) $departure->id);
-            $this->roomClaims->claim($stay, $cabins, $booking, ClaimKind::Booking);
-        } catch (RoomUnavailableException) {
-            throw new CabinUnavailableException(
-                CabinConflict::exception($stay, $cabins, $booking)->unavailable,
-                "The cabin was taken after this request's hold expired.",
-            );
-        }
-    }
-
-    /**
-     * @return Collection<int, Room>
-     */
-    private function cabinsFor(Booking $booking): Collection
-    {
-        if ($booking->cabin instanceof Room) {
-            return collect([$booking->cabin]);
-        }
-
-        return $booking->departure->property->cabins->sortBy('sort')->values();
     }
 }

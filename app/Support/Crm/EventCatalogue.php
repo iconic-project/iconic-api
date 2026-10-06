@@ -10,7 +10,6 @@ use App\Actions\Bookings\CreateReservation;
 use App\Actions\Bookings\ModifyStay;
 use App\Actions\Bookings\MoveBooking;
 use App\Actions\Bookings\TransitionBooking;
-use App\Actions\Charter\CreateCharterEnquiry;
 use App\Actions\Checkout\SubmitEngineCheckout;
 use App\Actions\Contacts\StitchEngineIdentity;
 use App\Actions\Crm\MoveDealStage;
@@ -35,7 +34,6 @@ use App\Events\BookingChargesChanged;
 use App\Events\BookingCreated;
 use App\Events\BookingOverdueFlagged;
 use App\Events\BookingStatusChanged;
-use App\Events\CharterEnquiryReceived;
 use App\Events\ConfigPublished;
 use App\Events\DealMarkedLost;
 use App\Events\DeliveryOutcomeRecorded;
@@ -50,7 +48,6 @@ use App\Listeners\ClearCurrentConfigCache;
 use App\Listeners\ExpireWebCheckoutSession;
 use App\Listeners\MarkRequestHoldExpired;
 use App\Listeners\OpenDealOnBookingCreated;
-use App\Listeners\OpenDealOnCharterEnquiryReceived;
 use App\Listeners\RaiseAlertsOnBookingCreated;
 use App\Listeners\RaiseAlertsOnBookingOverdueFlagged;
 use App\Listeners\RaiseAlertsOnBookingStatusChanged;
@@ -59,7 +56,6 @@ use App\Listeners\RaiseAlertsOnPaymentAwaitingWire;
 use App\Listeners\RaiseAlertsOnPaymentSettled;
 use App\Listeners\RaiseTasksOnBookingCreated;
 use App\Listeners\RaiseTasksOnBookingStatusChanged;
-use App\Listeners\RaiseTasksOnCharterEnquiry;
 use App\Listeners\RaiseTasksOnPaymentAwaitingWire;
 use App\Listeners\RaiseTasksOnRefundRequested;
 use App\Listeners\SendOnBookingChargesChanged;
@@ -161,15 +157,6 @@ final class EventCatalogue
                     self::short(RaiseTasksOnBookingCreated::class),
                     self::short(RaiseAlertsOnBookingCreated::class),
                     self::short(SyncJourneys::class),
-                ],
-            ],
-            [
-                'class' => CharterEnquiryReceived::class,
-                'name' => 'CharterEnquiryReceived',
-                'producer' => self::short(CreateCharterEnquiry::class),
-                'listeners' => [
-                    self::short(OpenDealOnCharterEnquiryReceived::class),
-                    self::short(RaiseTasksOnCharterEnquiry::class),
                 ],
             ],
             [

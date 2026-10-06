@@ -29,15 +29,8 @@ test('rules reject cabin, property, ages, search months, locale and copy shape',
         'copy' => [
             'book_now_pay_later' => '',
         ],
-        'charter' => [
-            'headline' => '',
-            'itinerary_label' => str_repeat('x', 31),
-            'response_sla_hours' => 0,
-            'group_contexts' => [],
-        ],
     ]);
     $invalid['copy']['confirmation_steps'] = ['one', 'two'];
-    $invalid['charter']['group_contexts'] = [];
 
     $errors = Validator::make($invalid, EngineSettingsDocument::rules())->errors();
 
@@ -55,10 +48,6 @@ test('rules reject cabin, property, ages, search months, locale and copy shape',
     expect($errors->has('locale.currency'))->toBeTrue();
     expect($errors->has('copy.book_now_pay_later'))->toBeTrue();
     expect($errors->has('copy.confirmation_steps'))->toBeTrue();
-    expect($errors->has('charter.headline'))->toBeTrue();
-    expect($errors->has('charter.itinerary_label'))->toBeTrue();
-    expect($errors->has('charter.response_sla_hours'))->toBeTrue();
-    expect($errors->has('charter.group_contexts'))->toBeTrue();
 });
 
 test('the locale pins reject es', function (): void {
@@ -95,22 +84,11 @@ test('rules reject property over nine cabins, reversed child ages and search ran
     expect($errors->has('calendar.default_adults'))->toBeTrue();
 });
 
-test('rules reject duplicate group contexts', function (): void {
-    $document = engineSettingsDocument();
-    $document['charter']['group_contexts'] = ['Family', 'Family'];
-
-    $errors = Validator::make($document, EngineSettingsDocument::rules())->errors();
-
-    expect($errors->has('charter.group_contexts.1'))->toBeTrue();
-});
-
-test('copyPaths classifies footnote and group contexts as copy', function (): void {
+test('copyPaths classifies footnote and copy blocks as copy', function (): void {
     expect(EngineSettingsDocument::isCopyPath('fees.footnote'))->toBeTrue();
-    expect(EngineSettingsDocument::isCopyPath('charter.group_contexts'))->toBeTrue();
     expect(EngineSettingsDocument::isCopyPath('copy.book_now_pay_later'))->toBeTrue();
     expect(EngineSettingsDocument::isCopyPath('copy.unknown_block'))->toBeTrue();
     expect(EngineSettingsDocument::isCopyPath('guests.max_per_cabin'))->toBeFalse();
-    expect(EngineSettingsDocument::isCopyPath('charter.response_sla_hours'))->toBeFalse();
     expect(EngineSettingsDocument::isCopyPath('guests'))->toBeFalse();
 });
 
@@ -125,9 +103,6 @@ test('warnings flag property capacity, under-age message and copy versus sla', f
         'copy' => [
             'traveling_with_children' => 'A 15% discount applies to children aged 7–16.',
         ],
-        'charter' => [
-            'response_sla_hours' => 12,
-        ],
     ]);
 
     $messages = array_map(
@@ -135,11 +110,9 @@ test('warnings flag property capacity, under-age message and copy versus sla', f
         EngineSettingsDocument::fromArray($draft)->warnings(null),
     );
 
-    expect($messages)->toContain('Charter capacity will show 14 guests (follows max per property).');
+    expect($messages)->toContain('The property guest cap will show 14 guests (follows max per property).');
     expect($messages)->toContain('Under-age message says 5 but children are accepted from age 6.');
     expect($messages)->toContain('"Traveling with children" mentions different ages than the guest rules (6–17).');
-    expect($messages)->toContain('Charter intro says "within 24 hours" but the SLA is 12 h.');
-    expect($messages)->toContain('Charter thank-you says "within 24 hours" but the SLA is 12 h.');
 });
 
 test('confirmation step 1 hours versus the business-rules sla is skipped when unpublished', function (): void {
@@ -200,10 +173,6 @@ test('copy with no numbers produces no copy-versus-rates or copy-versus-sla warn
                 'You receive your booking confirmation and deposit link.',
                 'After the deposit we gather guest details.',
             ],
-        ],
-        'charter' => [
-            'intro' => 'One property, yours for the week, shaped around your group.',
-            'thank_you' => 'Thank you — your charter enquiry has been received. Our team will contact you.',
         ],
     ]);
 

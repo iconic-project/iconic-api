@@ -12,9 +12,6 @@ return [
 
     'business_timezone' => 'Pacific/Galapagos',
 
-    // Infrastructure switch, not a business value. Yacht stays available until Sprint 22.
-    'seed_mode' => env('ICONIC_SEED_MODE', 'hotel'),
-
     'report_attachment_bytes' => 7_340_032,
 
     'inbox' => [

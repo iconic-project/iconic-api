@@ -20,24 +20,24 @@ final class FieldOwnership
     {
         return [
             [
-                'object' => 'Itinerary',
-                'field_group' => 'Name, description, day plan, media, SEO',
+                'object' => 'Property',
+                'field_group' => 'Name, description, media, SEO',
                 'system_of_record' => 'RMS',
                 'read_by' => 'Engine (published feed) · CRM',
                 'rule' => 'The engine renders what the RMS publishes; nothing is authored on the site.',
-                'code' => 'App\\Models\\Itinerary',
+                'code' => 'App\\Models\\Property',
             ],
             [
-                'object' => 'Departure',
-                'field_group' => 'Date, property, itinerary, status, capacity',
+                'object' => 'Stay',
+                'field_group' => 'Check-in, check-out, property, status, capacity',
                 'system_of_record' => 'RMS',
                 'read_by' => 'Engine · CRM',
-                'rule' => 'One row per property per Sunday. ANAMARA and ANATIVA are twin hulls.',
-                'code' => 'App\\Models\\Departure',
+                'rule' => 'A stay is check-in through check-out on one property.',
+                'code' => 'App\\Models\\Booking',
             ],
             [
                 'object' => 'Availability & holds',
-                'field_group' => 'Cabin state, web hold, request hold',
+                'field_group' => 'Room state, web hold, request hold',
                 'system_of_record' => 'RMS',
                 'read_by' => 'Engine · CRM',
                 'rule' => 'Derived from bookings, requests, holds and blocks — never typed anywhere. Read directly from the booking tables.',
@@ -45,7 +45,7 @@ final class FieldOwnership
             ],
             [
                 'object' => 'Rates',
-                'field_group' => 'Base rate by year and cabin type, discounts, supplements',
+                'field_group' => 'Base rate by year and room type, discounts, supplements',
                 'system_of_record' => 'RMS',
                 'read_by' => 'Engine · CRM',
                 'rule' => 'Draft → publish with an approval reference and an append-only history.',
@@ -61,7 +61,7 @@ final class FieldOwnership
             ],
             [
                 'object' => 'Booking',
-                'field_group' => 'Reference, status, cabins, pax, totals, balance calendar',
+                'field_group' => 'Reference, status, rooms, pax, totals, balance calendar',
                 'system_of_record' => 'RMS',
                 'read_by' => 'CRM (read directly from the booking tables)',
                 'rule' => 'The pipeline stage follows the booking status, never the reverse.',
@@ -165,7 +165,7 @@ final class FieldOwnership
             ],
             [
                 'object' => 'Behavioural events',
-                'field_group' => 'Page, itinerary, departure, checkout, abandon, consent',
+                'field_group' => 'Page, property, departure, checkout, abandon, consent',
                 'system_of_record' => 'Engine',
                 'read_by' => 'CRM (all) · RMS (hold and request only)',
                 'rule' => 'Anonymous events stitch to a contact on email capture. Stored in behavioural_events.',

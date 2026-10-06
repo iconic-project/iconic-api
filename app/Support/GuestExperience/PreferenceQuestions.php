@@ -22,7 +22,7 @@ final class PreferenceQuestions
             self::text('diet', 'Dietary & food preferences'),
             self::choice('breakfast', 'Breakfast style', ['Continental', 'Full', 'Light', 'Varies by day']),
             self::choice('pillow', 'Pillow preference', ['Soft', 'Medium', 'Firm']),
-            self::choice('temp', 'Preferred cabin temperature', ['Cool (18–20°C)', 'Moderate (21–23°C)', 'Warm (24–26°C)']),
+            self::choice('temp', 'Preferred room temperature', ['Cool (18–20°C)', 'Moderate (21–23°C)', 'Warm (24–26°C)']),
             self::text('bev', 'Preferred beverages'),
             self::choice('intensity', 'Physical activity intensity', ['Low', 'Moderate', 'High']),
             self::choice('time', 'Preferred activity time', ['Early (6–8am)', 'Flexible', 'Later (9–10am)']),

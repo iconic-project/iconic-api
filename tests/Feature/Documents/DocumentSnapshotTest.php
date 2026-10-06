@@ -50,7 +50,7 @@ test('snapshot totals match the booking API figures for a cabin booking', functi
     expect($snapshot['totals']['charges_total'])->toBe($booking->chargesTotal());
     expect($snapshot['totals']['paid'])->toBe(Ledger::paid($booking));
     expect($snapshot['totals']['balance'])->toBe($booking->balance());
-    expect($snapshot['totals']['cruise_outstanding'])->toBe($booking->cruiseOutstanding());
+    expect($snapshot['totals']['stay_outstanding'])->toBe($booking->stayOutstanding());
     expect(SensitiveFields::keysIn($snapshot))->toBe([]);
 });
 

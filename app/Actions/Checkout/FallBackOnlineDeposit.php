@@ -6,21 +6,21 @@ namespace App\Actions\Checkout;
 
 use App\Actions\Action;
 use App\Enums\BookingStatus;
-use App\Enums\BookingType;
 use App\Enums\CheckoutPath;
 use App\Models\Booking;
 use App\Models\CheckoutSession;
-use App\Services\Pricing\QuotedParty;
-use App\Services\Pricing\ReservationQuoter;
+use App\Models\RoomType;
+use App\Services\Pricing\StayQuoteInput;
+use App\Services\Pricing\StayQuoter;
+use App\Services\Pricing\StayReservationQuote;
 use App\Support\Config\Documents\RatesDocument;
 use App\Support\History\History;
-use App\Support\Inventory\DepartureLocks;
 
 final class FallBackOnlineDeposit extends Action
 {
     public const HISTORY = 'Online deposit not completed — the online advantage was removed; the request stays open for the team';
 
-    public function __construct(private readonly ReservationQuoter $quoter) {}
+    public function __construct(private readonly StayQuoter $quoter) {}
 
     public function handle(CheckoutSession $session): int
     {
@@ -31,7 +31,7 @@ final class FallBackOnlineDeposit extends Action
                 return 0;
             }
 
-            $session->load(['bookings.departure.property.cabins', 'bookings.ratesVersion']);
+            $session->load(['bookings.roomType', 'bookings.ratesVersion']);
             $changed = 0;
 
             foreach ($session->bookings as $booking) {
@@ -50,39 +50,51 @@ final class FallBackOnlineDeposit extends Action
             return false;
         }
 
-        DepartureLocks::lock((int) $booking->departure_id);
         $booking = Booking::query()->whereKey($booking->id)->lockForUpdate()->firstOrFail();
-        $booking->load(['departure.property.cabins', 'ratesVersion', 'cabin']);
+        $booking->load(['roomType', 'ratesVersion']);
 
         if ($booking->status !== BookingStatus::Requested || ! $booking->online_deposit) {
             return false;
         }
 
-        $document = $booking->ratesVersion->asDocument();
+        $roomType = $booking->roomType;
+        $plan = $booking->rate_plan_code;
 
-        $quote = $this->quoter->quote([
-            'departure_id' => $booking->departure_id,
-            'type' => BookingType::Cabin->value,
-            'cabins' => [[
-                'cabin_code' => $booking->cabin?->code,
-                'adults' => $booking->adults,
-                'children' => $booking->children,
-            ]],
-            'online_deposit' => false,
-            'promo_code' => $booking->promo_code,
-            'booking_date' => $booking->sold_on->toDateString(),
-            'rates' => $document instanceof RatesDocument ? $document : null,
-        ], $booking->departure);
-
-        $party = $quote->parties[0] ?? null;
-        $priced = $party instanceof QuotedParty ? $party->quote : null;
-
-        if ($priced === null) {
+        if (! $roomType instanceof RoomType || ! is_string($plan) || $plan === '') {
             return false;
         }
 
-        $booking->price_lines = $priced->toArray()['lines'];
-        $booking->total = $priced->total;
+        $document = $booking->ratesVersion->asDocument();
+        $ages = [];
+
+        foreach ($booking->child_ages ?? [] as $age) {
+            $ages[] = (int) $age;
+        }
+
+        $result = $this->quoter->quote($roomType, new StayQuoteInput(
+            $booking->stay(),
+            $roomType->code,
+            $booking->adults,
+            $ages,
+            $plan,
+            $booking->promo_code,
+            $booking->rates_version_id,
+            false,
+            $booking->main_channel->segment(),
+            $booking->sold_on->toDateString(),
+        ), $document instanceof RatesDocument ? $document : null);
+
+        if (! $result instanceof StayReservationQuote) {
+            return false;
+        }
+
+        $priced = $result->quote->toArray();
+        $booking->night_lines = $priced['night_lines'];
+        $booking->tax_lines = $priced['tax_lines'];
+        $booking->price_lines = $priced['lines'];
+        $booking->total = $result->quote->total;
+        $booking->deposit_pct = $result->quote->depositPct;
+        $booking->balance_days = $result->quote->terms->balanceDays;
         $booking->online_deposit = false;
         $booking->save();
 

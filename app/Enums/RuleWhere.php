@@ -9,6 +9,5 @@ enum RuleWhere: string
     case Here = 'here';
     case Rates = 'rates';
     case EngineSettings = 'engine_settings';
-    case Departures = 'departures';
     case Locked = 'locked';
 }

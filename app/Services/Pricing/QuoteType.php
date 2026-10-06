@@ -6,6 +6,6 @@ namespace App\Services\Pricing;
 
 enum QuoteType: string
 {
-    case Cabin = 'CABIN';
+    case Room = 'ROOM';
     case Charter = 'CHARTER';
 }

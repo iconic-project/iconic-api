@@ -22,7 +22,6 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property CarbonImmutable|null $preferred_from
  * @property CarbonImmutable|null $preferred_to
- * @property int|null $departure_id
  * @property int $guests
  * @property int $contact_id
  * @property string $message
@@ -35,14 +34,12 @@ use Illuminate\Support\Carbon;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure|null $departure
  * @property-read Contact $contact
  * @property-read Booking|null $booking
  */
 #[Fillable([
     'preferred_from',
     'preferred_to',
-    'departure_id',
     'guests',
     'contact_id',
     'message',
@@ -70,14 +67,6 @@ class CharterEnquiry extends Model
             'status' => CharterEnquiryStatus::class,
             'accepted_at' => 'datetime',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Departure, $this>
-     */
-    public function departure(): BelongsTo
-    {
-        return $this->belongsTo(Departure::class);
     }
 
     /**

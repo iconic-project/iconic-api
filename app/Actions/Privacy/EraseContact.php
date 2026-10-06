@@ -136,10 +136,10 @@ final class EraseContact extends Action
     private function guard(Contact $contact): void
     {
         $today = BusinessTime::now()->toDateString();
-        $bookings = Booking::query()->withTrashed()->with('departure')->whereIn('id', $this->bookingIds($contact))->get();
+        $bookings = Booking::query()->withTrashed()->with('property')->whereIn('id', $this->bookingIds($contact))->get();
 
         foreach ($bookings as $booking) {
-            if ($booking->departure->returnDate()->toDateString() >= $today) {
+            if ($booking->stay()->checkOut()->toDateString() >= $today) {
                 throw new HttpException(409, 'This contact has a booking whose return date has not passed.');
             }
         }

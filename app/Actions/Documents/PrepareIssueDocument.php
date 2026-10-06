@@ -29,11 +29,10 @@ final class PrepareIssueDocument extends Action
         bool $system = false,
     ): Document {
         return $this->transaction(function () use ($booking, $kind, $reason, $payment, $actor, $system): Document {
-            $locked = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+            $locked = BookingMutationLock::acquire($booking);
             $locked->load([
-                'departure.property',
-                'departure.itinerary',
-                'cabin',
+                'property',
+                'room.roomType',
                 'contact',
                 'group.coordinator',
                 'agency',

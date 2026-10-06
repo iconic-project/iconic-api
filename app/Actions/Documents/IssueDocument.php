@@ -55,7 +55,7 @@ final class IssueDocument extends Action
                 $disk,
                 &$path,
             ): Document {
-                $locked = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+                $locked = BookingMutationLock::acquire($booking);
 
                 if ($kind->isReceipt()) {
                     if (! $payment instanceof Payment) {

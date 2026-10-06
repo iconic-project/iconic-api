@@ -41,7 +41,7 @@ final class DocumentsDueCommand extends Command
         $sent = 0;
 
         Booking::query()
-            ->with(['departure', 'extras', 'contact', 'group.coordinator', 'agency', 'guests', 'documents.deliveries'])
+            ->with(['property', 'extras', 'contact', 'group.coordinator', 'agency', 'guests', 'documents.deliveries'])
             ->whereIn('status', [
                 BookingStatus::Confirmed,
                 BookingStatus::OnHoldAgency,
@@ -101,7 +101,7 @@ final class DocumentsDueCommand extends Command
             return 0;
         }
 
-        if ($booking->cruiseOutstanding() <= 0) {
+        if ($booking->stayOutstanding() <= 0) {
             return 0;
         }
 

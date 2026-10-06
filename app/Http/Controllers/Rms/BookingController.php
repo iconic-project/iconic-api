@@ -19,9 +19,10 @@ use App\Actions\Bookings\UndoCheckIn;
 use App\Actions\Bookings\UpdateBooking;
 use App\Enums\BookingSegment;
 use App\Enums\BookingStatus;
+use App\Enums\MainChannel;
 use App\Enums\Permission;
 use App\Enums\UserStatus;
-use App\Exceptions\CabinUnavailableException;
+use App\Exceptions\RoomUnavailableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rms\CheckInBookingRequest;
 use App\Http\Requests\Rms\CheckOutBookingRequest;
@@ -47,13 +48,11 @@ use App\Http\Resources\Rms\ChangeHistoryResource;
 use App\Http\Resources\Rms\ModifyStayPreviewResource;
 use App\Http\Resources\Rms\MovePreviewResource;
 use App\Http\Resources\Rms\ReservationCreatedResource;
-use App\Http\Resources\Rms\ReservationQuoteResource;
 use App\Http\Resources\Rms\StayRoomsQuoteResource;
 use App\Models\Booking;
 use App\Models\ChangeHistory;
 use App\Models\User;
 use App\Services\Config\CurrentConfig;
-use App\Services\Pricing\ReservationQuoter;
 use App\Services\Pricing\StayQuoter;
 use App\Support\Bookings\BookingFormOptions;
 use App\Support\BusinessTime;
@@ -118,10 +117,6 @@ final class BookingController extends Controller
                 fn (Builder $query) => $query->where('bookings.status', BookingStatus::from((string) $request->validated('status'))),
             )
             ->when(
-                $request->filled('departure_id'),
-                fn (Builder $query) => $query->where('bookings.departure_id', $request->validated('departure_id')),
-            )
-            ->when(
                 $request->filled('group_id'),
                 fn (Builder $query) => $query->where('bookings.group_id', $request->validated('group_id')),
             )
@@ -146,9 +141,7 @@ final class BookingController extends Controller
             ->withGuestSummary()
             ->withChargesSummary()
             ->with([
-                'departure.property',
-                'departure.itinerary',
-                'cabin.roomType',
+                'room.roomType',
                 'roomType',
                 'property',
                 'contact',
@@ -181,26 +174,28 @@ final class BookingController extends Controller
 
     public function quote(
         QuoteReservationRequest $request,
-        ReservationQuoter $quoter,
         StayQuoter $stayQuoter,
-    ): ReservationQuoteResource|StayRoomsQuoteResource {
+    ): StayRoomsQuoteResource {
         $this->authorize('create', Booking::class);
 
-        if ($request->filled('check_in')) {
-            /** @var array{check_in: string, check_out: string, rooms: list<array{room_type: string, adults: int, child_ages?: list<int>, rate_plan?: string|null, promo?: string|null, online_deposit?: bool}>} $validated */
-            $validated = $request->validated();
+        /** @var array{check_in: string, check_out: string, main_channel?: string, rooms: list<array{room_type: string, adults: int, child_ages?: list<int>, rate_plan?: string|null, promo?: string|null, online_deposit?: bool}>} $validated */
+        $validated = $request->validated();
+        $channel = isset($validated['main_channel'])
+            ? MainChannel::from($validated['main_channel'])->segment()->value
+            : BookingSegment::D2C->value;
 
-            return new StayRoomsQuoteResource($stayQuoter->quoteRooms(
-                StayDates::of($validated['check_in'], $validated['check_out']),
-                $validated['rooms'],
-            ));
+        foreach ($validated['rooms'] as $index => $room) {
+            $validated['rooms'][$index]['channel'] = $channel;
         }
 
-        return new ReservationQuoteResource($quoter->quote($request->validated()));
+        return new StayRoomsQuoteResource($stayQuoter->quoteRooms(
+            StayDates::of($validated['check_in'], $validated['check_out']),
+            $validated['rooms'],
+        ));
     }
 
     /**
-     * @throws CabinUnavailableException
+     * @throws RoomUnavailableException
      */
     #[DocumentedResponse(
         status: 201,
@@ -235,9 +230,7 @@ final class BookingController extends Controller
             ->withGuestSummary()
             ->withChargesSummary()
             ->with([
-                'departure.property',
-                'departure.itinerary',
-                'cabin.roomType',
+                'room.roomType',
                 'roomType',
                 'property',
                 'contact',
@@ -356,7 +349,7 @@ final class BookingController extends Controller
     }
 
     /**
-     * @throws CabinUnavailableException
+     * @throws RoomUnavailableException
      */
     public function overdueDecision(
         OverdueDecisionRequest $request,
@@ -399,7 +392,7 @@ final class BookingController extends Controller
     ): MovePreviewResource|ModifyStayPreviewResource {
         $this->authorize('move', $booking);
 
-        if ($request->filled('room_id') && ! $request->filled('departure_id')) {
+        if ($request->filled('room_id')) {
             return new ModifyStayPreviewResource($moveRoom->preview($booking, $request->validated(), $this->actor($request)));
         }
 
@@ -407,14 +400,14 @@ final class BookingController extends Controller
     }
 
     /**
-     * @throws CabinUnavailableException
+     * @throws RoomUnavailableException
      */
     public function move(MoveBookingRequest $request, Booking $booking, MoveBooking $action, MoveRoom $moveRoom): BookingResource
     {
         $this->authorize('move', $booking);
         $actor = $this->actor($request);
 
-        if ($request->filled('room_id') && ! $request->filled('departure_id')) {
+        if ($request->filled('room_id')) {
             return new BookingResource($moveRoom->handle($booking, $request->validated(), $actor));
         }
 
@@ -466,13 +459,13 @@ final class BookingController extends Controller
      */
     private function overdueKpis(Builder $query): array
     {
-        [$cruiseSql, $paid] = Booking::cruiseOutstandingSql();
+        [$staySql, $paid] = Booking::stayOutstandingSql();
 
         $row = $query
             ->overdue()
             ->toBase()
             ->select([])
-            ->selectRaw('COUNT(*) as overdue_count, COALESCE(SUM('.$cruiseSql.'), 0) as overdue_amount', $paid)
+            ->selectRaw('COUNT(*) as overdue_count, COALESCE(SUM('.$staySql.'), 0) as overdue_amount', $paid)
             ->first();
 
         return [

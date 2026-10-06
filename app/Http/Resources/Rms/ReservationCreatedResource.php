@@ -31,7 +31,6 @@ class ReservationCreatedResource extends JsonResource
      *         adults: int,
      *         children: int,
      *         party_label: string,
-     *         back_to_back: bool,
      *         total: int,
      *         balance: int,
      *         deposit_pct: int,
@@ -46,9 +45,8 @@ class ReservationCreatedResource extends JsonResource
      *         internal_notes: string|null,
      *         can_act: bool,
      *         allowed_transitions: list<array{to: string, reason_required: bool}>,
-     *         departure: array{id: int, date: string, return_date: string, itinerary_name: string, embark: string, festive: bool, property: array{id: int, code: string, name: string}},
-     *         cabin: array{id: int, code: string, label: string}|null,
-     *         cabin_label: string,
+     *         room: array{id: int, code: string, label: string}|null,
+     *         room_label: string,
      *         contact: array{id: int, name: string, email: string|null, phone: string|null, country: string|null, preferred_channel: string},
      *         group: array{id: int, reference: string, name: string, coordinator: array{id: int, name: string}}|null,
      *         owner: array{id: int, name: string},
@@ -64,9 +62,7 @@ class ReservationCreatedResource extends JsonResource
         $created = $this->resource;
 
         $created->bookings->load([
-            'departure.property',
-            'departure.itinerary',
-            'cabin',
+            'room',
             'contact',
             'group.coordinator',
             'owner',

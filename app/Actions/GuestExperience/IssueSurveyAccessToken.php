@@ -24,10 +24,10 @@ final class IssueSurveyAccessToken extends Action
     {
         /** @var BookingAccessToken $token */
         $token = $this->transaction(function () use ($booking, $guestId, $coveredGuestIds): BookingAccessToken {
-            $booking->loadMissing('departure.itinerary');
+            $booking->loadMissing('property');
             $plain = bin2hex(random_bytes(32));
             $pageUrl = rtrim((string) config('iconic.engine_url'), '/').'/survey/'.$plain;
-            $returnDate = $booking->departure->returnDate()->toDateString();
+            $returnDate = $booking->stay()->checkOut()->toDateString();
             $expiresOn = BusinessTime::calendarDay($returnDate)->addDays(self::EXPIRES_DAYS_AFTER_RETURN)->toDateString();
 
             return BookingAccessToken::query()->create([

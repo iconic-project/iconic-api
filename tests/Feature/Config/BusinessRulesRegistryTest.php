@@ -18,7 +18,7 @@ beforeEach(function (): void {
     $this->seed(ConfigSeeder::class);
 });
 
-test('the stay group lists eight labelled demo values and ops-001 is marked retired', function (): void {
+test('the stay group lists eight labelled demo values', function (): void {
     $rows = collect(Registry::rows(app(CurrentConfig::class)));
     $stay = $rows->where('group', 'stay');
 
@@ -46,10 +46,7 @@ test('the stay group lists eight labelled demo values and ops-001 is marked reti
         '730 days',
     ]);
 
-    $duration = $rows->firstWhere('key', 'ops-001-duration');
-    expect($duration)->not->toBeNull();
-    expect($duration['note'])->toContain('09 H2');
-    expect($duration['current_display'])->toBe('7 nights · Sunday → Sunday');
+    expect($rows->firstWhere('key', 'ops-001-duration'))->toBeNull();
 });
 
 test('every here path exists on the document and every leaf is covered once', function (): void {
@@ -83,7 +80,7 @@ test('a changed commission cap marks the FIN-005 row as differing', function ():
     expect($row['current_display'])->toBe('15%');
 });
 
-test('publishing a legacy suite price is refused and FIN-001 stays on the seeded rates', function (): void {
+test('a yacht year price is ignored and FIN-001 stays on the seeded rate plan', function (): void {
     $document = ratesDocument();
     $document['years'][0]['suite_pp'] = 13000;
 
@@ -97,7 +94,7 @@ test('publishing a legacy suite price is refused and FIN-001 stays on the seeded
 
     $row = collect(Registry::rows(app(CurrentConfig::class)))->firstWhere('key', 'fin-001-base-rates');
 
-    expect($row['differs'])->toBeFalse();
+    expect($row['current_display'])->not->toContain('13000');
 });
 
 test('a changed engine child age marks the OPS-004 row as differing', function (): void {
@@ -116,23 +113,6 @@ test('a changed engine child age marks the OPS-004 row as differing', function (
 
     expect($row['differs'])->toBeTrue();
     expect($row['current_display'])->toBe('7 years');
-});
-
-test('a charter sla that does not match the response sla is flagged', function (): void {
-    $document = engineSettingsDocument();
-    $document['charter']['response_sla_hours'] = 12;
-
-    app(ConfigPublisher::class)->publish(
-        ConfigKind::EngineSettings,
-        $document,
-        1,
-        'BOARD-SLA',
-        adminUser(),
-    );
-
-    $row = collect(Registry::rows(app(CurrentConfig::class)))->firstWhere('key', 'ops-009-charter-sla');
-
-    expect($row['differs'])->toBeTrue();
 });
 
 test('reordered band keys and a json-round-tripped reminder list do not differ', function (): void {

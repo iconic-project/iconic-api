@@ -9,7 +9,6 @@ use App\Http\Controllers\Rms\BookingExtraController;
 use App\Http\Controllers\Rms\BookingFeesController;
 use App\Http\Controllers\Rms\BusinessRulesController;
 use App\Http\Controllers\Rms\CalendarController;
-use App\Http\Controllers\Rms\CharterEnquiryController;
 use App\Http\Controllers\Rms\ClientDocumentController;
 use App\Http\Controllers\Rms\CommissionController;
 use App\Http\Controllers\Rms\CompleteLinkController;
@@ -18,7 +17,6 @@ use App\Http\Controllers\Rms\ContactController;
 use App\Http\Controllers\Rms\ContactsInController;
 use App\Http\Controllers\Rms\CountryController;
 use App\Http\Controllers\Rms\DeliveryController;
-use App\Http\Controllers\Rms\DepartureController;
 use App\Http\Controllers\Rms\DocumentController;
 use App\Http\Controllers\Rms\EngineSettingsController;
 use App\Http\Controllers\Rms\ExtrasController;
@@ -30,8 +28,6 @@ use App\Http\Controllers\Rms\GuestResponseController;
 use App\Http\Controllers\Rms\HoldController;
 use App\Http\Controllers\Rms\HotelKpisController;
 use App\Http\Controllers\Rms\InternalBlockController;
-use App\Http\Controllers\Rms\ItineraryController;
-use App\Http\Controllers\Rms\ManifestController;
 use App\Http\Controllers\Rms\MetricsController;
 use App\Http\Controllers\Rms\OfferController;
 use App\Http\Controllers\Rms\PaymentController;
@@ -105,7 +101,6 @@ Route::get('properties/{property}', [PropertyController::class, 'show'])->whereN
 Route::patch('properties/{property}', [PropertyController::class, 'update'])->whereNumber('property');
 Route::post('properties/{property}/hero', [PropertyController::class, 'hero'])->whereNumber('property');
 Route::get('properties/{property}/history', [PropertyController::class, 'history'])->whereNumber('property');
-Route::get('yachts', [PropertyController::class, 'index']);
 
 Route::get('properties/{property}/room-types', [RoomTypeController::class, 'index'])->whereNumber('property');
 Route::post('properties/{property}/room-types', [RoomTypeController::class, 'store'])->whereNumber('property');
@@ -120,29 +115,7 @@ Route::patch('rooms/{room}', [RoomController::class, 'update'])->whereNumber('ro
 Route::post('rooms/{room}/deactivate', [RoomController::class, 'deactivate'])->whereNumber('room');
 Route::get('rooms/{room}/history', [RoomController::class, 'history'])->whereNumber('room');
 
-Route::get('itineraries', [ItineraryController::class, 'index']);
-Route::get('itineraries/defaults', [ItineraryController::class, 'defaults']);
-Route::post('itineraries', [ItineraryController::class, 'store']);
-Route::get('itineraries/{itinerary}', [ItineraryController::class, 'show']);
-Route::patch('itineraries/{itinerary}', [ItineraryController::class, 'update']);
-Route::post('itineraries/{itinerary}/image', [ItineraryController::class, 'image']);
-Route::delete('itineraries/{itinerary}', [ItineraryController::class, 'destroy']);
-Route::get('itineraries/{itinerary}/history', [ItineraryController::class, 'history']);
-
 Route::get('calendar', CalendarController::class);
-
-Route::get('departures', [DepartureController::class, 'index']);
-Route::post('departures', [DepartureController::class, 'store']);
-Route::post('departures/generate-season', [DepartureController::class, 'generate']);
-Route::get('departures/{departure}/layout', [DepartureController::class, 'layout'])->whereNumber('departure');
-Route::get('departures/{departure}', [DepartureController::class, 'show'])->whereNumber('departure');
-Route::patch('departures/{departure}', [DepartureController::class, 'update'])->whereNumber('departure');
-Route::delete('departures/{departure}', [DepartureController::class, 'destroy'])->whereNumber('departure');
-Route::get('departures/{departure}/history', [DepartureController::class, 'history'])->whereNumber('departure');
-Route::get('manifests', [ManifestController::class, 'index']);
-Route::get('departures/{departure}/manifests', [ManifestController::class, 'versions'])->whereNumber('departure');
-Route::post('departures/{departure}/manifests/{kind}', [ManifestController::class, 'store'])->whereNumber('departure')->whereIn('kind', ['DPNG', 'CAPTAIN']);
-Route::get('departures/{departure}/manifests/{manifest}/file/{format}', [ManifestController::class, 'file'])->whereNumber(['departure', 'manifest'])->whereIn('format', ['pdf', 'csv', 'xlsx']);
 
 Route::get('payments', [PaymentController::class, 'index']);
 Route::get('payments/options', [PaymentController::class, 'options']);
@@ -216,14 +189,11 @@ Route::post('reports/subscriptions/{subscription}/run-now', [ReportSubscriptionC
 
 Route::get('guest-experience', [GuestExperienceController::class, 'index']);
 Route::get('guest-experience/arrivals', [GuestExperienceController::class, 'arrivals']);
-Route::get('guest-experience/departures', [GuestExperienceController::class, 'retiredDepartures']);
 Route::get('guest-experience/nps', [GuestResponseController::class, 'index']);
 Route::get('guest-experience/questions', [GuestExperienceController::class, 'questions']);
 Route::get('guest-experience/survey-questions', [GuestResponseController::class, 'questions']);
 Route::get('bookings/{booking}/survey-guests', [GuestResponseController::class, 'surveyGuests'])->whereNumber('booking');
 Route::post('bookings/{booking}/guest-responses', [GuestResponseController::class, 'store'])->whereNumber('booking');
-Route::get('departures/{departure}/guest-experience', [GuestExperienceController::class, 'show'])->whereNumber('departure');
-Route::get('departures/{departure}/hotel-manager-brief', [GuestExperienceController::class, 'retiredBrief'])->whereNumber('departure');
 Route::get('guests/{guest}/preferences', [GuestExperienceController::class, 'preferences'])->whereNumber('guest');
 Route::put('guests/{guest}/preferences', [GuestExperienceController::class, 'update'])->whereNumber('guest');
 
@@ -277,10 +247,6 @@ Route::post('requests/{booking}/confirm', [RequestController::class, 'confirm'])
 Route::post('requests/{booking}/release', [RequestController::class, 'release'])->whereNumber('booking');
 
 Route::get('holds', [HoldController::class, 'index']);
-
-Route::get('charter-enquiries', [CharterEnquiryController::class, 'index']);
-Route::patch('charter-enquiries/{enquiry}', [CharterEnquiryController::class, 'update'])->whereNumber('enquiry');
-Route::post('charter-enquiries/{enquiry}/proposal', [CharterEnquiryController::class, 'proposal'])->whereNumber('enquiry');
 
 Route::get('waitlist', [WaitlistController::class, 'index']);
 Route::post('waitlist', [WaitlistController::class, 'store']);

@@ -8,7 +8,6 @@ use App\Enums\BookingAccessTokenPurpose;
 use App\Enums\DeliveryKind;
 use App\Enums\PaymentKind;
 use App\Enums\PaymentLinkStatus;
-use App\Mail\Charter\CharterProposalMail;
 use App\Mail\Journeys\JourneyMail;
 use App\Models\Booking;
 use App\Models\BookingAccessToken;
@@ -24,7 +23,7 @@ final class DeliveryMailFactory
 {
     public static function make(Delivery $delivery, ?string $pdfBytes): Mailable
     {
-        $delivery->loadMissing(['booking.departure', 'booking.paymentLinks', 'booking.accessTokens', 'document']);
+        $delivery->loadMissing(['booking.property', 'booking.paymentLinks', 'booking.accessTokens', 'document']);
 
         return match ($delivery->kind) {
             DeliveryKind::Reminder => new ReminderMail(
@@ -61,7 +60,7 @@ final class DeliveryMailFactory
                 app(CurrentConfig::class)->businessRules()->nps->reviewUrl,
             ),
             DeliveryKind::WaitlistOffer => WaitlistOfferCopy::mail($delivery),
-            DeliveryKind::CharterProposal => CharterProposalMail::forDelivery($delivery),
+            DeliveryKind::CharterProposal => throw new InvalidArgumentException('Charter proposal mail has been removed.'),
             DeliveryKind::Journey => new JourneyMail($delivery),
             default => self::documentMail($delivery, $pdfBytes),
         };

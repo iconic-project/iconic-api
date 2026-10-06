@@ -45,13 +45,13 @@ function insertPreChangeCharterRules(): BusinessRuleVersion
     return $row;
 }
 
-test('config-verify fails when charter rules are missing, then the migration publishes them', function (): void {
+test('the historical migration still publishes charter bands and does not keep the enquiry group', function (): void {
     $v1 = insertPreChangeCharterRules();
     $this->seed(ConfigSeeder::class);
 
     $this->artisan('iconic:config-verify')
         ->assertFailed()
-        ->expectsOutputToContain('business_rules v1: charter.deposit_business_days');
+        ->expectsOutputToContain('business_rules v1: cancellation.charter_bands');
 
     runCharterRulesMigration();
 
@@ -79,18 +79,21 @@ test('config-verify fails when charter rules are missing, then the migration pub
         ->expectsOutputToContain('business_rules v2: valid');
 });
 
-test('the charter rules migration is a no-op when the keys are already present', function (): void {
+test('re-running the historical migration on the current document publishes the enquiry group again', function (): void {
     $this->seed(ConfigSeeder::class);
 
     runCharterRulesMigration();
 
-    expect(BusinessRuleVersion::query()->count())->toBe(1);
+    $latest = BusinessRuleVersion::query()->orderByDesc('version')->firstOrFail();
+    expect($latest->version)->toBe(2);
+    expect($latest->document['charter']['deposit_business_days'])->toBe(5);
+    expect($latest->document['cancellation']['charter_bands'])->not->toBeEmpty();
 });
 
-test('a document without charter rules reads the new fields as empty defaults', function (): void {
+test('a document without charter bands reads them as an empty list', function (): void {
     $document = BusinessRulesDocument::fromArray([]);
 
-    expect($document->charter->depositBusinessDays)->toBe(0);
-    expect($document->charter->proposalValidBusinessDays)->toBe(0);
+    expect($document->charter)->toBeNull();
+    expect($document->toArray())->not->toHaveKey('charter');
     expect($document->charterBands)->toBe([]);
 });

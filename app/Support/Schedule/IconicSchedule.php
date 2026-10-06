@@ -76,7 +76,7 @@ final class IconicSchedule
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping()
                 ->onOneServer()
-                ->description('Email waitlist entries when a cabin in their category is free'),
+                ->description('Email waitlist entries when a room in their category is free'),
         );
 
         RecordScheduledRuns::attach(
@@ -84,15 +84,6 @@ final class IconicSchedule
                 ->daily()
                 ->timezone(BusinessTime::zone())
                 ->withoutOverlapping(),
-        );
-
-        RecordScheduledRuns::attach(
-            $schedule->command('iconic:charter-deposits')
-                ->daily()
-                ->timezone(BusinessTime::zone())
-                ->withoutOverlapping()
-                ->onOneServer()
-                ->description('Warn when a charter deposit is unpaid after its due date'),
         );
 
         RecordScheduledRuns::attach(

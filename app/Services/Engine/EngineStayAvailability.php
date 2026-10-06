@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Engine;
 
+use App\Models\Offer;
 use App\Models\RoomType;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Bookability;
@@ -99,6 +100,7 @@ final class EngineStayAvailability
             'rooms_left' => $this->roomsLeft($booked),
             'waitlist_enabled' => (bool) $type->waitlist_enabled,
             'quotes' => $quotes,
+            'offers' => $this->pills($quotes),
         ];
     }
 
@@ -141,6 +143,46 @@ final class EngineStayAvailability
         }
 
         return $quotes;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $quotes
+     * @return list<array{code: string, badge: string}>
+     */
+    private function pills(array $quotes): array
+    {
+        $codes = [];
+
+        foreach ($quotes as $quote) {
+            $lines = $quote['lines'] ?? [];
+
+            if (! is_array($lines)) {
+                continue;
+            }
+
+            foreach ($lines as $line) {
+                if (is_array($line) && is_string($line['code'] ?? null) && $line['code'] !== 'online_deposit') {
+                    $codes[] = $line['code'];
+                }
+            }
+        }
+
+        if ($codes === []) {
+            return [];
+        }
+
+        $pills = [];
+
+        foreach (Offer::query()->whereIn('code', array_values(array_unique($codes)))->get() as $offer) {
+            if ($offer->enginePlacement() === 'badge' && is_string($offer->badge) && $offer->badge !== '') {
+                $pills[] = [
+                    'code' => $offer->code,
+                    'badge' => $offer->badge,
+                ];
+            }
+        }
+
+        return $pills;
     }
 
     /**

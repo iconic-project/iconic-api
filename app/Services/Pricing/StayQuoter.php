@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Pricing;
 
+use App\Enums\BookingSegment;
 use App\Enums\ConfigKind;
 use App\Enums\RoomTypeStatus;
 use App\Models\RoomType;
@@ -44,7 +45,7 @@ final class StayQuoter
         }
 
         $priced = $this->withBands($priced, $rates, $input->ratePlan);
-        $applied = $this->discounts->applyToStay($priced, $input->onlineDeposit);
+        $applied = $this->discounts->applyToStay($priced, $input);
         $party = new StayParty($input->adults, $input->childAges);
         $taxLines = $this->taxes->forStay(
             $applied['quote'],
@@ -62,7 +63,7 @@ final class StayQuoter
     /**
      * One quote per room. Group rules are not applied.
      *
-     * @param  list<array{room_type: string, adults: int, child_ages?: list<int>, rate_plan?: string|null, promo?: string|null, online_deposit?: bool}>  $rooms
+     * @param  list<array{room_type: string, adults: int, child_ages?: list<int>, rate_plan?: string|null, promo?: string|null, online_deposit?: bool, channel?: string}>  $rooms
      */
     public function quoteRooms(StayDates $stay, array $rooms, ?RatesDocument $draft = null): StayRoomsQuote
     {
@@ -102,6 +103,11 @@ final class StayQuoter
             }
 
             $promo = $spec['promo'] ?? null;
+            $channel = BookingSegment::D2C;
+
+            if (isset($spec['channel'])) {
+                $channel = BookingSegment::tryFrom($spec['channel']) ?? BookingSegment::D2C;
+            }
 
             $quoted[] = [
                 'room_type' => $code,
@@ -114,6 +120,7 @@ final class StayQuoter
                     is_string($promo) && $promo !== '' ? $promo : null,
                     $versionId,
                     (bool) ($spec['online_deposit'] ?? false),
+                    $channel,
                 ), $draft),
             ];
         }

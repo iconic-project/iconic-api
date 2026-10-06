@@ -2,22 +2,14 @@
 
 declare(strict_types=1);
 
-use App\Enums\CharterEnquiryStatus;
-use App\Enums\ContactType;
-use App\Enums\Permission;
 use App\Enums\WaitlistSource;
-use App\Mail\CharterEnquiryMail;
-use App\Models\CharterEnquiry;
-use App\Models\Role;
 use App\Models\RoomType;
-use App\Models\User;
 use App\Models\WaitlistEntry;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\DemoUsersSeeder;
 use Database\Seeders\HotelSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
-use Illuminate\Support\Facades\Mail;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
@@ -45,26 +37,6 @@ function engineWaitlistPayload(string $roomType = 'STD', array $overrides = []):
     ], $overrides);
 }
 
-/**
- * @param  array<string, mixed>  $overrides
- * @return array<string, mixed>
- */
-function engineCharterPayload(array $overrides = []): array
-{
-    return array_merge([
-        'preferred_from' => '2027-11-01',
-        'preferred_to' => '2027-12-31',
-        'guests' => 12,
-        'contact' => [
-            'first_name' => 'Charter',
-            'last_name' => 'Guest',
-            'email' => 'charter-'.uniqid().'@iconic.test',
-            'phone' => '+15550000',
-        ],
-        'message' => 'We would like the property for a week in November.',
-    ], $overrides);
-}
-
 test('the engine waitlist is stored with source engine and refused when off', function (): void {
     $this->seed(DemoUsersSeeder::class);
     $this->seed(HotelSeeder::class);
@@ -89,92 +61,7 @@ test('a room type that is not on the published property cannot be waitlisted', f
     $this->postJson('/api/engine/waitlist', engineWaitlistPayload('HIDDEN'))->assertNotFound();
 });
 
-test('a charter enquiry is stored and mailed to the reservations mailbox', function (): void {
-    Mail::fake();
-    $departure = checkoutWestDeparture();
-
-    $this->postJson('/api/engine/charter-enquiries', engineCharterPayload([
-        'departure_id' => $departure->id,
-        'preferred_from' => null,
-        'preferred_to' => null,
-    ]))
-        ->assertCreated()
-        ->assertJsonPath('status', CharterEnquiryStatus::New->value)
-        ->assertJsonPath('source', 'ENGINE');
-
-    $enquiry = CharterEnquiry::query()->firstOrFail();
-    expect($enquiry->guests)->toBe(12);
-    expect($enquiry->departure_id)->toBe($departure->id);
-    expect($enquiry->contact->name)->toBe('Charter Guest');
-    expect($enquiry->contact->type)->toBe(ContactType::CorporateCharter);
-
-    Mail::assertSent(CharterEnquiryMail::class, function (CharterEnquiryMail $mail): bool {
-        return $mail->hasTo((string) config('mail.reservations'));
-    });
-});
-
-test('charter guests over the property cap are refused', function (): void {
-    $this->postJson('/api/engine/charter-enquiries', engineCharterPayload([
-        'guests' => 17,
-    ]))
-        ->assertUnprocessable()
-        ->assertJsonValidationErrors(['guests']);
-});
-
-test('staff can list charter enquiries and move NEW to CONTACTED to CLOSED', function (): void {
-    Mail::fake();
-    $this->postJson('/api/engine/charter-enquiries', engineCharterPayload())->assertCreated();
-    $enquiry = CharterEnquiry::query()->firstOrFail();
-
-    $this->actingAs(managerUser())
-        ->getJson('/api/rms/charter-enquiries')
-        ->assertOk()
-        ->assertJsonFragment(['id' => $enquiry->id, 'status' => CharterEnquiryStatus::New->value]);
-
-    $this->actingAs(managerUser())
-        ->patchJson('/api/rms/charter-enquiries/'.$enquiry->id, [
-            'status' => CharterEnquiryStatus::Contacted->value,
-        ])
-        ->assertOk()
-        ->assertJsonPath('status', CharterEnquiryStatus::Contacted->value);
-
-    $this->actingAs(managerUser())
-        ->patchJson('/api/rms/charter-enquiries/'.$enquiry->id, [
-            'status' => CharterEnquiryStatus::Closed->value,
-            'reason' => 'Guest withdrew',
-        ])
-        ->assertOk()
-        ->assertJsonPath('status', CharterEnquiryStatus::Closed->value);
-
-    $this->actingAs(managerUser())
-        ->patchJson('/api/rms/charter-enquiries/'.$enquiry->id, [
-            'status' => CharterEnquiryStatus::New->value,
-        ])
-        ->assertStatus(409);
-});
-
-test('panel.rms without bookings.create cannot change a charter enquiry', function (): void {
-    Mail::fake();
-    $this->postJson('/api/engine/charter-enquiries', engineCharterPayload())->assertCreated();
-    $enquiry = CharterEnquiry::query()->firstOrFail();
-
-    $role = Role::factory()->create([
-        'permissions' => [Permission::PanelRms->value],
-    ]);
-    $user = User::factory()->create(['role_id' => $role->id]);
-
-    $this->actingAs($user)
-        ->getJson('/api/rms/charter-enquiries')
-        ->assertOk();
-
-    $this->actingAs($user)
-        ->patchJson('/api/rms/charter-enquiries/'.$enquiry->id, [
-            'status' => CharterEnquiryStatus::Contacted->value,
-        ])
-        ->assertForbidden();
-});
-
-test('engine waitlist and charter are rate limited', function (): void {
+test('the engine waitlist is rate limited', function (): void {
     $this->seed(DemoUsersSeeder::class);
     $this->seed(HotelSeeder::class);
     for ($i = 0; $i < 5; $i++) {
@@ -182,12 +69,6 @@ test('engine waitlist and charter are rate limited', function (): void {
     }
 
     $this->postJson('/api/engine/waitlist', engineWaitlistPayload())->assertStatus(429);
-
-    for ($i = 0; $i < 5; $i++) {
-        $this->postJson('/api/engine/charter-enquiries', engineCharterPayload())->assertCreated();
-    }
-
-    $this->postJson('/api/engine/charter-enquiries', engineCharterPayload())->assertStatus(429);
 });
 
 test('checkout create is rate limited at ten per minute', function (): void {

@@ -55,7 +55,7 @@ test('a waitlist stitch with no booking makes the contact MQL', function (): voi
     $session = engineSessionId();
     $this->postJson('/api/engine/events', [
         'session_id' => $session,
-        'events' => [engineEvent(BehaviouralEventName::ViewDeparture->value, ['itinerary_code' => 'WEST'])],
+        'events' => [engineEvent(BehaviouralEventName::ViewStay->value, ['itinerary_code' => 'WEST'])],
     ])->assertOk();
 
     $payload = engineWaitlistPayload('STD', ['session_id' => $session]);

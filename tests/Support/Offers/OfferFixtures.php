@@ -27,7 +27,7 @@ final class OfferFixtures
             'is_promo_code' => false,
             'badge' => 'TEST',
             'show_on_card' => true,
-            'show_on_departures' => true,
+            'show_on_calendar' => true,
             'price_line' => 'Test 10%',
             'terms' => 'Terms.',
         ], $overrides);

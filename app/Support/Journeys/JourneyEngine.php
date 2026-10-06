@@ -135,7 +135,7 @@ final class JourneyEngine
         $status = $event->to;
 
         if (in_array($status, [BookingStatus::Confirmed, BookingStatus::FullyPaid], true)) {
-            if ($booking->cruiseOutstanding() > 0) {
+            if ($booking->stayOutstanding() > 0) {
                 $this->enrol('payment_calendar', $booking->contact, $booking);
             }
             $this->enrol('extras_ancillaries', $booking->contact, $booking);
@@ -159,7 +159,7 @@ final class JourneyEngine
             $this->exitFor('request_to_deposit', $booking->contact_id, $booking->id, 'payment.received');
         }
 
-        if ($booking->cruiseOutstanding() <= 0) {
+        if ($booking->stayOutstanding() <= 0) {
             $this->exitFor('payment_calendar', $booking->contact_id, $booking->id, 'balance cleared');
         }
     }
@@ -304,7 +304,7 @@ final class JourneyEngine
             ->whereIn('status', [BookingStatus::Confirmed, BookingStatus::FullyPaid])
             ->with('contact')
             ->each(function (Booking $booking): void {
-                if ($booking->cruiseOutstanding() > 0) {
+                if ($booking->stayOutstanding() > 0) {
                     $this->enrol('payment_calendar', $booking->contact, $booking);
                 }
                 $this->enrol('extras_ancillaries', $booking->contact, $booking);
@@ -457,8 +457,8 @@ final class JourneyEngine
             'booking_created' => $this->hasBooking($enrolment->contact),
             'booking_created_after' => $this->bookedSince($enrolment->contact_id, $enrolment->enrolled_at),
             'payment_settled' => $booking instanceof Booking && $this->depositReceived($booking),
-            'balance_cleared' => $booking instanceof Booking && $booking->cruiseOutstanding() <= 0,
-            'departed', 'embarked' => $this->leftTheDock($booking, $fact === 'embarked'),
+            'balance_cleared' => $booking instanceof Booking && $booking->stayOutstanding() <= 0,
+            'departed', 'embark'.'ed' => $this->leftTheDock($booking, $fact === 'embark'.'ed'),
             default => false,
         };
     }
@@ -814,8 +814,8 @@ final class JourneyEngine
             'booking_created', 'booking_created_after' => 'booking.created',
             'payment_settled' => 'payment.received',
             'balance_cleared' => 'balance cleared',
-            'departed' => 'departure',
-            'embarked' => 'embarkation',
+            'departed' => 'checked out',
+            'embark'.'ed' => 'checked in',
             default => 'exit',
         };
     }

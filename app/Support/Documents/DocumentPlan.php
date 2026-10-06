@@ -36,7 +36,7 @@ final class DocumentPlan
     public function for(Booking $booking, ?User $actor = null): array
     {
         $booking->loadMissing([
-            'departure',
+            'property',
             'contact',
             'group.coordinator',
             'agency',
@@ -61,7 +61,7 @@ final class DocumentPlan
             BookingStatus::InHouse,
             BookingStatus::CheckedOut,
         ], true);
-        $cruiseOpen = $this->cruiseOutstanding($booking) > 0;
+        $stayOpen = $this->stayOutstanding($booking) > 0;
         $rows = [];
 
         $rows[] = $this->documentRow(
@@ -88,7 +88,7 @@ final class DocumentPlan
             $rows[] = $this->receiptRow($booking, $payment, $canAct);
         }
 
-        if ($cruiseOpen) {
+        if ($stayOpen) {
             foreach ($reminderSlots as $index => $days) {
                 $sendDate = BusinessTime::calendarDay($due)->subDays($days)->toDateString();
                 $rows[] = $this->reminderRow(
@@ -556,7 +556,7 @@ final class DocumentPlan
             ->values();
     }
 
-    private function cruiseOutstanding(Booking $booking): int
+    private function stayOutstanding(Booking $booking): int
     {
         $paid = (int) $booking->payments
             ->filter(fn (Payment $payment): bool => $payment->status->countsAsPaid())

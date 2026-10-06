@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\ConfigKind;
 use App\Http\Requests\StayRequest;
-use App\Models\Departure;
 use App\Services\Config\ConfigPublisher;
 use App\Support\Stays\StayClock;
 use App\Support\Stays\StayDates;
@@ -86,22 +85,6 @@ test('arrival moment uses the published check-in time', function (): void {
     $stay = StayDates::of('2026-06-15', '2026-06-22');
 
     expect($clock->arrivalMoment($stay)->format('Y-m-d H:i'))->toBe('2026-06-15 22:30');
-});
-
-test('a departure stay is its date plus the itinerary nights', function (): void {
-    $departure = Departure::factory()->create(['date' => '2026-03-01']);
-
-    expect($departure->stayDates()->toArray())->toBe([
-        'check_in' => '2026-03-01',
-        'check_out' => '2026-03-08',
-        'nights' => 7,
-    ])->and($departure->returnDate()->toDateString())->toBe('2026-03-08');
-
-    $departure->itinerary->update(['nights' => 0]);
-    $departure->unsetRelation('itinerary');
-
-    expect($departure->stayDates()->nights())->toBe(Departure::DEFAULT_NIGHTS)
-        ->and($departure->returnDate()->toDateString())->toBe('2026-03-08');
 });
 
 test('stay fields reject a bad date, a reversed range and a stay past max nights', function (): void {

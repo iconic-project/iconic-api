@@ -81,7 +81,7 @@ final class ExecuteRefund extends Action
                 'what' => 'Refund executed — '.Money::format($amount).' ('.$refund->penalty_pct.' % penalty band)',
             ], reason: 'Director approval', actor: $actor);
 
-            return $refund->fresh(['booking.contact', 'booking.departure', 'decidedBy', 'executedPayment']) ?? $refund;
+            return $refund->fresh(['booking.contact', 'booking.property', 'decidedBy', 'executedPayment']) ?? $refund;
         });
     }
 }

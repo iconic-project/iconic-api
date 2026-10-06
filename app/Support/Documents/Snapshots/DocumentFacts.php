@@ -7,7 +7,6 @@ namespace App\Support\Documents\Snapshots;
 use App\Enums\BookingStatus;
 use App\Enums\BookingType;
 use App\Enums\PaymentKind;
-use App\Enums\PngCategory;
 use App\Models\Booking;
 use App\Models\BookingExtra;
 use App\Models\Guest;
@@ -40,7 +39,7 @@ final class DocumentFacts
         public readonly int $chargesTotal,
         public readonly int $paid,
         public readonly int $balance,
-        public readonly int $cruiseOutstanding,
+        public readonly int $stayOutstanding,
         public readonly int $depositAmount,
         public readonly int $informationTotal,
     ) {}
@@ -66,7 +65,7 @@ final class DocumentFacts
         $charges = $fresh ? $booking->chargesTotalFresh() : $booking->chargesTotal();
         $paid = $fresh ? Ledger::paidFresh($booking) : Ledger::paid($booking);
         $balance = $fresh ? $booking->balanceFresh() : $booking->balance();
-        $cruise = $fresh ? $booking->cruiseOutstandingFresh() : $booking->cruiseOutstanding();
+        $stay = $fresh ? $booking->stayOutstandingFresh() : $booking->stayOutstanding();
 
         return new self(
             $booking,
@@ -77,7 +76,7 @@ final class DocumentFacts
             $charges,
             $paid,
             $balance,
-            $cruise,
+            $stay,
             $booking->depositAmount(),
             self::informationFeeTotal($booking),
         );
@@ -95,9 +94,9 @@ final class DocumentFacts
             'charges_total' => $this->chargesTotal,
             'paid' => $this->paid,
             'balance' => $this->balance,
-            'cruise_outstanding' => $this->cruiseOutstanding,
+            'stay_outstanding' => $this->stayOutstanding,
             'deposit_amount' => $this->depositAmount,
-            'cruise_balance_amount' => $this->vessel - $this->depositAmount,
+            'stay_balance_amount' => $this->vessel - $this->depositAmount,
             'extras_and_fees' => $this->extras + $this->feesCollected,
             'information_total' => $this->informationTotal,
         ];
@@ -149,9 +148,9 @@ final class DocumentFacts
             ->contains(fn (Payment $payment): bool => $payment->kind === PaymentKind::Deposit);
     }
 
-    public function cruiseReceived(): bool
+    public function stayReceived(): bool
     {
-        return $this->cruiseOutstanding === 0;
+        return $this->stayOutstanding === 0;
     }
 
     public function invoiceDate(): string
@@ -351,16 +350,12 @@ final class DocumentFacts
      */
     public function feeRows(): array
     {
-        $png = $this->pngRows();
+        $entryFees = $this->entryFeeRows();
         $tct = $this->tctRow();
         $collected = [];
         $information = [];
 
-        if ($this->booking->png_collected) {
-            $collected = array_merge($collected, $png);
-        } else {
-            $information = array_merge($information, $png);
-        }
+        $information = array_merge($information, $entryFees);
 
         if ($tct !== null) {
             if ($this->booking->tct_collected) {
@@ -415,7 +410,7 @@ final class DocumentFacts
      *     deposit_pct: int,
      *     balance_pct: int,
      *     deposit_received: bool,
-     *     cruise_received: bool,
+     *     stay_received: bool,
      *     on_board_note: bool,
      *     cancellation: string
      * }
@@ -438,7 +433,7 @@ final class DocumentFacts
             'balance_days' => $this->booking->balance_days,
             'balance_pct' => 100 - $this->booking->deposit_pct,
             'deposit_received' => $this->depositReceived(),
-            'cruise_received' => $this->cruiseReceived(),
+            'stay_received' => $this->stayReceived(),
             'on_board_note' => in_array($this->booking->status, [
                 BookingStatus::InHouse,
                 BookingStatus::CheckedOut,
@@ -540,20 +535,20 @@ final class DocumentFacts
     /**
      * @return list<array{concept: string, qty: string, rate: int|null, amount: int}>
      */
-    private function pngRows(): array
+    private function entryFeeRows(): array
     {
-        $exempt = app(CurrentConfig::class)->engineSettings()->fees->png->exemptUnderAge;
         $groups = [];
 
         foreach ($this->booking->guests as $guest) {
-            if (! $guest->png_category instanceof PngCategory || $guest->png_fee === null) {
+            if ($guest->png_fee === null) {
                 continue;
             }
 
-            $label = 'PNG Entry Fee — '.$guest->png_category->label($exempt);
-            $groups[$label] ??= ['concept' => $label, 'count' => 0, 'rate' => $guest->png_fee, 'amount' => 0];
-            $groups[$label]['count']++;
-            $groups[$label]['amount'] += $guest->png_fee;
+            $label = 'Entry fee';
+            $key = $label.'|'.$guest->png_fee;
+            $groups[$key] ??= ['concept' => $label, 'count' => 0, 'rate' => $guest->png_fee, 'amount' => 0];
+            $groups[$key]['count']++;
+            $groups[$key]['amount'] += $guest->png_fee;
         }
 
         return array_values(array_map(fn (array $row): array => [
@@ -579,9 +574,7 @@ final class DocumentFacts
             return null;
         }
 
-        $rate = $this->booking->tct_collected
-            ? (int) ($this->booking->tct_rate_usd ?? app(CurrentConfig::class)->engineSettings()->fees->tctPp)
-            : app(CurrentConfig::class)->engineSettings()->fees->tctPp;
+        $rate = (int) ($this->booking->tct_rate_usd ?? 0);
 
         return [
             'concept' => 'TCT — Transit Control Card / INGALA',
@@ -595,16 +588,14 @@ final class DocumentFacts
     {
         $total = 0;
 
-        if (! $booking->png_collected) {
-            $total += (int) $booking->guests->sum(fn (Guest $guest): int => $guest->png_fee ?? 0);
-        }
+        $total += (int) $booking->guests->sum(fn (Guest $guest): int => $guest->png_fee ?? 0);
 
         if (! $booking->tct_collected) {
             $count = $booking->guests->count();
             if ($count === 0) {
                 $count = $booking->adults + $booking->children;
             }
-            $rate = app(CurrentConfig::class)->engineSettings()->fees->tctPp;
+            $rate = (int) ($booking->tct_rate_usd ?? 0);
             $total += $rate * $count;
         }
 
@@ -721,7 +712,7 @@ final class DocumentFacts
             }
 
             $groups[$code]['nights']++;
-            $groups[$code]['amount'] += (int) ($line['total'] ?? 0);
+            $groups[$code]['amount'] += (int) ($line['total'] ?? 0) - (int) ($line['discount'] ?? 0);
         }
 
         $rows = [];

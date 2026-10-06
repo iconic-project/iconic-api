@@ -29,6 +29,7 @@ use App\Services\Pricing\QuoteInput;
 use App\Services\References\ReferenceService;
 use App\Support\Bookings\ChannelSeedMap;
 use App\Support\Bookings\SoldOn;
+use App\Support\Bookings\StayFromDeparture;
 use App\Support\History\History;
 use App\Support\Inventory\DepartureLocks;
 use App\Support\Payments\InsertLedgerRow;
@@ -151,7 +152,7 @@ final class DemoBookingsSeeder extends Seeder
             [
                 'request_reference' => null,
                 'type' => $type,
-                'departure_id' => $departure->id,
+                ...StayFromDeparture::columns($departure, $cabin),
                 'room_id' => $cabin?->id,
                 'contact_id' => $contact->id,
                 'group_id' => ($row['grp'] ?? null) === 'GRP-007' ? $group?->id : null,
@@ -161,7 +162,6 @@ final class DemoBookingsSeeder extends Seeder
                 'channel_of_origin' => $channels['origin'],
                 'adults' => (int) ($row['adults'] ?? 0),
                 'children' => (int) ($row['children'] ?? 0),
-                'back_to_back' => false,
                 'rates_version_id' => app(CurrentConfig::class)->version(ConfigKind::Rates)->id,
                 'price_lines' => $quote->toArray()['lines'],
                 'total' => $quote->total,
@@ -219,7 +219,7 @@ final class DemoBookingsSeeder extends Seeder
         $input = new QuoteInput(
             year: (int) $departure->date->format('Y'),
             type: $type->quoteType(),
-            category: $cabin?->pricingCategory(),
+            category: $cabin?->roomType?->code,
             adults: (int) ($row['adults'] ?? 0),
             children: (int) ($row['children'] ?? 0),
             festive: $departure->festive,

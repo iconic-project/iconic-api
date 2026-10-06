@@ -7,7 +7,6 @@ namespace App\Http\Resources\Rms;
 use App\Enums\Permission;
 use App\Models\Guest;
 use App\Models\User;
-use App\Services\Config\CurrentConfig;
 use App\Support\Guests\Age;
 use App\Support\Guests\Masking;
 use App\Support\Iso;
@@ -42,8 +41,6 @@ class GuestResource extends JsonResource
      *     accessibility_note: MaskedNoteResource,
      *     age_at_departure: int|null,
      *     is_minor_now: bool,
-     *     png_category: string|null,
-     *     png_category_label: string|null,
      *     png_fee: int|null,
      *     complete: bool,
      *     guardian: array{name: string|null, relationship: string|null, consented_at: string|null}|null
@@ -51,15 +48,13 @@ class GuestResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing('booking.departure');
+        $this->resource->loadMissing('booking');
 
         $actor = $request->user();
         $canViewSensitive = $actor instanceof User
             && $actor->hasPermission(Permission::GuestsViewSensitive);
-        $departure = $this->booking->departure->date;
-        $age = Age::at($this->dob, $departure);
+        $age = Age::at($this->dob, $this->booking->check_in);
         $minor = $this->isMinorNow();
-        $exemptAge = app(CurrentConfig::class)->engineSettings()->fees->png->exemptUnderAge;
 
         return [
             'id' => $this->id,
@@ -81,8 +76,6 @@ class GuestResource extends JsonResource
             'accessibility_note' => new MaskedNoteResource(Masking::note($this->accessibility_note, $canViewSensitive)),
             'age_at_departure' => $age,
             'is_minor_now' => $minor,
-            'png_category' => $this->png_category?->value,
-            'png_category_label' => $this->png_category?->label($exemptAge),
             'png_fee' => $this->png_fee,
             'complete' => $this->isComplete(),
             'guardian' => $minor ? [

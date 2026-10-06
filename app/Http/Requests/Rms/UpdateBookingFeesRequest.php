@@ -19,7 +19,6 @@ class UpdateBookingFeesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'png_collected' => ['sometimes', 'boolean'],
             'tct_collected' => ['sometimes', 'boolean'],
         ];
     }

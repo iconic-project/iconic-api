@@ -13,11 +13,9 @@ use App\Enums\MainChannel;
 use App\Enums\PaymentLinkStatus;
 use App\Enums\PaymentStatus;
 use App\Enums\Permission;
-use App\Enums\PngCategory;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
 use App\Services\Config\CurrentConfig;
-use App\Support\Bookings\StayFromDeparture;
 use App\Support\BusinessTime;
 use App\Support\Payments\Ledger;
 use App\Support\Payments\PaymentsKpis;
@@ -45,7 +43,6 @@ use RuntimeException;
  * @property string|null $reference
  * @property string|null $request_reference
  * @property BookingType $type
- * @property int|null $departure_id
  * @property int $property_id
  * @property int|null $room_type_id
  * @property CarbonImmutable $check_in
@@ -76,7 +73,6 @@ use RuntimeException;
  * @property array<string, mixed>|null $utm_last
  * @property int $adults
  * @property int $children
- * @property bool $back_to_back
  * @property int $rates_version_id
  * @property list<array{code: string, label: string, amount: int}> $price_lines
  * @property int $total
@@ -93,7 +89,6 @@ use RuntimeException;
  * @property string|null $billing_address
  * @property string|null $billing_email
  * @property string|null $billing_phone
- * @property bool $png_collected
  * @property bool $tct_collected
  * @property int|null $tct_rate_usd
  * @property Carbon|null $deleted_at
@@ -101,11 +96,10 @@ use RuntimeException;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure|null $departure
  * @property-read Property $property
  * @property-read RoomType|null $roomType
  * @property-read Room|null $room
- * @property-read Room|null $cabin
+ * @property-read Room|null $room
  * @property-read Contact $contact
  * @property-read Group|null $group
  * @property-read User $owner
@@ -137,7 +131,6 @@ use RuntimeException;
     'reference',
     'request_reference',
     'type',
-    'departure_id',
     'property_id',
     'room_type_id',
     'check_in',
@@ -168,7 +161,6 @@ use RuntimeException;
     'utm_last',
     'adults',
     'children',
-    'back_to_back',
     'rates_version_id',
     'price_lines',
     'total',
@@ -185,7 +177,6 @@ use RuntimeException;
     'billing_address',
     'billing_email',
     'billing_phone',
-    'png_collected',
     'tct_collected',
     'tct_rate_usd',
 ])]
@@ -193,13 +184,6 @@ class Booking extends Model
 {
     /** @use HasFactory<BookingFactory> */
     use HasAuditColumns, HasFactory, SerializesDatesAsUtc, SoftDeletes;
-
-    protected static function booted(): void
-    {
-        static::creating(function (Booking $booking): void {
-            $booking->copyStayFromDeparture();
-        });
-    }
 
     /**
      * @return array<string, string>
@@ -227,7 +211,6 @@ class Booking extends Model
             'commission_approved_at' => 'datetime',
             'adults' => 'integer',
             'children' => 'integer',
-            'back_to_back' => 'boolean',
             'price_lines' => 'array',
             'total' => 'integer',
             'deposit_pct' => 'integer',
@@ -236,18 +219,9 @@ class Booking extends Model
             'online_deposit' => 'boolean',
             'sold_on' => CalendarDate::class,
             'balance_due_date_override' => CalendarDate::class,
-            'png_collected' => 'boolean',
             'tct_collected' => 'boolean',
             'tct_rate_usd' => 'integer',
         ];
-    }
-
-    /**
-     * @return BelongsTo<Departure, $this>
-     */
-    public function departure(): BelongsTo
-    {
-        return $this->belongsTo(Departure::class);
     }
 
     /**
@@ -274,14 +248,6 @@ class Booking extends Model
         return $this->belongsTo(Room::class, 'room_id');
     }
 
-    /**
-     * @return BelongsTo<Room, $this>
-     */
-    public function cabin(): BelongsTo
-    {
-        return $this->belongsTo(Room::class, 'room_id');
-    }
-
     public function stay(): StayDates
     {
         $attributes = $this->getAttributes();
@@ -293,54 +259,6 @@ class Booking extends Model
         }
 
         return StayDates::of(substr($checkIn, 0, 10), substr($checkOut, 0, 10));
-    }
-
-    /**
-     * New yacht writes still name a departure. Copy its dates onto the stay columns.
-     */
-    public function copyStayFromDeparture(): void
-    {
-        if ($this->departure_id === null || ! $this->stayColumnsMissing()) {
-            return;
-        }
-
-        $departure = $this->relationLoaded('departure') ? $this->getRelation('departure') : null;
-
-        if (! $departure instanceof Departure) {
-            $departure = Departure::query()->with('itinerary')->find($this->departure_id);
-        }
-
-        if (! $departure instanceof Departure) {
-            return;
-        }
-
-        $room = null;
-
-        if ($this->room_id !== null) {
-            $loaded = $this->relationLoaded('room') ? $this->getRelation('room') : null;
-            $room = $loaded instanceof Room ? $loaded : Room::query()->find($this->room_id);
-        }
-
-        foreach (StayFromDeparture::columns($departure, $room instanceof Room ? $room : null) as $key => $value) {
-            if ($value === null || $this->getAttribute($key) !== null) {
-                continue;
-            }
-
-            $this->setAttribute($key, $value);
-        }
-    }
-
-    private function stayColumnsMissing(): bool
-    {
-        $attributes = $this->getAttributes();
-
-        foreach (['check_in', 'check_out', 'property_id', 'nights', 'room_type_id'] as $key) {
-            if (! array_key_exists($key, $attributes) || $attributes[$key] === null || $attributes[$key] === '') {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -538,7 +456,7 @@ class Booking extends Model
 
     public function segment(): BookingSegment
     {
-        if ($this->type !== BookingType::Cabin) {
+        if ($this->type !== BookingType::Room) {
             return BookingSegment::Charter;
         }
 
@@ -597,12 +515,12 @@ class Booking extends Model
         return $this->chargesTotalFresh() - Ledger::paidFresh($this);
     }
 
-    public function cruiseOutstanding(): int
+    public function stayOutstanding(): int
     {
         return max(0, $this->total - Ledger::paid($this));
     }
 
-    public function cruiseOutstandingFresh(): int
+    public function stayOutstandingFresh(): int
     {
         return max(0, $this->total - Ledger::paidFresh($this));
     }
@@ -615,9 +533,7 @@ class Booking extends Model
 
         $this->loadMissing('guests');
 
-        return $this->guests
-            ->filter(fn (Guest $guest): bool => $guest->png_category === PngCategory::Pending)
-            ->count();
+        return 0;
     }
 
     public function extrasDueAt(): CarbonImmutable
@@ -629,13 +545,7 @@ class Booking extends Model
 
     private function pngCollectedTotal(): int
     {
-        if (! $this->png_collected) {
-            return 0;
-        }
-
-        $this->loadMissing('guests');
-
-        return (int) $this->guests->sum(fn (Guest $guest): int => $guest->png_fee ?? 0);
+        return 0;
     }
 
     private function tctCollectedTotal(): int
@@ -651,11 +561,7 @@ class Booking extends Model
 
     private function pngCollectedFresh(): int
     {
-        if (! $this->png_collected) {
-            return 0;
-        }
-
-        return (int) $this->guests()->whereNotNull('png_fee')->sum('png_fee');
+        return 0;
     }
 
     private function tctCollectedFresh(): int
@@ -682,7 +588,7 @@ class Booking extends Model
             return false;
         }
 
-        if ($this->cruiseOutstanding() <= 0) {
+        if ($this->stayOutstanding() <= 0) {
             return false;
         }
 
@@ -772,12 +678,7 @@ class Booking extends Model
 
     public static function feesCollectedSql(): string
     {
-        return '(CASE WHEN bookings.png_collected = 1 THEN COALESCE((
-            SELECT SUM(guests.png_fee) FROM guests
-            WHERE guests.booking_id = bookings.id
-              AND guests.png_fee IS NOT NULL
-        ), 0) ELSE 0 END)
-        + (CASE WHEN bookings.tct_collected = 1 THEN
+        return '(CASE WHEN bookings.tct_collected = 1 THEN
             COALESCE(bookings.tct_rate_usd, 0) * COALESCE((
                 SELECT COUNT(*) FROM guests WHERE guests.booking_id = bookings.id
             ), 0)
@@ -791,11 +692,7 @@ class Booking extends Model
 
     public static function pngPendingCountSql(): string
     {
-        return 'COALESCE((
-            SELECT COUNT(*) FROM guests
-            WHERE guests.booking_id = bookings.id
-              AND guests.png_category = \''.PngCategory::Pending->value.'\'
-        ), 0)';
+        return '0';
     }
 
     /**
@@ -816,7 +713,7 @@ class Booking extends Model
     /**
      * @return array{0: string, 1: list<string>}
      */
-    public static function cruiseOutstandingSql(): array
+    public static function stayOutstandingSql(): array
     {
         [$paidSql, $paid] = self::paidSql();
 
@@ -864,14 +761,14 @@ class Booking extends Model
     public function scopeOverdue(Builder $query): void
     {
         $today = BusinessTime::now()->toDateString();
-        [$cruiseSql, $paid] = self::cruiseOutstandingSql();
+        [$staySql, $paid] = self::stayOutstandingSql();
 
         $query
             ->whereIn('bookings.status', [
                 BookingStatus::Confirmed->value,
                 BookingStatus::OnHoldAgency->value,
             ])
-            ->whereRaw('('.$cruiseSql.') > 0', $paid)
+            ->whereRaw('('.$staySql.') > 0', $paid)
             ->whereRaw(self::overdueDateSql(), [$today, $today]);
     }
 
@@ -956,17 +853,17 @@ class Booking extends Model
         return $this->status->holdsInventory() && ! $this->holdExpired();
     }
 
-    public function cabinLabel(): string
+    public function roomLabel(): string
     {
         if ($this->type === BookingType::Charter) {
             return 'Full property';
         }
 
-        $this->loadMissing('cabin');
+        $this->loadMissing('room');
 
-        $cabin = $this->cabin;
+        $room = $this->room;
 
-        return $cabin instanceof Room ? $cabin->label : 'Cabin';
+        return $room instanceof Room ? $room->label : 'Room';
     }
 
     public function historyLabel(): string
@@ -1061,7 +958,7 @@ class Booking extends Model
     }
 
     /**
-     * Arrivals: check-in inside the window. Yacht check-in is the departure date.
+     * Arrivals: check-in inside the window. Check-in is the arrival date.
      *
      * @param  Builder<self>  $query
      */
@@ -1098,15 +995,15 @@ class Booking extends Model
     }
 
     /**
-     * Galápagos calendar window on the joined `departures.date` column.
+     * Check-in inside the window. The old departure date was the check-in.
      *
      * @param  Builder<self>  $query
      */
     public function scopeDepartingBetween(Builder $query, ?string $from, ?string $to): void
     {
         $query
-            ->when(is_string($from) && $from !== '', fn (Builder $inner) => $inner->whereDate('departures.date', '>=', $from))
-            ->when(is_string($to) && $to !== '', fn (Builder $inner) => $inner->whereDate('departures.date', '<=', $to));
+            ->when(is_string($from) && $from !== '', fn (Builder $inner) => $inner->whereDate('bookings.check_in', '>=', $from))
+            ->when(is_string($to) && $to !== '', fn (Builder $inner) => $inner->whereDate('bookings.check_in', '<=', $to));
     }
 
     /**
@@ -1128,7 +1025,7 @@ class Booking extends Model
             ),
         ));
 
-        $query->where('type', BookingType::Cabin);
+        $query->where('type', BookingType::Room);
 
         if ($segment === BookingSegment::B2B) {
             $query->whereIn('main_channel', $b2b);

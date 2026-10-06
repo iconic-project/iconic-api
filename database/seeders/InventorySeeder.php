@@ -15,7 +15,7 @@ final class InventorySeeder extends Seeder
     public function run(): void
     {
         $types = app(BackfillRoomTypes::class);
-        $maxPerCabin = $types->maxPerCabin();
+        $maxOccupancy = $types->maxOccupancy();
 
         foreach (['ANAMARA', 'ANATIVA'] as $code) {
             $property = Property::query()->firstOrCreate(
@@ -24,7 +24,7 @@ final class InventorySeeder extends Seeder
             );
 
             foreach ($this->cabins() as $cabin) {
-                $type = $types->ensure($property->id, $cabin['category'], $maxPerCabin);
+                $type = $types->ensure($property->id, $cabin['category'], $maxOccupancy);
 
                 Room::query()->firstOrCreate(
                     [

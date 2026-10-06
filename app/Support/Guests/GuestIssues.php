@@ -6,7 +6,6 @@ namespace App\Support\Guests;
 
 use App\Enums\BookingType;
 use App\Enums\ConsentDocument;
-use App\Enums\PngCategory;
 use App\Enums\RegistrationField;
 use App\Models\Booking;
 use App\Models\Consent;
@@ -103,7 +102,7 @@ final class GuestIssues
             );
         }
 
-        if ($booking->type === BookingType::Cabin) {
+        if ($booking->type === BookingType::Room) {
             $guests = $booking->guests;
             $dated = $guests->filter(fn (Guest $guest): bool => $guest->dob !== null)->count();
 
@@ -167,7 +166,8 @@ final class GuestIssues
         $booking->loadMissing('guests');
         $guests = $booking->guests;
         $total = $guests->count();
-        $max = GuestCapacity::max($booking->type, $this->config->engineSettings()->guests);
+        $booking->loadMissing('roomType');
+        $max = GuestCapacity::max($booking->type, $this->config->engineSettings()->guests, $booking->roomType);
         $guestFields = array_values(array_filter(
             $this->registrationFields(),
             fn (RegistrationField $field): bool => $field->onGuest(),
@@ -189,9 +189,7 @@ final class GuestIssues
             })->count(),
             'total' => $total,
             'png_known_total' => (int) $guests->sum(fn (Guest $guest): int => $guest->png_fee ?? 0),
-            'png_pending_count' => $guests
-                ->filter(fn (Guest $guest): bool => $guest->png_category === PngCategory::Pending)
-                ->count(),
+            'png_pending_count' => 0,
             'max' => $max,
             'can_add' => $total < $max,
         ];

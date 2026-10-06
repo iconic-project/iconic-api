@@ -9,8 +9,6 @@ use App\Models\JourneyEnrolment;
 use App\Models\JourneyStep;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
-use App\Support\Manifests\ManifestDue;
-use App\Support\Manifests\ManifestRoster;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
@@ -61,14 +59,7 @@ final class JourneyClock
             return $this->checkInDay($booking)->subDays($rules->documents->preArrivalDaysBefore);
         }
 
-        $booking->loadMissing('departure');
-        $manifest = ManifestDue::forDeparture(
-            $booking->departure,
-            ManifestRoster::passengers($booking->departure),
-        );
-        $date = $rule === 'dpng_due' ? $manifest->dpng : $manifest->chase;
-
-        return BusinessTime::calendarDay($date)->utc();
+        return $this->checkInDay($booking);
     }
 
     private function reengagement(JourneyEnrolment $enrolment, int $months): CarbonImmutable

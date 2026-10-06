@@ -51,7 +51,7 @@ test('a confirmed booking cancelled 484 days out uses the 5 percent band on the 
         ->assertJsonPath('refund.band_label', '≥120 days');
 
     $request = RefundRequest::query()->where('booking_id', $booking->id)->firstOrFail();
-    expect($request->days_before_departure)->toBe(484);
+    expect($request->days_before_arrival)->toBe(484);
     expect($request->band_min_days)->toBe(120);
     expect($request->penalty_pct)->toBe(5);
     expect($request->paid_at_cancellation)->toBe(2660);

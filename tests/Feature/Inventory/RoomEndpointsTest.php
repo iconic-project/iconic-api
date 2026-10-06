@@ -6,13 +6,13 @@ use App\Enums\ClaimKind;
 use App\Enums\HoldType;
 use App\Models\ChangeHistory;
 use App\Models\Property;
-use App\Models\RoomNightClaim;
 use App\Models\Room;
+use App\Models\RoomNightClaim;
 use App\Models\RoomType;
 use App\Models\User;
 use Database\Seeders\InventorySeeder;
-use Illuminate\Support\Str;
 use Database\Seeders\RolesSeeder;
+use Illuminate\Support\Str;
 use Tests\Support\Inventory\ClaimHolder;
 
 beforeEach(function (): void {

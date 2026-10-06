@@ -19,7 +19,7 @@ final class IssueCompleteAccessToken extends Action
     public function handle(Booking $booking): string
     {
         return $this->transaction(function () use ($booking): string {
-            $booking = Booking::query()->withTrashed()->with('departure')->lockForUpdate()->findOrFail($booking->id);
+            $booking = Booking::query()->withTrashed()->with('property')->lockForUpdate()->findOrFail($booking->id);
             $this->guardBooking($booking);
 
             $active = BookingAccessToken::query()
@@ -37,13 +37,13 @@ final class IssueCompleteAccessToken extends Action
 
             $token = bin2hex(random_bytes(32));
             $pageUrl = rtrim((string) config('iconic.engine_url'), '/').'/complete/'.$token;
-            $departureDate = $booking->departure->date->toDateString();
+            $checkIn = $booking->stay()->checkIn()->toDateString();
 
             BookingAccessToken::query()->create([
                 'booking_id' => $booking->id,
                 'token_hash' => BookingAccessToken::hashToken($token),
                 'purpose' => BookingAccessTokenPurpose::Complete,
-                'expires_at' => BusinessTime::dayEndUtc($departureDate),
+                'expires_at' => BusinessTime::dayEndUtc($checkIn),
                 'page_url' => $pageUrl,
             ]);
 

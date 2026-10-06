@@ -122,9 +122,7 @@ final class CampaignController extends Controller
                 return [
                     'id' => $booking->id,
                     'reference' => $booking->reference ?? $booking->request_reference,
-                    'departure' => $booking->getAttribute('departure_date') instanceof \DateTimeInterface
-                        ? $booking->getAttribute('departure_date')->format('Y-m-d')
-                        : (is_string($booking->getAttribute('departure_date')) ? substr((string) $booking->getAttribute('departure_date'), 0, 10) : null),
+                    'check_in' => $booking->check_in->toDateString(),
                     'status' => $booking->status->value,
                     'charges_total' => (int) $booking->getAttribute('charges_total'),
                     'measures' => [
@@ -196,8 +194,8 @@ final class CampaignController extends Controller
                 'to' => $this->day($offer->booking_to),
             ],
             'travel_window' => [
-                'from' => $this->day($offer->travel_from),
-                'to' => $this->day($offer->travel_to),
+                'from' => $this->day($offer->stay_from),
+                'to' => $this->day($offer->stay_to),
             ],
         ];
     }

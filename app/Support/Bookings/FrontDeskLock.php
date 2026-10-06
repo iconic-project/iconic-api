@@ -10,10 +10,6 @@ final class FrontDeskLock
 {
     public static function acquire(Booking $booking): Booking
     {
-        if ($booking->departure_id === null) {
-            return Booking::query()->whereKey($booking->getKey())->lockForUpdate()->firstOrFail();
-        }
-
-        return BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+        return BookingMutationLock::acquire($booking);
     }
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Resources\Rms;
 
 use App\Models\Booking;
-use App\Models\Departure;
 use App\Models\Group;
+use App\Models\Property;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -23,8 +23,8 @@ class GroupResource extends JsonResource
      *     reference: string,
      *     name: string,
      *     coordinator: array{id: int, name: string, email: string|null, preferred_channel: string},
-     *     departure: array{id: int, date: string, property: array{id: int, code: string, name: string}}|null,
-     *     cabins: list<string>,
+     *     property: array{id: int, code: string, name: string}|null,
+     *     rooms: list<string>,
      *     guests: int,
      *     total: int,
      *     balance: int,
@@ -35,11 +35,12 @@ class GroupResource extends JsonResource
     {
         $this->resource->loadMissing([
             'coordinator',
-            'departure.property',
-            'bookings.cabin',
+            'bookings.room',
+            'bookings.property',
         ]);
 
         $bookings = $this->bookings;
+        $property = $bookings->first()?->property;
 
         return [
             'id' => $this->id,
@@ -51,17 +52,13 @@ class GroupResource extends JsonResource
                 'email' => $this->coordinator->email,
                 'preferred_channel' => $this->coordinator->preferred_channel->value,
             ],
-            'departure' => $this->departure instanceof Departure ? [
-                'id' => $this->departure->id,
-                'date' => $this->departure->date->toDateString(),
-                'property' => [
-                    'id' => $this->departure->property->id,
-                    'code' => $this->departure->property->code,
-                    'name' => $this->departure->property->name,
-                ],
+            'property' => $property instanceof Property ? [
+                'id' => $property->id,
+                'code' => $property->code,
+                'name' => $property->name,
             ] : null,
-            'cabins' => $bookings
-                ->map(fn (Booking $booking): string => $booking->cabinLabel())
+            'rooms' => $bookings
+                ->map(fn (Booking $booking): string => $booking->roomLabel())
                 ->values()
                 ->all(),
             'guests' => (int) $bookings->sum(fn (Booking $booking): int => $booking->adults + $booking->children),

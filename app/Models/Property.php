@@ -43,8 +43,7 @@ use Illuminate\Support\Collection;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Collection<int, Room> $cabins
- * @property-read Collection<int, Departure> $departures
+ * @property-read Collection<int, Room> $rooms
  */
 #[Fillable([
     'code',
@@ -101,22 +100,6 @@ class Property extends Model
     public function rooms(): HasMany
     {
         return $this->hasMany(Room::class)->orderBy('sort');
-    }
-
-    /**
-     * @return HasMany<Room, $this>
-     */
-    public function cabins(): HasMany
-    {
-        return $this->hasMany(Room::class)->orderBy('sort');
-    }
-
-    /**
-     * @return HasMany<Departure, $this>
-     */
-    public function departures(): HasMany
-    {
-        return $this->hasMany(Departure::class);
     }
 
     /**

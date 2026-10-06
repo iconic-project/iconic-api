@@ -12,10 +12,8 @@ final class BehaviouralEventParams
 {
     /** @var list<string> */
     private const KEYS = [
-        'itinerary_code',
-        'departure_id',
+        'property_code',
         'step',
-        'cabin_count',
         'path',
         'currency',
         'value',
@@ -67,29 +65,28 @@ final class BehaviouralEventParams
     {
         return match ($name) {
             BehaviouralEventName::PageView => ['page_path'],
-            BehaviouralEventName::ViewItinerary,
-            BehaviouralEventName::ViewItineraryDetail,
+            BehaviouralEventName::ViewProperty,
+            BehaviouralEventName::ViewPropertyDetail,
             BehaviouralEventName::ViewRouteMap,
-            BehaviouralEventName::SearchAvailability => ['itinerary_code'],
-            BehaviouralEventName::ViewDeparture,
-            BehaviouralEventName::SelectDeparture => ['itinerary_code', 'departure_id'],
+            BehaviouralEventName::SearchAvailability => ['property_code'],
+            BehaviouralEventName::ViewStay,
+            BehaviouralEventName::SelectStay => ['property_code'],
             BehaviouralEventName::BeginCheckout,
-            BehaviouralEventName::BeginBookingRequest => ['itinerary_code', 'departure_id', 'cabin_count'],
+            BehaviouralEventName::BeginBookingRequest => ['property_code', 'rooms'],
             BehaviouralEventName::SelectPaymentPath => ['path'],
             BehaviouralEventName::ApplyPromotion,
             BehaviouralEventName::RemovePromotion,
             BehaviouralEventName::PromoInvalid => ['coupon_code'],
             BehaviouralEventName::BookingFormInvalid => ['step'],
             BehaviouralEventName::SubmitBookingRequest => [
-                'itinerary_code',
-                'departure_id',
-                'cabin_count',
+                'property_code',
+                'rooms',
                 'path',
                 'currency',
                 'value',
             ],
-            BehaviouralEventName::AbandonCart => ['itinerary_code', 'departure_id', 'step', 'cabin_count'],
-            BehaviouralEventName::CharterInquirySubmit => ['itinerary_code', 'departure_id', 'value', 'currency'],
+            BehaviouralEventName::AbandonCart => ['property_code', 'step', 'rooms'],
+            BehaviouralEventName::CharterInquirySubmit => ['property_code', 'value', 'currency'],
             BehaviouralEventName::SearchPerformed => ['check_in', 'check_out', 'adults', 'children', 'rooms'],
             BehaviouralEventName::RoomTypeViewed => ['room_type'],
             BehaviouralEventName::IdentityStitched => ['count'],
@@ -101,10 +98,8 @@ final class BehaviouralEventParams
         $field = 'events.'.$index.'.params.'.$key;
 
         return match ($key) {
-            'itinerary_code' => self::stringOf($value, $field, 32),
-            'departure_id' => self::intOf($value, $field, 1),
+            'property_code' => self::stringOf($value, $field, 32),
             'step' => self::stringOf(is_int($value) ? (string) $value : $value, $field, 32),
-            'cabin_count' => self::intOf($value, $field, 0),
             'path' => self::paymentPath($value, $field),
             'currency' => self::currency($value, $field),
             'value' => self::intOf($value, $field, 0),

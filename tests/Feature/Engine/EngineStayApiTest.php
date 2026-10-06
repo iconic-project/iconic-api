@@ -83,6 +83,7 @@ test('the calendar prices a season once and a claim drops availability', functio
         'night' => '2026-01-01',
         'available' => true,
         'from_price' => 90,
+        'offers' => [],
         'closed_to_arrival' => false,
         'closed_to_departure' => false,
         'min_stay' => 1,
@@ -212,8 +213,8 @@ test('a promo is checked against check in', function (): void {
     Offer::factory()->live()->promo()->create([
         'code' => 'STAY10',
         'channel' => OfferChannel::D2C,
-        'travel_from' => '2026-10-01',
-        'travel_to' => '2026-12-31',
+        'stay_from' => '2026-10-01',
+        'stay_to' => '2026-12-31',
         'price_line' => 'Stay 10',
     ]);
 

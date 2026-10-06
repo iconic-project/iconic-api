@@ -16,10 +16,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
  *     check_in: string,
  *     check_out: string,
  *     property_name: string,
- *     departure_date: string,
- *     itinerary_name: string,
  *     questions: list<array{key: string, label: string, type: PreferenceQuestionType, options: list<string>, restricted: bool, required: bool}>,
- *     guests: list<array{id: int, first_name: string, cabin: string, answers: array<string, string>}>
+ *     guests: list<array{id: int, first_name: string, room: string, answers: array<string, string>}>
  * } $resource
  */
 class QuestionnaireResource extends JsonResource
@@ -41,10 +39,8 @@ class QuestionnaireResource extends JsonResource
      *     check_in: string,
      *     check_out: string,
      *     property_name: string,
-     *     departure_date: string,
-     *     itinerary_name: string,
      *     questions: list<array{key: string, label: string, type: PreferenceQuestionType, options: list<string>, restricted: bool, required: bool}>,
-     *     guests: list<array{id: int, first_name: string, cabin: string, answers: array<string, string>}>
+     *     guests: list<array{id: int, first_name: string, room: string, answers: array<string, string>}>
      * }
      */
     public function toArray(Request $request): array

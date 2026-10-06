@@ -14,24 +14,6 @@ class RatesCurrentResource extends ConfigCurrentResource
      *     document: array{
      *         currency: string,
      *         schema_version: int,
-     *         years: list<array{year: int, suite_pp: int, owner_pp: int, charter_week: int}>,
-     *         terms: array{
-     *             cabin_deposit_pct: int,
-     *             cabin_balance_days: int,
-     *             charter_deposit_pct: int,
-     *             charter_deposit_business_days: int,
-     *             charter_balance_days: int
-     *         },
-     *         rules: array{
-     *             single_supplement_pct: int,
-     *             triple_discount_pct: int,
-     *             child_discount_pct: int,
-     *             child_discounts_per_adult: int,
-     *             child_discounts_per_cabin: int,
-     *             back_to_back_pct: int,
-     *             festive_supplement_pp: int,
-     *             festive_supplement_charter: int
-     *         },
      *         seasons: list<array{code: string, name: string, from: string, to: string}>,
      *         room_rates: list<array{room_type: string, season: string, nightly: int}>,
      *         occupancy: array{extra_adult_nightly: int, extra_child_nightly: int, single_occupancy_pct: int},

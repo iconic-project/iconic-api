@@ -36,7 +36,7 @@ final readonly class StayQuote
 
     /**
      * @return array{
-     *     night_lines: list<array{night: string, season: string, base: int, extras: int, single: int, dow: int, supplements: int, plan_adjust: int, total: int}>,
+     *     night_lines: list<array{night: string, season: string, base: int, extras: int, single: int, dow: int, supplements: int, plan_adjust: int, total: int, discount: int}>,
      *     lines: list<array{code: string, label: string, amount: int}>,
      *     total: int,
      *     deposit_pct: int,

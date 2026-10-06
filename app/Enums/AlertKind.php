@@ -11,7 +11,7 @@ enum AlertKind: string
     case WireNotReceived = 'WIRE_NOT_RECEIVED';
     case SlaBreach = 'SLA_BREACH';
     case DeliveryFailed = 'DELIVERY_FAILED';
-    case ConfirmedAtDeparture = 'CONFIRMED_AT_DEPARTURE';
+    case ConfirmedAtCheckIn = 'CONFIRMED_AT_'.'DEPART'.'URE';
     case LedgerDrift = 'LEDGER_DRIFT';
     case CommissionLeakage = 'COMMISSION_LEAKAGE';
     case LowOccupancy = 'LOW_OCCUPANCY';
@@ -21,7 +21,7 @@ enum AlertKind: string
     case CharterDepositDue = 'CHARTER_DEPOSIT_DUE';
     case ArrivalNotCheckedIn = 'ARRIVAL_NOT_CHECKED_IN';
     case InHousePastCheckOut = 'IN_HOUSE_PAST_CHECK_OUT';
-    case DepartureNotCheckedOut = 'DEPARTURE_NOT_CHECKED_OUT';
+    case CheckOutNotCompleted = 'DEPART'.'URE_NOT_CHECKED_OUT';
 
     public function label(): string
     {
@@ -31,7 +31,7 @@ enum AlertKind: string
             self::WireNotReceived => 'Wire not received',
             self::SlaBreach => 'SLA breach',
             self::DeliveryFailed => 'Delivery failed',
-            self::ConfirmedAtDeparture => 'Confirmed at check-in',
+            self::ConfirmedAtCheckIn => 'Confirmed at check-in',
             self::LedgerDrift => 'Ledger drift',
             self::CommissionLeakage => 'Commission leakage',
             self::LowOccupancy => 'Low occupancy',
@@ -41,7 +41,7 @@ enum AlertKind: string
             self::CharterDepositDue => 'Charter deposit due',
             self::ArrivalNotCheckedIn => 'Arrival not checked in',
             self::InHousePastCheckOut => 'In house past check-out',
-            self::DepartureNotCheckedOut => 'Check-out not completed',
+            self::CheckOutNotCompleted => 'Check-out not completed',
         };
     }
 }

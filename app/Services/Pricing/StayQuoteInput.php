@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Pricing;
 
+use App\Enums\BookingSegment;
 use App\Support\Stays\StayDates;
 
 /**
@@ -27,5 +28,7 @@ final readonly class StayQuoteInput
         public ?string $promo = null,
         public ?int $ratesVersionId = null,
         public bool $onlineDeposit = false,
+        public BookingSegment $channel = BookingSegment::D2C,
+        public ?string $bookingDate = null,
     ) {}
 }

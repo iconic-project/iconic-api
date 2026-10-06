@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Services\Inventory\ClaimService;
 use App\Enums\BookingStatus;
 use App\Enums\ClaimKind;
 use App\Models\Booking;
 use App\Models\RoomNightClaim;
+use App\Services\Inventory\ClaimService;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;

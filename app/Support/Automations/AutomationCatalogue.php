@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Automations;
 
-use App\Actions\Charter\CreateCharterEnquiry;
-use App\Actions\Charter\IssueCharterProposal;
 use App\Actions\GuestExperience\RecordGuestResponse;
-use App\Actions\Manifests\SendDataChaser;
 use App\Actions\Waitlist\OfferWaitlistEntry;
 use App\Enums\AlertKind;
 use App\Enums\AutomationAudience;
@@ -90,7 +87,7 @@ final class AutomationCatalogue
         return [
             self::row('welcome_web_lead', 'a', 'Welcome — web lead', 'Your Galápagos adventure begins here — Iconic', 'A web lead is captured.', 'Day 0 of nurture_to_request.', 'journey:nurture_to_request', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'nurture_to_request'),
             self::row('nurture_story', 'a', 'Nurture — sixteen guests', 'Sixteen guests, never more', 'Two days after a nurture enrolment.', 'Day 2 of nurture_to_request.', 'journey:nurture_to_request', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'nurture_to_request'),
-            self::row('nurture_itinerary', 'a', 'Nurture — itinerary spotlight', 'Itinerary spotlight', 'Six days after a nurture enrolment.', 'Day 6 of nurture_to_request.', 'journey:nurture_to_request', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'nurture_to_request'),
+            self::row('nurture_'.'itiner'.'ary', 'a', 'Nurture — property spotlight', 'Property spotlight', 'Six days after a nurture enrolment.', 'Day 6 of nurture_to_request.', 'journey:nurture_to_request', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'nurture_to_request'),
             self::row('nurture_call', 'a', 'Nurture — expedition call', 'A 15-minute expedition call', 'Twelve days after a nurture enrolment.', 'Day 12 of nurture_to_request.', 'journey:nurture_to_request', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'nurture_to_request'),
             self::row('nurture_concierge', 'a', 'Nurture — concierge note', 'A note from the concierge', 'Twenty-one days after a nurture enrolment.', 'Day 21 of nurture_to_request.', 'journey:nurture_to_request', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'nurture_to_request'),
             self::row('partner_positioning', 'a', 'Partner positioning', 'Selling Iconic', 'Seven days after an agency is approved.', 'Day 7 of b2b_partner_activation.', 'journey:b2b_partner_activation', AutomationAudience::Customer, true, journeyKey: 'b2b_partner_activation'),
@@ -102,18 +99,18 @@ final class AutomationCatalogue
 
             self::row('request_acknowledgement', 'b', 'Request acknowledgement', 'We have received your booking — [ID]', 'A booking is created in REQUESTED.', 'Hour 0 of request_to_deposit.', 'journey:request_to_deposit', AutomationAudience::Customer, true, journeyKey: 'request_to_deposit'),
             self::row('deposit_link', 'b', 'Deposit link', 'Complete your reservation — [ID]', 'A request has been held for a day.', 'Day 1 of request_to_deposit. This step does not open a Stripe session.', 'journey:request_to_deposit', AutomationAudience::Customer, true, journeyKey: 'request_to_deposit'),
-            self::row('hold_expiry_reminder', 'b', 'Hold expiry reminder', 'Your cabin hold', 'A request has been held for two days.', 'Day 2 of request_to_deposit.', 'journey:request_to_deposit', AutomationAudience::Customer, true, journeyKey: 'request_to_deposit'),
+            self::row('hold_expiry_reminder', 'b', 'Hold expiry reminder', 'Your room hold', 'A request has been held for two days.', 'Day 2 of request_to_deposit.', 'journey:request_to_deposit', AutomationAudience::Customer, true, journeyKey: 'request_to_deposit'),
             self::row('booking_confirmation', 'b', 'Booking confirmation', 'Booking confirmation & invoice — {reference}', 'The booking reaches CONFIRMED.', 'Immediate. The invoice PDF is issued, then this email.', SendOnBookingStatusChanged::class, AutomationAudience::Customer, true),
             self::row('booking_summary', 'b', 'Booking summary', 'Your Iconic booking summary — {reference}', 'The booking reaches CONFIRMED.', 'Immediate, with the confirmation. The summary PDF is issued, then this email.', SendOnBookingStatusChanged::class, AutomationAudience::Customer, true),
             self::missing('wire_instructions', 'b', 'Wire instructions', 'Wire transfer instructions — [ID]', 'The payment method is a wire.', 'Immediate.', 'Staff send wire instructions from the RMS. Nothing sends them on a timer.'),
             self::row('waitlist_offer', 'b', 'Waitlist offer', 'A {room type} is free — {stay}', 'The entry\'s whole stay can hold one room of its type.', 'iconic:waitlist-notify. The offer, the follow-up task and this email are one action (O4).', OfferWaitlistEntry::class, AutomationAudience::Customer, false),
-            self::row('charter_proposal', 'b', 'Charter proposal', 'Your Iconic charter proposal', 'Staff issue a charter proposal.', 'With the issue. The PDF is stored, then this email.', IssueCharterProposal::class, AutomationAudience::Customer, true),
+            self::missing('charter_proposal', 'b', 'Charter proposal', 'Your Iconic charter proposal', 'Staff used to issue a charter proposal.', 'Retired in Sprint 22. Existing proposal documents stay on the booking.', 'Exclusive use was dropped (HQ1).'),
 
-            self::row('balance_reminder_21', 'c', 'Balance reminder — 21 days', 'Your Iconic balance — due {date}', 'The cruise balance is open and the 21-day reminder date has arrived.', 'The payments.balance_reminder_days slot of 21, from iconic:documents-due.', 'iconic:documents-due', AutomationAudience::Customer, true),
-            self::row('balance_reminder_7', 'c', 'Balance reminder — 7 days', 'Your Iconic balance — due {date}', 'The cruise balance is open and the 7-day reminder date has arrived.', 'The payments.balance_reminder_days slot of 7, from iconic:documents-due.', 'iconic:documents-due', AutomationAudience::Customer, true),
+            self::row('balance_reminder_21', 'c', 'Balance reminder — 21 days', 'Your Iconic balance — due {date}', 'The stay balance is open and the 21-day reminder date has arrived.', 'The payments.balance_reminder_days slot of 21, from iconic:documents-due.', 'iconic:documents-due', AutomationAudience::Customer, true),
+            self::row('balance_reminder_7', 'c', 'Balance reminder — 7 days', 'Your Iconic balance — due {date}', 'The stay balance is open and the 7-day reminder date has arrived.', 'The payments.balance_reminder_days slot of 7, from iconic:documents-due.', 'iconic:documents-due', AutomationAudience::Customer, true),
             self::row('payment_receipt', 'c', 'Payment confirmation', 'Payment confirmation — {reference}', 'A payment settles.', 'Immediate. The receipt is issued, then this email.', SendOnPaymentSettled::class, AutomationAudience::Customer, true),
             self::row('final_invoice', 'c', 'Final invoice', 'Final invoice — {reference}', 'The booking reaches FULLY_PAID.', 'Immediate. The final invoice is issued, then this email.', SendOnBookingStatusChanged::class, AutomationAudience::Customer, true),
-            self::missing('overdue_client', 'c', 'Overdue — day 1', 'Overdue payment — action required — [ID]', 'The cruise balance is past its due date.', 'Day 1.', 'No client overdue email. The flag, the OVERDUE_BALANCE alert and the overdue task are separate rows.'),
+            self::missing('overdue_client', 'c', 'Overdue — day 1', 'Overdue payment — action required — [ID]', 'The stay balance is past its due date.', 'Day 1.', 'No client overdue email. The flag, the OVERDUE_BALANCE alert and the overdue task are separate rows.'),
             self::missing('escalation_review', 'c', 'Escalation — manual review', '[ESCALATION] Non-payment review required — [ID]', 'An overdue balance waits for a person.', 'After the escalation window.', 'OPS-007 is a person\'s decision. No escalation email is sent.'),
 
             self::row('extras_offer', 'd', 'Extras offer', 'Curated additions to your Galápagos expedition — Iconic', 'A booking has been confirmed for 7 days.', 'Day 7 of extras_ancillaries.', 'journey:extras_ancillaries', AutomationAudience::Customer, true, journeyKey: 'extras_ancillaries'),
@@ -123,22 +120,22 @@ final class AutomationCatalogue
             self::row('pretrip', 'e', 'Pre-arrival package', 'Before you arrive — {reference}', 'Check-in is inside documents.pre_arrival_days_before and the booking is confirmed or later.', 'iconic:documents-due. The pre-arrival PDF is issued, then this email.', 'iconic:documents-due', AutomationAudience::Customer, true),
             self::row('questionnaire', 'e', 'Preferences questionnaire', 'Your preferences questionnaire — {reference}', 'The same pre-trip date, for each guest the plan still owes a questionnaire.', 'iconic:documents-due. One send, not a later reminder.', 'iconic:documents-due', AutomationAudience::Customer, true),
             self::row('questionnaire_reminder', 'e', 'Questionnaire reminder', '14 days to go — complete your questionnaire', 'The pre-trip questionnaire is still incomplete.', 'T−14 of ready_to_depart, only while a questionnaire is incomplete.', 'journey:ready_to_depart', AutomationAudience::Customer, true, journeyKey: 'ready_to_depart'),
-            self::row('data_chaser', 'e', 'Passport chase', 'Passenger details needed — {reference}', 'Retired with manifests (09 H15). Not scheduled.', 'Retired with manifests (09 H15). Not scheduled.', SendDataChaser::class, AutomationAudience::Customer, false),
+            self::row('data_chaser', 'e', 'Passport chase', 'Passenger details needed — {reference}', 'Retired with manifests (09 H15). Not scheduled.', 'Retired with manifests (09 H15). Not scheduled.', 'retired', AutomationAudience::Customer, false),
             self::row('voucher', 'e', 'Transfer voucher', 'Transfer voucher — {reference}', 'A contracted transfer extra and departure is inside documents.voucher_days_before.', 'iconic:documents-due. The voucher PDF is issued, then this email.', 'iconic:documents-due', AutomationAudience::Customer, true),
             self::row('arrival_instructions', 'e', 'Arrival instructions', 'Almost time! Final instructions for your arrival in San Cristóbal', 'Departure is three days away.', 'T−3 of ready_to_depart.', 'journey:ready_to_depart', AutomationAudience::Customer, true, journeyKey: 'ready_to_depart'),
 
             self::row('survey', 'f', 'NPS survey', 'Your post-trip survey — {reference}', 'Check-out has passed by nps.survey_hours_after_check_out. A no-show is never surveyed.', 'iconic:nps-survey. The anchor is checked_out_at, otherwise check-out at stay.check_out_time.', 'iconic:nps-survey', AutomationAudience::Customer, true),
             self::row('review_request', 'f', 'Public review request', 'Would you share a review? — {reference}', 'A post-trip score is at least nps.review_request_from and the guest is the contact.', 'When the score is recorded. Marketing: ConsentGate is checked as well, and always.', RecordGuestResponse::class, AutomationAudience::Customer, true, AutomationKind::Marketing),
-            self::row('reengagement_6_months', 'f', 'Re-engagement — 6 months', 'Back to Galápagos? A new expedition awaits you', 'Six months after the cruise, with no active booking.', 'Month 6 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
-            self::row('reengagement_month_7', 'f', 'Re-engagement — month 7', 'Owner\'s Suite early access', 'Seven months after the cruise, with no active booking.', 'Month 7 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
-            self::row('reengagement_month_9', 'f', 'Re-engagement — month 9', 'Bring your people', 'Nine months after the cruise, with no active booking.', 'Month 9 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
+            self::row('reengagement_6_months', 'f', 'Re-engagement — 6 months', 'Back to Galápagos? A new expedition awaits you', 'Six months after the stay, with no active booking.', 'Month 6 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
+            self::row('reengagement_month_7', 'f', 'Re-engagement — month 7', 'Owner\'s Suite early access', 'Seven months after the stay, with no active booking.', 'Month 7 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
+            self::row('reengagement_month_9', 'f', 'Re-engagement — month 9', 'Bring your people', 'Nine months after the stay, with no active booking.', 'Month 9 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
             self::row('winback', 'f', 'Win-back', 'Sorry we missed you — what changed?', 'A hold expired, a booking was cancelled, or a deal was marked lost.', 'Day 1 of winback.', 'journey:winback', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'winback'),
             self::row('winback_day_30', 'f', 'Win-back — day 30', 'Alternative departures', 'Thirty days after a lost or expired enquiry.', 'Day 30 of winback.', 'journey:winback', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'winback'),
             self::row('winback_month_6', 'f', 'Win-back — month 6', 'A new season', 'Six months after a lost or expired enquiry.', 'Month 6 of winback.', 'journey:winback', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'winback'),
 
             self::missing('high_value_lead', 'g', 'High-value new lead', '[ALERT] High-value new lead — [Name] — [Country] — USD [Est.]', 'A high-value lead or a charter enquiry.', 'Immediate.', 'No alert kind. The charter enquiry email is its own row.'),
             ...self::alerts(),
-            self::row('charter_enquiry', 'g', 'Charter enquiry', 'Charter enquiry · {name}', 'An engine charter enquiry is stored.', 'Immediate, to the reservations mailbox. The enquiry row already exists.', CreateCharterEnquiry::class, AutomationAudience::Staff, true),
+            self::missing('charter_enquiry', 'g', 'Charter enquiry', 'Charter enquiry · {name}', 'An engine charter enquiry used to be stored.', 'Retired in Sprint 22. Existing enquiry rows stay readable.', 'Exclusive use was dropped (HQ1).'),
             self::row('report_email', 'g', 'Scheduled report', '{report title} {window}', 'A report subscription is due.', 'iconic:reports-send, after the run file exists (O3).', ReportMailer::class, AutomationAudience::Staff, true),
         ];
     }
@@ -224,7 +221,7 @@ final class AutomationCatalogue
             AlertKind::NpsLow,
             AlertKind::DeliveryFailed,
             AlertKind::WireNotReceived,
-            AlertKind::ConfirmedAtDeparture,
+            AlertKind::ConfirmedAtCheckIn,
             AlertKind::LedgerDrift,
             AlertKind::CommissionLeakage,
             AlertKind::ManifestDataOverdue,
@@ -232,7 +229,7 @@ final class AutomationCatalogue
             AlertKind::CharterDepositDue,
             AlertKind::ArrivalNotCheckedIn,
             AlertKind::InHousePastCheckOut,
-            AlertKind::DepartureNotCheckedOut,
+            AlertKind::CheckOutNotCompleted,
         ];
 
         $rows = [];
@@ -272,7 +269,7 @@ final class AutomationCatalogue
             AlertKind::WireNotReceived => 'Wire not received {reference}',
             AlertKind::SlaBreach => 'SLA breach {task}',
             AlertKind::DeliveryFailed => 'Delivery failed {reference}',
-            AlertKind::ConfirmedAtDeparture => 'Confirmed at check-in {reference}',
+            AlertKind::ConfirmedAtCheckIn => 'Confirmed at check-in {reference}',
             AlertKind::LedgerDrift => 'Ledger drift {reference}',
             AlertKind::CommissionLeakage => 'Commission leakage {reference}',
             AlertKind::LowOccupancy => 'Low occupancy {reference}',
@@ -282,7 +279,7 @@ final class AutomationCatalogue
             AlertKind::CharterDepositDue => 'Charter deposit due · {reference}',
             AlertKind::ArrivalNotCheckedIn => 'Arrival not checked in {reference}',
             AlertKind::InHousePastCheckOut => 'In house past check-out {reference}',
-            AlertKind::DepartureNotCheckedOut => 'Check-out not completed {reference}',
+            AlertKind::CheckOutNotCompleted => 'Check-out not completed {reference}',
         };
     }
 

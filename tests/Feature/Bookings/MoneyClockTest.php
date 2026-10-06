@@ -38,7 +38,7 @@ test('a thursday arrival measures balance, reminders, and a short lead from chec
         ->and($due->toDateString())->toBe('2026-01-15')
         ->and($due->subDays($rules->payments->balanceReminderDays[0])->toDateString())->toBe('2025-12-25')
         ->and($due->subDays($rules->payments->balanceReminderDays[1])->toDateString())->toBe('2026-01-08')
-        ->and($booking->cruiseOutstanding())->toBe(100);
+        ->and($booking->stayOutstanding())->toBe(100);
 
     $payment = Payment::factory()->create([
         'booking_id' => $booking->id,
@@ -84,7 +84,7 @@ test('cancellation days run to check-in on the rate plan set', function (): void
 
     $request = app(CreateRefundRequest::class)->handle($booking->fresh() ?? $booking, $booking->owner);
 
-    expect($request?->days_before_departure)->toBe(127)
+    expect($request?->days_before_arrival)->toBe(127)
         ->and($request?->penalty_pct)->toBe(5)
         ->and($request?->penalty_amount)->toBe(5)
         ->and($request?->band_source)->toBe('CABIN');

@@ -14,8 +14,8 @@ final class SurveyPage
     /**
      * @return array{
      *     reference: string,
-     *     departure_date: string,
-     *     itinerary_name: string,
+     *     check_in: string,
+     *     property_name: string,
      *     questions: list<array{key: string, label: string, type: SurveyQuestionType, min: int|null, max: int|null}>,
      *     guests: list<array{id: int, first_name: string, last_name: string, responded: bool}>
      * }
@@ -23,7 +23,7 @@ final class SurveyPage
     public static function forToken(BookingAccessToken $token): array
     {
         $booking = $token->booking;
-        $booking->loadMissing('departure.itinerary');
+        $booking->loadMissing('property');
         $ids = array_map(intval(...), $token->covered_guest_ids ?? []);
 
         $responded = GuestResponse::query()
@@ -48,8 +48,8 @@ final class SurveyPage
 
         return [
             'reference' => (string) ($booking->displayReference() ?? ''),
-            'departure_date' => $booking->departure->date->toDateString(),
-            'itinerary_name' => $booking->departure->itinerary->name,
+            'check_in' => $booking->stay()->checkIn()->toDateString(),
+            'property_name' => $booking->property->name,
             'questions' => SurveyQuestions::payload(),
             'guests' => $guests->map(fn (Guest $guest): array => [
                 'id' => $guest->id,

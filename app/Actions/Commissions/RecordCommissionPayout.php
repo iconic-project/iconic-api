@@ -27,7 +27,7 @@ final class RecordCommissionPayout extends Action
     {
         return $this->transaction(function () use ($booking, $data, $actor): Booking {
             $booking = FrontDeskLock::acquire($booking);
-            $booking->load(['agency', 'departure.itinerary', 'commissionPayout']);
+            $booking->load(['agency', 'property', 'room.roomType', 'commissionPayout']);
 
             $agency = $booking->agency;
 
@@ -79,7 +79,7 @@ final class RecordCommissionPayout extends Action
                 'booking_reference' => $booking->reference,
             ], actor: $actor);
 
-            return $booking->load(['agency', 'departure.itinerary', 'commissionPayout']);
+            return $booking->load(['agency', 'property', 'room.roomType', 'commissionPayout']);
         });
     }
 }

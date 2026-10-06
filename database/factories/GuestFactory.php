@@ -38,7 +38,6 @@ class GuestFactory extends Factory
             'guardian_relationship' => null,
             'guardian_consented_at' => null,
             'guardian_recorded_by' => null,
-            'png_category' => null,
             'png_fee' => null,
         ];
     }

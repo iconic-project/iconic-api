@@ -8,13 +8,13 @@ use App\Services\Pricing\QuoteType;
 
 enum BookingType: string
 {
-    case Cabin = 'CABIN';
+    case Room = 'ROOM';
     case Charter = 'CHARTER';
 
     public function quoteType(): QuoteType
     {
         return match ($this) {
-            self::Cabin => QuoteType::Cabin,
+            self::Room => QuoteType::Room,
             self::Charter => QuoteType::Charter,
         };
     }

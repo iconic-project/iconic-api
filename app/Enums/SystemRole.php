@@ -40,8 +40,6 @@ enum SystemRole: string
                 Permission::BookingsWaivePenalty,
                 Permission::RequestsConfirm,
                 Permission::RequestsRelease,
-                Permission::DeparturesManage,
-                Permission::ItinerariesManage,
                 Permission::BlocksManage,
                 Permission::InventoryManageRestrictions,
                 Permission::OffersManage,

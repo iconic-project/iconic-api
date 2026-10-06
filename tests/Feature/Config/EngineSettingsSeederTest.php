@@ -47,12 +47,7 @@ test('the seeded engine settings document matches seed-data.json plus the FIN-00
     expect($document['fees']['png']['exempt_under_age'])->toBe(2);
     expect($document['fees']['show_in_price_panel'])->toBe($source['showFees']);
     expect($document['fees']['footnote'])->toBe($source['feeNote']);
-    expect($document['charter']['headline'])->toBe($source['chHead']);
-    expect($document['charter']['intro'])->toBe($source['chIntro']);
-    expect($document['charter']['itinerary_label'])->toBe($source['chItin']);
-    expect($document['charter']['response_sla_hours'])->toBe($source['chSla']);
-    expect($document['charter']['group_contexts'])->toBe($source['chCtx']);
-    expect($document['charter']['thank_you'])->toBe($source['chThanks']);
+    expect($document)->not->toHaveKey('charter');
 
     $row = EngineSettingsVersion::query()->firstOrFail();
     expect($row->version)->toBe(1);

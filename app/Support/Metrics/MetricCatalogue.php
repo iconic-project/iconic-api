@@ -16,17 +16,17 @@ final class MetricCatalogue
     {
         return [
             'occupancy' => [
-                'sentence' => 'Sold berths divided by sellable berths, per departure and as that ratio over the window. A sellable berth is a cabin that is not blocked. A charter counts as the whole property.',
+                'sentence' => 'Sold berths divided by sellable berths, per departure and as that ratio over the window. A sellable berth is a room that is not blocked. A charter counts as the whole property.',
                 'filters_on' => 'departure date',
-                'excludes' => 'Blocked cabins are not sellable. Expired holds are free. People are not listed.',
+                'excludes' => 'Blocked rooms are not sellable. Expired holds are free. People are not listed.',
             ],
             'revpab' => [
-                'sentence' => 'Cruise revenue divided by sellable berths. Cruise revenue is the cabin charge on bookings that hold a sold berth.',
+                'sentence' => 'Stay revenue divided by sellable berths. Stay revenue is the room charge on bookings that hold a sold berth.',
                 'filters_on' => 'departure date',
-                'excludes' => 'Extras and Galápagos fees are excluded. Blocked cabins are not sellable.',
+                'excludes' => 'Extras and Galápagos fees are excluded. Blocked rooms are not sellable.',
             ],
             'adr' => [
-                'sentence' => 'Cruise revenue divided by berths sold. Cruise revenue is the cabin charge on bookings that hold a sold berth.',
+                'sentence' => 'Stay revenue divided by berths sold. Stay revenue is the room charge on bookings that hold a sold berth.',
                 'filters_on' => 'departure date',
                 'excludes' => 'Extras and Galápagos fees are excluded.',
             ],
@@ -36,7 +36,7 @@ final class MetricCatalogue
                 'excludes' => 'Bookings that do not hold a sold berth.',
             ],
             'channel_mix' => [
-                'sentence' => 'Sold bookings and their cruise revenue by channel of origin. Channels in the commission scan\'s trade list are named Trade.',
+                'sentence' => 'Sold bookings and their stay revenue by channel of origin. Channels in the commission scan\'s trade list are named Trade.',
                 'filters_on' => 'departure date',
                 'excludes' => 'Extras and Galápagos fees are excluded from revenue.',
             ],

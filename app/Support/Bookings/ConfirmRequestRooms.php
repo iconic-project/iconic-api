@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Support\Bookings;
 
 use App\Enums\ClaimKind;
-use App\Exceptions\CabinUnavailableException;
 use App\Exceptions\RoomUnavailableException;
 use App\Models\Booking;
 use App\Models\Room;
@@ -15,6 +14,7 @@ use App\Models\User;
 use App\Services\Inventory\RoomAllocator;
 use App\Support\Inventory\StaffStayRestrictions;
 use App\Support\Stays\StayDates;
+use Illuminate\Validation\ValidationException;
 
 /**
  * A request whose hold expired is offered its original room when that room
@@ -57,7 +57,10 @@ final class ConfirmRequestRooms
         $stay = $booking->stay();
 
         if (! $current instanceof Room || ! $type instanceof RoomType) {
-            throw new CabinUnavailableException([], self::taken());
+            throw new RoomUnavailableException(
+                $type instanceof RoomType ? $type->name : 'Room',
+                $stay->checkIn()->toDateString(),
+            );
         }
 
         if ($this->liveHold($booking)) {
@@ -81,16 +84,15 @@ final class ConfirmRequestRooms
         $picked = $this->alternative($type, $stay, (int) $current->id);
 
         if (! $picked instanceof Room) {
-            throw new CabinUnavailableException([], self::taken());
+            throw new RoomUnavailableException($type->name, $stay->checkIn()->toDateString());
         }
 
         $accepted = isset($data['room_id']) && is_numeric($data['room_id']) ? (int) $data['room_id'] : 0;
 
         if ($acceptRequired && $accepted !== $picked->id) {
-            throw new CabinUnavailableException(
-                [],
-                'The original room was taken. Confirm '.$picked->label.' to take that room.',
-            );
+            throw ValidationException::withMessages([
+                'room_id' => ['The original room was taken. Confirm '.$picked->label.' to take that room.'],
+            ]);
         }
 
         $this->guardSell($picked, $stay, $actor, $data);

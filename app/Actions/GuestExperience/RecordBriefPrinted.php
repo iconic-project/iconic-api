@@ -7,12 +7,12 @@ namespace App\Actions\GuestExperience;
 use App\Actions\Action;
 use App\Models\Property;
 use App\Models\User;
-use App\Support\GuestExperience\DepartureGuestExperience;
+use App\Support\GuestExperience\ArrivalGuestList;
 use App\Support\History\History;
 
 final class RecordBriefPrinted extends Action
 {
-    public function __construct(private readonly DepartureGuestExperience $experience) {}
+    public function __construct(private readonly ArrivalGuestList $experience) {}
 
     public function handle(string $date, User $actor, string $format): void
     {

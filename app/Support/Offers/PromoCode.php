@@ -5,31 +5,28 @@ declare(strict_types=1);
 namespace App\Support\Offers;
 
 use App\Enums\BookingSegment;
-use App\Enums\CabinCategory;
-use App\Models\Departure;
 use App\Models\Offer;
+use App\Support\Bookings\SoldOn;
+use App\Support\Stays\StayDates;
 
 final class PromoCode
 {
     /**
      * @return array{valid: bool, reason: string|null, offer: Offer|null}
      */
-    public static function check(
+    public static function checkStay(
         string $code,
-        Departure $departure,
-        // TODO(Sprint 18): room type pricing (09 H8)
-        CabinCategory $cabinType,
+        StayDates $stay,
+        ?string $roomType,
+        ?string $ratePlan,
         BookingSegment $channel,
-        string $bookingDate,
+        ?string $bookingDate = null,
     ): array {
         $normalized = strtoupper(trim($code));
+        $bookingDate ??= SoldOn::today();
 
         if ($normalized === '') {
-            return [
-                'valid' => false,
-                'reason' => 'This code is not valid',
-                'offer' => null,
-            ];
+            return self::invalid(null);
         }
 
         $offer = Offer::query()
@@ -38,35 +35,33 @@ final class PromoCode
             ->first();
 
         if (! $offer instanceof Offer) {
-            return [
-                'valid' => false,
-                'reason' => 'This code is not valid',
-                'offer' => null,
-            ];
+            return self::invalid(null);
         }
 
-        if ($departure->festive) {
-            return [
-                'valid' => false,
-                'reason' => 'This code does not apply to festive departures',
-                'offer' => $offer,
-            ];
-        }
+        $matched = Offer::query()
+            ->forStay($stay, $roomType, $ratePlan, $channel, $bookingDate, $normalized)
+            ->whereKey($offer->id)
+            ->first();
 
-        $applicable = Offer::applicableTo($departure, $cabinType, $channel, $bookingDate, $normalized)
-            ->first(fn (Offer $item): bool => $item->id === $offer->id);
-
-        if (! $applicable instanceof Offer) {
-            return [
-                'valid' => false,
-                'reason' => 'This code is not valid',
-                'offer' => $offer,
-            ];
+        if (! $matched instanceof Offer || $matched->isDerivedExpired($bookingDate)) {
+            return self::invalid($offer);
         }
 
         return [
             'valid' => true,
             'reason' => null,
+            'offer' => $matched,
+        ];
+    }
+
+    /**
+     * @return array{valid: bool, reason: string|null, offer: Offer|null}
+     */
+    private static function invalid(?Offer $offer): array
+    {
+        return [
+            'valid' => false,
+            'reason' => 'This code is not valid',
             'offer' => $offer,
         ];
     }

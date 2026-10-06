@@ -76,13 +76,6 @@ final class TaskSweep
         }
     }
 
-    public function onCharterEnquiry(CharterEnquiry $enquiry): void
-    {
-        if ($enquiry->status === CharterEnquiryStatus::New) {
-            $this->raiseCharter($enquiry);
-        }
-    }
-
     public function onRefundRequested(RefundRequest $request): void
     {
         if ($request->status === RefundRequestStatus::Pending) {
@@ -117,10 +110,6 @@ final class TaskSweep
     {
         Booking::query()->where('status', BookingStatus::Requested)->orderBy('id')->each(
             fn (Booking $booking) => $this->raiseRequest($booking),
-        );
-
-        CharterEnquiry::query()->where('status', CharterEnquiryStatus::New)->orderBy('id')->each(
-            fn (CharterEnquiry $enquiry) => $this->raiseCharter($enquiry),
         );
 
         Booking::query()->overdue()->orderBy('bookings.id')->each(
@@ -183,15 +172,15 @@ final class TaskSweep
 
     private function raisePostTripCall(Booking $booking): void
     {
-        // TODO(OPEN: 19-05) the post-trip call still measures from the departure return date.
-        if ($booking->departure_id === null) {
+        $checkOut = $booking->getAttributes()['check_out'] ?? null;
+
+        if (! is_string($checkOut) || $checkOut === '') {
             return;
         }
 
-        $booking->loadMissing('departure.itinerary');
         $rules = $this->config->businessRules();
         $reference = self::reference($booking);
-        $from = BusinessTime::calendarDay($booking->departure->returnDate()->toDateString());
+        $from = BusinessTime::calendarDay(substr($checkOut, 0, 10));
 
         $this->raise->handle(
             TaskKind::PostTripCall,
@@ -224,25 +213,6 @@ final class TaskSweep
         );
     }
 
-    private function raiseCharter(CharterEnquiry $enquiry): void
-    {
-        $rules = $this->config->businessRules();
-        $deal = Deal::query()->where('charter_enquiry_id', $enquiry->id)->first();
-
-        $this->raise->handle(
-            TaskKind::CharterQuote,
-            'charter:'.$enquiry->id,
-            'Quote the charter enquiry',
-            'Charter enquiry · OPS-009',
-            TaskDue::responseHours($enquiry->created_at, $rules),
-            $deal?->owner_id,
-            null,
-            contactId: $enquiry->contact_id,
-            dealId: $deal?->id,
-            charterEnquiryId: $enquiry->id,
-        );
-    }
-
     private function raiseOverdue(Booking $booking): void
     {
         $dueDate = $booking->balanceDueDate()->toDateString();
@@ -252,7 +222,7 @@ final class TaskSweep
             TaskKind::OverdueDecision,
             'overdue:'.$booking->id.':'.$dueDate,
             'Overdue decision '.$reference,
-            $reference.' · '.Money::format($booking->cruiseOutstanding()).' outstanding · OPS-007',
+            $reference.' · '.Money::format($booking->stayOutstanding()).' outstanding · OPS-007',
             TaskDue::endOfGalapagosDay(now()),
             $booking->owner_id,
             Permission::BookingsOverdueDecision,

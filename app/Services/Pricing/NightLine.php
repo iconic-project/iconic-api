@@ -16,6 +16,7 @@ final readonly class NightLine
         public int $supplements,
         public int $planAdjust,
         public int $total,
+        public int $discount = 0,
     ) {}
 
     /**
@@ -28,7 +29,8 @@ final readonly class NightLine
      *     dow: int,
      *     supplements: int,
      *     plan_adjust: int,
-     *     total: int
+     *     total: int,
+     *     discount: int
      * }
      */
     public function toArray(): array
@@ -43,6 +45,23 @@ final readonly class NightLine
             'supplements' => $this->supplements,
             'plan_adjust' => $this->planAdjust,
             'total' => $this->total,
+            'discount' => $this->discount,
         ];
+    }
+
+    public function withDiscount(int $discount): self
+    {
+        return new self(
+            $this->night,
+            $this->season,
+            $this->base,
+            $this->extras,
+            $this->single,
+            $this->dow,
+            $this->supplements,
+            $this->planAdjust,
+            $this->total,
+            $discount,
+        );
     }
 }

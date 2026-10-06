@@ -6,10 +6,10 @@ namespace App\Support\Bookings;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
-use App\Models\Departure;
 use App\Models\Room;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
+use stdClass;
 
 /**
  * Copies each booking's departure onto stay columns, then renames retired statuses.
@@ -44,7 +44,7 @@ final class BackfillBookingStays
 
         Booking::query()
             ->whereNull('check_in')
-            ->with(['departure.itinerary', 'cabin'])
+            ->with(['property', 'room'])
             ->orderBy('id')
             ->chunkById(200, function ($bookings) use (&$fallback): void {
                 foreach ($bookings as $booking) {
@@ -73,14 +73,17 @@ final class BackfillBookingStays
      */
     private function fill(Booking $booking): array
     {
-        $departure = $booking->departure;
+        $linkedId = $booking->getAttribute('departure_id');
+        $row = is_numeric($linkedId)
+            ? DB::table('departures')->where('id', (int) $linkedId)->first()
+            : null;
 
-        if (! $departure instanceof Departure) {
+        if (! $row instanceof stdClass) {
             throw new RuntimeException('Booking '.$booking->getKey().' has no departure to backfill.');
         }
 
-        $room = $booking->cabin instanceof Room ? $booking->cabin : null;
-        $columns = StayFromDeparture::columns($departure, $room);
+        $room = $booking->room instanceof Room ? $booking->room : null;
+        $columns = StayFromDeparture::columns($row, $room);
 
         if ($columns['room_type_id'] === null) {
             $label = $booking->reference ?? 'id:'.$booking->id;

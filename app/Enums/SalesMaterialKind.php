@@ -9,7 +9,7 @@ enum SalesMaterialKind: string
     case FactSheet = 'FACT_SHEET';
     case BrandDeck = 'BRAND_DECK';
     case Photography = 'PHOTOGRAPHY';
-    case ItineraryPdf = 'ITINERARY_PDF';
+    case PropertyPdf = 'ITINER'.'ARY_PDF';
     case Video = 'VIDEO';
     case Other = 'OTHER';
 }

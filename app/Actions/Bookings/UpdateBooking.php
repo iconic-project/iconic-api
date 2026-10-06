@@ -21,8 +21,7 @@ final class UpdateBooking extends Action
     public function handle(Booking $booking, array $data, User $actor): Booking
     {
         return $this->transaction(function () use ($booking, $data, $actor): Booking {
-            $expectedDepartureId = (int) $booking->departure_id;
-            $booking = BookingMutationLock::acquire($booking, $expectedDepartureId);
+            $booking = BookingMutationLock::acquire($booking);
             $booking->load('owner');
 
             if (array_key_exists('internal_notes', $data)) {
@@ -46,8 +45,8 @@ final class UpdateBooking extends Action
             }
 
             return $booking->refresh()->load([
-                'departure.property',
-                'cabin',
+                'property',
+                'room',
                 'contact',
                 'group.coordinator',
                 'owner',

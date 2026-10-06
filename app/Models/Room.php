@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\CabinCategory;
 use App\Enums\RoomStatus;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
@@ -90,15 +89,5 @@ class Room extends Model
     public function history(): MorphMany
     {
         return $this->morphMany(ChangeHistory::class, 'subject');
-    }
-
-    // TODO(Sprint 18): room type pricing (09 H8)
-    public function pricingCategory(): CabinCategory
-    {
-        $this->loadMissing('roomType');
-
-        return $this->roomType->code === CabinCategory::Owner->value
-            ? CabinCategory::Owner
-            : CabinCategory::Suite;
     }
 }

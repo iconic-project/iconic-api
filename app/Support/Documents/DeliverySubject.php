@@ -28,7 +28,7 @@ final class DeliverySubject
             DeliveryKind::Questionnaire => 'Your preferences questionnaire — '.$ref,
             DeliveryKind::Survey => 'Your post-trip survey — '.$ref,
             DeliveryKind::ReviewRequest => 'Would you share a review? — '.$ref,
-            DeliveryKind::WaitlistOffer => 'A cabin is free',
+            DeliveryKind::WaitlistOffer => 'A room is free',
             DeliveryKind::CharterProposal => 'Your Iconic charter proposal',
             DeliveryKind::PortalInvite => 'Set your Iconic portal password',
             DeliveryKind::Journey => 'A note from Iconic — '.$ref,

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources\Rms;
 
 use App\Models\Booking;
-use App\Models\Departure;
 use App\Models\Group;
 use App\Models\RefundRequest;
 use App\Models\User;
@@ -43,15 +42,13 @@ class BookingResource extends JsonResource
      *     adults: int,
      *     children: int,
      *     party_label: string,
-     *     back_to_back: bool,
      *     total: int,
      *     extras_total: int,
      *     fees_collected_total: int,
-     *     png_collected: bool,
      *     tct_collected: bool,
      *     png_pending_count: int,
      *     charges_total: int,
-     *     cruise_outstanding: int,
+     *     stay_outstanding: int,
      *     extras_due_at: string,
      *     paid: int,
      *     pledged: int,
@@ -79,15 +76,13 @@ class BookingResource extends JsonResource
      *     allowed_actions: list<'check_in'|'check_out'|'no_show'|'modify_stay'|'move_room'>,
      *     property_id: int|null,
      *     stay: array{check_in: string, check_out: string, nights: int},
-     *     departure: array{id: int, date: string, return_date: string, itinerary_name: string, embark: string, festive: bool, property: array{id: int, code: string, name: string}}|null,
      *     room: array{id: int, code: string, label: string}|null,
      *     room_type: array{id: int, code: string, name: string}|null,
      *     rate_plan: string|null,
      *     night_lines: list<array<string, mixed>>|null,
      *     tax_lines: list<array<string, mixed>>|null,
      *     times: array{expected_arrival_time: string|null, checked_in_at: string|null, checked_out_at: string|null, no_show_at: string|null},
-     *     cabin: array{id: int, code: string, label: string}|null,
-     *     cabin_label: string,
+     *     room_label: string,
      *     contact: array{id: int, name: string, email: string|null, phone: string|null, country: string|null, preferred_channel: string},
      *     group: array{id: int, reference: string, name: string, coordinator: array{id: int, name: string}}|null,
      *     owner: array{id: int, name: string},
@@ -107,17 +102,10 @@ class BookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        if ($this->resource->relationLoaded('cabin') && ! $this->resource->relationLoaded('room')) {
-            $this->resource->setRelation('room', $this->resource->getRelation('cabin'));
-        }
-
         $this->resource->loadMissing([
-            'departure.property',
-            'departure.itinerary',
             'room.roomType',
             'roomType',
             'property',
-            'cabin',
             'contact',
             'group.coordinator',
             'owner',
@@ -147,15 +135,13 @@ class BookingResource extends JsonResource
             'adults' => $this->adults,
             'children' => $this->children,
             'party_label' => $this->partyLabel(),
-            'back_to_back' => $this->back_to_back,
             'total' => $this->total,
             'extras_total' => $this->extrasTotal(),
             'fees_collected_total' => $this->feesCollectedTotal(),
-            'png_collected' => $this->png_collected,
             'tct_collected' => $this->tct_collected,
             'png_pending_count' => $this->pngPendingCount(),
             'charges_total' => $this->chargesTotal(),
-            'cruise_outstanding' => $this->cruiseOutstanding(),
+            'stay_outstanding' => $this->stayOutstanding(),
             'extras_due_at' => Iso::utc($this->extrasDueAt()),
             'paid' => Ledger::paid($this->resource),
             'pledged' => Ledger::pledged($this->resource),
@@ -190,19 +176,6 @@ class BookingResource extends JsonResource
                 : [],
             'property_id' => $this->property_id,
             'stay' => $this->stay()->toArray(),
-            'departure' => $this->departure instanceof Departure ? [
-                'id' => $this->departure->id,
-                'date' => $this->departure->date->toDateString(),
-                'return_date' => $this->departure->returnDate()->toDateString(),
-                'itinerary_name' => $this->departure->itinerary->name,
-                'embark' => $this->departure->itinerary->embark,
-                'festive' => $this->departure->festive,
-                'property' => [
-                    'id' => $this->departure->property->id,
-                    'code' => $this->departure->property->code,
-                    'name' => $this->departure->property->name,
-                ],
-            ] : null,
             'room' => $this->room === null ? null : [
                 'id' => $this->room->id,
                 'code' => $this->room->code,
@@ -222,12 +195,7 @@ class BookingResource extends JsonResource
                 'checked_out_at' => Iso::utc($this->checked_out_at),
                 'no_show_at' => Iso::utc($this->no_show_at),
             ],
-            'cabin' => $this->cabin === null ? null : [
-                'id' => $this->cabin->id,
-                'code' => $this->cabin->code,
-                'label' => $this->cabin->label,
-            ],
-            'cabin_label' => $this->cabinLabel(),
+            'room_label' => $this->roomLabel(),
             'contact' => (new ContactResource($this->contact))->toArray($request),
             'group' => $this->groupPayload($this->group),
             'owner' => [

@@ -5,18 +5,15 @@ declare(strict_types=1);
 namespace App\Actions\Guests;
 
 use App\Actions\Action;
-use App\Events\BookingChargesChanged;
 use App\Models\Guest;
 use App\Models\User;
 use App\Support\Bookings\BookingMutationLock;
-use App\Support\Guests\ApplyPng;
 use App\Support\Guests\GuestFieldLabels;
 use App\Support\History\History;
 
 final class UpdateGuest extends Action
 {
     public function __construct(
-        private ApplyPng $png,
         private ApplyGuestFields $fields,
     ) {}
 
@@ -26,15 +23,12 @@ final class UpdateGuest extends Action
     public function handle(Guest $guest, array $data, ?User $actor = null, ?string $actorLabel = null): Guest
     {
         return $this->transaction(function () use ($guest, $data, $actor, $actorLabel): Guest {
-            $guest->load('booking.departure');
+            $guest->load('booking');
             $booking = $guest->booking;
-            $booking = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+            $booking = BookingMutationLock::acquire($booking);
             $guest->setRelation('booking', $booking);
 
-            $feeBefore = (int) $guest->png_fee;
-
             $this->fields->apply($guest, $data, $actor);
-            $this->png->toGuest($guest, $booking);
 
             if (! $guest->isDirty()) {
                 return $guest;
@@ -66,10 +60,6 @@ final class UpdateGuest extends Action
                         ? 'Guardian consent cleared — '.$guest->displayName()
                         : 'Guardian consent recorded — '.$guest->displayName(),
                 ], actor: $actor, actorLabel: $actorLabel);
-            }
-
-            if ($booking->png_collected && (int) $guest->png_fee !== $feeBefore) {
-                BookingChargesChanged::dispatch($booking, 'PNG fee changed');
             }
 
             return $guest->fresh() ?? $guest;

@@ -30,7 +30,6 @@ use LogicException;
  * @property Carbon|null $released_at
  * @property ReleaseReason|null $release_reason
  * @property string $claim_group
- * @property int|null $legacy_cabin_claim_id
  * @property string|null $active_key
  * @property int|null $created_by
  * @property int|null $updated_by
@@ -50,7 +49,6 @@ use LogicException;
     'released_at',
     'release_reason',
     'claim_group',
-    'legacy_cabin_claim_id',
 ])]
 class RoomNightClaim extends Model
 {

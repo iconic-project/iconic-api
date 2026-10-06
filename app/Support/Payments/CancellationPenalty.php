@@ -14,12 +14,12 @@ final class CancellationPenalty
      * @param  list<array{min_days: int, penalty_pct: int}|CancellationBand>  $bands
      * @return array{min_days: int, penalty_pct: int}
      */
-    public static function bandFor(int $daysBeforeDeparture, array $bands): array
+    public static function bandFor(int $daysBeforeArrival, array $bands): array
     {
         $normalized = self::normalize($bands);
 
         foreach ($normalized as $band) {
-            if ($daysBeforeDeparture >= $band['min_days']) {
+            if ($daysBeforeArrival >= $band['min_days']) {
                 return $band;
             }
         }

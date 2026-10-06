@@ -28,12 +28,12 @@ class CommissionResource extends JsonResource
      *     payable_date: string,
      *     status: CommissionAccrualStatus,
      *     payout: array{amount: int, paid_on: string, bank_reference: string}|null,
-     *     departure_date: string
+     *     check_in: string
      * }
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing(['agency', 'departure.itinerary', 'commissionPayout']);
+        $this->resource->loadMissing(['agency', 'room.roomType', 'property', 'commissionPayout']);
         $rules = app(CurrentConfig::class)->businessRules();
 
         return [
@@ -49,7 +49,7 @@ class CommissionResource extends JsonResource
             'payable_date' => Accrual::payableDate($this->resource, $rules)->toDateString(),
             'status' => Accrual::status($this->resource, $rules),
             'payout' => $this->commissionPayout?->toArrayForApi(),
-            'departure_date' => $this->departure->date->toDateString(),
+            'check_in' => $this->stay()->checkIn()->toDateString(),
         ];
     }
 }

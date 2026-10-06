@@ -21,15 +21,6 @@ class CompleteBookingResource extends JsonResource
      *     id: int,
      *     reference: string|null,
      *     property: string,
-     *     departure_date: string,
-     *     return_date: string,
-     *     itinerary_name: string,
-     *     cabin_label: string,
-     *     guests: list<CompleteGuestResource>
-     * }|array{
-     *     id: int,
-     *     reference: string|null,
-     *     property: string,
      *     check_in: string,
      *     check_out: string,
      *     room_label: string,
@@ -37,15 +28,6 @@ class CompleteBookingResource extends JsonResource
      * }
      *
      * @phpstan-return array{
-     *     id: int,
-     *     reference: string|null,
-     *     property: string,
-     *     departure_date: string,
-     *     return_date: string,
-     *     itinerary_name: string,
-     *     cabin_label: string,
-     *     guests: AnonymousResourceCollection
-     * }|array{
      *     id: int,
      *     reference: string|null,
      *     property: string,
@@ -57,30 +39,15 @@ class CompleteBookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        if ($this->departure_id === null) {
-            $this->resource->loadMissing(['property', 'roomType', 'guests']);
-
-            return [
-                'id' => $this->id,
-                'reference' => $this->displayReference(),
-                'property' => $this->property->name,
-                'check_in' => $this->check_in->toDateString(),
-                'check_out' => $this->check_out->toDateString(),
-                'room_label' => $this->roomType->name,
-                'guests' => CompleteGuestResource::collection($this->guests),
-            ];
-        }
-
-        $this->resource->loadMissing(['departure.property', 'departure.itinerary', 'cabin', 'guests']);
+        $this->resource->loadMissing(['property', 'roomType', 'guests']);
 
         return [
             'id' => $this->id,
             'reference' => $this->displayReference(),
-            'property' => $this->departure->property->name,
-            'departure_date' => $this->departure->date->toDateString(),
-            'return_date' => $this->departure->returnDate()->toDateString(),
-            'itinerary_name' => $this->departure->itinerary->name,
-            'cabin_label' => $this->cabinLabel(),
+            'property' => $this->property->name,
+            'check_in' => $this->check_in->toDateString(),
+            'check_out' => $this->check_out->toDateString(),
+            'room_label' => $this->roomType->name,
             'guests' => CompleteGuestResource::collection($this->guests),
         ];
     }

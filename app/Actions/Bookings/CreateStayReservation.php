@@ -12,6 +12,7 @@ use App\Enums\ClaimKind;
 use App\Enums\ConfigKind;
 use App\Enums\HoldRule;
 use App\Enums\HoldType;
+use App\Enums\MainChannel;
 use App\Enums\PreferredChannel;
 use App\Enums\ReferenceType;
 use App\Enums\RoomStatus;
@@ -53,7 +54,7 @@ use InvalidArgumentException;
 
 /**
  * One room is one booking. Several rooms are one group and N bookings.
- * Dates may differ per room. The yacht quoter is not used.
+ * Dates may differ per room.
  */
 final class CreateStayReservation extends Action
 {
@@ -101,7 +102,7 @@ final class CreateStayReservation extends Action
 
         $contact = $this->contacts->handle(is_array($data['client'] ?? null) ? $data['client'] : []);
         $group = $this->resolveGroup($data, $prepared['rows'], $contact, $actor);
-        $commission = $this->commissions->resolve($data, null, null);
+        $commission = $this->commissions->resolve($data);
         $notes = isset($data['internal_notes']) && is_string($data['internal_notes'])
             ? $data['internal_notes']
             : null;
@@ -156,7 +157,7 @@ final class CreateStayReservation extends Action
         $rules = $this->config->businessRules();
         $submittedAt = now();
         $expiry = BusinessHours::fromDocument($rules)->holdExpiry($submittedAt, $row['stay']->checkIn(), $rules);
-        $commission = $this->commissions->resolve($data, null, null);
+        $commission = $this->commissions->resolve($data);
 
         $booking = $this->insertBooking(
             $row,
@@ -274,6 +275,9 @@ final class CreateStayReservation extends Action
                 $reasons[] = $reason;
             }
 
+            $channel = $data['main_channel'] instanceof MainChannel
+                ? $data['main_channel']
+                : MainChannel::from((string) $data['main_channel']);
             $plan = $this->planCode($spec['rate_plan']);
             $bundle = $this->quoter->quoteRooms($stay, [[
                 'room_type' => $spec['room_type'],
@@ -282,6 +286,7 @@ final class CreateStayReservation extends Action
                 'rate_plan' => $plan,
                 'promo' => $spec['promo'],
                 'online_deposit' => $spec['online_deposit'],
+                'channel' => $channel->segment()->value,
             ]]);
             $result = $bundle->rooms[0]['result'] ?? null;
 
@@ -417,14 +422,12 @@ final class CreateStayReservation extends Action
         $group = Group::query()->create([
             'reference' => $this->references->next(ReferenceType::Group),
             'name' => $name !== '' ? $name : $contact->name.' group',
-            'departure_id' => null,
             'coordinator_contact_id' => $contact->id,
         ]);
 
         History::record($group, 'group.created', after: [
             'reference' => $group->reference,
             'name' => $group->name,
-            'departure_id' => null,
             'coordinator_contact_id' => $group->coordinator_contact_id,
         ]);
 
@@ -454,8 +457,7 @@ final class CreateStayReservation extends Action
         return Booking::query()->create([
             'reference' => $sale ? $this->references->next(ReferenceType::Booking) : null,
             'request_reference' => $sale ? null : $this->references->next(ReferenceType::Request, $referenceAt),
-            'type' => BookingType::Cabin,
-            'departure_id' => null,
+            'type' => BookingType::Room,
             'property_id' => $row['type']->property_id,
             'room_type_id' => $row['type']->id,
             'room_id' => $row['spec']['room_id'] ?? null,
@@ -480,7 +482,6 @@ final class CreateStayReservation extends Action
             'channel_of_origin' => $data['channel_of_origin'],
             'adults' => $row['spec']['adults'],
             'children' => count($row['spec']['child_ages']),
-            'back_to_back' => false,
             'rates_version_id' => $quote->ratesVersionId ?? $this->config->version(ConfigKind::Rates)->id,
             'price_lines' => $quote->toArray()['lines'],
             'total' => $quote->total,

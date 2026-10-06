@@ -25,7 +25,7 @@ class RefundRequestFactory extends Factory
         return [
             'booking_id' => Booking::factory(),
             'cancelled_at' => $now,
-            'days_before_departure' => 484,
+            'days_before_arrival' => 484,
             'band_min_days' => 120,
             'penalty_pct' => 5,
             'penalty_amount' => 1330,

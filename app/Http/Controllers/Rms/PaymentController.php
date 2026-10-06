@@ -32,7 +32,7 @@ final class PaymentController extends Controller
 {
     #[DocumentedResponse(
         status: 200,
-        type: 'array{data: list<App\\Http\\Resources\\Rms\\PaymentResource>, links: array{first: string|null, last: string|null, prev: string|null, next: string|null}, meta: array{current_page: int, from: int|null, last_page: int, links: list<array{url: string|null, label: string, active: bool}>, path: string|null, per_page: int, to: int|null, total: int, kpis: array{collected: int, deposits: int, pending: int, pending_count: int, overdue_count: int, overdue_amount: int, commission_accrued: int, cabin_deposit_pct: int, charter_deposit_pct: int, cabin_balance_days: int, commission_payable_days: int, commission_cap_pct: int, wire_window_hours: int}}}',
+        type: 'array{data: list<App\\Http\\Resources\\Rms\\PaymentResource>, links: array{first: string|null, last: string|null, prev: string|null, next: string|null}, meta: array{current_page: int, from: int|null, last_page: int, links: list<array{url: string|null, label: string, active: bool}>, path: string|null, per_page: int, to: int|null, total: int, kpis: array{collected: int, deposits: int, pending: int, pending_count: int, overdue_count: int, overdue_amount: int, commission_accrued: int, charter_deposit_pct: int, commission_payable_days: int, commission_cap_pct: int, wire_window_hours: int}}}',
     )]
     public function index(IndexPaymentsRequest $request): AnonymousResourceCollection
     {
@@ -146,9 +146,8 @@ final class PaymentController extends Controller
         $recorded = new RecordedPayment(
             $recorded->payment->load(['booking', 'recordedBy']),
             Booking::query()->withLedgerAggregates()->with([
-                'departure.property',
-                'departure.itinerary',
-                'cabin',
+                'property',
+                'room.roomType',
                 'contact',
                 'group.coordinator',
                 'owner',

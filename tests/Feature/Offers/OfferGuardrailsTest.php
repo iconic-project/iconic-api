@@ -28,13 +28,13 @@ test('b2b and promo codes never get public surfaces', function (): void {
             'code' => 'B2B10',
             'channel' => 'B2B',
             'show_on_card' => true,
-            'show_on_departures' => true,
+            'show_on_calendar' => true,
         ]))
         ->assertCreated()
         ->json();
 
     expect($b2b['show_on_card'])->toBeFalse();
-    expect($b2b['show_on_departures'])->toBeFalse();
+    expect($b2b['show_on_calendar'])->toBeFalse();
     expect($b2b['engine_placement'])->toBe('not_public');
 
     $promo = $this->actingAs(managerUser())
@@ -42,13 +42,13 @@ test('b2b and promo codes never get public surfaces', function (): void {
             'code' => 'PROMO10',
             'is_promo_code' => true,
             'show_on_card' => true,
-            'show_on_departures' => true,
+            'show_on_calendar' => true,
         ]))
         ->assertCreated()
         ->json();
 
     expect($promo['show_on_card'])->toBeFalse();
-    expect($promo['show_on_departures'])->toBeFalse();
+    expect($promo['show_on_calendar'])->toBeFalse();
     expect($promo['is_promo_code'])->toBeTrue();
     expect($promo['engine_placement'])->toBe('not_public');
 });

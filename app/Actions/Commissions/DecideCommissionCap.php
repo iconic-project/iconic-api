@@ -61,8 +61,8 @@ final class DecideCommissionCap extends Action
                 }
 
                 return $booking->refresh()->load([
-                    'departure.property',
-                    'cabin',
+                    'property',
+                    'room',
                     'contact',
                     'group.coordinator',
                     'owner',
@@ -82,8 +82,8 @@ final class DecideCommissionCap extends Action
             ], reason: $reason, actor: $actor);
 
             return $booking->refresh()->load([
-                'departure.property',
-                'cabin',
+                'property',
+                'room',
                 'contact',
                 'group.coordinator',
                 'owner',

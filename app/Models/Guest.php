@@ -6,7 +6,6 @@ namespace App\Models;
 
 use App\Casts\CalendarDate;
 use App\Casts\SensitiveEncrypted;
-use App\Enums\PngCategory;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
 use App\Support\Guests\Age;
@@ -43,7 +42,6 @@ use Illuminate\Support\Carbon;
  * @property string|null $guardian_relationship
  * @property Carbon|null $guardian_consented_at
  * @property int|null $guardian_recorded_by
- * @property PngCategory|null $png_category
  * @property int|null $png_fee
  * @property int|null $created_by
  * @property int|null $updated_by
@@ -72,7 +70,6 @@ use Illuminate\Support\Carbon;
     'guardian_relationship',
     'guardian_consented_at',
     'guardian_recorded_by',
-    'png_category',
     'png_fee',
 ])]
 class Guest extends Model
@@ -97,7 +94,6 @@ class Guest extends Model
             'dietary_note' => SensitiveEncrypted::class,
             'accessibility_note' => SensitiveEncrypted::class,
             'guardian_consented_at' => 'datetime',
-            'png_category' => PngCategory::class,
             'png_fee' => 'integer',
         ];
     }

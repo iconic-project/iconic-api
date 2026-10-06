@@ -82,7 +82,7 @@ test('show returns prototype derived columns', function (): void {
         'itinerary_codes' => ['WEST'],
         'badge' => 'OPENING OFFER',
         'show_on_card' => true,
-        'show_on_departures' => true,
+        'show_on_calendar' => true,
     ]);
 
     $this->actingAs(managerUser())
@@ -90,8 +90,8 @@ test('show returns prototype derived columns', function (): void {
         ->assertOk()
         ->assertJsonPath('benefit_label', 'USD 500 ancillary credit / cabin')
         ->assertJsonPath('booking_window_label', 'Any')
-        ->assertJsonPath('engine_placement', 'badge')
-        ->assertJsonPath('live_departures_count', 1);
+        ->assertJsonPath('stay_window_label', 'Any')
+        ->assertJsonPath('engine_placement', 'badge');
 });
 
 test('derived labels match the prototype wording', function (): void {
@@ -109,7 +109,7 @@ test('derived labels match the prototype wording', function (): void {
         ->getJson('/api/rms/offers/'.$offer->id)
         ->assertOk()
         ->assertJsonPath('benefit_label', '10% off cabin rate')
-        ->assertJsonPath('scope_label', 'All channels · Suites + Owner\'s · All non-festive itineraries')
+        ->assertJsonPath('scope_label', 'All channels · All room types · All rate plans')
         ->assertJsonPath('booking_window_label', '1 Jan 2027 → 31 Mar 2027');
 });
 

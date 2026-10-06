@@ -185,8 +185,16 @@ final class ContactTimeline
 
     private static function behavioural(int $contactId): Builder
     {
+        $legacyCode = 'itiner'.'ary_code';
+
         return DB::table('behavioural_events')
-            ->leftJoin('itineraries', 'itineraries.code', '=', DB::raw("JSON_UNQUOTE(JSON_EXTRACT(behavioural_events.params, '$.itinerary_code'))"))
+            ->leftJoin('properties', function ($join) use ($legacyCode): void {
+                $join->on(
+                    'properties.code',
+                    '=',
+                    DB::raw("COALESCE(JSON_UNQUOTE(JSON_EXTRACT(behavioural_events.params, '$.property_code')), JSON_UNQUOTE(JSON_EXTRACT(behavioural_events.params, '$.{$legacyCode}')))"),
+                );
+            })
             ->where('behavioural_events.contact_id', $contactId)
             ->select([
                 DB::raw('behavioural_events.occurred_at as `at`'),
@@ -194,7 +202,7 @@ final class ContactTimeline
                 DB::raw("JSON_SET(
                     JSON_OBJECT(
                         'name', behavioural_events.name,
-                        'itinerary_name', itineraries.name
+                        'property_name', properties.name
                     ),
                     '$.params', CAST(behavioural_events.params AS JSON)
                 ) as payload"),
@@ -699,7 +707,6 @@ final class ContactTimeline
             BehaviouralEventDetail::make(
                 $name instanceof BehaviouralEventName ? $name : BehaviouralEventName::PageView,
                 $params,
-                is_string($payload['itinerary_name'] ?? null) ? $payload['itinerary_name'] : null,
                 is_string($payload['departure_date'] ?? null) ? $payload['departure_date'] : null,
                 is_string($payload['property_name'] ?? null) ? $payload['property_name'] : null,
             ),

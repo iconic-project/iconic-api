@@ -7,7 +7,6 @@ namespace App\Support\Config\Documents;
 use App\Enums\ConfigKind;
 use App\Enums\RegistrationField;
 use App\Enums\TaxBasis;
-use App\Services\Config\CurrentConfig;
 use App\Support\Config\ConfigDocument;
 use App\Support\Config\Warning;
 use App\Support\Payments\CancellationPenalty;
@@ -28,7 +27,6 @@ final class BusinessRulesDocument extends ConfigDocument
         public readonly DiscountsRules $discounts,
         public readonly HoldsRules $holds,
         public readonly SlaRules $sla,
-        public readonly ManifestsRules $manifests,
         public readonly RegistrationRules $registration,
         public readonly AlertsRules $alerts,
         public readonly NpsRules $nps,
@@ -39,7 +37,6 @@ final class BusinessRulesDocument extends ConfigDocument
         public readonly CrmRules $crm,
         public readonly PrivacyRules $privacy,
         public readonly ReportsRules $reports,
-        public readonly CharterRules $charter,
         public readonly PortalRules $portal,
         public readonly StayRules $stay,
         public readonly array $bands,
@@ -47,6 +44,8 @@ final class BusinessRulesDocument extends ConfigDocument
         public readonly array $cancellationSets,
         public readonly array $taxes,
         public readonly bool $hasTaxes,
+        /** @var array<string, mixed>|null Retained so the charter-key migration can diff the group out. */
+        public readonly ?array $charter = null,
     ) {}
 
     /**
@@ -91,12 +90,6 @@ final class BusinessRulesDocument extends ConfigDocument
                 'response_hours' => 24,
                 'refund_business_days' => 15,
                 'agency_approval_business_days' => 2,
-            ],
-            'manifests' => [
-                'dpng_fit_days' => 15,
-                'dpng_charter_days' => 30,
-                'captain_days' => 7,
-                'chase_days_before_due' => 10,
             ],
             'registration' => RegistrationRules::defaults(),
             'alerts' => [
@@ -171,10 +164,6 @@ final class BusinessRulesDocument extends ConfigDocument
                 // TODO(OPEN: 21-06) the task names N and no fixture states it.
                 'pickup_days' => 7,
             ],
-            'charter' => [
-                'deposit_business_days' => 5,
-                'proposal_valid_business_days' => 10,
-            ],
             'portal' => [
                 'invite_valid_days' => 14,
             ],
@@ -213,7 +202,6 @@ final class BusinessRulesDocument extends ConfigDocument
         $discounts = is_array($data['discounts'] ?? null) ? $data['discounts'] : [];
         $holds = is_array($data['holds'] ?? null) ? $data['holds'] : [];
         $sla = is_array($data['sla'] ?? null) ? $data['sla'] : [];
-        $manifests = is_array($data['manifests'] ?? null) ? $data['manifests'] : [];
         $registration = is_array($data['registration'] ?? null) ? $data['registration'] : [];
         $alerts = is_array($data['alerts'] ?? null) ? $data['alerts'] : [];
         $nps = is_array($data['nps'] ?? null) ? $data['nps'] : [];
@@ -227,7 +215,7 @@ final class BusinessRulesDocument extends ConfigDocument
         $pipeline = is_array($crm['pipeline'] ?? null) ? $crm['pipeline'] : [];
         $privacy = is_array($data['privacy'] ?? null) ? $data['privacy'] : [];
         $reports = is_array($data['reports'] ?? null) ? $data['reports'] : [];
-        $charter = is_array($data['charter'] ?? null) ? $data['charter'] : [];
+        $charter = is_array($data['charter'] ?? null) ? $data['charter'] : null;
         $portal = is_array($data['portal'] ?? null) ? $data['portal'] : [];
         $stay = is_array($data['stay'] ?? null) ? $data['stay'] : [];
         $cancellation = is_array($data['cancellation'] ?? null) ? $data['cancellation'] : [];
@@ -265,7 +253,7 @@ final class BusinessRulesDocument extends ConfigDocument
             new CommissionRules(
                 (int) ($commission['cap_pct'] ?? 0),
                 (int) ($commission['default_pct'] ?? 0),
-                (int) ($commission['payable_days_after_check_out'] ?? $commission['payable_days_after_cruise'] ?? 0),
+                (int) ($commission['payable_days_after_check_out'] ?? 0),
             ),
             (int) ($data['modification_fee_usd'] ?? 0),
             new PaymentsRules(
@@ -292,12 +280,6 @@ final class BusinessRulesDocument extends ConfigDocument
                 (int) ($sla['response_hours'] ?? 0),
                 (int) ($sla['refund_business_days'] ?? 0),
                 (int) ($sla['agency_approval_business_days'] ?? 0),
-            ),
-            new ManifestsRules(
-                (int) ($manifests['dpng_fit_days'] ?? 0),
-                (int) ($manifests['dpng_charter_days'] ?? 0),
-                (int) ($manifests['captain_days'] ?? 0),
-                (int) ($manifests['chase_days_before_due'] ?? 0),
             ),
             RegistrationRules::fromArray($registration),
             AlertsRules::fromArray($alerts),
@@ -351,10 +333,6 @@ final class BusinessRulesDocument extends ConfigDocument
                 (int) ($reports['retention_days'] ?? 0),
                 (int) ($reports['pickup_days'] ?? 7),
             ),
-            new CharterRules(
-                (int) ($charter['deposit_business_days'] ?? 0),
-                (int) ($charter['proposal_valid_business_days'] ?? 0),
-            ),
             new PortalRules(
                 (int) ($portal['invite_valid_days'] ?? 0),
             ),
@@ -373,6 +351,7 @@ final class BusinessRulesDocument extends ConfigDocument
             self::orderedSets($sets),
             self::taxesFrom($data['taxes'] ?? []),
             array_key_exists('taxes', $data),
+            $charter,
         );
     }
 
@@ -384,18 +363,17 @@ final class BusinessRulesDocument extends ConfigDocument
      *     discounts: array{online_deposit_discount_pct: int, max_total_discount_pct: int|null},
      *     holds: array{web_minutes: int, web_extension_minutes: int, near_term_business_hours: int, long_lead_business_days: int, business_days: list<int>, business_day_start: string, business_day_end: string, holidays: list<string>, near_term_max_days: int},
      *     sla: array{response_hours: int, refund_business_days: int, agency_approval_business_days: int},
-     *     manifests: array{dpng_fit_days: int, dpng_charter_days: int, captain_days: int, chase_days_before_due: int},
      *     registration: array{fields: list<string>, formats: list<string>, deadline_hours_after_check_in: int|null},
      *     alerts: array{low_occupancy_pct: int, low_occupancy_days_before: int, low_occupancy_min_consecutive_nights: int},
      *     nps: array{survey_hours_after_check_out?: int, survey_hours_after_return?: int, alert_below: int, review_request_from: int, review_url: string},
-     *     retention: array{passport_months_after_check_out?: int, passport_months_after_cruise?: int, medical_days_after_check_out?: int, medical_days_after_cruise?: int, behavioural_raw_months: int, behavioural_unstitched_days: int},
+     *     retention: array{passport_months_after_check_out: int, medical_days_after_check_out: int, behavioural_raw_months: int, behavioural_unstitched_days: int},
      *     legal: array{consent_versions: array{terms: string, cancellation: string, privacy: string, insurance: string, marketing: string, analytics: string, checkout_marketing: string}},
      *     legal_entity: array{name: string, address_lines: list<string>, email: string, website: string, ein: string, bank: array{bank_name: string, account_name: string, account_number: string, routing: string, swift: string}},
      *     documents: array{pre_arrival_days_before: int, voucher_days_before: int},
      *     crm: array{segment_high_ltv: int, segment_mid_ltv: int, pipeline: array{sla_new_lead_business_hours: int, sla_qualifying_business_days: int, sla_negotiation_business_days: int, probability_new_lead: int, probability_qualifying: int, probability_quoted: int, probability_negotiation: int, probability_deposit_pending: int}},
      *     privacy: array{request_sla_days: int},
      *     reports: array{retention_days: int, pickup_days: int},
-     *     charter: array{deposit_business_days: int, proposal_valid_business_days: int},
+     *     charter?: array<string, mixed>,
      *     portal: array{invite_valid_days: int},
      *     stay: array{check_in_time: string, check_out_time: string, no_show_cutoff_time: string, min_nights: int, max_nights: int, max_rooms_per_booking: int, check_in_requires_full_payment: bool, booking_horizon_days: int},
      *     cancellation: array{bands: list<array{min_days: int, penalty_pct: int}>, charter_bands: list<array{min_days: int, penalty_pct: int}>, sets: array<string, list<array{min_days: int, penalty_pct: int}>>},
@@ -411,7 +389,6 @@ final class BusinessRulesDocument extends ConfigDocument
             'discounts' => $this->discounts->toArray(),
             'holds' => $this->holds->toArray(),
             'sla' => $this->sla->toArray(),
-            'manifests' => $this->manifests->toArray(),
             'registration' => $this->registration->toArray(),
             'alerts' => $this->alerts->toArray(),
             'nps' => $this->nps->toArray(),
@@ -424,7 +401,6 @@ final class BusinessRulesDocument extends ConfigDocument
             'crm' => $this->crm->toArray(),
             'privacy' => $this->privacy->toArray(),
             'reports' => $this->reports->toArray(),
-            'charter' => $this->charter->toArray(),
             'portal' => $this->portal->toArray(),
             'stay' => $this->stay->toArray(),
             'cancellation' => [
@@ -440,6 +416,10 @@ final class BusinessRulesDocument extends ConfigDocument
 
         if (! $this->hasTaxes) {
             unset($document['taxes']);
+        }
+
+        if ($this->charter !== null) {
+            $document['charter'] = $this->charter;
         }
 
         return $document;
@@ -480,11 +460,6 @@ final class BusinessRulesDocument extends ConfigDocument
             'sla.response_hours' => ['required', 'integer', 'min:1', 'max:72'],
             'sla.refund_business_days' => ['required', 'integer', 'min:1', 'max:60'],
             'sla.agency_approval_business_days' => ['required', 'integer', 'min:1', 'max:10'],
-            'manifests' => ['required', 'array'],
-            'manifests.dpng_fit_days' => ['required', 'integer', 'min:1', 'max:90'],
-            'manifests.dpng_charter_days' => ['required', 'integer', 'min:1', 'max:90'],
-            'manifests.captain_days' => ['required', 'integer', 'min:1', 'max:90'],
-            'manifests.chase_days_before_due' => ['required', 'integer', 'min:1', 'max:90'],
             'registration' => ['required', 'array'],
             'registration.fields' => ['required', 'array', 'min:1'],
             'registration.fields.*' => ['required', 'string', 'distinct', Rule::enum(RegistrationField::class)],
@@ -502,18 +477,13 @@ final class BusinessRulesDocument extends ConfigDocument
             'nps.review_request_from' => ['required', 'integer', 'min:0', 'max:10'],
             'nps.review_url' => ['required', 'string', 'min:1', 'max:200'],
             'retention' => ['required', 'array'],
-            'retention.passport_months_after_check_out' => ['required_without:retention.passport_months_after_cruise', 'integer', 'min:1', 'max:120'],
-            'retention.passport_months_after_cruise' => ['required_without:retention.passport_months_after_check_out', 'integer', 'min:1', 'max:120'],
-            'retention.medical_days_after_check_out' => ['required_without:retention.medical_days_after_cruise', 'integer', 'min:1', 'max:3650'],
-            'retention.medical_days_after_cruise' => ['required_without:retention.medical_days_after_check_out', 'integer', 'min:1', 'max:3650'],
+            'retention.passport_months_after_check_out' => ['required', 'integer', 'min:1', 'max:120'],
+            'retention.medical_days_after_check_out' => ['required', 'integer', 'min:1', 'max:3650'],
             'retention.behavioural_raw_months' => ['required', 'integer', 'min:1', 'max:120'],
             'retention.behavioural_unstitched_days' => ['required', 'integer', 'min:1', 'max:3650'],
             'reports' => ['required', 'array'],
             'reports.retention_days' => ['required', 'integer', 'min:1', 'max:3650'],
             'reports.pickup_days' => ['sometimes', 'integer', 'min:1', 'max:90'],
-            'charter' => ['required', 'array'],
-            'charter.deposit_business_days' => ['required', 'integer', 'min:1', 'max:60'],
-            'charter.proposal_valid_business_days' => ['required', 'integer', 'min:1', 'max:60'],
             'portal' => ['required', 'array'],
             'portal.invite_valid_days' => ['required', 'integer', 'min:1', 'max:60'],
             'stay' => ['required', 'array'],
@@ -599,7 +569,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'commission.default_pct' => 'RMS · Default agency commission',
             'commission.payable_days_after_check_out' => '§10 · Commission payable after check-out',
             'modification_fee_usd' => 'FIN-006 · Date-change / modification fee',
-            'payments.extras_due_hours' => 'Iconic · Extras & collected fees — due before departure',
+            'payments.extras_due_hours' => 'Iconic · Extras and collected fees — due before check-out',
             'payments.wire_window_hours' => 'RMS · Wire transfer window before auto-release',
             'payments.balance_reminder_days' => '§4.1.4 · Balance reminders — days before due',
             'discounts.online_deposit_discount_pct' => '08 B2 · Online-deposit advantage',
@@ -616,10 +586,6 @@ final class BusinessRulesDocument extends ConfigDocument
             'sla.response_hours' => 'OPS-009 · Quote / first-response SLA (FIT, groups, charter)',
             'sla.refund_business_days' => 'RMS · Refund execution SLA',
             'sla.agency_approval_business_days' => '§5.5 · Agency approval SLA',
-            'manifests.dpng_fit_days' => 'OPS-013 · DPNG manifest deadline — FIT / charter',
-            'manifests.dpng_charter_days' => 'OPS-013 · DPNG manifest deadline — FIT / charter',
-            'manifests.captain_days' => 'N4 · Captain\'s manifest deadline',
-            'manifests.chase_days_before_due' => 'N5 · Passenger-data chaser — days before the DPNG due date',
             'registration.fields' => 'HQ9 · Guest registration fields',
             'registration.formats' => 'HQ9 · Guest registration formats',
             'registration.deadline_hours_after_check_in' => 'HQ9 · Guest registration deadline after check-in',
@@ -632,15 +598,11 @@ final class BusinessRulesDocument extends ConfigDocument
             'nps.review_request_from' => 'N8 · Review request from',
             'nps.review_url' => 'LEG-002 · Public review URL',
             'retention.passport_months_after_check_out' => '§6.4 · Passport retention after check-out',
-            'retention.passport_months_after_cruise' => '§6.4 · Retired passport-retention key (09 H10)',
             'retention.medical_days_after_check_out' => 'LEG-002 · Medical notes retention after check-out',
-            'retention.medical_days_after_cruise' => 'LEG-002 · Retired medical-retention key (09 H10)',
             'retention.behavioural_raw_months' => 'L6 · Behavioural events raw retention',
             'retention.behavioural_unstitched_days' => 'L6 · Unstitched anonymous events retention',
             'reports.retention_days' => 'O2 · Generated report file retention',
             'reports.pickup_days' => '21-06 · Pickup window',
-            'charter.deposit_business_days' => 'FIN-003 · Charter deposit due in business days',
-            'charter.proposal_valid_business_days' => 'O5 · Charter proposal validity',
             'portal.invite_valid_days' => '§5.5 · Portal invitation validity',
             'stay.check_in_time' => 'Stay · Check-in time',
             'stay.check_out_time' => 'Stay · Check-out time',
@@ -682,7 +644,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'crm.pipeline.probability_negotiation' => 'M4 · Negotiation probability',
             'crm.pipeline.probability_deposit_pending' => 'M4 · Deposit pending probability',
             'privacy.request_sla_days' => 'M7 · Subject request SLA',
-            'cancellation.bands' => '§4.1.5 · Cabin cancellation penalty bands',
+            'cancellation.bands' => '§4.1.5 · Cancellation penalty bands',
             'cancellation.sets' => 'Cancellation band sets',
             'taxes' => 'Taxes and fees',
         ];
@@ -693,16 +655,16 @@ final class BusinessRulesDocument extends ConfigDocument
         return ConfigKind::BusinessRules;
     }
 
-    public function penaltyFor(int $daysBeforeDeparture): CancellationBand
+    public function penaltyFor(int $daysBeforeCheckIn): CancellationBand
     {
-        $band = CancellationPenalty::bandFor($daysBeforeDeparture, $this->bands);
+        $band = CancellationPenalty::bandFor($daysBeforeCheckIn, $this->bands);
 
         return new CancellationBand($band['min_days'], $band['penalty_pct']);
     }
 
-    public function charterPenaltyFor(int $daysBeforeDeparture): CancellationBand
+    public function charterPenaltyFor(int $daysBeforeCheckIn): CancellationBand
     {
-        $band = CancellationPenalty::bandFor($daysBeforeDeparture, $this->charterBands);
+        $band = CancellationPenalty::bandFor($daysBeforeCheckIn, $this->charterBands);
 
         return new CancellationBand($band['min_days'], $band['penalty_pct']);
     }
@@ -713,33 +675,12 @@ final class BusinessRulesDocument extends ConfigDocument
     public function warnings(?ConfigDocument $published): array
     {
         $warnings = [];
-
-        if ($this->manifests->dpngCharterDays < $this->manifests->dpngFitDays) {
-            $warnings[] = new Warning(
-                'manifests.dpng_charter_days',
-                'Charter manifest deadline is shorter than FIT — the source has charter earlier (30 vs 15 days).',
-            );
-        }
-
         $sorted = $this->bands;
         for ($i = 1, $count = count($sorted); $i < $count; $i++) {
             if ($sorted[$i]->penaltyPct < $sorted[$i - 1]->penaltyPct) {
                 $warnings[] = new Warning(
                     'cancellation.bands',
-                    'Penalty drops closer to departure ('.$sorted[$i]->minDays.' days) — check the bands.',
-                );
-            }
-        }
-
-        $current = app(CurrentConfig::class);
-
-        if ($current->has(ConfigKind::EngineSettings)) {
-            $engineSla = $current->engineSettings()->charter->responseSlaHours;
-
-            if ($engineSla !== $this->sla->responseHours) {
-                $warnings[] = new Warning(
-                    'sla.response_hours',
-                    'Charter page promises '.$engineSla.' h but the response SLA is '.$this->sla->responseHours.' h — align in Engine Settings.',
+                    'Penalty drops closer to arrival ('.$sorted[$i]->minDays.' days) — check the bands.',
                 );
             }
         }
@@ -776,7 +717,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'commission.default_pct' => '10% (confirmed 12 Sep 2026)',
             'commission.payable_days_after_check_out' => '30 days',
             'modification_fee_usd' => 'USD 0 — free, subject to availability',
-            'payments.extras_due_hours' => '72 hours (Iconic 12 Sep 2026); services taken on board are settled during / after the cruise',
+            'payments.extras_due_hours' => '72 hours (Iconic 12 Sep 2026); services taken during the stay are settled during or after check-out',
             'payments.wire_window_hours' => '72 hours (confirmed 12 Sep 2026)',
             'payments.balance_reminder_days' => '21 and 7 days',
             'discounts.online_deposit_discount_pct' => '5%',
@@ -792,10 +733,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'sla.response_hours' => '24 hours',
             'sla.refund_business_days' => '15 business days (confirmed 12 Sep 2026)',
             'sla.agency_approval_business_days' => '2 business days',
-            'manifests.dpng_fit_days', 'manifests.dpng_charter_days' => '15 / 30 days',
-            'manifests.captain_days' => '7 days (N4 / prototype T−7)',
-            'manifests.chase_days_before_due' => '10 days (PENDING CLIENT, N5)',
-            'registration.fields' => 'Name, nationality, DOB, document no., arrival, departure (HQ9)',
+            'registration.fields' => 'Name, nationality, DOB, document no., arrival, check-out (HQ9)',
             'registration.formats' => 'CSV, PDF (HQ9)',
             'registration.deadline_hours_after_check_in' => 'No deadline (HQ9 names no number)',
             'alerts.low_occupancy_pct', 'alerts.low_occupancy_days_before' => '40% at 90 days',
@@ -805,14 +743,12 @@ final class BusinessRulesDocument extends ConfigDocument
             'nps.alert_below',
             'nps.review_request_from' => '24 h after check-out · alert below 7 · review from 8 (N8 / 09 H10)',
             'nps.review_url' => 'PENDING CLIENT (LEG-002)',
-            'retention.passport_months_after_check_out', 'retention.passport_months_after_cruise' => '24 months',
-            'retention.medical_days_after_check_out', 'retention.medical_days_after_cruise' => '90 days',
+            'retention.passport_months_after_check_out' => '24 months',
+            'retention.medical_days_after_check_out' => '90 days',
             'retention.behavioural_raw_months' => '24 months (PENDING CLIENT, L6 / doc 07 §8)',
             'retention.behavioural_unstitched_days' => '30 days (PENDING CLIENT, L6)',
             'reports.retention_days' => '90 days (PENDING CLIENT, O2)',
             'reports.pickup_days' => '7 days (OPEN: 21-06 names no number)',
-            'charter.deposit_business_days' => '5 business days (FIN-003)',
-            'charter.proposal_valid_business_days' => '10 business days (PENDING CLIENT, O5)',
             'portal.invite_valid_days' => '14 days (PENDING CLIENT, Sprint 13 task 01)',
             'stay.check_in_time' => '15:00 (demo, HQ3)',
             'stay.check_out_time' => '11:00 (demo, HQ3)',
@@ -822,7 +758,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'stay.max_rooms_per_booking' => '5 rooms (demo, HQ3)',
             'stay.check_in_requires_full_payment' => 'Yes (demo, HQ3)',
             'stay.booking_horizon_days' => '730 days (demo, HQ3)',
-            'cancellation.charter_bands' => '≥120 d 5% · 90–119 d 50% · 0–89 d 100% (PENDING CLIENT, O6, copies the cabin bands)',
+            'cancellation.charter_bands' => '≥120 d 5% · 90–119 d 50% · 0–89 d 100% (PENDING CLIENT, O6)',
             'legal.consent_versions.terms' => 'v2026.1 (text pending LEG-001)',
             'legal.consent_versions.cancellation' => 'v2026.1 (pending LEG-001)',
             'legal.consent_versions.privacy' => 'v2026.1 (pending LEG-002)',
@@ -854,7 +790,7 @@ final class BusinessRulesDocument extends ConfigDocument
             'crm.pipeline.probability_deposit_pending' => '80% (PENDING CLIENT, prototype pipeline)',
             'privacy.request_sla_days' => '30 calendar days (PENDING LEG-002)',
             'cancellation.bands' => '≥120 d 5% · 90–119 d 50% · 0–89 d 100%',
-            'cancellation.sets' => 'STANDARD and CHARTER keep the cabin and charter bands (09 H8)',
+            'cancellation.sets' => 'STANDARD and CHARTER keep the stay and charter bands (09 H8)',
             'taxes' => 'Empty until published (09 H9). The hotel fixture has no tax list.',
             default => $path,
         };

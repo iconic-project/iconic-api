@@ -18,8 +18,6 @@ test('manager default permissions match the sprint list', function (): void {
         Permission::BookingsWaivePenalty->value,
         Permission::RequestsConfirm->value,
         Permission::RequestsRelease->value,
-        Permission::DeparturesManage->value,
-        Permission::ItinerariesManage->value,
         Permission::BlocksManage->value,
         Permission::InventoryManageRestrictions->value,
         Permission::OffersManage->value,

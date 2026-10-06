@@ -29,7 +29,7 @@ final class GuestController extends Controller
     {
         $this->authorize('view', $booking);
 
-        $booking->load(['departure', 'guests']);
+        $booking->load(['property', 'guests']);
         $summary = $issues->summary($booking);
 
         return GuestResource::collection($booking->guests->sortBy('position')->values())

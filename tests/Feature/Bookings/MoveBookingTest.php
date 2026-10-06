@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Services\Inventory\ClaimService;
 use App\Enums\BookingStatus;
 use App\Enums\ClaimKind;
 use App\Enums\ConfigKind;
@@ -14,6 +13,7 @@ use App\Models\RoomNightClaim;
 use App\Services\Config\ConfigPublisher;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\Availability;
+use App\Services\Inventory\ClaimService;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;

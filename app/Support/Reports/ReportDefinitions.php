@@ -64,9 +64,9 @@ final class ReportDefinitions
         $csv = [ReportFormat::Csv, ReportFormat::Xlsx];
 
         return [
-            new ReportDefinition('overdue', 'Overdue balances', 'Bookings overdue on the Galápagos date, whose departure falls in the window. Cruise balance only.', Permission::PaymentsRecord, $csv),
-            new ReportDefinition('forecast-30-day', '30-day forecast', 'Open cruise balances whose due date falls in the window.', Permission::PaymentsRecord, $csv),
-            new ReportDefinition('revenue-monthly', 'Monthly revenue', 'Cruise revenue of sold bookings by departure month. Extras and fees are excluded.', Permission::PaymentsRecord, $csv),
+            new ReportDefinition('overdue', 'Overdue balances', 'Bookings overdue on the Galápagos date, whose departure falls in the window. Stay balance only.', Permission::PaymentsRecord, $csv),
+            new ReportDefinition('forecast-30-day', '30-day forecast', 'Open stay balances whose due date falls in the window.', Permission::PaymentsRecord, $csv),
+            new ReportDefinition('revenue-monthly', 'Monthly revenue', 'Stay revenue of sold bookings by departure month. Extras and fees are excluded.', Permission::PaymentsRecord, $csv),
             new ReportDefinition('occupancy', 'Occupancy', 'Sold and sellable berths by departure, from the metrics layer. A charter counts as the whole property.', Permission::PanelRms, $csv),
         ];
     }

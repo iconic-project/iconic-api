@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace App\Support\Offers;
 
-use App\Enums\CabinCategory;
 use App\Enums\OfferChannel;
 use App\Enums\OfferType;
-use App\Models\Itinerary;
 use App\Models\Offer;
 use App\Support\Dates\Format;
 use App\Support\Money;
@@ -18,9 +16,9 @@ final class OfferPresentation
     public static function benefit(Offer $offer): string
     {
         return match ($offer->type) {
-            OfferType::Credit => Money::format((int) $offer->value).' ancillary credit / cabin',
-            OfferType::Amount => Money::format((int) $offer->value).' off / cabin',
-            OfferType::Percent => ((int) $offer->value).'% off cabin rate',
+            OfferType::Credit => Money::format((int) $offer->value).' ancillary credit per room',
+            OfferType::Amount => Money::format((int) $offer->value).' off per room',
+            OfferType::Percent => ((int) $offer->value).'% off room rate',
             OfferType::Value => $offer->value_text !== null && $offer->value_text !== ''
                 ? $offer->value_text
                 : 'Value-add',
@@ -34,26 +32,21 @@ final class OfferPresentation
             ? 'All channels'
             : $offer->channel->value.($offer->partner !== null && $offer->partner !== '' ? ' · '.$offer->partner : '');
 
-        $cabins = collect($offer->cabin_types)
-            // TODO(Sprint 18): room type pricing (09 H8)
-            ->map(fn (string $code): string => $code === CabinCategory::Owner->value ? "Owner's" : 'Suites')
-            ->implode(' + ');
+        $rooms = $offer->applies_to_room_types === null || $offer->applies_to_room_types === []
+            ? 'All room types'
+            : implode(', ', $offer->applies_to_room_types);
 
-        $nonFestive = Itinerary::query()->where('festive', false)->pluck('code')->sort()->values();
-        $selected = collect($offer->itinerary_codes)->sort()->values();
+        $plans = $offer->applies_to_rate_plans === null || $offer->applies_to_rate_plans === []
+            ? 'All rate plans'
+            : implode(', ', $offer->applies_to_rate_plans);
 
-        $named = Itinerary::query()
-            ->whereIn('code', $offer->itinerary_codes)
-            ->orderBy('name')
-            ->pluck('name')
-            ->filter()
-            ->implode(', ');
+        $label = $channel.' · '.$rooms.' · '.$plans;
 
-        $itineraries = $nonFestive->isNotEmpty() && $selected->all() === $nonFestive->all()
-            ? 'All non-festive itineraries'
-            : ($named !== '' ? $named : implode(', ', $offer->itinerary_codes));
+        if ($offer->min_nights !== null && $offer->min_nights > 0) {
+            $label .= ' · min '.$offer->min_nights.' nights';
+        }
 
-        return $channel.' · '.$cabins.' · '.$itineraries;
+        return $label;
     }
 
     public static function window(?CarbonInterface $from, ?CarbonInterface $to): string
@@ -76,7 +69,7 @@ final class OfferPresentation
 
         $badge = $offer->badge !== null && $offer->badge !== '';
 
-        if ($badge && ($offer->show_on_card || $offer->show_on_departures)) {
+        if ($badge && ($offer->show_on_card || $offer->show_on_calendar)) {
             return 'badge';
         }
 

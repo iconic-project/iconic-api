@@ -51,15 +51,13 @@ class CompleteReservationResource extends JsonResource
     public function toArray(Request $request): array
     {
         $this->resource->loadMissing([
-            'departure.property',
-            'departure.itinerary',
-            'cabin',
+            'property',
+            'room.roomType',
             'guests',
             'consents',
             'paymentLinks',
-            'group.bookings.departure.property',
-            'group.bookings.departure.itinerary',
-            'group.bookings.cabin',
+            'group.bookings.property',
+            'group.bookings.room.roomType',
             'group.bookings.guests',
         ]);
 

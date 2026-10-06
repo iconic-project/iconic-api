@@ -11,6 +11,7 @@ use App\Enums\DealType;
 use App\Enums\PaymentStatus;
 use App\Enums\Permission;
 use App\Enums\TaskKind;
+use App\Enums\TaskSource;
 use App\Enums\TaskStatus;
 use App\Events\BookingCreated;
 use App\Events\BookingStatusChanged;
@@ -119,7 +120,7 @@ test('each system kind is raised once and the sweep does not raise it again', fu
     expect(CrmTask::query()->where('kind', TaskKind::OverdueDecision)->where('booking_id', $overdue->id)->count())->toBe(1);
     expect(CrmTask::query()->where('kind', TaskKind::WireWindow)->where('payment_id', $wire->id)->count())->toBe(1);
     expect(CrmTask::query()->where('kind', TaskKind::RefundDecision)->where('refund_request_id', $refund->id)->count())->toBe(1);
-    expect(CrmTask::query()->where('kind', TaskKind::CharterQuote)->where('charter_enquiry_id', $enquiry->id)->count())->toBe(1);
+    expect(CrmTask::query()->where('kind', TaskKind::CharterQuote)->where('charter_enquiry_id', $enquiry->id)->count())->toBe(0);
     expect(CrmTask::query()->where('kind', TaskKind::DealQuote)->where('deal_id', $deal->id)->count())->toBe(1);
 
     $before = CrmTask::query()->count();
@@ -205,10 +206,18 @@ test('visibility follows ownership and needs_permission', function (): void {
     $admin = $this->actingAs(adminUser())->getJson('/api/crm/tasks?scope=all')->assertOk();
     expect(collect($admin->json('data'))->pluck('title'))->toContain('Call back');
 
-    $enquiry = CharterEnquiry::factory()->create();
-    Artisan::call('iconic:crm-tasks');
+    CrmTask::query()->create([
+        'title' => 'Nobody owns this',
+        'context' => 'visibility',
+        'owner_id' => null,
+        'due_at' => now()->addDay(),
+        'source' => TaskSource::System,
+        'kind' => TaskKind::RequestResponse,
+        'idempotency_key' => 'unassigned:visibility',
+        'status' => TaskStatus::Open,
+    ]);
     $unassigned = $this->actingAs($other)->getJson('/api/crm/tasks?scope=unassigned')->assertOk();
-    expect(collect($unassigned->json('data'))->pluck('kind'))->toContain(TaskKind::CharterQuote->value);
+    expect(collect($unassigned->json('data'))->pluck('title'))->toContain('Nobody owns this');
 
     $departure = ReservationFixtures::anamaraDeparture('2027-12-12');
     $overdue = Booking::factory()->create([
@@ -225,7 +234,7 @@ test('visibility follows ownership and needs_permission', function (): void {
     assertNoSensitiveFields($seen);
     expect(collect($seen->json('data'))->pluck('booking.id'))->toContain($overdue->id);
 
-    $system = CrmTask::query()->where('kind', TaskKind::CharterQuote)->where('charter_enquiry_id', $enquiry->id)->firstOrFail();
+    $system = CrmTask::query()->where('kind', TaskKind::OverdueDecision)->where('booking_id', $overdue->id)->firstOrFail();
     $this->actingAs(adminUser())
         ->postJson('/api/crm/tasks/'.$system->id.'/cancel', ['outcome' => 'Not mine'])
         ->assertStatus(422);

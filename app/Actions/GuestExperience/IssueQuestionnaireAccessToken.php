@@ -19,7 +19,7 @@ final class IssueQuestionnaireAccessToken extends Action
     {
         /** @var BookingAccessToken $token */
         $token = $this->transaction(function () use ($booking, $guestId, $coveredGuestIds): BookingAccessToken {
-            $booking->loadMissing('departure.itinerary');
+            $booking->loadMissing('property');
             $plain = bin2hex(random_bytes(32));
             $pageUrl = rtrim((string) config('iconic.engine_url'), '/').'/questionnaire/'.$plain;
 
@@ -29,7 +29,7 @@ final class IssueQuestionnaireAccessToken extends Action
                 'token_hash' => BookingAccessToken::hashToken($plain),
                 'purpose' => BookingAccessTokenPurpose::Questionnaire,
                 'covered_guest_ids' => $coveredGuestIds,
-                'expires_at' => BusinessTime::dayEndUtc($booking->departure->returnDate()->toDateString()),
+                'expires_at' => BusinessTime::dayEndUtc($booking->stay()->checkOut()->toDateString()),
                 'page_url' => $pageUrl,
             ]);
         });

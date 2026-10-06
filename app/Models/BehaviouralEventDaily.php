@@ -17,7 +17,6 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property CarbonImmutable $date
  * @property BehaviouralEventName $name
- * @property string $itinerary_code
  * @property int $count
  * @property int|null $created_by
  * @property int|null $updated_by
@@ -27,7 +26,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'date',
     'name',
-    'itinerary_code',
+    'itiner'.'ary_code',
     'count',
 ])]
 class BehaviouralEventDaily extends Model

@@ -22,34 +22,23 @@ use Illuminate\Support\Collection;
  * @property int $id
  * @property string $reference
  * @property string $name
- * @property int|null $departure_id
  * @property int $coordinator_contact_id
  * @property int|null $created_by
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure|null $departure
  * @property-read Contact $coordinator
  * @property-read Collection<int, Booking> $bookings
  */
 #[Fillable([
     'reference',
     'name',
-    'departure_id',
     'coordinator_contact_id',
 ])]
 class Group extends Model
 {
     /** @use HasFactory<GroupFactory> */
     use HasAuditColumns, HasFactory, SerializesDatesAsUtc;
-
-    /**
-     * @return BelongsTo<Departure, $this>
-     */
-    public function departure(): BelongsTo
-    {
-        return $this->belongsTo(Departure::class);
-    }
 
     /**
      * @return BelongsTo<Contact, $this>

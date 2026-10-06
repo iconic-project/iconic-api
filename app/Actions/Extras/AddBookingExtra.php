@@ -26,7 +26,7 @@ final class AddBookingExtra extends Action
     public function handle(Booking $booking, array $data, User $actor): BookingExtra
     {
         return $this->transaction(function () use ($booking, $data, $actor): BookingExtra {
-            $booking = BookingMutationLock::acquire($booking, (int) $booking->departure_id);
+            $booking = BookingMutationLock::acquire($booking);
             BookingCharges::assertWritable($booking);
 
             $code = (string) $data['code'];

@@ -25,7 +25,7 @@ enum DocumentKind: string
             self::Receipt => 'Payment Confirmation',
             self::Voucher => 'Transfer Voucher',
             self::PreArrival => 'Pre-arrival information',
-            self::Pretrip => 'Pre-trip Itinerary',
+            self::Pretrip => 'Pre-arrival plan',
             self::WireInstructions => 'Wire Instructions',
             self::CharterProposal => 'Charter proposal',
         };

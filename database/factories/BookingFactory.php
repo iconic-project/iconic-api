@@ -10,7 +10,6 @@ use App\Enums\ChannelOfOrigin;
 use App\Enums\MainChannel;
 use App\Models\Booking;
 use App\Models\Contact;
-use App\Models\Departure;
 use App\Models\RateVersion;
 use App\Models\Room;
 use App\Models\User;
@@ -31,9 +30,17 @@ class BookingFactory extends Factory
         return [
             'reference' => 'ANK-2026-'.str_pad((string) fake()->unique()->numberBetween(100, 999), 4, '0', STR_PAD_LEFT),
             'request_reference' => null,
-            'type' => BookingType::Cabin,
-            'departure_id' => Departure::factory(),
+            'type' => BookingType::Room,
             'room_id' => Room::factory(),
+            'property_id' => function (array $attributes): int {
+                return (int) Room::query()->findOrFail($attributes['room_id'])->property_id;
+            },
+            'room_type_id' => function (array $attributes): int {
+                return (int) Room::query()->findOrFail($attributes['room_id'])->room_type_id;
+            },
+            'check_in' => '2027-01-10',
+            'check_out' => '2027-01-17',
+            'nights' => 7,
             'contact_id' => Contact::factory(),
             'group_id' => null,
             'owner_id' => User::factory(),
@@ -42,7 +49,6 @@ class BookingFactory extends Factory
             'channel_of_origin' => ChannelOfOrigin::HotelBookingEngine,
             'adults' => 2,
             'children' => 0,
-            'back_to_back' => false,
             'rates_version_id' => fn (): int => $this->currentRatesVersionId(),
             'price_lines' => [
                 ['code' => 'base', 'label' => '2 adults', 'amount' => 26600],
@@ -54,7 +60,6 @@ class BookingFactory extends Factory
             'online_deposit' => false,
             'sold_on' => SoldOn::today(),
             'internal_notes' => null,
-            'png_collected' => false,
             'tct_collected' => false,
             'tct_rate_usd' => null,
         ];

@@ -73,7 +73,6 @@ test('panel-read OpenAPI schemas have properties', function (): void {
         'BookingRequestResource',
         'HoldResource',
         'WaitlistEntryResource',
-        'CharterEnquiryResource',
         'PaymentResource',
         'PaymentOptionsResource',
         'RecordedPaymentResource',
@@ -146,7 +145,7 @@ test('panel-read OpenAPI schemas have properties', function (): void {
         'full',
     ]);
 
-    $unavailable = $spec['components']['responses']['CabinUnavailableException'] ?? null;
+    $unavailable = $spec['components']['responses']['RoomUnavailableException'] ?? null;
     expect($unavailable)->toBeArray();
     $body = $unavailable['content']['application/json']['schema']['properties'] ?? [];
     expect($body)->toHaveKey('unavailable');
@@ -161,7 +160,7 @@ test('panel-read OpenAPI schemas have properties', function (): void {
     expect($conflict)->toBeArray();
     $conflictRef = $conflict['$ref'] ?? $conflict['content']['application/json']['schema']['$ref'] ?? null;
     expect($conflictRef)->toBeString();
-    expect($conflictRef)->toContain('CabinUnavailableException');
+    expect($conflictRef)->toContain('RoomUnavailableException');
 
     $booking = openApiSchema($spec, 'BookingResource');
     expect($booking['properties'])->toHaveKeys([
@@ -187,7 +186,7 @@ test('panel-read OpenAPI schemas have properties', function (): void {
         'tct_collected',
         'png_pending_count',
         'charges_total',
-        'cruise_outstanding',
+        'stay_outstanding',
         'extras_due_at',
         'billing_name',
         'billing_address',
@@ -470,7 +469,6 @@ test('panel-read OpenAPI schemas have properties', function (): void {
         'DocumentPlanStatus',
         'OfferType',
         'OfferChannel',
-        'CharterEnquiryStatus',
     ] as $enum) {
         $schema = $spec['components']['schemas'][$enum] ?? null;
         expect($schema)->toBeArray("schema {$enum} is missing");
@@ -759,9 +757,9 @@ test('panel-read OpenAPI schemas have properties', function (): void {
         'benefit_label',
         'scope_label',
         'booking_window_label',
+        'stay_window_label',
         'travel_window_label',
         'engine_placement',
-        'live_departures_count',
         'status',
         'stored_status',
     ]);
@@ -777,20 +775,6 @@ test('panel-read OpenAPI schemas have properties', function (): void {
     } else {
         expect($offer['properties']['channel']['type'] ?? null)->toBe('string');
     }
-
-    $enquiry = openApiSchema($spec, 'CharterEnquiryResource');
-    expect($enquiry['properties'])->toHaveKeys([
-        'id',
-        'preferred_from',
-        'preferred_to',
-        'departure',
-        'guests',
-        'contact',
-        'message',
-        'source',
-        'status',
-        'created_at',
-    ]);
 
     $completeLink = openApiSchema($spec, 'CompleteLinkResource');
     expect($completeLink['properties'])->toHaveKey('url');
@@ -999,11 +983,7 @@ test('sprint 12 report, metric, waitlist and charter schemas name their enums', 
     $waitlist = openApiSchema($spec, 'WaitlistEntryResource');
     expect($waitlist['properties'])->toHaveKeys(['auto_notified', 'position', 'stay', 'room_available']);
 
-    $enquiry = openApiSchema($spec, 'CharterEnquiryResource');
-    expect($enquiry['properties'])->toHaveKeys(['proposal', 'sla_breached', 'booking']);
-    expect(sprint11SchemaRef($enquiry['properties']['status']))->toContain('CharterEnquiryStatus');
-
-    foreach (['ReportRunStatus', 'ReportCadence', 'CharterEnquiryStatus', 'CharterProposalState'] as $enum) {
+    foreach (['ReportRunStatus', 'ReportCadence'] as $enum) {
         $schema = $spec['components']['schemas'][$enum] ?? null;
         expect($schema)->toBeArray();
         expect($schema['enum'] ?? [])->not->toBeEmpty();
@@ -1011,6 +991,4 @@ test('sprint 12 report, metric, waitlist and charter schemas name their enums', 
 
     expect($spec['components']['schemas']['StoreReportRunRequest']['properties'] ?? null)->not->toBeEmpty();
     expect($spec['components']['schemas']['UpdateReportSubscriptionRequest']['properties'] ?? null)->toHaveKey('active');
-    expect($spec['components']['schemas']['UpdateCharterEnquiryRequest']['properties'] ?? null)->toHaveKeys(['status', 'reason']);
-    expect($spec['components']['schemas']['IssueCharterProposalRequest']['properties'] ?? null)->toHaveKey('reason');
 });

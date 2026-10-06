@@ -100,12 +100,12 @@ final class ExportSubjectAccess extends Action
                     'accepted_at' => Iso::utc($row->accepted_at),
                     'withdrawn' => $row->withdrawn,
                 ])->all(),
-            'bookings' => Booking::query()->withTrashed()->with(['departure', 'payments'])->whereIn('id', $bookingIds)->orderBy('id')->get()
+            'bookings' => Booking::query()->withTrashed()->with(['payments'])->whereIn('id', $bookingIds)->orderBy('id')->get()
                 ->map(function (Booking $booking): array {
                     return [
                         'reference' => $booking->reference ?? $booking->request_reference,
-                        'departure_date' => $booking->departure->date->format('Y-m-d'),
-                        'return_date' => $booking->departure->returnDate()->toDateString(),
+                        'check_in' => $booking->stay()->checkIn()->toDateString(),
+                        'check_out' => $booking->stay()->checkOut()->toDateString(),
                         'status' => $booking->status->value,
                         'charges_total' => $booking->chargesTotal(),
                         'payments' => $booking->payments->map(fn (Payment $payment): array => [

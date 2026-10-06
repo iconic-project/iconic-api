@@ -16,7 +16,7 @@ final class ArrivalsBrief
 {
     public function __construct(
         private readonly PdfRenderer $pdf,
-        private readonly DepartureGuestExperience $experience,
+        private readonly ArrivalGuestList $experience,
         private readonly CurrentConfig $config,
     ) {}
 
@@ -206,7 +206,7 @@ final class ArrivalsBrief
 
     private function who(Guest $guest): string
     {
-        $place = GuestCabin::label($guest);
+        $place = $guest->booking->roomLabel();
 
         return $place === '' ? $guest->displayName() : $guest->displayName().' · '.$place;
     }

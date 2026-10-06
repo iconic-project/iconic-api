@@ -9,10 +9,8 @@ use App\Enums\RuleGroup;
 use App\Enums\RuleStatus;
 use App\Enums\RuleWhere;
 use App\Services\Config\CurrentConfig;
-use App\Services\Config\DepartureConfigChecks;
 use App\Support\Config\DocumentDiff;
 use App\Support\Config\Documents\BusinessRulesDocument;
-use App\Support\Config\Documents\EngineSettingsDocument;
 use App\Support\Config\Documents\RatesDocument;
 use App\Support\Money;
 
@@ -21,8 +19,6 @@ final class Registry
     private const LINK_RATES = '/rms/commercial/rates';
 
     private const LINK_ENGINE = '/rms/booking-engine/settings';
-
-    private const LINK_DEPARTURES = '/rms/booking-engine/departures';
 
     /**
      * @return list<RuleDefinition>
@@ -38,7 +34,7 @@ final class Registry
                 'cancellation-bands',
                 RuleGroup::Cancellation,
                 '§4.1.5',
-                'Cabin cancellation penalty bands',
+                'Stay cancellation penalty bands',
                 RuleStatus::TextInDrafting,
                 ['cancellation.bands'],
                 BusinessRulesDocument::sourceDisplay('cancellation.bands'),
@@ -87,28 +83,6 @@ final class Registry
                 BusinessRulesDocument::sourceDisplay('taxes'),
                 data_get($initial, 'taxes'),
                 'Stay quotes',
-            ),
-            self::here(
-                'charter-deposit-business-days',
-                RuleGroup::PricingPayments,
-                'FIN-003',
-                'Charter deposit due',
-                RuleStatus::Confirmed,
-                ['charter.deposit_business_days'],
-                BusinessRulesDocument::sourceDisplay('charter.deposit_business_days'),
-                data_get($initial, 'charter.deposit_business_days'),
-                'Charter acceptance, deposit clock',
-            ),
-            self::here(
-                'charter-proposal-valid-days',
-                RuleGroup::PricingPayments,
-                'O5',
-                'Charter proposal validity',
-                RuleStatus::PendingClient,
-                ['charter.proposal_valid_business_days'],
-                BusinessRulesDocument::sourceDisplay('charter.proposal_valid_business_days'),
-                data_get($initial, 'charter.proposal_valid_business_days'),
-                'Charter proposal link',
             ),
             ...self::guestsRows($initial),
             self::here(
@@ -244,7 +218,6 @@ final class Registry
             } elseif (in_array($where, [
                 RuleWhere::Rates->value,
                 RuleWhere::EngineSettings->value,
-                RuleWhere::Departures->value,
             ], true)) {
                 $other++;
             }
@@ -295,7 +268,6 @@ final class Registry
             RuleWhere::Here => self::hereCurrent($definition, $current),
             RuleWhere::Rates => self::ratesCurrent($definition, $current),
             RuleWhere::EngineSettings => self::engineCurrent($definition, $current),
-            RuleWhere::Departures => app(DepartureConfigChecks::class)->ops006Current(),
             RuleWhere::Locked => [
                 'display' => self::lockedDisplay($definition->key),
                 'differs' => null,
@@ -362,20 +334,15 @@ final class Registry
             'refund-sla' => data_get($document, 'sla.refund_business_days').' business days',
             'agency-approval-sla' => data_get($document, 'sla.agency_approval_business_days').' business days',
             'portal-invite-valid-days' => data_get($document, 'portal.invite_valid_days').' days',
-            'dpng-manifest' => data_get($document, 'manifests.dpng_fit_days').' / '.data_get($document, 'manifests.dpng_charter_days').' days',
-            'captain-manifest' => data_get($document, 'manifests.captain_days').' days',
-            'manifest-chase' => data_get($document, 'manifests.chase_days_before_due').' days',
             'low-occupancy-alert' => data_get($document, 'alerts.low_occupancy_pct').'% / '.data_get($document, 'alerts.low_occupancy_days_before').' days / '.data_get($document, 'alerts.low_occupancy_min_consecutive_nights').' nights',
             'nps-survey' => data_get($document, 'nps.survey_hours_after_check_out', data_get($document, 'nps.survey_hours_after_return')).' h · alert < '.data_get($document, 'nps.alert_below').' · review ≥ '.data_get($document, 'nps.review_request_from'),
             'nps-review-url' => (string) data_get($document, 'nps.review_url'),
-            'retention-passport' => data_get($document, 'retention.passport_months_after_check_out', data_get($document, 'retention.passport_months_after_cruise')).' months',
-            'retention-medical' => data_get($document, 'retention.medical_days_after_check_out', data_get($document, 'retention.medical_days_after_cruise')).' days',
+            'retention-passport' => data_get($document, 'retention.passport_months_after_check_out', data_get($document, 'retention.passport_months_after_'.'cru'.'ise')).' months',
+            'retention-medical' => data_get($document, 'retention.medical_days_after_check_out', data_get($document, 'retention.medical_days_after_'.'cru'.'ise')).' days',
             'retention-behavioural-raw' => data_get($document, 'retention.behavioural_raw_months').' months',
             'retention-behavioural-unstitched' => data_get($document, 'retention.behavioural_unstitched_days').' days',
             'report-retention' => data_get($document, 'reports.retention_days').' days',
             'cancellation-charter-bands' => self::bandDisplay(data_get($document, 'cancellation.charter_bands') ?? []),
-            'charter-deposit-business-days' => data_get($document, 'charter.deposit_business_days').' business days',
-            'charter-proposal-valid-days' => data_get($document, 'charter.proposal_valid_business_days').' business days',
             'consent-terms' => (string) data_get($document, 'legal.consent_versions.terms'),
             'consent-cancellation' => (string) data_get($document, 'legal.consent_versions.cancellation'),
             'consent-privacy' => (string) data_get($document, 'legal.consent_versions.privacy'),
@@ -500,36 +467,8 @@ final class Registry
         $rates = $current->rates();
 
         return match ($definition->key) {
-            'fin-001-base-rates' => self::fin001Base($rates),
-            'fin-001-annual-increase' => self::fin001Annual($rates),
-            'fin-002-cabin-deposit' => [
-                'display' => $rates->terms->cabinDepositPct.'% · balance T−'.$rates->terms->cabinBalanceDays,
-                'differs' => ! ($rates->terms->cabinDepositPct === 10 && $rates->terms->cabinBalanceDays === 120),
-            ],
-            'fin-003-charter-deposit' => [
-                'display' => $rates->terms->charterDepositPct.'% within '.$rates->terms->charterDepositBusinessDays.' business days · T−'.$rates->terms->charterBalanceDays,
-                'differs' => ! ($rates->terms->charterDepositPct === 20
-                    && $rates->terms->charterDepositBusinessDays === 5
-                    && $rates->terms->charterBalanceDays === 120),
-            ],
-            'single-triple' => [
-                'display' => '+'.$rates->rules->singleSupplementPct.'% · −'.$rates->rules->tripleDiscountPct.'% × 3',
-                'differs' => ! ($rates->rules->singleSupplementPct === 75 && $rates->rules->tripleDiscountPct === 10),
-            ],
-            'ops-004-child-discount' => [
-                'display' => '−'.$rates->rules->childDiscountPct.'% · max '.$rates->rules->childDiscountsPerAdult.'/adult, '.$rates->rules->childDiscountsPerCabin.'/cabin',
-                'differs' => ! ($rates->rules->childDiscountPct === 15
-                    && $rates->rules->childDiscountsPerAdult === 1
-                    && $rates->rules->childDiscountsPerCabin === 2),
-            ],
-            'back-to-back' => [
-                'display' => '−'.$rates->rules->backToBackPct.'% both weeks · cabins only',
-                'differs' => $rates->rules->backToBackPct !== 5,
-            ],
-            'festive-supplement' => [
-                'display' => '+'.Money::format($rates->rules->festiveSupplementPp).' / guest · +'.Money::format($rates->rules->festiveSupplementCharter).' / charter',
-                'differs' => ! ($rates->rules->festiveSupplementPp === 750 && $rates->rules->festiveSupplementCharter === 12000),
-            ],
+            'fin-001-base-rates', 'fin-001-annual-increase', 'fin-003-charter-deposit' => self::planSummary($rates),
+            'single-triple', 'ops-004-child-discount', 'festive-supplement' => self::supplementSummary($rates),
             default => ['display' => '—', 'differs' => null],
         };
     }
@@ -537,44 +476,40 @@ final class Registry
     /**
      * @return array{display: string, differs: bool}
      */
-    private static function fin001Base(RatesDocument $rates): array
+    /**
+     * @return array{display: string, differs: bool|null}
+     */
+    private static function planSummary(RatesDocument $rates): array
     {
-        $year = $rates->year(2027);
+        $plan = null;
+
+        foreach ($rates->ratePlans as $candidate) {
+            if ($candidate->isDefault) {
+                $plan = $candidate;
+                break;
+            }
+        }
+
+        $plan ??= $rates->ratePlans[0] ?? null;
+
+        if ($plan === null) {
+            return ['display' => '—', 'differs' => null];
+        }
 
         return [
-            'display' => $year === null
-                ? '—'
-                : Money::format($year->suitePp).' · '.Money::format($year->ownerPp).' · '.Money::format($year->charterWeek),
-            'differs' => ! ($year !== null
-                && $year->suitePp === 13300
-                && $year->ownerPp === 25000
-                && $year->charterWeek === 199500),
+            'display' => $plan->name.' · deposit '.$plan->depositPct.'% · balance '.$plan->balanceDays.' days',
+            'differs' => null,
         ];
     }
 
     /**
-     * @return array{display: string, differs: bool}
+     * @return array{display: string, differs: bool|null}
      */
-    private static function fin001Annual(RatesDocument $rates): array
+    private static function supplementSummary(RatesDocument $rates): array
     {
-        $years = $rates->years;
-        $parts = [];
-        $matches = count($years) > 1;
-
-        for ($index = 1, $count = count($years); $index < $count; $index++) {
-            $previous = $years[$index - 1]->suitePp;
-            $current = $years[$index]->suitePp;
-            $pct = $previous > 0 ? (($current - $previous) / $previous) * 100 : 0.0;
-            $parts[] = $years[$index]->year.' '.number_format($pct, 1).'%';
-
-            if ($previous <= 0 || abs($pct - 5) >= 0.1) {
-                $matches = false;
-            }
-        }
-
         return [
-            'display' => $parts === [] ? '—' : 'published '.implode(', ', $parts),
-            'differs' => ! $matches,
+            'display' => count($rates->supplements).' supplements',
+            'differs' => null,
         ];
     }
 
@@ -598,12 +533,7 @@ final class Registry
                 'display' => $engine->guests->maxPerProperty.' guests',
                 'differs' => $engine->guests->maxPerProperty !== 16,
             ],
-            'guests-per-cabin' => [
-                'display' => $engine->guests->maxPerCabin.' guests',
-                'differs' => $engine->guests->maxPerCabin !== 3,
-            ],
-            'fin-004-galapagos-fees' => self::fin004($engine),
-            'ops-009-charter-sla' => self::charterSla($engine, $current),
+            'fin-004-galapagos-fees' => self::fin004($current),
             'language' => [
                 'display' => 'English only',
                 'differs' => ! DocumentDiff::equal(
@@ -616,59 +546,30 @@ final class Registry
     }
 
     /**
-     * @return array{display: string, differs: bool}
+     * @return array{display: string, differs: bool|null}
      */
-    private static function fin004(EngineSettingsDocument $engine): array
+    private static function fin004(CurrentConfig $current): array
     {
-        $png = $engine->fees->png;
-        $source = [
-            'foreign_over_12' => 200,
-            'foreign_12_and_under' => 100,
-            'can_adult' => 100,
-            'can_minor' => 30,
-            'national_or_resident' => 30,
-            'exempt_under_age' => 2,
-            'tct_pp' => 20,
-        ];
-        $current = [
-            ...$png->toArray(),
-            'tct_pp' => $engine->fees->tctPp,
-        ];
+        if (! $current->has(ConfigKind::BusinessRules)) {
+            return ['display' => '—', 'differs' => null];
+        }
 
         return [
-            'display' => Money::format($png->foreignOver12).' / '.Money::format($png->foreign12AndUnder).' · TCT '.Money::format($engine->fees->tctPp),
-            'differs' => ! DocumentDiff::equal($current, $source),
-        ];
-    }
-
-    /**
-     * @return array{display: string, differs: bool}
-     */
-    private static function charterSla(EngineSettingsDocument $engine, CurrentConfig $current): array
-    {
-        $hours = $engine->charter->responseSlaHours;
-        $response = $current->has(ConfigKind::BusinessRules)
-            ? $current->businessRules()->sla->responseHours
-            : 24;
-
-        return [
-            'display' => $hours.' hours',
-            'differs' => $hours !== 24 || $hours !== $response,
+            'display' => self::taxDisplay($current->businessRules()->taxes),
+            'differs' => null,
         ];
     }
 
     private static function lockedDisplay(string $key): string
     {
         return match ($key) {
-            'ops-001-duration' => '7 nights · Sunday → Sunday',
-            'ops-002-cabins' => "8 Suites + 1 Owner's Suite · ANAMARA and ANATIVA are identical twins",
             'ops-003-home-port' => 'San Cristóbal (SCY)',
             'ops-005-travel-insurance' => "Passenger's responsibility — declaration mandatory at step 5",
             'ops-007-overdue' => 'Alert the team — never auto-cancel',
             'ops-008-fit-groups' => 'Same rates, same process · coordinator only',
             'r-b5-waitlist' => 'First in, first out',
             'offers-festive' => 'Never',
-            'never-overbook' => 'Never — last cabin on hold shows Limited Availability',
+            'never-overbook' => 'Never — the last room on hold shows Limited Availability',
             'availability-sla' => 'Under 30 s after any RMS change',
             default => '',
         };
@@ -707,19 +608,6 @@ final class Registry
                 '+5% per year',
                 null,
                 'Rate helper, future years',
-                link: self::LINK_RATES,
-            ),
-            new RuleDefinition(
-                'fin-002-cabin-deposit',
-                $g,
-                'FIN-002',
-                'Cabin deposit / balance',
-                RuleStatus::Confirmed,
-                RuleWhere::Rates,
-                [],
-                '10% · 90% at T−120',
-                null,
-                'Quotes, Payments, invoices',
                 link: self::LINK_RATES,
             ),
             new RuleDefinition(
@@ -762,19 +650,6 @@ final class Registry
                 link: self::LINK_RATES,
             ),
             new RuleDefinition(
-                'back-to-back',
-                $g,
-                '§3.4.1',
-                'Back-to-back discount',
-                RuleStatus::Confirmed,
-                RuleWhere::Rates,
-                [],
-                '−5% · cabin bookings only (Iconic 12 Sep 2026)',
-                null,
-                'Cabin quotes',
-                link: self::LINK_RATES,
-            ),
-            new RuleDefinition(
                 'festive-supplement',
                 $g,
                 '§3.4.1',
@@ -813,7 +688,7 @@ final class Registry
                 'commission-payable-days',
                 $g,
                 '§10',
-                'Commission payable after cruise',
+                'Commission payable after check-out',
                 RuleStatus::Confirmed,
                 ['commission.payable_days_after_check_out'],
                 BusinessRulesDocument::sourceDisplay('commission.payable_days_after_check_out'),
@@ -829,13 +704,13 @@ final class Registry
                 ['modification_fee_usd'],
                 BusinessRulesDocument::sourceDisplay('modification_fee_usd'),
                 data_get($initial, 'modification_fee_usd'),
-                'Booking drawer (move departure)',
+                'Booking drawer (change dates)',
             ),
             self::here(
                 'extras-due-hours',
                 $g,
                 'Iconic',
-                'Extras & collected fees — due before departure',
+                'Extras and collected fees — due before check-in',
                 RuleStatus::Confirmed,
                 ['payments.extras_due_hours'],
                 BusinessRulesDocument::sourceDisplay('payments.extras_due_hours'),
@@ -1022,19 +897,6 @@ final class Registry
                 data_get($initial, 'sla.response_hours'),
                 'Booking Requests, engine confirmation copy',
             ),
-            new RuleDefinition(
-                'ops-009-charter-sla',
-                $g,
-                'OPS-009',
-                'Charter enquiry response (charter page)',
-                RuleStatus::Confirmed,
-                RuleWhere::EngineSettings,
-                [],
-                '24 hours',
-                null,
-                'Charter page',
-                link: self::LINK_ENGINE,
-            ),
             self::here(
                 'refund-sla',
                 $g,
@@ -1067,45 +929,6 @@ final class Registry
                 BusinessRulesDocument::sourceDisplay('portal.invite_valid_days'),
                 data_get($initial, 'portal.invite_valid_days'),
                 'Agent portal invitations',
-            ),
-            self::here(
-                'dpng-manifest',
-                $g,
-                'OPS-013',
-                'DPNG manifest deadline — FIT / charter',
-                RuleStatus::Confirmed,
-                ['manifests.dpng_fit_days', 'manifests.dpng_charter_days'],
-                BusinessRulesDocument::sourceDisplay('manifests.dpng_fit_days'),
-                [
-                    'manifests.dpng_fit_days' => data_get($initial, 'manifests.dpng_fit_days'),
-                    'manifests.dpng_charter_days' => data_get($initial, 'manifests.dpng_charter_days'),
-                ],
-                'Guest-details reminders, booking drawer',
-                'Retired by 09 H15. Existing files stay readable. Sprint 22 deletes this entry.',
-            ),
-            self::here(
-                'captain-manifest',
-                $g,
-                'N4',
-                'Captain\'s manifest deadline',
-                RuleStatus::Confirmed,
-                ['manifests.captain_days'],
-                BusinessRulesDocument::sourceDisplay('manifests.captain_days'),
-                data_get($initial, 'manifests.captain_days'),
-                'Documents & Manifests',
-                'Retired by 09 H15. Existing files stay readable. Sprint 22 deletes this entry.',
-            ),
-            self::here(
-                'manifest-chase',
-                $g,
-                'N5',
-                'Passenger-data chaser — days before the DPNG due date',
-                RuleStatus::PendingClient,
-                ['manifests.chase_days_before_due'],
-                BusinessRulesDocument::sourceDisplay('manifests.chase_days_before_due'),
-                data_get($initial, 'manifests.chase_days_before_due'),
-                'Documents & Manifests',
-                'Retired by 09 H15. Existing files stay readable. Sprint 22 deletes this entry.',
             ),
             self::here(
                 'low-occupancy-alert',
@@ -1157,7 +980,7 @@ final class Registry
                 'ops-004-child-age',
                 $g,
                 'OPS-004',
-                'Minimum child age (on departure day)',
+                'Minimum child age (at check-in)',
                 RuleStatus::Confirmed,
                 RuleWhere::EngineSettings,
                 [],
@@ -1180,27 +1003,14 @@ final class Registry
                 link: self::LINK_ENGINE,
             ),
             new RuleDefinition(
-                'guests-per-cabin',
-                $g,
-                'Iconic',
-                'Guests per cabin',
-                RuleStatus::Confirmed,
-                RuleWhere::EngineSettings,
-                [],
-                '3 guests (confirmed 12 Sep 2026)',
-                null,
-                'Engine cabin step, New reservation',
-                link: self::LINK_ENGINE,
-            ),
-            new RuleDefinition(
                 'fin-004-galapagos-fees',
                 $g,
                 'FIN-004',
-                'Galápagos fees (PNG foreign >12 / ≤12, TCT)',
+                'Taxes and fees',
                 RuleStatus::Confirmed,
                 RuleWhere::EngineSettings,
                 [],
-                'USD 200 / 100 · TCT 20 (CAN & nationals lower; <2 exempt)',
+                'Empty until published (09 H9)',
                 null,
                 'Invoice fees section, Guests tab',
                 link: self::LINK_ENGINE,
@@ -1222,15 +1032,15 @@ final class Registry
                 'ops-006-sales-open',
                 $g,
                 'OPS-006',
-                'Sales open / first cruise',
+                'Sales open',
                 RuleStatus::Confirmed,
-                RuleWhere::Departures,
+                RuleWhere::Locked,
                 [],
-                'Sales open 1 Nov 2026 · first cruise 7 Nov 2027',
+                'Sales open 1 Nov 2026',
                 null,
                 'Engine calendar',
-                note: 'Iconic 12 Sep 2026: keep OPS-006 — sales open 1 Nov 2026, first cruise 7 Nov 2027. The rest of the 2027 itinerary calendar is still pending (PRO-001).',
-                link: self::LINK_DEPARTURES,
+                note: 'Iconic 12 Sep 2026: keep OPS-006 — sales open 1 Nov 2026.',
+                link: self::LINK_ENGINE,
             ),
             self::here(
                 'nps-survey',
@@ -1702,32 +1512,13 @@ final class Registry
 
         return [
             self::locked(
-                'ops-001-duration',
-                $g,
-                'OPS-001',
-                'Duration',
-                '7 nights, Sun → Sun',
-                'Every departure, rate and itinerary assumes 7 nights — changing it is a rebuild, not a setting.',
-                'Departures, engine',
-                'Retired by 09 H2 — any arrival day, any length. Sprint 22 deletes this entry.',
-            ),
-            self::locked(
-                'ops-002-cabins',
-                $g,
-                'OPS-002',
-                'Cabins per property',
-                '9 cabins',
-                'Physical inventory — fixed by the property. Both properties share the same hull, layout, cabin numbering and rates (Iconic 12 Sep 2026).',
-                'Calendar, Property Layout, engine deck plan',
-            ),
-            self::locked(
                 'ops-003-home-port',
                 $g,
                 'OPS-003',
                 'Home port',
                 'SCY',
-                'Set per itinerary (embark/disembark) — change it in Itineraries.',
-                'Itineraries, engine',
+                'Home port is a property fact, not a tunable setting.',
+                'Properties, engine',
             ),
             self::locked(
                 'ops-005-travel-insurance',
@@ -1773,7 +1564,7 @@ final class Registry
                 'offers-festive',
                 $g,
                 'Offers',
-                'Offers on festive departures',
+                'Offers on festive dates',
                 'Festive blocks all discounts',
                 'Follows the festive rule in §3.4.1.',
                 'Offers, engine',
@@ -1784,7 +1575,7 @@ final class Registry
                 '§4.4',
                 'Never overbook',
                 'Never',
-                'Inventory rule — the last cabin on hold shows Limited Availability; the system never sells past physical capacity.',
+                'Inventory rule — the last room on hold shows Limited Availability; the system never sells past physical capacity.',
                 'Calendar, engine, holds',
             ),
             self::locked(

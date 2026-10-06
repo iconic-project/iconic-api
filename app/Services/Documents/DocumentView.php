@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Documents;
 
 use App\Enums\DocumentKind;
+use InvalidArgumentException;
 
 final class DocumentView
 {
@@ -18,7 +19,7 @@ final class DocumentView
             DocumentKind::Voucher => 'documents.voucher',
             DocumentKind::PreArrival, DocumentKind::Pretrip => 'documents.pretrip',
             DocumentKind::WireInstructions => 'documents.wire-instructions',
-            DocumentKind::CharterProposal => 'documents.charter-proposal',
+            DocumentKind::CharterProposal => throw new InvalidArgumentException('Charter proposals are no longer rendered.'),
         };
     }
 }

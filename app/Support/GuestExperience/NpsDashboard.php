@@ -6,8 +6,8 @@ namespace App\Support\GuestExperience;
 
 use App\Enums\DeliveryKind;
 use App\Enums\DeliveryStatus;
+use App\Models\Booking;
 use App\Models\Delivery;
-use App\Models\Departure;
 use App\Models\GuestResponse;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
@@ -78,14 +78,14 @@ final class NpsDashboard
 
     public static function firstExpected(NpsRules $rules): ?string
     {
-        $departure = Departure::query()->orderBy('date')->orderBy('id')->first();
+        $booking = Booking::query()->whereNotNull('check_out')->orderBy('check_out')->orderBy('id')->first();
 
-        if (! $departure instanceof Departure) {
+        if (! $booking instanceof Booking) {
             return null;
         }
 
         return app(StayClock::class)
-            ->checkOutMoment($departure->stayDates())
+            ->checkOutMoment($booking->stay())
             ->addHours($rules->surveyHoursAfterCheckOut)
             ->toDateString();
     }

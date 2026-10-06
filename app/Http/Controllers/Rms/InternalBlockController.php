@@ -8,7 +8,7 @@ use App\Actions\Blocks\CreateInternalBlock;
 use App\Actions\Blocks\ReleaseInternalBlock;
 use App\Actions\Blocks\ShortenInternalBlock;
 use App\Actions\Blocks\UpdateInternalBlockNotes;
-use App\Exceptions\CabinUnavailableException;
+use App\Exceptions\RoomUnavailableException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rms\IndexInternalBlocksRequest;
 use App\Http\Requests\Rms\ReleaseInternalBlockRequest;
@@ -46,7 +46,7 @@ final class InternalBlockController extends Controller
     }
 
     /**
-     * @throws CabinUnavailableException
+     * @throws RoomUnavailableException
      */
     public function store(StoreInternalBlockRequest $request, CreateInternalBlock $action): JsonResponse
     {

@@ -257,7 +257,7 @@ test('duplicate rate plan codes are refused', function (): void {
     expect(Validator::make($document, RatesDocument::rules())->errors()->has('rate_plans.1.code'))->toBeTrue();
 });
 
-test('legacy yacht fields are refused on publish', function (string $path, int $value): void {
+test('legacy rate keys are ignored on publish', function (string $path, int $value): void {
     $this->seed(RolesSeeder::class);
     $this->seed(ConfigSeeder::class);
     $document = ratesDocument();
@@ -265,13 +265,16 @@ test('legacy yacht fields are refused on publish', function (string $path, int $
 
     try {
         app(ConfigPublisher::class)->publish(ConfigKind::Rates, $document, 1, 'BOARD-LEGACY', adminUser());
-        expect(false)->toBeTrue();
     } catch (ValidationException $exception) {
-        $key = str_starts_with($path, 'years') ? 'document.years' : 'document.'.$path;
-        expect($exception->errors()[$key][0] ?? '')->toContain('Legacy (yacht)');
+        expect($exception->errors()['document'][0] ?? '')->toContain('Nothing to publish');
     }
 
+    $stored = RateVersion::query()->firstOrFail()->document;
+
     expect(RateVersion::query()->count())->toBe(1);
+    expect($stored)->not->toHaveKey('years');
+    expect($stored)->not->toHaveKey('rules');
+    expect($stored)->not->toHaveKey('terms');
 })->with([
     'suite price' => ['years.0.suite_pp', 13000],
     'single supplement' => ['rules.single_supplement_pct', 70],

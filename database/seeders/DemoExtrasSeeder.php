@@ -69,22 +69,5 @@ final class DemoExtrasSeeder extends Seeder
         ], system: true);
     }
 
-    private function collectPng(string $reference): void
-    {
-        $booking = Booking::query()->where('reference', $reference)->first();
-
-        if (! $booking instanceof Booking || $booking->png_collected) {
-            return;
-        }
-
-        $booking->png_collected = true;
-        $booking->save();
-
-        History::record($booking, 'booking.fees_changed', before: [
-            'png_collected' => false,
-        ], after: [
-            'png_collected' => true,
-            'what' => 'PNG park entry fee — collected by Iconic (invoiced, due with the balance)',
-        ], system: true);
-    }
+    private function collectPng(string $reference): void {}
 }

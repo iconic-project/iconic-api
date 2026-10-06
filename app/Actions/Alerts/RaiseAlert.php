@@ -20,7 +20,6 @@ final class RaiseAlert extends Action
         string $title,
         string $sentence,
         ?int $bookingId = null,
-        ?int $departureId = null,
         ?int $agencyId = null,
         ?int $paymentId = null,
         ?int $deliveryId = null,
@@ -29,7 +28,7 @@ final class RaiseAlert extends Action
     ): Alert {
         $definition = AlertRegistry::get($kind);
 
-        return $this->transaction(function () use ($kind, $definition, $baseKey, $title, $sentence, $bookingId, $departureId, $agencyId, $paymentId, $deliveryId, $guestResponseId, $crmTaskId): Alert {
+        return $this->transaction(function () use ($kind, $definition, $baseKey, $title, $sentence, $bookingId, $agencyId, $paymentId, $deliveryId, $guestResponseId, $crmTaskId): Alert {
             $existing = Alert::query()->where('base_key', $baseKey)->lockForUpdate()->get();
             $open = $existing->first(fn (Alert $alert): bool => $alert->resolved_at === null);
 
@@ -47,7 +46,6 @@ final class RaiseAlert extends Action
                     'title' => $title,
                     'sentence' => $sentence,
                     'booking_id' => $bookingId,
-                    'departure_id' => $departureId,
                     'agency_id' => $agencyId,
                     'payment_id' => $paymentId,
                     'delivery_id' => $deliveryId,

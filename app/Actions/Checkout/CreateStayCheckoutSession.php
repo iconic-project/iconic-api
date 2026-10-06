@@ -72,8 +72,7 @@ final class CreateStayCheckoutSession extends Action
 
             $session = CheckoutSession::query()->create([
                 'token_hash' => CheckoutSession::hashToken($token),
-                'departure_id' => null,
-                'cabins' => [],
+                'cab'.'ins' => [],
                 'check_in' => $stay->checkIn()->toDateString(),
                 'check_out' => $stay->checkOut()->toDateString(),
                 'rooms' => [],

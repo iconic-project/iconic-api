@@ -260,7 +260,6 @@ final class SubmitStayCheckout extends Action
         $group = Group::query()->create([
             'reference' => $this->references->next(ReferenceType::Group),
             'name' => $contact->name.' group',
-            'departure_id' => null,
             'coordinator_contact_id' => $contact->id,
         ]);
 
@@ -300,8 +299,7 @@ final class SubmitStayCheckout extends Action
         $booking = Booking::query()->create([
             'reference' => null,
             'request_reference' => $this->references->next(ReferenceType::Request),
-            'type' => BookingType::Cabin,
-            'departure_id' => null,
+            'type' => BookingType::Room,
             'property_id' => $type->property_id,
             'room_type_id' => $type->id,
             'room_id' => $room->id,
@@ -320,7 +318,6 @@ final class SubmitStayCheckout extends Action
             'channel_of_origin' => $channels['origin'],
             'adults' => (int) $line['adults'],
             'children' => count($ages),
-            'back_to_back' => false,
             'rates_version_id' => $result->quote->ratesVersionId ?? $this->config->version(ConfigKind::Rates)->id,
             'price_lines' => $priced['lines'],
             'total' => $result->quote->total,
@@ -329,7 +326,6 @@ final class SubmitStayCheckout extends Action
             'online_deposit' => $path === CheckoutPath::PayDeposit,
             'sold_on' => SoldOn::today(),
             'checkout_session_id' => $sessionId,
-            'png_collected' => false,
             'tct_collected' => false,
             'utm_first' => null,
             'utm_last' => null,

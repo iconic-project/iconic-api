@@ -4,11 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services\Engine;
 
+use App\Enums\OfferChannel;
+use App\Enums\OfferStatus;
+use App\Enums\OfferType;
+use App\Models\Offer;
 use App\Models\Property;
 use App\Models\RoomType;
 use App\Services\Config\CurrentConfig;
 use App\Services\Inventory\NightAvailability;
 use App\Services\Inventory\Restrictions;
+use App\Services\Pricing\BookingDiscounts;
 use App\Support\Content\Completeness;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Cache;
@@ -16,7 +21,8 @@ use Illuminate\Support\Facades\Cache;
 /**
  * Price calendar. Inventory comes from NightAvailability in chunks of 62 nights.
  * A night is available when any engine-visible type can be booked for one night
- * by the party. from_price is the lowest season price among those types.
+ * by the party. from_price is the lowest net price among those types after
+ * public stay offers. Each night also lists the badge texts for that price.
  */
 final class EngineCalendar
 {
@@ -26,16 +32,17 @@ final class EngineCalendar
         private readonly SeasonNightly $prices,
         private readonly CurrentConfig $config,
         private readonly EnginePropertyFeed $properties,
+        private readonly BookingDiscounts $discounts,
     ) {}
 
     /**
-     * @return array{from: string, months: int, adults: int, children: int, nights: list<array{night: string, available: bool, from_price: int|null, closed_to_arrival: bool, closed_to_departure: bool, min_stay: int}>}
+     * @return array{from: string, months: int, adults: int, children: int, nights: list<array{night: string, available: bool, from_price: int|null, offers: list<string>, closed_to_arrival: bool, closed_to_departure: bool, min_stay: int}>}
      */
     public function month(string $from, int $months, int $adults, int $children): array
     {
         $version = EngineFeedVersion::current();
 
-        /** @var array{from: string, months: int, adults: int, children: int, nights: list<array{night: string, available: bool, from_price: int|null, closed_to_arrival: bool, closed_to_departure: bool, min_stay: int}>} $payload */
+        /** @var array{from: string, months: int, adults: int, children: int, nights: list<array{night: string, available: bool, from_price: int|null, offers: list<string>, closed_to_arrival: bool, closed_to_departure: bool, min_stay: int}>} $payload */
         $payload = Cache::remember(
             EngineFeedVersion::calendarKey($from, $months, $adults, $children, $version),
             60,
@@ -46,7 +53,7 @@ final class EngineCalendar
     }
 
     /**
-     * @return array{from: string, months: int, adults: int, children: int, nights: list<array{night: string, available: bool, from_price: int|null, closed_to_arrival: bool, closed_to_departure: bool, min_stay: int}>}
+     * @return array{from: string, months: int, adults: int, children: int, nights: list<array{night: string, available: bool, from_price: int|null, offers: list<string>, closed_to_arrival: bool, closed_to_departure: bool, min_stay: int}>}
      */
     private function assemble(string $from, int $months, int $adults, int $children): array
     {
@@ -62,6 +69,8 @@ final class EngineCalendar
         );
         $counts = $this->counts($property, $start, $end);
         $ages = $this->ages($children);
+        $plan = $this->prices->defaultPlan();
+        $adjust = $this->hasPublicPriceOffers();
         $nights = [];
         $cursor = $start;
 
@@ -70,15 +79,16 @@ final class EngineCalendar
             $next = $cursor->addDay()->toDateString();
             $available = false;
             $fromPrice = null;
+            $offers = [];
             $closedToArrival = $types !== [];
-            $closedToDeparture = $types !== [];
+            $closedOnCheckOut = $types !== [];
             $minStay = null;
 
             foreach ($types as $type) {
                 $flag = $flags[$night][$type->id];
                 $depart = $flags[$next][$type->id];
                 $closedToArrival = $closedToArrival && $flag['closed_to_arrival'];
-                $closedToDeparture = $closedToDeparture && $flag['closed_to_departure'];
+                $closedOnCheckOut = $closedOnCheckOut && $flag['closed_to_departure'];
                 $minStay = $minStay === null ? $flag['min_stay'] : min($minStay, $flag['min_stay']);
 
                 if ($flag['stop_sell'] || $flag['closed_to_arrival'] || $depart['closed_to_departure']) {
@@ -101,16 +111,29 @@ final class EngineCalendar
                     continue;
                 }
 
+                $pills = [];
+
+                if ($adjust) {
+                    $net = $this->discounts->netNight($price, $night, $type->code, $plan);
+                    $price = $net['total'];
+                    $pills = $net['pills'];
+                }
+
                 $available = true;
-                $fromPrice = $fromPrice === null ? $price : min($fromPrice, $price);
+
+                if ($fromPrice === null || $price < $fromPrice) {
+                    $fromPrice = $price;
+                    $offers = $pills;
+                }
             }
 
             $nights[] = [
                 'night' => $night,
                 'available' => $available,
                 'from_price' => $fromPrice,
+                'offers' => $offers,
                 'closed_to_arrival' => $closedToArrival,
-                'closed_to_departure' => $closedToDeparture,
+                'closed_to_departure' => $closedOnCheckOut,
                 'min_stay' => $minStay ?? $this->config->businessRules()->stay->minNights,
             ];
 
@@ -178,6 +201,16 @@ final class EngineCalendar
         }
 
         return $counts;
+    }
+
+    private function hasPublicPriceOffers(): bool
+    {
+        return Offer::query()
+            ->where('status', OfferStatus::Live)
+            ->where('is_promo_code', false)
+            ->whereIn('channel', [OfferChannel::D2C->value, OfferChannel::All->value])
+            ->whereIn('type', [OfferType::Percent->value, OfferType::Amount->value, OfferType::Credit->value])
+            ->exists();
     }
 
     /**

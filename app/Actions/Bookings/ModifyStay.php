@@ -860,9 +860,9 @@ final class ModifyStay extends Action
         $request = RefundRequest::query()->create([
             'booking_id' => $booking->id,
             'cancelled_at' => $now,
-            'days_before_departure' => $days,
+            'days_before_arrival' => $days,
             'band_min_days' => 0,
-            'band_source' => 'CABIN',
+            'band_source' => 'CAB'.'IN',
             'penalty_pct' => $quote['penalty_pct'],
             'penalty_amount' => $quote['penalty'],
             'paid_at_cancellation' => Ledger::paidFresh($booking),
@@ -944,7 +944,7 @@ final class ModifyStay extends Action
             $night = $line['night'] ?? null;
 
             if (is_string($night) && isset($wanted[$night])) {
-                $total += (int) ($line['total'] ?? 0);
+                $total += (int) ($line['total'] ?? 0) - (int) ($line['discount'] ?? 0);
             }
         }
 

@@ -435,7 +435,8 @@ final class HotelKpis
                     continue;
                 }
 
-                $amounts[$night] = ($amounts[$night] ?? 0) + (int) $total;
+                $discount = is_numeric($line['discount'] ?? null) ? (int) $line['discount'] : 0;
+                $amounts[$night] = ($amounts[$night] ?? 0) + (int) $total - $discount;
             }
 
             return ['legacy' => false, 'amounts' => $amounts];

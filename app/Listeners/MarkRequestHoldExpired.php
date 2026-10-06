@@ -30,7 +30,7 @@ final class MarkRequestHoldExpired
         $request->save();
 
         History::record($holder, 'request.hold_expired', after: [
-            'what' => 'Hold expired (TEC-004) — cabin returned to inventory; the request stays open for review',
+            'what' => 'Hold expired (TEC-004) — room returned to inventory; the request stays open for review',
         ], system: true);
         // TODO(Sprint 7): notify the owner
     }

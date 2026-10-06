@@ -8,9 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * Departure calendar. Deprecated: pass property_id for the night grid (17-07).
+ * Retired inventory grid. The panel reads NightCalendarResource.
  *
- * @property array{departures: list<array<string, mixed>>, rows: list<array<string, mixed>>} $resource
+ * @property array<string, mixed> $resource
  *
  * @deprecated Panel 17-07 reads NightCalendarResource.
  */
@@ -19,40 +19,11 @@ class CalendarGridResource extends JsonResource
     public static $wrap = null;
 
     /**
-     * @return array{
-     *     departures: list<array{
-     *         id: int,
-     *         reference: string,
-     *         date: string,
-     *         property: array{id: int, code: string, name: string},
-     *         itinerary: array{id: int, code: string, name: string},
-     *         festive: bool,
-     *         status: string
-     *     }>,
-     *     rows: list<array{
-     *         property: array{id: int, code: string, name: string},
-     *         cabin: array{id: int, code: string, label: string, category: string, sort: int},
-     *         cells: array<string, array{
-     *             state: string,
-     *             claim: array{
-     *                 kind: string,
-     *                 hold_type: string|null,
-     *                 expires_at: string|null,
-     *                 holder: array{
-     *                     type: string,
-     *                     id: int,
-     *                     reference: string|null,
-     *                     label: string|null,
-     *                     detail: array{reason: string, reason_label: string}|array{status: string, type: string, segment: string, display_reference: string|null, owner_id: int, owner_name: string, party_label: string, hold_expired: bool}|null
-     *                 }
-     *             }|null
-     *         }>
-     *     }>
-     * }
+     * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
-        /** @var array{departures: list<array<string, mixed>>, rows: list<array<string, mixed>>} $payload */
+        /** @var array<string, mixed> $payload */
         $payload = $this->resource;
 
         return $payload;

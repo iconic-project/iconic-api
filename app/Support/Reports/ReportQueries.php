@@ -91,24 +91,23 @@ class ReportQueries
      */
     private function overdue(MetricWindow $window, MetricScope $scope): array
     {
-        [$cruise, $paid] = Booking::cruiseOutstandingSql();
+        [$staySql, $paid] = Booking::stayOutstandingSql();
         $due = Booking::dueDateSql();
         $statuses = [BookingStatus::Confirmed->value, BookingStatus::OnHoldAgency->value];
         [$scopeSql, $scopeBindings] = $this->bookingScope('bookings', $scope);
         $today = BusinessTime::now()->toDateString();
         $sql = 'SELECT COALESCE(bookings.reference, bookings.request_reference, \'\') AS booking,
-                departures.`date` AS departure_date, ('.$due.') AS due_date, ('.$cruise.') AS cruise_outstanding
+                bookings.check_in AS departure_date, ('.$due.') AS due_date, ('.$staySql.') AS stay_outstanding
             FROM bookings
-            INNER JOIN departures ON departures.id = bookings.departure_id
             WHERE bookings.deleted_at IS NULL
               AND bookings.status IN ('.$this->placeholders($statuses).')
-              AND ('.$cruise.') > 0
+              AND ('.$staySql.') > 0
               AND ? > ('.$due.')
-              AND departures.`date` >= ? AND departures.`date` <= ?'.$scopeSql.'
+              AND bookings.check_in >= ? AND bookings.check_in <= ?'.$scopeSql.'
             ORDER BY due_date, bookings.id';
 
         return $this->grid(
-            ['booking', 'departure_date', 'due_date', 'cruise_outstanding'],
+            ['booking', 'departure_date', 'due_date', 'stay_outstanding'],
             DB::select($sql, [
                 ...$paid,
                 ...$statuses,
@@ -118,7 +117,7 @@ class ReportQueries
                 $window->to,
                 ...$scopeBindings,
             ]),
-            ['booking', 'departure_date', 'due_date', 'cruise_outstanding'],
+            ['booking', 'departure_date', 'due_date', 'stay_outstanding'],
         );
     }
 
@@ -127,7 +126,7 @@ class ReportQueries
      */
     private function forecast(MetricWindow $window, MetricScope $scope): array
     {
-        [$cruise, $paid] = Booking::cruiseOutstandingSql();
+        [$staySql, $paid] = Booking::stayOutstandingSql();
         $due = Booking::dueDateSql();
         $statuses = [
             BookingStatus::PendingPayment->value,
@@ -136,17 +135,16 @@ class ReportQueries
         ];
         [$scopeSql, $scopeBindings] = $this->bookingScope('bookings', $scope);
         $sql = 'SELECT COALESCE(bookings.reference, bookings.request_reference, \'\') AS booking,
-                ('.$due.') AS due_date, ('.$cruise.') AS cruise_outstanding
+                ('.$due.') AS due_date, ('.$staySql.') AS stay_outstanding
             FROM bookings
-            INNER JOIN departures ON departures.id = bookings.departure_id
             WHERE bookings.deleted_at IS NULL
               AND bookings.status IN ('.$this->placeholders($statuses).')
-              AND ('.$cruise.') > 0
+              AND ('.$staySql.') > 0
               AND ('.$due.') >= ? AND ('.$due.') <= ?'.$scopeSql.'
             ORDER BY due_date, bookings.id';
 
         return $this->grid(
-            ['booking', 'due_date', 'cruise_outstanding'],
+            ['booking', 'due_date', 'stay_outstanding'],
             DB::select($sql, [
                 ...$paid,
                 ...$statuses,
@@ -155,7 +153,7 @@ class ReportQueries
                 $window->to,
                 ...$scopeBindings,
             ]),
-            ['booking', 'due_date', 'cruise_outstanding'],
+            ['booking', 'due_date', 'stay_outstanding'],
         );
     }
 
@@ -166,20 +164,19 @@ class ReportQueries
     {
         $statuses = ContactDerived::soldStatuses();
         [$scopeSql, $scopeBindings] = $this->bookingScope('bookings', $scope);
-        $sql = 'SELECT DATE_FORMAT(departures.`date`, \'%Y-%m\') AS month,
-                COUNT(*) AS bookings, COALESCE(SUM(bookings.total), 0) AS cruise_revenue
+        $sql = 'SELECT DATE_FORMAT(bookings.check_in, \'%Y-%m\') AS month,
+                COUNT(*) AS bookings, COALESCE(SUM(bookings.total), 0) AS stay_revenue
             FROM bookings
-            INNER JOIN departures ON departures.id = bookings.departure_id
             WHERE bookings.deleted_at IS NULL
               AND bookings.status IN ('.$this->placeholders($statuses).')
-              AND departures.`date` >= ? AND departures.`date` <= ?'.$scopeSql.'
+              AND bookings.check_in >= ? AND bookings.check_in <= ?'.$scopeSql.'
             GROUP BY month
             ORDER BY month';
 
         return $this->grid(
-            ['month', 'bookings', 'cruise_revenue'],
+            ['month', 'bookings', 'stay_revenue'],
             DB::select($sql, [...$statuses, $window->from, $window->to, ...$scopeBindings]),
-            ['month', 'bookings', 'cruise_revenue'],
+            ['month', 'bookings', 'stay_revenue'],
         );
     }
 
@@ -246,7 +243,7 @@ class ReportQueries
             ['sellable_berths', $occupancy['sellable_berths']],
             ['revpab', (string) ($revpab['revpab'] ?? '')],
             ['adr', (string) ($adr['adr'] ?? '')],
-            ['cruise_revenue', $revpab['cruise_revenue']],
+            ['stay_revenue', $revpab['stay_revenue']],
             ['lead_time_average_days', (string) ($lead['average_days'] ?? '')],
             ['lead_time_median_days', (string) ($lead['median_days'] ?? '')],
             ['nps_average', (string) ($nps['average_score'] ?? '')],
@@ -498,16 +495,14 @@ class ReportQueries
         $sql = 'SELECT agencies.reference AS agency_reference, agencies.name AS agency_name,
                 COALESCE(bookings.reference, bookings.request_reference, \'\') AS booking,
                 CASE WHEN bookings.commission_pct IS NOT NULL THEN ROUND(bookings.total * bookings.commission_pct / 100) ELSE 0 END AS amount,
-                departures.`date` AS departure_date,
+                bookings.check_in AS departure_date,
                 commission_payouts.amount AS paid_amount,
                 ('.$status.') AS accrual
             FROM bookings
             INNER JOIN agencies ON agencies.id = bookings.agency_id
-            INNER JOIN departures ON departures.id = bookings.departure_id
-            INNER JOIN itineraries ON itineraries.id = departures.itinerary_id
             LEFT JOIN commission_payouts ON commission_payouts.booking_id = bookings.id
             WHERE agencies.status = ?
-              AND departures.`date` >= ? AND departures.`date` <= ?'.$scopeSql;
+              AND bookings.check_in >= ? AND bookings.check_in <= ?'.$scopeSql;
 
         return [
             'sql' => $sql,
@@ -532,13 +527,8 @@ class ReportQueries
         $bindings = [];
 
         if ($scope->propertyId !== null) {
-            $sql .= ' AND EXISTS (SELECT 1 FROM departures scope_departures WHERE scope_departures.id = '.$alias.'.departure_id AND scope_departures.property_id = ?)';
+            $sql .= ' AND '.$alias.'.property_id = ?';
             $bindings[] = $scope->propertyId;
-        }
-
-        if ($scope->itineraryId !== null) {
-            $sql .= ' AND EXISTS (SELECT 1 FROM departures scope_itineraries WHERE scope_itineraries.id = '.$alias.'.departure_id AND scope_itineraries.itinerary_id = ?)';
-            $bindings[] = $scope->itineraryId;
         }
 
         if ($scope->agencyId !== null) {

@@ -6,9 +6,6 @@ namespace App\Models;
 
 use App\Casts\CalendarDate;
 use App\Enums\BookingSegment;
-use App\Enums\CabinCategory;
-use App\Enums\DepartureStatus;
-use App\Enums\ItineraryStatus;
 use App\Enums\OfferChannel;
 use App\Enums\OfferStatus;
 use App\Enums\OfferType;
@@ -17,12 +14,12 @@ use App\Models\Concerns\SerializesDatesAsUtc;
 use App\Support\BusinessTime;
 use App\Support\Offers\OfferGuardrails;
 use App\Support\Offers\OfferPresentation;
+use App\Support\Stays\StayDates;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\OfferFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -39,17 +36,18 @@ use Illuminate\Support\Carbon;
  * @property string|null $value_text
  * @property OfferChannel $channel
  * @property string|null $partner
- * @property list<string> $cabin_types
- * @property list<string> $itinerary_codes
  * @property CarbonImmutable|null $booking_from
  * @property CarbonImmutable|null $booking_to
- * @property CarbonImmutable|null $travel_from
- * @property CarbonImmutable|null $travel_to
+ * @property CarbonImmutable|null $stay_from
+ * @property CarbonImmutable|null $stay_to
+ * @property int|null $min_nights
+ * @property list<string>|null $applies_to_room_types
+ * @property list<string>|null $applies_to_rate_plans
  * @property bool $combinable
  * @property bool $is_promo_code
  * @property string|null $badge
  * @property bool $show_on_card
- * @property bool $show_on_departures
+ * @property bool $show_on_calendar
  * @property string|null $price_line
  * @property string|null $terms
  * @property OfferStatus $status
@@ -75,17 +73,18 @@ use Illuminate\Support\Carbon;
     'value_text',
     'channel',
     'partner',
-    'cabin_types',
-    'itinerary_codes',
     'booking_from',
     'booking_to',
-    'travel_from',
-    'travel_to',
+    'stay_from',
+    'stay_to',
+    'min_nights',
+    'applies_to_room_types',
+    'applies_to_rate_plans',
     'combinable',
     'is_promo_code',
     'badge',
     'show_on_card',
-    'show_on_departures',
+    'show_on_calendar',
     'price_line',
     'terms',
     'status',
@@ -111,12 +110,13 @@ class Offer extends Model
             'value_text',
             'channel',
             'partner',
-            'cabin_types',
-            'itinerary_codes',
             'booking_from',
             'booking_to',
-            'travel_from',
-            'travel_to',
+            'stay_from',
+            'stay_to',
+            'min_nights',
+            'applies_to_room_types',
+            'applies_to_rate_plans',
             'combinable',
             'is_promo_code',
         ];
@@ -131,16 +131,17 @@ class Offer extends Model
             'type' => OfferType::class,
             'value' => 'integer',
             'channel' => OfferChannel::class,
-            'cabin_types' => 'array',
-            'itinerary_codes' => 'array',
             'booking_from' => CalendarDate::class,
             'booking_to' => CalendarDate::class,
-            'travel_from' => CalendarDate::class,
-            'travel_to' => CalendarDate::class,
+            'stay_from' => CalendarDate::class,
+            'stay_to' => CalendarDate::class,
+            'min_nights' => 'integer',
+            'applies_to_room_types' => 'array',
+            'applies_to_rate_plans' => 'array',
             'combinable' => 'boolean',
             'is_promo_code' => 'boolean',
             'show_on_card' => 'boolean',
-            'show_on_departures' => 'boolean',
+            'show_on_calendar' => 'boolean',
             'status' => OfferStatus::class,
             'approved_at' => 'datetime',
             'needs_reapproval' => 'boolean',
@@ -156,12 +157,12 @@ class Offer extends Model
                 'channel' => $offer->channel,
                 'is_promo_code' => $offer->is_promo_code,
                 'show_on_card' => $offer->show_on_card,
-                'show_on_departures' => $offer->show_on_departures,
+                'show_on_calendar' => $offer->show_on_calendar,
             ]);
 
             $offer->code = (string) $normalized['code'];
             $offer->show_on_card = (bool) $normalized['show_on_card'];
-            $offer->show_on_departures = (bool) $normalized['show_on_departures'];
+            $offer->show_on_calendar = (bool) $normalized['show_on_calendar'];
 
             OfferGuardrails::validate($offer->attributesForGuardrails(), $offer->exists ? $offer : null);
         });
@@ -178,12 +179,13 @@ class Offer extends Model
             'value' => $this->value,
             'value_text' => $this->value_text,
             'channel' => $this->channel,
-            'cabin_types' => $this->cabin_types,
-            'itinerary_codes' => $this->itinerary_codes,
             'booking_from' => $this->booking_from,
             'booking_to' => $this->booking_to,
-            'travel_from' => $this->travel_from,
-            'travel_to' => $this->travel_to,
+            'stay_from' => $this->stay_from,
+            'stay_to' => $this->stay_to,
+            'min_nights' => $this->min_nights,
+            'applies_to_room_types' => $this->applies_to_room_types,
+            'applies_to_rate_plans' => $this->applies_to_rate_plans,
             'is_promo_code' => $this->is_promo_code,
         ];
     }
@@ -212,7 +214,7 @@ class Offer extends Model
     public function windowEnd(): ?CarbonImmutable
     {
         $ends = array_values(array_filter([
-            $this->travel_to,
+            $this->stay_to,
             $this->booking_to,
         ]));
 
@@ -257,8 +259,8 @@ class Offer extends Model
     public function span(): array
     {
         return [
-            $this->travel_from ?? $this->booking_from,
-            $this->travel_to ?? $this->booking_to,
+            $this->stay_from ?? $this->booking_from,
+            $this->stay_to ?? $this->booking_to,
         ];
     }
 
@@ -301,7 +303,38 @@ class Offer extends Model
 
     public function travelWindowLabel(): string
     {
-        return OfferPresentation::window($this->travel_from, $this->travel_to);
+        return OfferPresentation::window($this->stay_from, $this->stay_to);
+    }
+
+    public function stayWindowLabel(): string
+    {
+        return OfferPresentation::window($this->stay_from, $this->stay_to);
+    }
+
+    /**
+     * Nights of the stay that fall in [stay_from, stay_to]. Null bounds are open.
+     *
+     * @return list<string>
+     */
+    public function eligibleNights(StayDates $stay): array
+    {
+        $nights = [];
+
+        foreach ($stay->eachNight() as $night) {
+            $date = $night->toDateString();
+
+            if ($this->stay_from instanceof CarbonInterface && $this->stay_from->toDateString() > $date) {
+                continue;
+            }
+
+            if ($this->stay_to instanceof CarbonInterface && $this->stay_to->toDateString() < $date) {
+                continue;
+            }
+
+            $nights[] = $date;
+        }
+
+        return $nights;
     }
 
     public function enginePlacement(): string
@@ -309,50 +342,22 @@ class Offer extends Model
         return OfferPresentation::enginePlacement($this);
     }
 
-    public function liveDeparturesCount(): int
-    {
-        if ($this->derivedStatus() !== OfferStatus::Live->value) {
-            return 0;
-        }
-
-        return Departure::query()
-            ->where('status', DepartureStatus::OnSale)
-            ->where('festive', false)
-            ->whereHas('itinerary', function (Builder $query): void {
-                $query->where('status', ItineraryStatus::Published)
-                    ->whereIn('code', $this->itinerary_codes);
-            })
-            ->get()
-            ->filter(function (Departure $departure): bool {
-                $date = $departure->date->toDateString();
-
-                if ($this->travel_from instanceof CarbonInterface && $this->travel_from->toDateString() > $date) {
-                    return false;
-                }
-
-                if ($this->travel_to instanceof CarbonInterface && $this->travel_to->toDateString() < $date) {
-                    return false;
-                }
-
-                return true;
-            })
-            ->count();
-    }
-
     /**
+     * Live offers whose stay window overlaps the stay. A null room type or rate plan skips that filter.
+     *
      * @param  Builder<static>  $query
      * @return Builder<static>
      */
-    // TODO(Sprint 18): room type pricing (09 H8)
-    public function scopeApplicableTo(
+    public function scopeForStay(
         Builder $query,
-        Departure $departure,
-        CabinCategory $cabinType,
+        StayDates $stay,
+        ?string $roomType,
+        ?string $ratePlan,
         BookingSegment $channel,
         string $bookingDate,
         ?string $code = null,
     ): Builder {
-        if ($departure->festive || $channel === BookingSegment::Charter) {
+        if ($channel === BookingSegment::Charter) {
             return $query->whereRaw('0 = 1');
         }
 
@@ -360,25 +365,41 @@ class Offer extends Model
             ? [OfferChannel::B2B, OfferChannel::All]
             : [OfferChannel::D2C, OfferChannel::All];
 
-        $departure->loadMissing('itinerary');
-        $travelDate = $departure->date->toDateString();
+        $first = $stay->checkIn()->toDateString();
+        $last = $stay->lastNight()->toDateString();
+        $nights = $stay->nights();
 
         $query->where('status', OfferStatus::Live)
             ->whereIn('channel', array_map(fn (OfferChannel $offerChannel): string => $offerChannel->value, $channels))
-            ->whereJsonContains('cabin_types', $cabinType->value)
-            ->whereJsonContains('itinerary_codes', $departure->itinerary->code)
+            ->where(function (Builder $inner) use ($nights): void {
+                $inner->whereNull('min_nights')->orWhere('min_nights', '<=', $nights);
+            })
             ->where(function (Builder $inner) use ($bookingDate): void {
                 $inner->whereNull('booking_from')->orWhere('booking_from', '<=', $bookingDate);
             })
             ->where(function (Builder $inner) use ($bookingDate): void {
                 $inner->whereNull('booking_to')->orWhere('booking_to', '>=', $bookingDate);
             })
-            ->where(function (Builder $inner) use ($travelDate): void {
-                $inner->whereNull('travel_from')->orWhere('travel_from', '<=', $travelDate);
+            ->where(function (Builder $inner) use ($last): void {
+                $inner->whereNull('stay_from')->orWhere('stay_from', '<=', $last);
             })
-            ->where(function (Builder $inner) use ($travelDate): void {
-                $inner->whereNull('travel_to')->orWhere('travel_to', '>=', $travelDate);
+            ->where(function (Builder $inner) use ($first): void {
+                $inner->whereNull('stay_to')->orWhere('stay_to', '>=', $first);
             });
+
+        if (is_string($roomType) && $roomType !== '') {
+            $query->where(function (Builder $inner) use ($roomType): void {
+                $inner->whereNull('applies_to_room_types')
+                    ->orWhereJsonContains('applies_to_room_types', $roomType);
+            });
+        }
+
+        if (is_string($ratePlan) && $ratePlan !== '') {
+            $query->where(function (Builder $inner) use ($ratePlan): void {
+                $inner->whereNull('applies_to_rate_plans')
+                    ->orWhereJsonContains('applies_to_rate_plans', $ratePlan);
+            });
+        }
 
         if ($code === null || trim($code) === '') {
             $query->where('is_promo_code', false);
@@ -394,23 +415,5 @@ class Offer extends Model
         }
 
         return $query;
-    }
-
-    /**
-     * @return EloquentCollection<int, static>
-     */
-    // TODO(Sprint 18): room type pricing (09 H8)
-    public static function applicableTo(
-        Departure $departure,
-        CabinCategory $cabinType,
-        BookingSegment $channel,
-        string $bookingDate,
-        ?string $code = null,
-    ): EloquentCollection {
-        return static::query()
-            ->applicableTo($departure, $cabinType, $channel, $bookingDate, $code)
-            ->get()
-            ->filter(fn (self $offer): bool => ! $offer->isDerivedExpired($bookingDate))
-            ->values();
     }
 }

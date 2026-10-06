@@ -6,7 +6,6 @@ namespace Database\Factories;
 
 use App\Enums\CheckoutSessionStatus;
 use App\Models\CheckoutSession;
-use App\Models\Departure;
 use App\Support\IpHash;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,7 +21,8 @@ class CheckoutSessionFactory extends Factory
     {
         return [
             'token_hash' => CheckoutSession::hashToken(bin2hex(random_bytes(32))),
-            'departure_id' => Departure::factory(),
+            'check_in' => '2026-06-15',
+            'check_out' => '2026-06-22',
             'cabins' => [
                 ['cabin_code' => 'S1', 'adults' => 2, 'children' => 0],
             ],

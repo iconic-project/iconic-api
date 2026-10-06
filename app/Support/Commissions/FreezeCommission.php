@@ -5,15 +5,10 @@ declare(strict_types=1);
 namespace App\Support\Commissions;
 
 use App\Enums\AgencyStatus;
-use App\Enums\CabinCategory;
 use App\Enums\MainChannel;
-use App\Enums\OfferType;
 use App\Models\Agency;
 use App\Models\Booking;
-use App\Models\Departure;
-use App\Models\Offer;
 use App\Services\Config\CurrentConfig;
-use App\Support\Bookings\SoldOn;
 use App\Support\History\History;
 use Illuminate\Validation\ValidationException;
 
@@ -26,7 +21,7 @@ final class FreezeCommission
      * @return array{agency_id: int, commission_pct: int, commission_approved: bool, over_cap: bool, offer_codes: list<string>}|null
      */
     // TODO(Sprint 18): room type pricing (09 H8)
-    public function resolve(array $data, ?Departure $departure, ?CabinCategory $category): ?array
+    public function resolve(array $data): ?array
     {
         $agencyId = $data['agency_id'] ?? null;
 
@@ -62,20 +57,6 @@ final class FreezeCommission
             ? (int) $data['commission_pct']
             : $agency->commission_pct;
         $offerCodes = [];
-
-        if ($departure instanceof Departure && $category instanceof CabinCategory) {
-            $commOffers = Offer::applicableTo(
-                $departure,
-                $category,
-                $channel->segment(),
-                SoldOn::today(),
-            )->filter(fn (Offer $offer): bool => $offer->type === OfferType::Commission);
-
-            foreach ($commOffers as $offer) {
-                $pct += (int) $offer->value;
-                $offerCodes[] = $offer->code;
-            }
-        }
 
         $cap = $this->config->businessRules()->commission->capPct;
         $overCap = $pct > $cap;

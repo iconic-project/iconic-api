@@ -19,9 +19,7 @@ class PreviewMoveBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'departure_id' => ['required_without:room_id', 'integer', 'exists:departures,id'],
-            'cabin_code' => ['sometimes', 'nullable', 'string', 'max:16'],
-            'room_id' => ['required_without:departure_id', 'integer', 'exists:rooms,id'],
+            'room_id' => ['required', 'integer', 'exists:rooms,id'],
             'reprice' => ['sometimes', 'boolean'],
         ];
     }

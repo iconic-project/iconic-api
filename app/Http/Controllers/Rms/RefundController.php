@@ -30,7 +30,7 @@ final class RefundController extends Controller
         $this->authorize('viewAny', RefundRequest::class);
 
         $refunds = RefundRequest::query()
-            ->with(['booking.contact', 'booking.departure', 'decidedBy'])
+            ->with(['booking.contact', 'booking.property', 'decidedBy'])
             ->when(
                 $request->filled('status'),
                 fn (Builder $query) => $query->where(

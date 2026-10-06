@@ -45,9 +45,7 @@ final class ClientDocumentController extends Controller
 
         $bookings = Booking::query()
             ->select('bookings.*')
-            ->join('departures', 'departures.id', '=', 'bookings.departure_id')
             ->with([
-                'departure',
                 'contact',
                 'group.coordinator',
                 'agency',
@@ -72,7 +70,7 @@ final class ClientDocumentController extends Controller
                     });
                 },
             )
-            ->orderBy('departures.date')
+            ->orderBy('bookings.check_in')
             ->orderBy('bookings.id')
             ->get();
 

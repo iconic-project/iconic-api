@@ -29,9 +29,9 @@ final class EngineFeedVersion
         return 'engine:feed:'.($version ?? self::current());
     }
 
-    public static function cabinsKey(int $departureId): string
+    public static function roomsKey(int $stayId): string
     {
-        return 'engine:cabins:'.$departureId;
+        return 'engine:rooms:'.$stayId;
     }
 
     public static function propertyKey(?int $version = null): string

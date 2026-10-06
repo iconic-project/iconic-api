@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\ManifestFormat;
-use App\Enums\ManifestKind;
-use App\Enums\ManifestReason;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -17,10 +14,9 @@ use LogicException;
 
 /**
  * @property int $id
- * @property int $departure_id
- * @property ManifestKind $kind
+ * @property string $kind
  * @property int $version
- * @property ManifestReason $reason
+ * @property string $reason
  * @property Carbon $generated_at
  * @property int|null $generated_by
  * @property int $passengers
@@ -34,11 +30,9 @@ use LogicException;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure $departure
  * @property-read User|null $generatedBy
  */
 #[Fillable([
-    'departure_id',
     'kind',
     'version',
     'reason',
@@ -72,8 +66,8 @@ class Manifest extends Model
     protected function casts(): array
     {
         return [
-            'kind' => ManifestKind::class,
-            'reason' => ManifestReason::class,
+            'kind' => 'string',
+            'reason' => 'string',
             'generated_at' => 'datetime',
             'passengers' => 'integer',
             'complete' => 'integer',
@@ -111,14 +105,6 @@ class Manifest extends Model
     }
 
     /**
-     * @return BelongsTo<Departure, $this>
-     */
-    public function departure(): BelongsTo
-    {
-        return $this->belongsTo(Departure::class);
-    }
-
-    /**
      * @return BelongsTo<User, $this>
      */
     public function generatedBy(): BelongsTo
@@ -128,15 +114,6 @@ class Manifest extends Model
 
     public function historyLabel(): string
     {
-        return $this->kind->value.' v'.$this->version;
-    }
-
-    public function pathFor(ManifestFormat $format): ?string
-    {
-        return match ($format) {
-            ManifestFormat::Pdf => $this->pdf_path,
-            ManifestFormat::Csv => $this->csv_path,
-            ManifestFormat::Xlsx => $this->xlsx_path,
-        };
+        return $this->kind.' v'.$this->version;
     }
 }

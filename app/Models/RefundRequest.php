@@ -19,7 +19,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $booking_id
  * @property Carbon $cancelled_at
- * @property int $days_before_departure
+ * @property int $days_before_arrival
  * @property int $band_min_days
  * @property string|null $band_source
  * @property int $penalty_pct
@@ -43,7 +43,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'booking_id',
     'cancelled_at',
-    'days_before_departure',
+    'days_before_arrival',
     'band_min_days',
     'band_source',
     'penalty_pct',
@@ -69,7 +69,7 @@ class RefundRequest extends Model
     {
         return [
             'cancelled_at' => 'datetime',
-            'days_before_departure' => 'integer',
+            'days_before_arrival' => 'integer',
             'band_min_days' => 'integer',
             'penalty_pct' => 'integer',
             'penalty_amount' => 'integer',

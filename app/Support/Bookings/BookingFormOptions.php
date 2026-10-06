@@ -27,7 +27,7 @@ final class BookingFormOptions
      *     main: list<array{value: string, label: string, trade: bool}>,
      *     origin: list<array{group: string, options: list<array{value: string, label: string}>}>,
      *     preferred: list<array{value: string, label: string}>,
-     *     guests: array{child_min_age: int, child_max_age: int, max_per_cabin: int},
+     *     guests: array{child_min_age: int, child_max_age: int, max_per_property: int, max_occupancy: int},
      *     commission: array{cap_pct: int, default_pct: int},
      *     payments: array{wire_window_hours: int},
      *     agencies: list<array{id: int, reference: string, name: string, network: string|null, commission_pct: int}>,
@@ -80,7 +80,8 @@ final class BookingFormOptions
             'guests' => [
                 'child_min_age' => $guests->childMinAge,
                 'child_max_age' => $guests->childMaxAge,
-                'max_per_cabin' => $guests->maxPerCabin,
+                'max_per_property' => $guests->maxPerProperty,
+                'max_occupancy' => self::maxOccupancy(),
             ],
             'commission' => [
                 'cap_pct' => $commission->capPct,
@@ -156,6 +157,15 @@ final class BookingFormOptions
         }
 
         return $stay;
+    }
+
+    private static function maxOccupancy(): int
+    {
+        $max = RoomType::query()
+            ->where('status', RoomTypeStatus::Active)
+            ->max('max_occupancy');
+
+        return is_numeric($max) ? (int) $max : 0;
     }
 
     /**

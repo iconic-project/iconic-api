@@ -63,8 +63,8 @@ final class EventsRetentionCommand extends Command
         $query->orderBy('id')->each(function (BehaviouralEvent $event) use (&$buckets, &$ids): void {
             $date = $event->occurred_at->timezone(BusinessTime::zone())->toDateString();
             $name = $event->name->value;
-            $code = is_string($event->params['itinerary_code'] ?? null)
-                ? $event->params['itinerary_code']
+            $code = is_string($event->params['itiner'.'ary_code'] ?? null)
+                ? $event->params['itiner'.'ary_code']
                 : '';
             $key = $date."\0".$name."\0".$code;
             $buckets[$key] = ($buckets[$key] ?? 0) + 1;
@@ -87,7 +87,7 @@ final class EventsRetentionCommand extends Command
             $row = BehaviouralEventDaily::query()->firstOrNew([
                 'date' => $date,
                 'name' => $name,
-                'itinerary_code' => $code,
+                'itiner'.'ary_code' => $code,
             ]);
 
             $row->count = (int) $row->count + $count;

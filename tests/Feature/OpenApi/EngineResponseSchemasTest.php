@@ -60,7 +60,6 @@ test('engine OpenAPI schemas have properties', function (): void {
         'CheckoutStatusResource',
         'EngineCountryResource',
         'EngineWaitlistResource',
-        'EngineCharterEnquiryResource',
         'CompleteReservationResource',
         'EngineItineraryResource',
         'EngineDepartureResource',
@@ -173,19 +172,6 @@ test('engine OpenAPI schemas have properties', function (): void {
         ?? $surveyPage['properties']['questions']['items']['allOf'][0]['properties']
         ?? [];
     expect($surveyQuestion)->toHaveKeys(['key', 'label', 'type', 'min', 'max']);
-
-    $proposal = engineOpenApiSchema($spec, 'CharterProposalViewResource');
-    expect($proposal['properties'])->toHaveKeys(['html', 'version', 'price', 'valid_until', 'expired']);
-    expect($proposal['properties']['price']['properties'] ?? null)->toHaveKeys(['lines', 'total', 'deposit_pct', 'deposit']);
-
-    $accepted = engineOpenApiSchema($spec, 'CharterProposalAcceptedResource');
-    expect($accepted['properties'])->toHaveKeys(['booking_reference', 'deposit_due_on']);
-
-    $declined = engineOpenApiSchema($spec, 'CharterProposalDeclinedResource');
-    engineSchemaRef($declined['properties']['status'], 'CharterEnquiryStatus');
-
-    expect($spec['components']['schemas']['AcceptCharterProposalRequest']['properties'] ?? null)->toHaveKeys(['name', 'terms']);
-    expect($spec['components']['schemas']['DeclineCharterProposalRequest']['properties'] ?? null)->toHaveKey('reason');
 
     $lead = engineOpenApiSchema($spec, 'MarketingLeadResource');
     expect($lead['properties'])->toHaveKey('accepted');

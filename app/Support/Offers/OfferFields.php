@@ -25,17 +25,18 @@ final class OfferFields
             'value_text',
             'channel',
             'partner',
-            'cabin_types',
-            'itinerary_codes',
             'booking_from',
             'booking_to',
-            'travel_from',
-            'travel_to',
+            'stay_from',
+            'stay_to',
+            'min_nights',
+            'applies_to_room_types',
+            'applies_to_rate_plans',
             'combinable',
             'is_promo_code',
             'badge',
             'show_on_card',
-            'show_on_departures',
+            'show_on_calendar',
             'price_line',
             'terms',
         ];
@@ -43,22 +44,22 @@ final class OfferFields
 
     public static function equal(string $field, mixed $current, mixed $next): bool
     {
-        if (in_array($field, ['cabin_types', 'itinerary_codes'], true)) {
+        if (in_array($field, ['applies_to_room_types', 'applies_to_rate_plans'], true)) {
             $left = self::sortedStrings($current);
             $right = self::sortedStrings($next);
 
             return $left === $right;
         }
 
-        if (in_array($field, ['booking_from', 'booking_to', 'travel_from', 'travel_to'], true)) {
+        if (in_array($field, ['booking_from', 'booking_to', 'stay_from', 'stay_to'], true)) {
             return self::dateString($current) === self::dateString($next);
         }
 
-        if (in_array($field, ['combinable', 'is_promo_code', 'show_on_card', 'show_on_departures'], true)) {
+        if (in_array($field, ['combinable', 'is_promo_code', 'show_on_card', 'show_on_calendar'], true)) {
             return (bool) $current === (bool) $next;
         }
 
-        if ($field === 'value') {
+        if (in_array($field, ['value', 'min_nights'], true)) {
             return self::intOrNull($current) === self::intOrNull($next);
         }
 

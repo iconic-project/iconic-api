@@ -150,13 +150,13 @@ final class AlertSweep
      */
     private function overdueQuery(): Builder
     {
-        [$cruiseSql, $paid] = Booking::cruiseOutstandingSql();
+        [$staySql, $paid] = Booking::stayOutstandingSql();
 
         return Booking::query()
             ->overdue()
             ->select(['bookings.id', 'bookings.reference', 'bookings.request_reference'])
             ->selectRaw('DATE('.Booking::dueDateSql().') as alert_due_date')
-            ->selectRaw('('.$cruiseSql.') as alert_outstanding', $paid);
+            ->selectRaw('('.$staySql.') as alert_outstanding', $paid);
     }
 
     private function raiseOverdue(Booking $booking): void
@@ -293,7 +293,7 @@ final class AlertSweep
     private function resolveConfirmedOnCheckIn(): void
     {
         Alert::query()
-            ->where('kind', AlertKind::ConfirmedAtDeparture)
+            ->where('kind', AlertKind::ConfirmedAtCheckIn)
             ->unresolved()
             ->whereNotIn('booking_id', Booking::query()->whereIn('status', [
                 BookingStatus::Confirmed,

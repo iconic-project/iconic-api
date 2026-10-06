@@ -35,7 +35,7 @@ enum DeliveryKind: string
             self::Reminder => 'Balance reminder',
             self::Voucher => 'Transfer Voucher',
             self::PreArrival => 'Pre-arrival information',
-            self::Pretrip => 'Pre-trip Itinerary',
+            self::Pretrip => 'Pre-arrival plan',
             self::PaymentLink => 'Payment link',
             self::WireInstructions => 'Wire Instructions',
             self::DataChaser => 'Passenger details needed',

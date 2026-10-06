@@ -14,7 +14,6 @@ class EngineSettingsCurrentResource extends ConfigCurrentResource
      *     version: int,
      *     document: array{
      *         guests: array{
-     *             max_per_cabin: int,
      *             max_per_property: int,
      *             child_min_age: int,
      *             child_max_age: int,
@@ -29,15 +28,6 @@ class EngineSettingsCurrentResource extends ConfigCurrentResource
      *         },
      *         locale: array{default: string, live: list<string>, currency: string},
      *         fees: array{
-     *             tct_pp: int,
-     *             png: array{
-     *                 foreign_over_12: int,
-     *                 foreign_12_and_under: int,
-     *                 can_adult: int,
-     *                 can_minor: int,
-     *                 national_or_resident: int,
-     *                 exempt_under_age: int
-     *             },
      *             show_in_price_panel: bool,
      *             footnote: string
      *         },
@@ -51,14 +41,8 @@ class EngineSettingsCurrentResource extends ConfigCurrentResource
      *             online_deposit_advantage: string,
      *             online_deposit_perk: string
      *         },
-     *         charter: array{
-     *             headline: string,
-     *             intro: string,
-     *             itinerary_label: string,
-     *             response_sla_hours: int,
-     *             group_contexts: list<string>,
-     *             thank_you: string
-     *         }
+     *         availability: array{low_availability_threshold: int},
+     *         charter?: array<string, mixed>
      *     },
      *     published_at: string,
      *     published_by: array{id: int, name: string}|null,

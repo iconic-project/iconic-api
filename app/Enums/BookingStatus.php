@@ -23,8 +23,8 @@ enum BookingStatus: string
     case CancelledPostpaid = 'CANCELLED_POSTPAID';
 
     /**
-     * Whether this status occupies cabins (G9). Task 04 reuses this.
-     * RELEASED / CANCELLED / CANCELLED_POSTPAID free the cabin.
+     * Whether this status occupies rooms (G9). Task 04 reuses this.
+     * RELEASED / CANCELLED / CANCELLED_POSTPAID free the room.
      */
     public function holdsInventory(): bool
     {

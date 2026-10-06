@@ -54,7 +54,7 @@ final class DecideRefund extends Action
                     'status' => $decision->value,
                 ], reason: $reason, actor: $actor);
 
-            return $refund->fresh(['booking.contact', 'booking.departure', 'decidedBy']) ?? $refund;
+            return $refund->fresh(['booking.contact', 'booking.property', 'decidedBy']) ?? $refund;
         });
     }
 }

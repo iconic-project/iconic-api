@@ -17,8 +17,8 @@ final class RemoveGuest extends Action
     public function handle(Guest $guest, User $actor): void
     {
         $this->transaction(function () use ($guest, $actor): void {
-            $guest->load('booking.departure');
-            $booking = BookingMutationLock::acquire($guest->booking, (int) $guest->booking->departure_id);
+            $guest->load('booking');
+            $booking = BookingMutationLock::acquire($guest->booking);
 
             if ($guest->is_lead || $guest->first_name !== '' || $guest->last_name !== '') {
                 throw ValidationException::withMessages([
@@ -26,7 +26,7 @@ final class RemoveGuest extends Action
                 ]);
             }
 
-            $feeBefore = (int) $guest->png_fee;
+            $feesBefore = $booking->feesCollectedFresh();
             $guest->delete();
 
             History::record($booking, 'guest.removed', before: [
@@ -36,8 +36,8 @@ final class RemoveGuest extends Action
                 'what' => 'Empty guest slot removed ('.$booking->guests()->count().' guests)',
             ], actor: $actor);
 
-            if ($booking->png_collected && $feeBefore > 0) {
-                BookingChargesChanged::dispatch($booking, 'PNG fee changed');
+            if ($booking->feesCollectedFresh() !== $feesBefore) {
+                BookingChargesChanged::dispatch($booking, 'Fee changed');
             }
         });
     }

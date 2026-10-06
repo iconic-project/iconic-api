@@ -38,7 +38,7 @@ final class FlagOverdueCommand extends Command
                     History::record($booking, 'booking.overdue_flagged', after: [
                         'overdue_since' => $booking->overdueSince()?->toDateString(),
                         'overdue_days' => $booking->overdueDays(),
-                        'balance' => $booking->cruiseOutstanding(),
+                        'balance' => $booking->stayOutstanding(),
                     ], system: true);
 
                     BookingOverdueFlagged::dispatch($booking);

@@ -34,7 +34,6 @@ class IndexBookingsRequest extends FormRequest
             'in_house_on' => ['sometimes', 'date_format:Y-m-d'],
             'owner_id' => ['sometimes', 'integer', 'exists:users,id'],
             'channel' => ['sometimes', Rule::enum(MainChannel::class)],
-            'departure_id' => ['sometimes', 'integer', 'exists:departures,id'],
             'group_id' => ['sometimes', 'integer', 'exists:groups,id'],
             'q' => ['sometimes', 'string', 'max:255'],
             'mine' => ['sometimes', 'boolean'],

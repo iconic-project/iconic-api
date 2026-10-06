@@ -61,7 +61,7 @@ final class RecordGuestResponse extends Action
         /** @var GuestResponse $response */
         $response = $this->transaction(function () use ($booking, $guest, $answers, $source, $actor, $actorLabel): GuestResponse {
             if ($booking->status !== BookingStatus::CheckedOut) {
-                throw new HttpException(422, 'A survey response can only be recorded on a completed voyage.');
+                throw new HttpException(422, 'A survey response can only be recorded on a checked-out stay.');
             }
 
             if ((int) $guest->booking_id !== (int) $booking->id) {
@@ -75,10 +75,10 @@ final class RecordGuestResponse extends Action
                 ->first();
 
             if ($existing instanceof GuestResponse) {
-                throw new HttpException(409, 'This guest already has a response for this voyage.');
+                throw new HttpException(409, 'This guest already has a response for this stay.');
             }
 
-            $booking->loadMissing(['contact', 'departure.itinerary']);
+            $booking->loadMissing(['contact', 'property']);
             $rules = $this->config->businessRules()->nps;
             $respondedAt = Carbon::now();
 

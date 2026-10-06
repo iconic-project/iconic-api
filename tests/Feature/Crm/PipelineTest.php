@@ -5,14 +5,12 @@ declare(strict_types=1);
 use App\Actions\Bookings\CreateBookingRequest;
 use App\Actions\Bookings\CreateReservation;
 use App\Actions\Crm\CreateUnboundDeal;
-use App\Actions\Crm\OpenDealForCharterEnquiry;
 use App\Enums\BookingStatus;
 use App\Enums\DealStage;
 use App\Enums\DealType;
 use App\Enums\PaymentStatus;
 use App\Models\Booking;
 use App\Models\ChangeHistory;
-use App\Models\CharterEnquiry;
 use App\Models\Contact;
 use App\Models\Deal;
 use App\Models\Group;
@@ -333,8 +331,14 @@ test('moves follow ownership and a bound deal names the booking', function (): v
 });
 
 test('an unassigned deal must be taken before it can move', function (): void {
-    $enquiry = CharterEnquiry::factory()->create();
-    $deal = app(OpenDealForCharterEnquiry::class)->handle($enquiry);
+    $deal = Deal::query()->create([
+        'contact_id' => Contact::factory()->create()->id,
+        'owner_id' => null,
+        'title' => 'Unassigned lead',
+        'type' => DealType::Fit,
+        'stage' => DealStage::NewLead,
+        'stage_entered_at' => now(),
+    ]);
     $owner = salesExecUser();
 
     test()->actingAs($owner)

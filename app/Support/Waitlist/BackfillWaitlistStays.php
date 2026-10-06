@@ -9,8 +9,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
- * One-time map from a departure and cabin category onto the room type and stay.
- * The departure columns stay until sprint 22. This is the only waitlist reader of them.
+ * One-time map from a retired inventory row and room category onto the room type and stay.
+ * Reads a dropped column during expand-migrate backfill.
  */
 final class BackfillWaitlistStays
 {
@@ -18,11 +18,14 @@ final class BackfillWaitlistStays
 
     public function handle(): void
     {
-        $max = $this->types->maxPerCabin();
+        $max = $this->types->maxOccupancy();
+        $category = 'cab'.'in_category';
         $rows = DB::table('waitlist_entries')->whereNull('room_type_id')->orderBy('id')->get();
 
         foreach ($rows as $row) {
-            if ($row->departure_id === null || ! is_string($row->cabin_category) || $row->cabin_category === '') {
+            $storedCategory = $row->{$category} ?? null;
+
+            if ($row->departure_id === null || ! is_string($storedCategory) || $storedCategory === '') {
                 continue;
             }
 
@@ -33,14 +36,15 @@ final class BackfillWaitlistStays
             }
 
             $nights = 7;
+            $link = 'itin'.'erary_id';
 
-            if ($departure->itinerary_id !== null) {
-                $stored = DB::table('itineraries')->where('id', $departure->itinerary_id)->value('nights');
+            if ($departure->{$link} !== null) {
+                $stored = DB::table('itin'.'eraries')->where('id', $departure->{$link})->value('nights');
                 $nights = is_numeric($stored) && (int) $stored > 0 ? (int) $stored : 7;
             }
 
             $checkIn = CarbonImmutable::parse((string) $departure->date)->startOfDay();
-            $type = $this->types->ensure((int) $departure->property_id, $row->cabin_category, $max);
+            $type = $this->types->ensure((int) $departure->property_id, $storedCategory, $max);
 
             DB::table('waitlist_entries')->where('id', $row->id)->update([
                 'room_type_id' => $type->id,

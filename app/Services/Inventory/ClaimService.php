@@ -158,7 +158,7 @@ final class ClaimService
 
     /**
      * Moves the active nights onto the new holder. Returns the number of rooms
-     * moved (one per room per claim group), which is what a cabin count compares to.
+     * moved (one per room per claim group), which is what a room count compares to.
      *
      * @param  Collection<int, Room>|null  $rooms
      */

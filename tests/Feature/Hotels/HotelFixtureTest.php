@@ -181,14 +181,11 @@ test('the hotel seeder is idempotent and bookings have no departure', function (
     expect(Booking::query()->where('reference', 'HTL-026')->exists())->toBeFalse();
 });
 
-test('hotel seed mode writes the hotel and skips the yacht inventory', function (): void {
-    config(['iconic.seed_mode' => 'hotel']);
-
+test('hotel seed writes the hotel', function (): void {
     $this->seed(DatabaseSeeder::class);
 
     expect(Property::query()->pluck('code')->all())->toBe(['HTL']);
     expect(RoomType::query()->count())->toBe(4);
     expect(Room::query()->count())->toBe(24);
-    expect(Booking::query()->whereNotNull('departure_id')->count())->toBe(0);
     expect(Booking::query()->where('reference', 'HTL-001')->exists())->toBeTrue();
 });

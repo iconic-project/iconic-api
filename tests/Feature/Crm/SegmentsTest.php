@@ -54,7 +54,7 @@ test('each seeded segment count equals the contacts it lists', function (): void
 
     $festiveDeparture = ReservationFixtures::anamaraDeparture('2027-11-07', true);
     $festive = consentedContact(['name' => 'Festive Viewer']);
-    stitchedEvent($festive, BehaviouralEventName::ViewDeparture, [
+    stitchedEvent($festive, BehaviouralEventName::ViewStay, [
         'departure_id' => $festiveDeparture->id,
     ]);
 

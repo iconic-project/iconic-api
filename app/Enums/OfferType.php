@@ -20,9 +20,9 @@ enum OfferType: string
     public function label(): string
     {
         return match ($this) {
-            self::Credit => 'Ancillary credit (USD / cabin)',
-            self::Amount => 'Amount off (USD / cabin)',
-            self::Percent => 'Percent off cabin rate',
+            self::Credit => 'Ancillary credit (USD per room)',
+            self::Amount => 'Amount off (USD per room)',
+            self::Percent => 'Percent off room rate',
             self::Value => 'Value-add (no price change)',
             self::Commission => 'Extra partner commission (%)',
         };

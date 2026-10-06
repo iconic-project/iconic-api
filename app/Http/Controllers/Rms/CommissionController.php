@@ -34,15 +34,13 @@ final class CommissionController extends Controller
 
         $bookings = Booking::query()
             ->whereNotNull('agency_id')
-            ->with(['agency', 'departure.itinerary', 'commissionPayout'])
+            ->with(['agency', 'room.roomType', 'property', 'commissionPayout'])
             ->when(
                 $request->filled('from') || $request->filled('to'),
                 function (Builder $query) use ($request): void {
-                    $query->whereHas('departure', function (Builder $departure) use ($request): void {
-                        $departure
-                            ->when($request->filled('from'), fn (Builder $inner) => $inner->whereDate('date', '>=', (string) $request->validated('from')))
-                            ->when($request->filled('to'), fn (Builder $inner) => $inner->whereDate('date', '<=', (string) $request->validated('to')));
-                    });
+                    $query
+                        ->when($request->filled('from'), fn (Builder $inner) => $inner->whereDate('bookings.check_in', '>=', (string) $request->validated('from')))
+                        ->when($request->filled('to'), fn (Builder $inner) => $inner->whereDate('bookings.check_in', '<=', (string) $request->validated('to')));
                 },
             )
             ->orderByDesc('id')

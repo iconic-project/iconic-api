@@ -28,6 +28,7 @@ use App\Services\Pricing\QuoteInput;
 use App\Services\References\ReferenceService;
 use App\Support\Bookings\ChannelSeedMap;
 use App\Support\Bookings\SoldOn;
+use App\Support\Bookings\StayFromDeparture;
 use App\Support\History\History;
 use App\Support\Inventory\DepartureLocks;
 use Illuminate\Database\Seeder;
@@ -215,7 +216,7 @@ final class DemoAgenciesSeeder extends Seeder
         $input = new QuoteInput(
             year: 2027,
             type: BookingType::Cabin->quoteType(),
-            category: $cabin->pricingCategory(),
+            category: $cabin->roomType->code,
             adults: 2,
             children: 0,
             festive: $departure->festive,
@@ -236,7 +237,7 @@ final class DemoAgenciesSeeder extends Seeder
         $booking = Booking::query()->create([
             'reference' => 'ANK-2026-0021',
             'type' => BookingType::Cabin,
-            'departure_id' => $departure->id,
+            ...StayFromDeparture::columns($departure, $cabin),
             'room_id' => $cabin->id,
             'contact_id' => $contact->id,
             'owner_id' => $owner->id,
@@ -248,7 +249,6 @@ final class DemoAgenciesSeeder extends Seeder
             'channel_of_origin' => $channels['origin'],
             'adults' => 2,
             'children' => 0,
-            'back_to_back' => false,
             'rates_version_id' => app(CurrentConfig::class)->version(ConfigKind::Rates)->id,
             'price_lines' => $priced->toArray()['lines'],
             'total' => $priced->total,

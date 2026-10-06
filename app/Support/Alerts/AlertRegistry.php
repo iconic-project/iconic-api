@@ -58,7 +58,7 @@ final class AlertRegistry
                 'crm',
             ),
             new AlertKindDefinition(
-                AlertKind::ConfirmedAtDeparture,
+                AlertKind::ConfirmedAtCheckIn,
                 AlertSeverity::Critical,
                 [Permission::BookingsOverdueDecision, Permission::PaymentsRecord],
                 'A booking is still CONFIRMED or ON_HOLD_AGENCY on or after its check-in date.',
@@ -84,7 +84,7 @@ final class AlertRegistry
             new AlertKindDefinition(
                 AlertKind::LowOccupancy,
                 AlertSeverity::Info,
-                [Permission::DeparturesManage, Permission::RatesManage],
+                [Permission::PropertiesManage, Permission::RatesManage],
                 'A run of nights in the low-occupancy window is below the sold-room threshold.',
                 'The run is no longer below the threshold.',
                 'rms',
@@ -138,7 +138,7 @@ final class AlertRegistry
                 'rms',
             ),
             new AlertKindDefinition(
-                AlertKind::DepartureNotCheckedOut,
+                AlertKind::CheckOutNotCompleted,
                 AlertSeverity::Warn,
                 [Permission::BookingsFrontDesk],
                 'Night audit finds an in-house booking whose check-out is today.',

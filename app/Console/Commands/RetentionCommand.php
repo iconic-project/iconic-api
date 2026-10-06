@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Enums\ManifestKind;
 use App\Models\Booking;
 use App\Models\Guest;
 use App\Models\GuestPreference;
@@ -15,6 +14,7 @@ use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
 use App\Support\History\History;
 use App\Support\Retention\RetentionWindow;
+use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -252,11 +252,10 @@ final class RetentionCommand extends Command
 
         Manifest::query()
             ->whereNull('purged_at')
-            ->with('departure.itinerary')
             ->orderBy('id')
             ->each(function (Manifest $manifest) use ($months, $days, $today, $dry, &$captain, &$dpng): void {
-                $returnDate = $manifest->departure->stayDates()->checkOut();
-                $end = $manifest->kind === ManifestKind::Captain
+                $returnDate = CarbonImmutable::parse($manifest->generated_at);
+                $end = $manifest->kind === 'CAPTAIN'
                     ? RetentionWindow::notesEndOn($returnDate, $days)
                     : RetentionWindow::passportEndsOn($returnDate, $months);
 
@@ -269,7 +268,7 @@ final class RetentionCommand extends Command
                     fn (?string $path): bool => is_string($path) && $path !== '',
                 ));
 
-                if ($manifest->kind === ManifestKind::Captain) {
+                if ($manifest->kind === 'CAPTAIN') {
                     $captain += count($paths);
                 } else {
                     $dpng += count($paths);

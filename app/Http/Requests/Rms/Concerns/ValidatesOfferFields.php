@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Rms\Concerns;
 
-use App\Enums\CabinCategory;
 use App\Enums\OfferChannel;
 use App\Enums\OfferType;
 use App\Models\Offer;
@@ -30,20 +29,20 @@ trait ValidatesOfferFields
             'value_text' => ['sometimes', 'nullable', 'string', 'max:255'],
             'channel' => [$presence, Rule::enum(OfferChannel::class)],
             'partner' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'cabin_types' => [$presence, 'array', 'min:1'],
-            // TODO(Sprint 18): room type pricing (09 H8)
-            'cabin_types.*' => [Rule::enum(CabinCategory::class)],
-            'itinerary_codes' => [$presence, 'array', 'min:1'],
-            'itinerary_codes.*' => ['string', 'max:10'],
             'booking_from' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
             'booking_to' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
-            'travel_from' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
-            'travel_to' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
+            'stay_from' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
+            'stay_to' => ['sometimes', 'nullable', 'date_format:Y-m-d'],
+            'min_nights' => ['sometimes', 'nullable', 'integer', 'min:1'],
+            'applies_to_room_types' => ['sometimes', 'nullable', 'array'],
+            'applies_to_room_types.*' => ['string', 'max:32'],
+            'applies_to_rate_plans' => ['sometimes', 'nullable', 'array'],
+            'applies_to_rate_plans.*' => ['string', 'max:32'],
             'combinable' => ['sometimes', 'boolean'],
             'is_promo_code' => ['sometimes', 'boolean'],
             'badge' => ['sometimes', 'nullable', 'string', 'max:18'],
             'show_on_card' => ['sometimes', 'boolean'],
-            'show_on_departures' => ['sometimes', 'boolean'],
+            'show_on_calendar' => ['sometimes', 'boolean'],
             'price_line' => ['sometimes', 'nullable', 'string', 'max:255'],
             'terms' => ['sometimes', 'nullable', 'string'],
             'as_draft' => ['sometimes', 'boolean'],
@@ -58,7 +57,7 @@ trait ValidatesOfferFields
             $this->merge(['code' => strtoupper(trim($code))]);
         }
 
-        foreach (['booking_from', 'booking_to', 'travel_from', 'travel_to', 'partner', 'badge', 'price_line', 'terms', 'value_text'] as $field) {
+        foreach (['booking_from', 'booking_to', 'stay_from', 'stay_to', 'partner', 'badge', 'price_line', 'terms', 'value_text', 'min_nights'] as $field) {
             if ($this->exists($field) && $this->input($field) === '') {
                 $this->merge([$field => null]);
             }

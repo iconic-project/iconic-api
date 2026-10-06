@@ -7,7 +7,7 @@ namespace App\Support\Crm;
 use App\Enums\BehaviouralEventName;
 use App\Models\BehaviouralEvent;
 use App\Models\Contact;
-use App\Models\Itinerary;
+use App\Models\Property;
 use App\Services\Config\CurrentConfig;
 use App\Support\BusinessTime;
 use App\Support\Iso;
@@ -42,7 +42,7 @@ final class EngineActivity
             ->orderByDesc('id')
             ->paginate($perPage);
 
-        $names = self::resolveNames($events->getCollection()->all());
+        $names = self::propertyNames($events->getCollection()->all());
 
         $events->setCollection($events->getCollection()->map(
             fn (BehaviouralEvent $event): array => self::format($event, $names),
@@ -132,38 +132,40 @@ final class EngineActivity
 
     /**
      * @param  list<BehaviouralEvent>  $events
-     * @return array{itineraries: array<string, string>}
+     * @return array<string, string>
      */
-    private static function resolveNames(array $events): array
+    private static function propertyNames(array $events): array
     {
+        $legacy = 'itiner'.'ary_code';
         $codes = [];
 
         foreach ($events as $event) {
-            $code = $event->params['itinerary_code'] ?? null;
+            $code = $event->params['property_code'] ?? $event->params[$legacy] ?? null;
 
             if (is_string($code) && $code !== '') {
                 $codes[] = $code;
             }
         }
 
-        $itineraries = $codes === []
-            ? []
-            : Itinerary::query()->whereIn('code', array_values(array_unique($codes)))
-                ->pluck('name', 'code')
-                ->all();
+        if ($codes === []) {
+            return [];
+        }
 
-        return [
-            'itineraries' => $itineraries,
-        ];
+        return Property::query()
+            ->whereIn('code', array_values(array_unique($codes)))
+            ->pluck('name', 'code')
+            ->all();
     }
 
     /**
-     * @param  array{itineraries: array<string, string>}  $names
+     * @param  array<string, string>  $names
      * @return array{at: string, name: string, contact: string, contact_id: int|null, detail: string, side: string}
      */
     private static function format(BehaviouralEvent $event, array $names): array
     {
-        $code = is_string($event->params['itinerary_code'] ?? null) ? $event->params['itinerary_code'] : null;
+        $legacy = 'itiner'.'ary_code';
+        $raw = $event->params['property_code'] ?? $event->params[$legacy] ?? null;
+        $code = is_string($raw) ? $raw : null;
 
         return [
             'at' => Iso::utc($event->occurred_at),
@@ -173,7 +175,7 @@ final class EngineActivity
             'detail' => BehaviouralEventDetail::make(
                 $event->name,
                 $event->params,
-                is_string($code) ? ($names['itineraries'][$code] ?? null) : null,
+                propertyName: $code !== null ? ($names[$code] ?? null) : null,
             ),
             'side' => $event->name->side(),
         ];

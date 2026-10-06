@@ -27,31 +27,11 @@ final class EngineSettingsConstraint implements ValidationRule, ValidatorAwareRu
         $data = $this->validator?->getData() ?? [];
 
         match ($this->check) {
-            'property_fits_cabins' => $this->propertyFitsCabins($value, $data, $fail),
             'child_ages_ordered' => $this->childAgesOrdered($value, $data, $fail),
             'search_range_ordered' => $this->searchRangeOrdered($value, $data, $fail),
             'default_adults_capacity' => $this->defaultAdultsCapacity($value, $data, $fail),
             default => null,
         };
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     */
-    private function propertyFitsCabins(mixed $value, array $data, Closure $fail): void
-    {
-        $cabin = data_get($data, 'guests.max_per_cabin');
-
-        if (! is_numeric($value) || ! is_numeric($cabin)) {
-            return;
-        }
-
-        $property = (int) $value;
-        $perCabin = (int) $cabin;
-
-        if ($property > 9 * $perCabin) {
-            $fail('Max per property ('.$property.') is more than 9 cabins × '.$perCabin.' can hold.');
-        }
     }
 
     /**
@@ -97,14 +77,9 @@ final class EngineSettingsConstraint implements ValidationRule, ValidatorAwareRu
 
         $adults = (int) $value;
         $property = data_get($data, 'guests.max_per_property');
-        $cabin = data_get($data, 'guests.max_per_cabin');
 
         if (is_numeric($property) && $adults > (int) $property) {
             $fail('Default adults must be between 1 and max guests per property.');
-        }
-
-        if (is_numeric($cabin) && $adults > (int) $cabin * 9) {
-            $fail('Default adults must be at most max guests per cabin × 9.');
         }
     }
 }

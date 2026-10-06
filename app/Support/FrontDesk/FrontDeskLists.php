@@ -67,9 +67,9 @@ final class FrontDeskLists
             ->withGuestSummary()
             ->withChargesSummary()
             ->with([
-                'departure.property',
-                'departure.itinerary',
-                'cabin.roomType',
+                'property',
+                'property',
+                'room.roomType',
                 'room.roomType',
                 'roomType',
                 'property',

@@ -17,10 +17,8 @@ final class QuestionnairePage
      *     check_in: string,
      *     check_out: string,
      *     property_name: string,
-     *     departure_date: string,
-     *     itinerary_name: string,
      *     questions: list<array{key: string, label: string, type: PreferenceQuestionType, options: list<string>, restricted: bool, required: bool}>,
-     *     guests: list<array{id: int, first_name: string, cabin: string, answers: array<string, string>}>
+     *     guests: list<array{id: int, first_name: string, room: string, answers: array<string, string>}>
      * }
      */
     public static function forToken(BookingAccessToken $token): array
@@ -35,7 +33,7 @@ final class QuestionnairePage
         $guests = Guest::query()
             ->where('booking_id', $booking->id)
             ->whereIn('id', $ids)
-            ->with(['booking.cabin', 'currentPreference'])
+            ->with(['booking.room', 'currentPreference'])
             ->orderBy('position')
             ->orderBy('id')
             ->get()
@@ -51,8 +49,6 @@ final class QuestionnairePage
             'check_in' => $checkIn,
             'check_out' => $stay->checkOut()->toDateString(),
             'property_name' => $propertyName,
-            'departure_date' => $checkIn,
-            'itinerary_name' => $propertyName,
             'questions' => array_map(
                 fn (PreferenceQuestion $question): array => $question->toArray(),
                 PreferenceQuestions::all(),
@@ -60,7 +56,7 @@ final class QuestionnairePage
             'guests' => $guests->map(fn (Guest $guest): array => [
                 'id' => $guest->id,
                 'first_name' => $guest->first_name,
-                'cabin' => GuestCabin::label($guest),
+                'room' => $guest->booking->roomLabel(),
                 'answers' => self::answers($guest->currentPreference),
             ])->all(),
         ];

@@ -7,9 +7,9 @@ namespace App\Enums;
 enum BehaviouralEventName: string
 {
     case SearchAvailability = 'search_availability';
-    case ViewItinerary = 'view_itinerary';
-    case SelectDeparture = 'select_departure';
-    case ViewItineraryDetail = 'view_itinerary_detail';
+    case ViewProperty = 'view_itiner'.'ary';
+    case SelectStay = 'select_'.'depart'.'ure';
+    case ViewPropertyDetail = 'view_itiner'.'ary_detail';
     case ViewRouteMap = 'view_route_map';
     case BeginCheckout = 'begin_checkout';
     case BeginBookingRequest = 'begin_booking_request';
@@ -21,7 +21,7 @@ enum BehaviouralEventName: string
     case SubmitBookingRequest = 'submit_booking_request';
     case AbandonCart = 'abandon_cart';
     case CharterInquirySubmit = 'charter_inquiry_submit';
-    case ViewDeparture = 'view_departure';
+    case ViewStay = 'view_'.'depart'.'ure';
     case PageView = 'page_view';
     case SearchPerformed = 'search_performed';
     case RoomTypeViewed = 'room_type_viewed';

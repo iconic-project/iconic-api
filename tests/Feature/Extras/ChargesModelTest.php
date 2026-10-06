@@ -123,7 +123,7 @@ test('a booking with the cruise paid and an extra unpaid past T-120 is not overd
 
     $fresh = $booking->fresh();
     expect($fresh?->balance())->toBe(420);
-    expect($fresh?->cruiseOutstanding())->toBe(0);
+    expect($fresh?->stayOutstanding())->toBe(0);
     expect($fresh?->isOverdue())->toBeFalse();
 
     $admin = adminUser();
@@ -159,7 +159,7 @@ test('adding an extra to a fully paid booking reopens the balance without moving
         ->assertOk()
         ->assertJsonPath('status', BookingStatus::FullyPaid->value)
         ->assertJsonPath('balance', 420)
-        ->assertJsonPath('cruise_outstanding', 0);
+        ->assertJsonPath('stay_outstanding', 0);
 
     $this->actingAs($actor)
         ->postJson('/api/rms/bookings/'.$booking->id.'/payments', [
@@ -257,9 +257,9 @@ test('pending kpi sums charges and overdue kpi sums cruise outstanding', functio
     $overdueFresh = $overdue->fresh();
     $cruiseFresh = $cruisePaid->fresh();
     expect($overdueFresh?->isOverdue())->toBeTrue();
-    expect($overdueFresh?->balance())->toBeGreaterThan((int) $overdueFresh?->cruiseOutstanding());
+    expect($overdueFresh?->balance())->toBeGreaterThan((int) $overdueFresh?->stayOutstanding());
     expect($cruiseFresh?->isOverdue())->toBeFalse();
-    expect($cruiseFresh?->cruiseOutstanding())->toBe(0);
+    expect($cruiseFresh?->stayOutstanding())->toBe(0);
     expect($cruiseFresh?->balance())->toBe(320);
 
     $kpis = $this->actingAs($actor)
@@ -282,8 +282,8 @@ test('pending kpi sums charges and overdue kpi sums cruise outstanding', functio
     expect($pendingIds)->toContain($overdue->id, $cruisePaid->id);
 
     expect($kpis['overdue_count'])->toBe($overdueList->json('meta.total'));
-    expect($kpis['overdue_amount'])->toBe($overdueFresh?->cruiseOutstanding());
-    expect($overdueList->json('meta.kpis.overdue_amount'))->toBe($overdueFresh?->cruiseOutstanding());
+    expect($kpis['overdue_amount'])->toBe($overdueFresh?->stayOutstanding());
+    expect($overdueList->json('meta.kpis.overdue_amount'))->toBe($overdueFresh?->stayOutstanding());
     expect($kpis['pending_count'])->toBe($pendingList->json('meta.total'));
     expect($kpis['pending'])->toBe(
         (int) $overdueFresh?->balance() + (int) $cruiseFresh?->balance(),

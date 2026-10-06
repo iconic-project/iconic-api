@@ -92,14 +92,12 @@ final class SubmitPortalRequest extends Action
             $group = Group::query()->create([
                 'reference' => $this->references->next(ReferenceType::Group),
                 'name' => $first->contact->name.' group',
-                'departure_id' => null,
                 'coordinator_contact_id' => $first->contact_id,
             ]);
 
             History::record($group, 'group.created', after: [
                 'reference' => $group->reference,
                 'name' => $group->name,
-                'departure_id' => null,
                 'coordinator_contact_id' => $group->coordinator_contact_id,
             ], actorLabel: $label, extraContext: [
                 'agency_user_id' => $actor->id,

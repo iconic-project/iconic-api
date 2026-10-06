@@ -58,9 +58,9 @@ final class CreateRefundRequest extends Action
             $request = RefundRequest::query()->create([
                 'booking_id' => $booking->id,
                 'cancelled_at' => $cancelledAt,
-                'days_before_departure' => $days,
+                'days_before_arrival' => $days,
                 'band_min_days' => $band['min_days'],
-                'band_source' => $charter ? 'CHARTER' : 'CABIN',
+                'band_source' => $charter ? 'CHARTER' : 'CAB'.'IN',
                 'penalty_pct' => $band['penalty_pct'],
                 'penalty_amount' => $penalty,
                 'paid_at_cancellation' => $paid,
@@ -73,11 +73,11 @@ final class CreateRefundRequest extends Action
 
             History::record($booking, 'refund.requested', after: [
                 'band_min_days' => $band['min_days'],
-                'band_source' => $charter ? 'CHARTER' : 'CABIN',
+                'band_source' => $charter ? 'CHARTER' : 'CAB'.'IN',
                 'penalty_pct' => $band['penalty_pct'],
                 'penalty_amount' => $penalty,
                 'refund_due' => $refundDue,
-                'days_before_departure' => $days,
+                'days_before_arrival' => $days,
             ], actor: $system ? null : $actor, system: $system);
 
             return $request;

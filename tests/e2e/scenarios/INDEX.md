@@ -33,7 +33,6 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | ENG-01 | Manager publishes copy without a reference | sprint-2, config | P1 | B2 | Mateo | [config/ENG-01-manager-copy-no-reference.md](config/ENG-01-manager-copy-no-reference.md) |
 | ENG-02 | Manager can't touch rules | sprint-2, config | P1 | B2 | Mateo | [config/ENG-02-manager-rules-locked.md](config/ENG-02-manager-rules-locked.md) |
 | ENG-03 | Rule change needs a reference | sprint-2, config | P2 | — | Carolina | [config/ENG-03-rule-change-needs-reference.md](config/ENG-03-rule-change-needs-reference.md) |
-| ENG-04 | Typing group contexts | sprint-2, config | P2 | — | Carolina | [config/ENG-04-typing-group-contexts.md](config/ENG-04-typing-group-contexts.md) |
 | ENG-05 | Engine settings read-only | sprint-2, config | P2 | — | Lucía | [config/ENG-05-engine-read-only.md](config/ENG-05-engine-read-only.md) |
 | BR-01 | Fresh-seed registry | sprint-2, config | P1 | B2 | Carolina | [config/BR-01-fresh-seed-registry.md](config/BR-01-fresh-seed-registry.md) |
 | BR-02 | A differing value, reset, publish | sprint-2, config | P1 | B2 | Carolina | [config/BR-02-differ-reset-publish.md](config/BR-02-differ-reset-publish.md) |
@@ -58,7 +57,6 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | BKG-01 | Seeded bookings and segments | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-01-seeded-bookings-segments.md](bookings/BKG-01-seeded-bookings-segments.md) |
 | BKG-02 | Create a one-cabin reservation | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-02-create-one-cabin.md](bookings/BKG-02-create-one-cabin.md) |
 | BKG-03 | Create a three-cabin group | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-03-create-three-cabin-group.md](bookings/BKG-03-create-three-cabin-group.md) |
-| BKG-04 | Festive charter | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-04-festive-charter.md](bookings/BKG-04-festive-charter.md) |
 | BKG-05 | No double booking | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-05-no-double-booking.md](bookings/BKG-05-no-double-booking.md) |
 | BKG-06 | Legal transitions and cancellation | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-06-transitions-cancel.md](bookings/BKG-06-transitions-cancel.md) |
 | BKG-07 | Date change reprices | sprint-4, bookings | retired | — | Carolina | [bookings/BKG-07-date-change-reprice.md](bookings/BKG-07-date-change-reprice.md) |
@@ -117,7 +115,6 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | OFF-01 | A PCT offer is PENDING DIRECTOR until approved, then LIVE | sprint-8, offers | P1 | B8 | Carolina + Guest | [offers/OFF-01-pct-pending-director-then-live.md](offers/OFF-01-pct-pending-director-then-live.md) |
 | OFF-02 | Pause a live offer — gone from the engine within 30 seconds | sprint-8, offers | P2 | — | Carolina + Guest | [offers/OFF-02-pause-live-offer-gone-in-30s.md](offers/OFF-02-pause-live-offer-gone-in-30s.md) |
 | OFF-03 | Festive itinerary cannot be selected; B2B never shows publicly | sprint-8, offers | P2 | — | Carolina + Guest | [offers/OFF-03-festive-blocked-b2b-never-public.md](offers/OFF-03-festive-blocked-b2b-never-public.md) |
-| OFF-04 | Charter enquiry and waitlist from the engine land in the RMS | sprint-8, offers | P2 | — | Guest + Carolina | [offers/OFF-04-charter-and-waitlist-land-in-rms.md](offers/OFF-04-charter-and-waitlist-land-in-rms.md) |
 | CRM-01 | Seeded contacts with lifecycle, value, segment and consent | sprint-9, crm | P1 | B9 | Carolina | [crm/CRM-01-seeded-contacts.md](crm/CRM-01-seeded-contacts.md) |
 | CRM-02 | Cancel a confirmed booking → contact value and segment change | sprint-9, crm | P1 | B9 | Carolina | [crm/CRM-02-cancel-moves-value.md](crm/CRM-02-cancel-moves-value.md) |
 | CRM-03 | Contact drawer: RMS bookings, timeline, no sensitive fields | sprint-9, crm | P1 | B9 | Carolina | [crm/CRM-03-drawer-timeline-no-sensitive.md](crm/CRM-03-drawer-timeline-no-sensitive.md) |
@@ -131,7 +128,6 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | PIPE-01 | Pipeline KPIs equal Payments & Revenue; bound deals stay locked | sprint-10, crm | P1 | — | Carolina | [crm/PIPE-01-kpis-match-ledger-bound-locked.md](crm/PIPE-01-kpis-match-ledger-bound-locked.md) |
 | PIPE-02 | Lucía moves her own deal; she cannot move Mateo’s; LOST needs a reason | sprint-10, crm | P1 | — | Lucía, Mateo | [crm/PIPE-02-own-deal-move-lost-reason.md](crm/PIPE-02-own-deal-move-lost-reason.md) |
 | PIPE-03 | Engine request opens Deposit pending; a confirmed deposit moves it to Booking confirmed | sprint-10, crm | P1 | — | Guest + Carolina | [crm/PIPE-03-request-then-deposit-confirmed.md](crm/PIPE-03-request-then-deposit-confirmed.md) |
-| PIPE-04 | Charter enquiry opens an unassigned New lead; take it; bind it | sprint-10, crm | P2 | — | Guest + Carolina | [crm/PIPE-04-charter-enquiry-take-and-bind.md](crm/PIPE-04-charter-enquiry-take-and-bind.md) |
 | TASK-01 | A request raises one response task; releasing it closes the task | sprint-10, crm | P1 | — | Guest + Lucía | [crm/TASK-01-request-task-closes-on-release.md](crm/TASK-01-request-task-closes-on-release.md) |
 | TASK-02 | Overdue balance and the commission-cap hold each raise one task | sprint-10, crm | P1 | — | Carolina | [crm/TASK-02-overdue-and-commission-cap.md](crm/TASK-02-overdue-and-commission-cap.md) |
 | TASK-03 | Completing a task writes the contact timeline and nothing on the booking | sprint-10, crm | P1 | — | Lucía | [crm/TASK-03-complete-writes-timeline-not-booking.md](crm/TASK-03-complete-writes-timeline-not-booking.md) |
@@ -218,3 +214,5 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | HCRM-01 | Contact shows last and next stay | sprint-21, crm | P1 | B27 | Carolina | [crm/HCRM-01-contact-last-and-next-stay.md](crm/HCRM-01-contact-last-and-next-stay.md) |
 | HCRM-02 | Segment by length of stay | sprint-21, crm | P2 | B27 | Carolina | [crm/HCRM-02-segment-by-length-of-stay.md](crm/HCRM-02-segment-by-length-of-stay.md) |
 | HCRM-03 | Journey email three days before arrival | sprint-21, crm | P2 | B27 | Carolina | [crm/HCRM-03-journey-three-days-before-arrival.md](crm/HCRM-03-journey-three-days-before-arrival.md) |
+| HOFF-01 | Stay-window percent discounts the nights inside it | sprint-22, hotel, offers | P1 | B28 | Carolina | [hotel/HOFF-01-stay-window-percent.md](hotel/HOFF-01-stay-window-percent.md) |
+| HOFF-02 | Min nights skips a short stay | sprint-22, hotel, offers | P2 | B28 | Carolina | [hotel/HOFF-02-min-nights.md](hotel/HOFF-02-min-nights.md) |

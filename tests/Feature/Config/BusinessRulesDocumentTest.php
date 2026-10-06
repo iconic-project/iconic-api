@@ -36,20 +36,14 @@ test('rules reject ranges, default above cap, reminder order and band shape', fu
             'refund_business_days' => 61,
             'agency_approval_business_days' => 11,
         ],
-        'manifests' => [
-            'dpng_fit_days' => 0,
-            'dpng_charter_days' => 91,
-            'captain_days' => 0,
-            'chase_days_before_due' => 91,
-        ],
         'alerts' => [
             'low_occupancy_pct' => 0,
             'low_occupancy_days_before' => 366,
             'low_occupancy_min_consecutive_nights' => 0,
         ],
         'retention' => [
-            'passport_months_after_cruise' => 0,
-            'medical_days_after_cruise' => 3651,
+            'passport_months_after_check_out' => 0,
+            'medical_days_after_check_out' => 3651,
             'behavioural_raw_months' => 0,
             'behavioural_unstitched_days' => 3651,
         ],
@@ -74,15 +68,11 @@ test('rules reject ranges, default above cap, reminder order and band shape', fu
     expect($errors->has('sla.response_hours'))->toBeTrue();
     expect($errors->has('sla.refund_business_days'))->toBeTrue();
     expect($errors->has('sla.agency_approval_business_days'))->toBeTrue();
-    expect($errors->has('manifests.dpng_fit_days'))->toBeTrue();
-    expect($errors->has('manifests.dpng_charter_days'))->toBeTrue();
-    expect($errors->has('manifests.captain_days'))->toBeTrue();
-    expect($errors->has('manifests.chase_days_before_due'))->toBeTrue();
     expect($errors->has('alerts.low_occupancy_pct'))->toBeTrue();
     expect($errors->has('alerts.low_occupancy_days_before'))->toBeTrue();
     expect($errors->has('alerts.low_occupancy_min_consecutive_nights'))->toBeTrue();
-    expect($errors->has('retention.passport_months_after_cruise'))->toBeTrue();
-    expect($errors->has('retention.medical_days_after_cruise'))->toBeTrue();
+    expect($errors->has('retention.passport_months_after_check_out'))->toBeTrue();
+    expect($errors->has('retention.medical_days_after_check_out'))->toBeTrue();
     expect($errors->has('retention.behavioural_raw_months'))->toBeTrue();
     expect($errors->has('retention.behavioural_unstitched_days'))->toBeTrue();
     expect($errors->has('cancellation.bands'))->toBeTrue();
@@ -258,7 +248,7 @@ test('warnings flag a shorter charter manifest, a dropping penalty and an engine
         'Charter manifest deadline is shorter than FIT — the source has charter earlier (30 vs 15 days).',
     );
     expect($messages)->toContain('Penalty drops closer to departure (90 days) — check the bands.');
-    expect($messages)->toContain(
+    expect($messages)->not->toContain(
         'Charter page promises 24 h but the response SLA is 12 h — align in Engine Settings.',
     );
 });
