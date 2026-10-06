@@ -58,8 +58,6 @@ class Journey extends Model
         'nurture_to_request',
         'request_to_deposit',
         'payment_calendar',
-        'extras_ancillaries',
-        'ready_to_depart',
         'reengagement',
         'b2b_partner_activation',
         'winback',

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Enums\ConfigKind;
 use App\Services\Config\ConfigRegistry;
+use App\Support\Config\Documents\RatesDocument;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
@@ -28,6 +30,12 @@ class ConfigSeeder extends Seeder
 
             if ($initial === null) {
                 continue;
+            }
+
+            // The registry copies rates when the process boots. migrate:fresh
+            // drops room types after that, so read them again here.
+            if ($kind === ConfigKind::Rates) {
+                $initial = RatesDocument::initial();
             }
 
             $documentClass = $kind->documentClass();

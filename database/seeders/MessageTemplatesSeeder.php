@@ -28,10 +28,6 @@ class MessageTemplatesSeeder extends Seeder
         'welcome_web_lead' => 'Your Galápagos adventure begins here — Iconic',
         'request_acknowledgement' => 'We have received your booking — {{booking_reference}}',
         'deposit_link' => 'Complete your reservation — {{booking_reference}}',
-        'extras_offer' => 'Curated additions to your Galápagos expedition — Iconic',
-        'extras_closing' => 'Last call for additions — {{booking_reference}}',
-        'questionnaire_reminder' => '14 days to go — complete your questionnaire',
-        'arrival_instructions' => 'Almost time! Final instructions for your arrival in San Cristóbal',
         'reengagement_6_months' => 'Back to Galápagos? A new expedition awaits you',
         'winback' => 'Sorry we missed you — what changed?',
         'cart_recovery_1' => 'Can we help you plan your Galápagos expedition?',
@@ -47,8 +43,8 @@ class MessageTemplatesSeeder extends Seeder
             ->orderBy('id')
             ->get();
 
-        if (! in_array($steps->count(), [21, 24], true)) {
-            throw new RuntimeException('Expected 21 or 24 journey send steps, found '.$steps->count().'.');
+        if (! in_array($steps->count(), [15, 18], true)) {
+            throw new RuntimeException('Expected 15 or 18 journey send steps, found '.$steps->count().'.');
         }
 
         foreach ($steps as $step) {

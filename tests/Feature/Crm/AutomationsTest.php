@@ -66,9 +66,9 @@ test('built rows resolve and not-built rows name the gap', function (): void {
     $rows = AutomationCatalogue::all();
     $built = AutomationCatalogue::built();
 
-    expect($rows)->toHaveCount(58)
-        ->and($built)->toHaveCount(54)
-        ->and(count($rows) - count($built))->toBe(4);
+    expect($rows)->toHaveCount(55)
+        ->and($built)->toHaveCount(49)
+        ->and(count($rows) - count($built))->toBe(6);
 
     foreach ($built as $row) {
         $location = $row->location;
@@ -136,7 +136,7 @@ test('the catalogue is readable with panel.crm and a switch needs rules.manage',
     $index = $this->actingAs($crm)->getJson('/api/crm/automations')->assertOk();
     assertNoSensitiveFields($index);
 
-    expect($index->json('data'))->toHaveCount(58)
+    expect($index->json('data'))->toHaveCount(55)
         ->and($index->json('data.0.key'))->toBe('welcome_web_lead')
         ->and($index->json('data.0.built'))->toBeTrue()
         ->and($index->json('data.0.enabled'))->toBeTrue()

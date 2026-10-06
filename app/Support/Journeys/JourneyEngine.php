@@ -138,8 +138,6 @@ final class JourneyEngine
             if ($booking->stayOutstanding() > 0) {
                 $this->enrol('payment_calendar', $booking->contact, $booking);
             }
-            $this->enrol('extras_ancillaries', $booking->contact, $booking);
-            $this->enrol('ready_to_depart', $booking->contact, $booking);
         }
 
         if (in_array($status, [BookingStatus::Cancelled, BookingStatus::CancelledPostpaid], true)) {
@@ -307,8 +305,6 @@ final class JourneyEngine
                 if ($booking->stayOutstanding() > 0) {
                     $this->enrol('payment_calendar', $booking->contact, $booking);
                 }
-                $this->enrol('extras_ancillaries', $booking->contact, $booking);
-                $this->enrol('ready_to_depart', $booking->contact, $booking);
             });
 
         Booking::query()

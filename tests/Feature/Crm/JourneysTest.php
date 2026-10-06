@@ -74,15 +74,11 @@ test('each journey trigger enrols once', function (): void {
     expect(enrolmentCount('request_to_deposit', $requestContact))->toBe(1);
 
     activate('payment_calendar');
-    activate('extras_ancillaries');
-    activate('ready_to_depart');
     $confirmedContact = journeyContact();
     $confirmed = journeyBooking($confirmedContact, $owner, BookingStatus::Confirmed, '2027-11-14');
     BookingStatusChanged::dispatch($confirmed, BookingStatus::Requested, BookingStatus::Confirmed);
     BookingStatusChanged::dispatch($confirmed, BookingStatus::Requested, BookingStatus::Confirmed);
-    expect(enrolmentCount('payment_calendar', $confirmedContact))->toBe(1)
-        ->and(enrolmentCount('extras_ancillaries', $confirmedContact))->toBe(1)
-        ->and(enrolmentCount('ready_to_depart', $confirmedContact))->toBe(1);
+    expect(enrolmentCount('payment_calendar', $confirmedContact))->toBe(1);
 
     activate('reengagement');
     $past = journeyContact();
@@ -291,7 +287,7 @@ test('crm can list journeys, enrolments and toggle the active flag', function ()
 
     $index = $this->actingAs($crm)->getJson('/api/crm/journeys')->assertOk();
     assertNoSensitiveFields($index);
-    expect($index->json('data'))->toHaveCount(8)
+    expect($index->json('data'))->toHaveCount(6)
         ->and($index->json('data.0.key'))->toBe('nurture_to_request')
         ->and($index->json('data.0.kind'))->toBe('MARKETING')
         ->and($index->json('data.0.suppression_sentence'))->toBe(Journey::SUPPRESSION_SENTENCE)

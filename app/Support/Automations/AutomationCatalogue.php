@@ -73,7 +73,6 @@ final class AutomationCatalogue
         'a' => 'a · Lead capture & welcome',
         'b' => 'b · Request & confirmation',
         'c' => 'c · Payment calendar',
-        'd' => 'd · Extras & ancillaries',
         'e' => 'e · Pre-trip',
         'f' => 'f · Post-trip & loyalty',
         'g' => 'g · Internal alerts — Iconic team',
@@ -113,16 +112,10 @@ final class AutomationCatalogue
             self::missing('overdue_client', 'c', 'Overdue — day 1', 'Overdue payment — action required — [ID]', 'The stay balance is past its due date.', 'Day 1.', 'No client overdue email. The flag, the OVERDUE_BALANCE alert and the overdue task are separate rows.'),
             self::missing('escalation_review', 'c', 'Escalation — manual review', '[ESCALATION] Non-payment review required — [ID]', 'An overdue balance waits for a person.', 'After the escalation window.', 'OPS-007 is a person\'s decision. No escalation email is sent.'),
 
-            self::row('extras_offer', 'd', 'Extras offer', 'Curated additions to your Galápagos expedition — Iconic', 'A booking has been confirmed for 7 days.', 'Day 7 of extras_ancillaries.', 'journey:extras_ancillaries', AutomationAudience::Customer, true, journeyKey: 'extras_ancillaries'),
-            self::row('extras_second_window', 'd', 'Extras second window', 'Pre and post travel, if you would like it', 'Sixty calendar days before departure.', 'T−60 of extras_ancillaries.', 'journey:extras_ancillaries', AutomationAudience::Customer, true, journeyKey: 'extras_ancillaries'),
-            self::row('extras_closing', 'd', 'Extras closing notice', 'Last call for additions — [ID]', 'Departure is inside the extras window.', 'payments.extras_due_hours before departure.', 'journey:extras_ancillaries', AutomationAudience::Customer, true, journeyKey: 'extras_ancillaries'),
-
             self::row('pretrip', 'e', 'Pre-arrival package', 'Before you arrive — {reference}', 'Check-in is inside documents.pre_arrival_days_before and the booking is confirmed or later.', 'iconic:documents-due. The pre-arrival PDF is issued, then this email.', 'iconic:documents-due', AutomationAudience::Customer, true),
             self::row('questionnaire', 'e', 'Preferences questionnaire', 'Your preferences questionnaire — {reference}', 'The same pre-trip date, for each guest the plan still owes a questionnaire.', 'iconic:documents-due. One send, not a later reminder.', 'iconic:documents-due', AutomationAudience::Customer, true),
-            self::row('questionnaire_reminder', 'e', 'Questionnaire reminder', '14 days to go — complete your questionnaire', 'The pre-trip questionnaire is still incomplete.', 'T−14 of ready_to_depart, only while a questionnaire is incomplete.', 'journey:ready_to_depart', AutomationAudience::Customer, true, journeyKey: 'ready_to_depart'),
             self::row('data_chaser', 'e', 'Passport chase', 'Passenger details needed — {reference}', 'Retired with manifests (09 H15). Not scheduled.', 'Retired with manifests (09 H15). Not scheduled.', 'retired', AutomationAudience::Customer, false),
             self::row('voucher', 'e', 'Transfer voucher', 'Transfer voucher — {reference}', 'A contracted transfer extra and departure is inside documents.voucher_days_before.', 'iconic:documents-due. The voucher PDF is issued, then this email.', 'iconic:documents-due', AutomationAudience::Customer, true),
-            self::row('arrival_instructions', 'e', 'Arrival instructions', 'Almost time! Final instructions for your arrival in San Cristóbal', 'Departure is three days away.', 'T−3 of ready_to_depart.', 'journey:ready_to_depart', AutomationAudience::Customer, true, journeyKey: 'ready_to_depart'),
 
             self::row('survey', 'f', 'NPS survey', 'Your post-trip survey — {reference}', 'Check-out has passed by nps.survey_hours_after_check_out. A no-show is never surveyed.', 'iconic:nps-survey. The anchor is checked_out_at, otherwise check-out at stay.check_out_time.', 'iconic:nps-survey', AutomationAudience::Customer, true),
             self::row('review_request', 'f', 'Public review request', 'Would you share a review? — {reference}', 'A post-trip score is at least nps.review_request_from and the guest is the contact.', 'When the score is recorded. Marketing: ConsentGate is checked as well, and always.', RecordGuestResponse::class, AutomationAudience::Customer, true, AutomationKind::Marketing),
@@ -130,7 +123,6 @@ final class AutomationCatalogue
             self::row('reengagement_month_7', 'f', 'Re-engagement — month 7', 'Owner\'s Suite early access', 'Seven months after the stay, with no active booking.', 'Month 7 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
             self::row('reengagement_month_9', 'f', 'Re-engagement — month 9', 'Bring your people', 'Nine months after the stay, with no active booking.', 'Month 9 of reengagement.', 'journey:reengagement', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'reengagement'),
             self::row('winback', 'f', 'Win-back', 'Sorry we missed you — what changed?', 'A hold expired, a booking was cancelled, or a deal was marked lost.', 'Day 1 of winback.', 'journey:winback', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'winback'),
-            self::row('winback_day_30', 'f', 'Win-back — day 30', 'Alternative departures', 'Thirty days after a lost or expired enquiry.', 'Day 30 of winback.', 'journey:winback', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'winback'),
             self::row('winback_month_6', 'f', 'Win-back — month 6', 'A new season', 'Six months after a lost or expired enquiry.', 'Month 6 of winback.', 'journey:winback', AutomationAudience::Customer, true, AutomationKind::Marketing, journeyKey: 'winback'),
 
             self::missing('high_value_lead', 'g', 'High-value new lead', '[ALERT] High-value new lead — [Name] — [Country] — USD [Est.]', 'A high-value lead or a charter enquiry.', 'Immediate.', 'No alert kind. The charter enquiry email is its own row.'),

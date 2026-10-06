@@ -160,7 +160,7 @@ test('preview resolves declared variables and refuses an unknown or empty one', 
     expect($withBooking->json('subject'))->toContain($booking->displayReference())
         ->and($withBooking->json('body'))->toContain('Ada');
 
-    test()->actingAs($admin)->postJson('/api/crm/templates/extras_second_window/drafts', [
+    test()->actingAs($admin)->postJson('/api/crm/templates/winback/drafts', [
         'subject' => 'Hello',
         'body' => ['paragraphs' => ['<script>alert(1)</script>'], 'list' => [], 'cta' => null],
     ])->assertStatus(422);
