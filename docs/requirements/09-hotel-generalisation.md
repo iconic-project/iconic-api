@@ -34,10 +34,10 @@ Everything else that makes Iconic valuable — single write path, Actions, appen
 | — | `NO_SHOW` | `BookingStatus::NoShow` | H11 |
 | PNG / TCT fees | Taxes and fees | business rules `taxes` | H9 |
 | DPNG / Captain manifests | Front-desk lists + guest registration export | `FrontDesk*` | H15 |
-| Charter (whole yacht) | Exclusive use (buyout) | — | HQ1, H14 |
+| Charter (whole yacht) | — (retired) | — | HQ1 answered: dropped (H14) |
 | Hotel manager brief (per departure) | Daily arrivals brief | `ArrivalsBrief` | H15 |
 
-**Naming rule for code:** after Sprint 22, the identifiers `departure` (as inventory), `yacht`, `cabin`, `itinerary`, `voyage`, `cruise`, `png`, `ppdo` must not appear in `app/` except in `database/migrations` that already exist. An Arch test enforces this (Sprint 22).
+**Naming rule for code:** the identifiers `departure` (as inventory), `yacht`, `cabin`, `itinerary`, `voyage`, `cruise`, `png`, `ppdo` must not appear in `app/` except in `database/migrations` that already exist. An Arch test enforces this.
 
 ## 3. Decisions
 
@@ -123,7 +123,7 @@ Renamed keys ship with a config migration through `ConfigPublisher` (see `larave
 
 **H13 — Groups.** A group (`GRP-…`) ties several bookings with one payer/contact. Bookings in a group **may have different dates and room types**. "Create a three-room group" creates three bookings in one Action and one transaction, as today.
 
-**H14 — Exclusive use.** The yacht charter generalises to booking **every active room of a property** for a date range under one booking of type `BUYOUT`. Whether the client wants it at all is **HQ1**. Until answered, Sprint 22 retires the charter flow behind a feature flag in engine settings (`buyout.enabled = false`) rather than deleting it.
+**H14 — Exclusive use.** Dropped. Sprint 22 answered HQ1 by removing the charter flow. There is no buyout booking type and no `buyout.enabled` flag. Enquiry and proposal routes return 410. Cancellation `charter_bands` stay on the business-rules document as stored history of the old bands.
 
 ### Operations
 
@@ -182,7 +182,7 @@ offers              + stay_from, stay_to, min_nights
 
 | Id | Question | Safe default until answered |
 |---|---|---|
-| HQ1 | Keep exclusive-use (buyout) bookings? | Flag off, code kept until Sprint 22 decision |
+| HQ1 | Keep exclusive-use (buyout) bookings? | **Answered, Sprint 22:** dropped. No buyout type. Enquiry and proposal routes return 410. |
 | HQ2 | Day-use rooms (0 nights)? | Not supported |
 | HQ3 | Standard check-in / check-out times, no-show cut-off | Demo values `15:00` / `11:00` / `23:59`, labelled demo |
 | HQ4 | Split-room stays? | Not supported |

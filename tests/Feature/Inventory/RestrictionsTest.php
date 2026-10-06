@@ -412,8 +412,6 @@ test('a request and a move need the same override', function (): void {
         ->assertCreated()
         ->json('bookings.0.id');
 
-    restrictionsStopDeparture($open);
-
     $roomId = $open->property->rooms->firstWhere('code', 'S2')?->id;
 
     $preview = $this->actingAs($manager)
@@ -431,28 +429,18 @@ test('a request and a move need the same override', function (): void {
     $this->actingAs($manager)
         ->postJson('/api/rms/bookings/'.$id.'/move', $move)
         ->assertUnprocessable()
-        ->assertJsonPath('errors.stay.0', 'STOP_SELL');
-
-    $this->actingAs(salesExecUser())
-        ->postJson('/api/rms/bookings/'.$id.'/move', [
-            ...$move,
-            'override_restrictions' => true,
-            'restriction_reason' => 'Keep the party together',
-        ])
-        ->assertForbidden();
+        ->assertJsonValidationErrors(['reason']);
 
     $this->actingAs($manager)
         ->postJson('/api/rms/bookings/'.$id.'/move', [
             ...$move,
-            'override_restrictions' => true,
-            'restriction_reason' => 'Keep the party together',
+            'reason' => 'Keep the party together',
         ])
         ->assertOk();
 
     $moved = ChangeHistory::query()->where('event', 'booking.moved')->firstOrFail();
 
-    expect($moved->reason)->toBe('Keep the party together')
-        ->and($moved->after['override_restrictions'] ?? null)->toBe(['STOP_SELL']);
+    expect($moved->reason)->toBe('Keep the party together');
 });
 
 /**

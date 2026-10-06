@@ -45,10 +45,7 @@ final class DemoBookingsSeeder extends Seeder
      */
     public static array $priceDifferences = [];
 
-    public function run(): void
-    {
-        return;
-    }
+    public function run(): void {}
 
     public function runYachtSeedDisabled(): void
     {

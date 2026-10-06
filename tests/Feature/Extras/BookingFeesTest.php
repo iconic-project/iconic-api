@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\BookingStatus;
-use App\Enums\PngCategory;
 use App\Models\Booking;
 use App\Models\ChangeHistory;
 use App\Models\Guest;

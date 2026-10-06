@@ -59,12 +59,35 @@
     }
   ],
   "settings": {
-    "copy": {},
-    "guests": {},
-    "locale": {},
+    "copy": {
+      "book_now_pay_later": "We will hold the rooms for you, obligation-free. Our team confirms availability and sends your deposit link — nothing is charged today.",
+      "traveling_with_children": "Children aged 6–17 are welcome. One adult must travel with them.",
+      "solo_and_triple": "Single occupancy and extra guests are priced per night. Shown live in the next step.",
+      "pay_today": "We will hold the rooms for you, obligation-free. Our team confirms availability and sends your deposit link (10%) — nothing is charged until you decide.",
+      "details_note": "Full guest details (passports, dietary preferences) and payment are arranged after we confirm your rooms — no card is required today. Travel insurance is the sole responsibility of the passenger. Iconic does not sell or intermediate travel insurance.",
+      "confirmation_steps": [
+        "Within 24 hours a member of our team confirms your rooms and answers any questions — by your preferred channel.",
+        "You receive your booking confirmation and deposit link (10%). Your rooms stay held while you decide, per our hold policy.",
+        "After the deposit, we gather guest details and preferences, and our concierge curates flights, stays and in-house touches."
+      ],
+      "online_deposit_advantage": "Online deposit advantage",
+      "online_deposit_perk": "Complimentary spa access aboard"
+    },
+    "guests": {
+      "max_per_property": 16,
+      "child_min_age": 6,
+      "child_max_age": 17,
+      "adult_required_with_children": true,
+      "under_age_message": "Under 6 not accommodated"
+    },
+    "locale": {
+      "default": "en",
+      "live": ["en"],
+      "currency": "USD"
+    },
     "stay": {
       "min_nights": 1,
-      "max_nights": 62,
+      "max_nights": 30,
       "max_rooms_per_booking": 5
     },
     "availability": {

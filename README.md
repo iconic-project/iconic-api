@@ -87,6 +87,12 @@ Do not run `docker compose exec app sh` on its own (an interactive shell). Compo
 
 `iconic:retention` anonymises passport data and purges medical, dietary and accessibility notes on the published schedule (B4). **Do not run it in production until the client confirms those periods** (sprint 6 README, client question 1). `--dry-run` prints the counts and writes nothing.
 
+`iconic:night-audit` raises front-desk alerts for arrivals, guests leaving late, and guests still in house. It changes no booking status (09 H11).
+
+`iconic:hotel-contract-check` is read-only. It reports whether the schema still has the legacy tables and columns the hotel contract drops. It writes nothing.
+
+`iconic:voyage-status` is removed. There is no seed mode. `migrate:fresh --seed` always writes Hotel Demo.
+
 ## Tests, lint, static analysis
 
 ```bash
@@ -110,6 +116,8 @@ Tests use the `iconic_test` database (pinned in `phpunit.xml`). Credentials come
 | API | http://localhost:8000 |
 | Health | http://localhost:8000/api/health |
 | OpenAPI (Scramble, local only) | http://localhost:8000/docs/api |
+
+Scramble serves the spec at `/docs/api.json`. It is not a committed file. In `iconic-ui`, `pnpm types:api` writes `app/types/api.d.ts` from that URL. `pnpm types:check` fails when the committed file differs from a fresh generation.
 | Horizon (local only) | http://localhost:8000/horizon |
 | Telescope (local only) | http://localhost:8000/telescope |
 | Mailpit | http://localhost:8025 |
@@ -162,5 +170,5 @@ docker compose exec app sh -c "php artisan migrate:fresh --seed"
 
 ## Requirements and sprints
 
-- Requirements: [`docs/requirements/`](docs/requirements/) — start with [`INDEX.md`](docs/requirements/INDEX.md) and [`08-dev-decisions.md`](docs/requirements/08-dev-decisions.md) (highest authority when documents disagree).
+- Requirements: [`docs/requirements/`](docs/requirements/) — start with [`INDEX.md`](docs/requirements/INDEX.md). [`09-hotel-generalisation.md`](docs/requirements/09-hotel-generalisation.md) ranks above [`08-dev-decisions.md`](docs/requirements/08-dev-decisions.md) for stays, rooms and nights. Everywhere else, `08` is the highest authority.
 - Sprints: [`docs/sprints/`](docs/sprints/) — roadmap in [`ROADMAP.md`](docs/sprints/ROADMAP.md); hotel migration (sprints 16–22) in [`HOTEL-ROADMAP.md`](docs/sprints/HOTEL-ROADMAP.md). The current sprint is a folder `sprint-NN/` with a `README.md` and ordered task files.

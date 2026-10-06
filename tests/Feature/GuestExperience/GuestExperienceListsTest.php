@@ -16,6 +16,7 @@ use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Tests\Support\Bookings\ReservationFixtures;
+use Tests\Support\Bookings\StayAnchor;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
@@ -139,7 +140,7 @@ test('survey guests are names and cabins, and a user without guest_experience.ma
 });
 
 /**
- * @return array{departure: \Tests\Support\Bookings\StayAnchor, booking: Booking, guest: Guest}
+ * @return array{departure: StayAnchor, booking: Booking, guest: Guest}
  */
 function pickerDeparture(string $date, string $first, string $last, BookingStatus $status): array
 {

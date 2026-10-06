@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Actions\Bookings\CreateReservation;
+use App\Actions\Bookings\CreateStayReservation;
 use App\Actions\Bookings\DeleteBooking;
 use App\Actions\Bookings\TransitionBooking;
 use App\Enums\BookingStatus;
@@ -51,8 +51,8 @@ beforeEach(function (): void {
 test('a held transition vs delete waits 1205 never 1213', function (): void {
     $actor = adminUser();
     Auth::login($actor);
-    $departure = ReservationFixtures::anamaraDeparture('2028-04-02');
-    $created = app(CreateReservation::class)->handle(
+    $departure = ReservationFixtures::anamaraDeparture('2026-12-21');
+    $created = app(CreateStayReservation::class)->handle(
         ReservationFixtures::createPayload($departure),
         $actor,
     );

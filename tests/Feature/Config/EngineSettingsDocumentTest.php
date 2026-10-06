@@ -60,10 +60,9 @@ test('the locale pins reject es', function (): void {
     expect($errors->has('locale.live.0'))->toBeTrue();
 });
 
-test('rules reject property over nine cabins, reversed child ages and search range', function (): void {
+test('rules reject reversed child ages, a reversed search range and too many default adults', function (): void {
     $document = engineSettingsDocument([
         'guests' => [
-            'max_per_cabin' => 1,
             'max_per_property' => 16,
             'child_min_age' => 12,
             'child_max_age' => 6,
@@ -71,7 +70,7 @@ test('rules reject property over nine cabins, reversed child ages and search ran
         'calendar' => [
             'default_search_from' => '2028-06',
             'default_search_to' => '2028-01',
-            'default_adults' => 10,
+            'default_adults' => 20,
         ],
     ]);
 
@@ -179,16 +178,16 @@ test('copy with no numbers produces no copy-versus-rates or copy-versus-sla warn
     expect($warnings)->toBe([]);
 });
 
-test('png and tct fees are read-only and the footnote can still change', function (): void {
+test('dropped fee keys are ignored and the footnote can still change', function (): void {
     $current = EngineSettingsDocument::fromArray(EngineSettingsDocument::initial());
 
     $tct = EngineSettingsDocument::initial();
     $tct['fees']['tct_pp'] = 21;
-    expect(EngineSettingsDocument::fromArray($tct)->publishErrors($current))->toHaveKey('fees.tct_pp');
+    expect(EngineSettingsDocument::fromArray($tct)->publishErrors($current))->not->toHaveKey('fees.tct_pp');
 
     $png = EngineSettingsDocument::initial();
     $png['fees']['png']['foreign_over_12'] = 201;
-    expect(EngineSettingsDocument::fromArray($png)->publishErrors($current))->toHaveKey('fees.png');
+    expect(EngineSettingsDocument::fromArray($png)->publishErrors($current))->not->toHaveKey('fees.png');
 
     $note = EngineSettingsDocument::initial();
     $note['fees']['footnote'] = 'Hotel taxes are configured separately.';

@@ -28,7 +28,6 @@ use App\Support\Config\Documents\ExtrasDocument;
 use App\Support\Config\Documents\RatesDocument;
 use App\Support\SensitiveFields;
 use Illuminate\Testing\TestResponse;
-use Tests\Support\Bookings\ReservationFixtures;
 use Tests\Support\Config\TestConfigDocument;
 use Tests\Support\Config\TestConfigVersion;
 use Tests\TestCase;

@@ -29,12 +29,15 @@ test('core tables exist after migration', function (): void {
     expect(Schema::hasTable('properties'))->toBeTrue('properties table missing after migration.');
     expect(Schema::hasTable('rooms'))->toBeTrue('rooms table missing after migration.');
     expect(Schema::hasTable('room_types'))->toBeTrue('room_types table missing after migration.');
-    expect(Schema::hasTable('itineraries'))->toBeTrue('itineraries table missing after migration.');
-    expect(Schema::hasTable('departures'))->toBeTrue('departures table missing after migration.');
+    expect(Schema::hasTable('archive_itineraries'))->toBeTrue('archive_itineraries table missing after migration.');
+    expect(Schema::hasTable('itineraries'))->toBeFalse();
+    expect(Schema::hasTable('archive_departures'))->toBeTrue('archive_departures table missing after migration.');
+    expect(Schema::hasTable('departures'))->toBeFalse();
     expect(Schema::hasTable('calendar_date_hosts'))->toBeTrue(
         'calendar_date_hosts missing — tests/database/migrations must be registered for the whole suite.',
     );
-    expect(Schema::hasTable('cabin_claims'))->toBeTrue('cabin_claims table missing after migration.');
+    expect(Schema::hasTable('archive_cabin_claims'))->toBeTrue('archive_cabin_claims table missing after migration.');
+    expect(Schema::hasTable('cabin_claims'))->toBeFalse();
     expect(Schema::hasTable('room_night_claims'))->toBeTrue('room_night_claims table missing after migration.');
     expect(Schema::hasTable('guests'))->toBeTrue('guests table missing after migration.');
     expect(Schema::hasTable('consents'))->toBeTrue('consents table missing after migration.');

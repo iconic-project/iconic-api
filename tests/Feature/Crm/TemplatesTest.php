@@ -305,14 +305,14 @@ function marketingDraft(string $paragraph): array
     ];
 }
 
-test('stay variables render from the booking and departure_date still renders check-in', function (): void {
+test('stay variables render from the booking', function (): void {
     $admin = adminUser();
     $contact = Contact::factory()->create(['name' => 'Ada Stay']);
     $booking = journeyBookingFor($contact, $admin)->fresh(['roomType', 'property']);
     $version = new MessageTemplateVersion([
         'subject' => 'Arrive {{check_in}}',
         'body' => [
-            'paragraphs' => ['{{check_out}} {{nights}} {{room_type}} {{property_name}} {{check_in_time}} {{check_out_time}} {{departure_date}}'],
+            'paragraphs' => ['{{check_out}} {{nights}} {{room_type}} {{property_name}} {{check_in_time}} {{check_out_time}}'],
             'list' => [],
             'cta' => null,
         ],
@@ -324,7 +324,6 @@ test('stay variables render from the booking and departure_date still renders ch
             'property_name',
             'check_in_time',
             'check_out_time',
-            'departure_date',
         ],
     ]);
 
@@ -338,8 +337,6 @@ test('stay variables render from the booking and departure_date still renders ch
         ->and($rendered->html)->toContain((string) $booking->property?->name)
         ->and($rendered->html)->toContain('15:00')
         ->and($rendered->html)->toContain('11:00')
-        ->and($rendered->html)->toContain($checkIn)
-        ->and(TemplateVariable::DepartureDate->isDeprecated())->toBeTrue()
         ->and(TemplateVariable::CheckIn->isDeprecated())->toBeFalse();
 });
 

@@ -9,7 +9,6 @@ use App\Enums\BookingType;
 use App\Enums\DocumentKind;
 use App\Enums\PaymentKind;
 use App\Enums\PaymentStatus;
-use App\Enums\PngCategory;
 use App\Models\Booking;
 use App\Models\Guest;
 use App\Models\Payment;

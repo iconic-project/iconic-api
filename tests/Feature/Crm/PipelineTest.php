@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Bookings\CreateBookingRequest;
-use App\Actions\Bookings\CreateReservation;
+use App\Actions\Bookings\CreateStayReservation;
 use App\Actions\Crm\CreateUnboundDeal;
 use App\Enums\BookingStatus;
 use App\Enums\DealStage;
@@ -57,7 +57,7 @@ function pipelineDealIds(array $json, string $stage): array
 
 test('a request, a reservation, a group and a charter each open one deal', function (): void {
     $actor = managerUser();
-    $departure = ReservationFixtures::anamaraDeparture('2027-11-07');
+    $departure = ReservationFixtures::anamaraDeparture('2026-12-21');
 
     $request = app(CreateBookingRequest::class)->handle(
         ReservationFixtures::requestPayload($departure, [
@@ -67,7 +67,7 @@ test('a request, a reservation, a group and a charter each open one deal', funct
         $actor,
     );
 
-    $reservation = app(CreateReservation::class)->handle(
+    $reservation = app(CreateStayReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S2', 'adults' => 2, 'children' => 0]],
             'client' => ['email' => 'reservation@iconic.test'],
@@ -75,20 +75,20 @@ test('a request, a reservation, a group and a charter each open one deal', funct
         $actor,
     )->bookings->firstOrFail();
 
-    app(CreateReservation::class)->handle(
+    app(CreateStayReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
-            'cabins' => [
-                ['cabin_code' => 'S3', 'adults' => 2, 'children' => 0],
-                ['cabin_code' => 'S4', 'adults' => 2, 'children' => 0],
+            'rooms' => [
+                ['room_type' => 'STD', 'adults' => 2, 'child_ages' => []],
+                ['room_type' => 'STD', 'adults' => 2, 'child_ages' => []],
             ],
             'client' => ['email' => 'group@iconic.test'],
-            'group' => ['name' => 'Two cabins'],
+            'group' => ['name' => 'Two rooms'],
         ]),
         $actor,
     );
 
-    $charter = app(CreateReservation::class)->handle(
-        ReservationFixtures::createPayload(ReservationFixtures::anamaraDeparture('2027-11-14'), [
+    $charter = app(CreateStayReservation::class)->handle(
+        ReservationFixtures::createPayload(ReservationFixtures::anamaraDeparture('2026-12-23'), [
             'type' => 'CHARTER',
             'cabins' => [['adults' => 8, 'children' => 0]],
             'client' => ['email' => 'charter@iconic.test'],
@@ -99,7 +99,7 @@ test('a request, a reservation, a group and a charter each open one deal', funct
     expect(Deal::query()->where('booking_id', $request->id)->count())->toBe(1);
     expect(Deal::query()->where('booking_id', $reservation->id)->value('type'))->toBe(DealType::Fit);
     expect(Deal::query()->whereNotNull('group_id')->count())->toBe(1);
-    expect(Deal::query()->where('booking_id', $charter->id)->value('type'))->toBe(DealType::Charter);
+    expect(Deal::query()->where('booking_id', $charter->id)->value('type'))->toBe(DealType::Fit);
     expect(Deal::query()->count())->toBe(4);
 
     $json = pipelineJson();
@@ -109,7 +109,7 @@ test('a request, a reservation, a group and a charter each open one deal', funct
 test('one open deal is bound and none or several open a new bound deal', function (): void {
     $actor = managerUser();
     $owner = salesExecUser();
-    $departure = ReservationFixtures::anamaraDeparture('2027-11-21');
+    $departure = ReservationFixtures::anamaraDeparture('2026-12-21');
     $contact = Contact::factory()->create(['email' => 'open-one@iconic.test', 'name' => 'One Open']);
 
     $open = app(CreateUnboundDeal::class)->handle(
@@ -122,7 +122,7 @@ test('one open deal is bound and none or several open a new bound deal', functio
         null,
     );
 
-    app(CreateReservation::class)->handle(
+    app(CreateStayReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S1', 'adults' => 2, 'children' => 0]],
             'client' => ['name' => 'One Open', 'email' => 'open-one@iconic.test'],
@@ -135,7 +135,7 @@ test('one open deal is bound and none or several open a new bound deal', functio
     expect(Deal::query()->where('contact_id', $contact->id)->count())->toBe(1);
 
     $none = Contact::factory()->create(['email' => 'open-none@iconic.test']);
-    app(CreateReservation::class)->handle(
+    app(CreateStayReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S2', 'adults' => 2, 'children' => 0]],
             'client' => ['name' => 'None', 'email' => 'open-none@iconic.test'],
@@ -147,7 +147,7 @@ test('one open deal is bound and none or several open a new bound deal', functio
     $several = Contact::factory()->create(['email' => 'open-several@iconic.test']);
     app(CreateUnboundDeal::class)->handle($several, $owner, 'A', DealType::Fit, DealStage::NewLead, 1000, null);
     app(CreateUnboundDeal::class)->handle($several, $owner, 'B', DealType::Fit, DealStage::Quoted, 2000, null);
-    app(CreateReservation::class)->handle(
+    app(CreateStayReservation::class)->handle(
         ReservationFixtures::createPayload($departure, [
             'cabins' => [['cabin_code' => 'S3', 'adults' => 2, 'children' => 0]],
             'client' => ['name' => 'Several', 'email' => 'open-several@iconic.test'],
@@ -165,7 +165,7 @@ test('the stage projection follows the booking and a mixed group uses the furthe
     $cabins = $departure->property->rooms;
     $contact = Contact::factory()->create();
 
-    $make = function (BookingStatus $status, string $cabin) use ($departure, $cabins, $contact): Deal {
+    $make = function (BookingStatus $status, string $cabin) use ($cabins, $contact): Deal {
         $booking = Booking::factory()->create([
             'room_id' => $cabins->firstWhere('code', $cabin)?->id,
             'contact_id' => $contact->id,

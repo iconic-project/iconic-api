@@ -612,7 +612,7 @@ final class CreateStayReservation extends Action
         if ($spec['room_id'] !== null) {
             $room = Room::query()->find($spec['room_id']);
 
-            if ($room instanceof Room && $room->roomType instanceof RoomType && $room->roomType->code === $spec['room_type']) {
+            if ($room instanceof Room && $room->roomType->code === $spec['room_type']) {
                 return $room->roomType;
             }
         }

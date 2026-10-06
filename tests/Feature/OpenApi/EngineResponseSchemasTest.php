@@ -50,10 +50,8 @@ test('engine OpenAPI schemas have properties', function (): void {
     $spec = $response->json();
 
     foreach ([
-        'FeedResource',
-        'DepartureCabinResource',
         'PromoCheckResource',
-        'EngineQuoteResource',
+        'StayRoomsQuoteResource',
         'CheckoutCreatedResource',
         'CheckoutExtendedResource',
         'CheckoutSubmittedResource',
@@ -61,11 +59,6 @@ test('engine OpenAPI schemas have properties', function (): void {
         'EngineCountryResource',
         'EngineWaitlistResource',
         'CompleteReservationResource',
-        'EngineItineraryResource',
-        'EngineDepartureResource',
-        'EngineOfferResource',
-        'EngineRatesResource',
-        'EngineSettingsResource',
         'CompleteBookingResource',
         'CompleteGuestResource',
         'EngineEventsAcceptedResource',
@@ -77,20 +70,35 @@ test('engine OpenAPI schemas have properties', function (): void {
         engineOpenApiSchema($spec, $name);
     }
 
-    $feed = engineOpenApiSchema($spec, 'FeedResource');
-    expect($feed['properties'])->toHaveKeys([
-        'generated_at',
-        'itineraries',
-        'departures',
-        'rates',
-        'settings',
-        'offers',
-    ]);
-    engineSchemaRef($feed['properties']['itineraries'] ?? [], 'EngineItineraryResource');
-    engineSchemaRef($feed['properties']['departures'] ?? [], 'EngineDepartureResource');
-    engineSchemaRef($feed['properties']['rates'] ?? [], 'EngineRatesResource');
-    engineSchemaRef($feed['properties']['settings'] ?? [], 'EngineSettingsResource');
-    engineSchemaRef($feed['properties']['offers'] ?? [], 'EngineOfferResource');
+    foreach (['EnginePropertyResource', 'EngineAvailabilityResource', 'EngineCalendarResource', 'EngineStayQuoteResource'] as $passthrough) {
+        expect($spec['components']['schemas'][$passthrough] ?? null)->toBeArray("schema {$passthrough} is missing");
+    }
+
+    foreach (array_keys($spec['components']['schemas'] ?? []) as $schemaName) {
+        expect($schemaName)->not->toMatch('/Yacht|Cabin|Itinerary|Voyage|Departure|FeedResource/');
+    }
+
+    foreach (['/engine/feed', '/api/engine/feed', '/engine/departures', '/engine/itineraries', '/engine/yachts'] as $gone) {
+        expect($spec['paths'])->not->toHaveKey($gone);
+    }
+
+    $propertyPath = $spec['paths']['/engine/property']['get']
+        ?? $spec['paths']['/api/engine/property']['get']
+        ?? null;
+    expect($propertyPath)->toBeArray();
+    engineSchemaRef(
+        $propertyPath['responses']['200']['content']['application/json']['schema'] ?? [],
+        'EnginePropertyResource',
+    );
+
+    $availabilityPath = $spec['paths']['/engine/availability']['get']
+        ?? $spec['paths']['/api/engine/availability']['get']
+        ?? null;
+    expect($availabilityPath)->toBeArray();
+    engineSchemaRef(
+        $availabilityPath['responses']['200']['content']['application/json']['schema'] ?? [],
+        'EngineAvailabilityResource',
+    );
 
     $complete = engineOpenApiSchema($spec, 'CompleteReservationResource');
     expect($complete['properties'])->toHaveKeys([
@@ -112,7 +120,7 @@ test('engine OpenAPI schemas have properties', function (): void {
     expect($guest['properties']['passport_on_file']['type'] ?? null)->toBe('boolean');
 
     $created = engineOpenApiSchema($spec, 'CheckoutCreatedResource');
-    engineSchemaRef($created['properties']['quote'] ?? [], 'EngineQuoteResource');
+    expect($created['properties'])->toHaveKey('quote');
 
     $status = engineOpenApiSchema($spec, 'CheckoutStatusResource');
     expect($status['properties'])->toHaveKeys([
@@ -148,7 +156,7 @@ test('engine OpenAPI schemas have properties', function (): void {
     $quote = $priceChanged['content']['application/json']['schema']['properties']['quote'] ?? [];
     $quoteRef = $quote['$ref'] ?? $quote['allOf'][0]['$ref'] ?? null;
     expect($quoteRef)->toBeString();
-    expect($quoteRef)->toContain('EngineQuoteResource');
+    expect($quoteRef)->toContain('StayRoomsQuoteResource');
 
     $storeEvents = $spec['components']['schemas']['StoreEngineEventsRequest'] ?? null;
     expect($storeEvents)->toBeArray();

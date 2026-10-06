@@ -15,11 +15,13 @@
       "bookable": true,
       "reasons": [],
       "rooms_left": 4,
+      "waitlist_enabled": false,
       "quotes": [
         {
           "rate_plan": "BAR",
           "night_lines": [
-            {"night": "2026-02-02", "season": "LOW", "base": 100, "extras": 0, "single": 0, "dow": 0, "supplements": 0, "plan_adjust": 0, "total": 100}
+            {"night": "2026-02-02", "season": "LOW", "base": 100, "extras": 0, "single": 0, "dow": 0, "supplements": 0, "plan_adjust": 0, "total": 100, "discount": 0},
+            {"night": "2026-02-03", "season": "LOW", "base": 100, "extras": 0, "single": 0, "dow": 0, "supplements": 0, "plan_adjust": 0, "total": 100, "discount": 0}
           ],
           "lines": [{"code": "room", "label": "room", "amount": 200}],
           "tax_lines": [],
@@ -28,7 +30,8 @@
           "deposit": 60,
           "total_including_charged_taxes": 200
         }
-      ]
+      ],
+      "offers": []
     },
     {
       "code": "STD",
@@ -36,7 +39,9 @@
       "bookable": false,
       "reasons": ["MIN_STAY:3"],
       "rooms_left": 4,
-      "quotes": []
+      "waitlist_enabled": false,
+      "quotes": [],
+      "offers": []
     }
   ]
 }

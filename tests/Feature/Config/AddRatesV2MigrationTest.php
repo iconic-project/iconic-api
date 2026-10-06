@@ -101,9 +101,9 @@ test('config-verify fails on a pre-v2 rates document, then the migration publish
     expect($v2->created_by)->toBeNull();
     expect($v2->approval_reference)->toBe(RatesV2::APPROVAL_REFERENCE);
     expect($v2->document['schema_version'])->toBe(2);
-    expect($v2->document['years'])->toBe($v1->document['years']);
-    expect($v2->document['terms'])->toBe($v1->document['terms']);
-    expect($v2->document['rules']['festive_supplement_pp'])->toBe(751);
+    expect($v2->document)->not->toHaveKey('years');
+    expect($v2->document)->not->toHaveKey('terms');
+    expect($v2->document)->not->toHaveKey('rules');
     expect($v2->asDocument()->toArray()['seasons'])->toBe(hotelFixture('seasons'));
     expect($v2->document['room_rates'])->toHaveCount(16);
     expect($v2->document['occupancy']['extra_adult_nightly'])->toBe(40);

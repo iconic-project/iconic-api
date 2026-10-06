@@ -8,7 +8,7 @@
 A property, a room type, and a room are the inventory staff edit. Each change writes one history line. An empty room type can be deactivated.
 
 ## Steps
-1. Hotel seed (`ICONIC_SEED_MODE=hotel`). Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms`.
+1. The seed is Hotel Demo. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms`.
 2. In the sidebar, under **Booking engine**, open **Property**. The seeded property is **Hotel Demo**.
 3. Set **Description** to `E2E property description`. Click **Save**.
 4. Open **Room types**. Click **Add room type**. Code `E2E`, name `E2E Garden`, base occupancy `2`, max occupancy `2`, max adults `2`, max children `0`. Click **Add room type**.

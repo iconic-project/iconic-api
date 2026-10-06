@@ -8,7 +8,6 @@ use App\Actions\Extras\UpdateBookingFees;
 use App\Enums\BookingStatus;
 use App\Enums\PaymentKind;
 use App\Enums\PaymentStatus;
-use App\Enums\PngCategory;
 use App\Models\Booking;
 use App\Models\Guest;
 use App\Models\Payment;

@@ -23,9 +23,23 @@ Also in this folder (not requirement docs):
 - `04-booking-engine-contract.md` — what the RMS must publish to iconic.co and the sync rules
 - `07-three-system-integration-contract.md` — ENGINE ↔ RMS ↔ CRM: field ownership, event catalogue, identity, jobs, data map
 
+## Superseded by 09
+
+`01`–`07` are not rewritten. Where a section below describes a yacht cruise, `09` wins. The H-id is the decision that replaces it.
+
+| Document | Section | Superseded by |
+|---|---|---|
+| `01-functional-spec.md` | Yacht, cabin, departure, itinerary, manifest and charter modules | H1, H2, H4, H6, H14, H15, H20 |
+| `02-data-model.md` | Departure, cabin, yacht, cabin claim, `ON_BOARD`, `COMPLETED`, PNG | H1, H4, H6, H9, H11 |
+| `03-business-rules.md` | Sunday departure, 7-night cruise, per-person-per-departure rates, PNG fees | H2, H8, H9 |
+| `04-booking-engine-contract.md` | Departures feed published to the engine | H1, H20 |
+| `05-decisions-and-open-questions.md` | Decisions that assume a departure is the unit of sale | H1, H2 |
+| `06-build-backlog.md` | Yacht inventory modules | H1–H24 |
+| `07-three-system-integration-contract.md` | Departure events and the old stay statuses | H1, H11 |
+
 ## Decisions
 
-- `09-hotel-generalisation.md` — hotel generalisation (stays, rooms, nights). Ranks above `08` for stays, rooms and nights.
+- `09-hotel-generalisation.md` — hotel generalisation (stays, rooms, nights). Ranks above `08` for stays, rooms and nights. HQ1 is answered: exclusive use is dropped. HQ2–HQ12 stay open, each with the safe default in that document.
 - `05-decisions-and-open-questions.md` — Iconic's decisions of 12 Sep 2026 + what is still open
 - `08-dev-decisions.md` — development-team architecture decisions and resolved contradictions. Highest authority except where `09` ranks above it (stays, rooms and nights).
 
@@ -37,10 +51,11 @@ Also in this folder (not requirement docs):
 
 ## Examples
 
-- `examples/booking-engine-feed.json` — live export of the engine feed contract (kept until the engine frontend switches)
-- `examples/engine-property.json` — `GET /api/engine/property`
-- `examples/engine-availability.json` — `GET /api/engine/availability`
-- `examples/seed-data.json` — every entity with realistic sample data (fixtures / test data)
+- `examples/hotel-seed-data.json` — the only fixture tests load
+- `examples/engine-property.json` — shape of `GET /api/engine/property`
+- `examples/engine-availability.json` — shape of `GET /api/engine/availability`
+- `examples/seed-data.json` — historical yacht fixture, unused
+- `examples/booking-engine-feed.json` — historical departures feed, unused
 
 ## Screenshots
 

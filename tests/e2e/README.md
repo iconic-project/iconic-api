@@ -29,9 +29,9 @@ Demo users: [`fixtures/accounts.md`](fixtures/accounts.md). Password for all fou
 
 Catalogue: [`scenarios/INDEX.md`](scenarios/INDEX.md).
 
-The portal is the agent site, not the staff panel. It listens on port **3002** (`http://localhost:3002`, sign-in at `http://localhost:3002/login`). Portal scenarios are batches **B16** and **B17** (written and walked in sprint 13 task 11).
+The portal is the agent site, not the staff panel. It listens on port **3002** (`http://localhost:3002`, sign-in at `http://localhost:3002/login`). Hotel portal scenarios are batch **B8**.
 
-Pick by **id**, **tag** (`smoke`, `sprint-1`, `sprint-2`, `auth`, `visual`…) or **priority** (P1 first).
+Pick by **id**, **tag** (`smoke`, `auth`, `users-roles`, `config`, `hotel`) or **priority** (P1 first). Yacht scenarios and the older product walks are in `scenarios/_archive/` and are not walked.
 
 Example prompts: “Run the e2e smoke suite” → tag `smoke`. “Run all sprint-2 scenarios” → tag `sprint-2`.
 
@@ -61,7 +61,7 @@ tests/e2e/bin/setup.sh agency-over-cap AG-002
 tests/e2e/bin/setup.sh journey-due 1
 tests/e2e/bin/setup.sh abandoned-checkout e2e.cart@iconic.test
 tests/e2e/bin/setup.sh hard-bounce ANK-2026-0018
-tests/e2e/bin/setup.sh inject-inbound-email whitfield.anna@iconic.test "Cabin question" "Is the master cabin free?"
+tests/e2e/bin/setup.sh inject-inbound-email whitfield.anna@iconic.test "Room question" "Is the twin free?"
 tests/e2e/bin/setup.sh portal-pay ANK-R-2026-0043 DEPOSIT
 ```
 
@@ -91,7 +91,7 @@ tests/e2e/bin/setup.sh portal-pay ANK-R-2026-0043 DEPOSIT
 - **Expected values come from the scenario or `fixtures/reference-values.md`**, never from what the screen currently shows.
 - **Time:** timestamps are shown in Galápagos time (UTC−6). Compare with that, not the machine's time zone.
 - **Don't wait blindly.** Wait for a visible condition (the text, the toast, the row), at most 15 s, then fail the step.
-- **Labels.** RMS fields use `label[for]` + control `id` (or `aria-label` on unlabeled table cells). Prefer `getByLabel` on Code, Max guests per cabin, Embark date, Child discounts per cabin, group-context, reason, and the new-reservation fields. Status pills are CSS-uppercase (`INVITED`); match case-insensitively.
+- **Labels.** RMS fields use `label[for]` + control `id` (or `aria-label` on unlabeled table cells). Prefer `getByLabel` on Code, Max guests, Check-in, group-context, reason, and the stay fields. Status pills are CSS-uppercase (`INVITED`); match case-insensitively.
 - **Engine analytics banner.** The engine shows a fixed bar at the bottom whenever analytics consent is unset, including when no GA measurement id is configured. It covers the lower edge of the page. On a fresh engine context, before any click, either click `Analytics off` or set `localStorage['iconic-engine-analytics']` to `refused` and reload. Use `accepted` only when the scenario is about behavioural events. Do not leave the bar up over footer actions.
 - **`/api/auth/me`.** Call `http://localhost:8000/api/auth/me` (JSON, 401 when signed out). Do not open `/api/auth/me` as a panel URL — that is HTML from Nuxt, not the API.
 - **Reports:**

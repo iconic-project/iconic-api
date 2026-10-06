@@ -35,7 +35,7 @@ Sprints are in `iconic-api/docs/sprints/sprint-NN/` — a `README.md` (context f
 6. The RMS and CRM prototypes (HTML) — both implemented in `iconic-panel` — behaviour and design reference
 7. The booking-engine `booking_engine_SPEC.md` (with `booking_engine_README.md`) and its prototype `prototype/booking_engine_index.html` — **v3, written before the 12 Sep decisions**; its design is the reference, but its business rules lose to everything above.
 
-`examples/seed-data.json` = fixtures. `examples/booking-engine-feed.json` = feed shape. `screenshots/` = visual acceptance reference.
+`examples/hotel-seed-data.json` = fixtures. `examples/engine-property.json` and `examples/engine-availability.json` = current engine shapes. `screenshots/` = visual acceptance reference. `examples/seed-data.json` and `examples/booking-engine-feed.json` are historical and unused.
 
 ## Non-negotiable rules
 1. **Single write path.** Every field has one write path: every mutation is one Action. The CRM section never writes money or booking data. No read-only mirrors, no internal sync events.

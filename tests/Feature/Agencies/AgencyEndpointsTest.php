@@ -10,8 +10,6 @@ use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\ChangeHistory;
 use App\Models\Contact;
-use App\Services\Config\CurrentConfig;
-use App\Support\Rounding;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\InventorySeeder;
@@ -147,10 +145,10 @@ test('agency show returns an empty year table and the stay rate document', funct
         ->assertJsonPath('portal_preview.net_rates', []);
 });
 
-test('agency index windowed stats and kpis count only bookings departing in from to', function (): void {
+test('agency index windowed stats and kpis count only bookings arriving in from to', function (): void {
     $agency = Agency::factory()->create(['commission_pct' => 10]);
-    $inside = ReservationFixtures::anamaraDeparture('2027-11-07');
-    $outside = ReservationFixtures::anamaraDeparture('2028-07-09');
+    $inside = ReservationFixtures::anamaraDeparture('2026-12-21');
+    $outside = ReservationFixtures::anamaraDeparture('2026-12-28');
 
     $this->actingAs(managerUser())
         ->postJson('/api/rms/bookings', ReservationFixtures::createPayload($inside, [
@@ -173,10 +171,10 @@ test('agency index windowed stats and kpis count only bookings departing in from
         ->assertCreated();
 
     $insideBooking = Booking::query()->where('agency_id', $agency->id)
-        ->whereHas('departure', fn ($query) => $query->whereDate('date', '2027-11-07'))
+        ->whereDate('check_in', '2026-12-21')
         ->firstOrFail();
     $outsideBooking = Booking::query()->where('agency_id', $agency->id)
-        ->whereHas('departure', fn ($query) => $query->whereDate('date', '2028-07-09'))
+        ->whereDate('check_in', '2026-12-28')
         ->firstOrFail();
     $allRevenue = $insideBooking->total + $outsideBooking->total;
     $allAccrued = $insideBooking->commissionAmount() + $outsideBooking->commissionAmount();
@@ -194,7 +192,7 @@ test('agency index windowed stats and kpis count only bookings departing in from
     expect($allTime->json('meta.kpis.commission_default_pct'))->toBe(10);
 
     $windowed = $this->actingAs(managerUser())
-        ->getJson('/api/rms/agencies?from=2027-11-01&to=2027-11-30')
+        ->getJson('/api/rms/agencies?from=2026-12-21&to=2026-12-25')
         ->assertOk();
     $windowRow = collect($windowed->json('data'))->firstWhere('id', $agency->id);
 

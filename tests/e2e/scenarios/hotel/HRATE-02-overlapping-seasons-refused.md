@@ -8,7 +8,7 @@
 Two seasons must not share a night. The API refuses the document, and the page must not publish it.
 
 ## Steps
-1. Hotel seed (`ICONIC_SEED_MODE=hotel` before `reset.sh`).
+1. The seed is Hotel Demo.
 2. As Carolina, open `/rms/commercial/rates`. Publish controls are the bar at the **top** (state line, `Approval ref / reason (required)`, Discard, `Save & publish`).
 3. In **Seasons**, the Shoulder row **From** is `2026-04-01` and Low **To** is `2026-03-31`. Change Shoulder **From** to `2026-03-15`.
 4. Wait until the warnbox under the top bar updates. Do not publish.

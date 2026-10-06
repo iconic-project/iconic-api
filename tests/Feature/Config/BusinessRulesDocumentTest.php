@@ -221,14 +221,10 @@ test('warnings skip the engine sla check when engine settings are unpublished', 
     );
 });
 
-test('warnings flag a shorter charter manifest, a dropping penalty and an engine sla mismatch', function (): void {
+test('warnings flag a dropping penalty and an engine sla mismatch', function (): void {
     $this->seed(ConfigSeeder::class);
 
     $draft = businessRulesDocument([
-        'manifests' => [
-            'dpng_fit_days' => 30,
-            'dpng_charter_days' => 15,
-        ],
         'cancellation' => [
             'bands' => [
                 ['min_days' => 120, 'penalty_pct' => 50],
@@ -244,10 +240,7 @@ test('warnings flag a shorter charter manifest, a dropping penalty and an engine
         BusinessRulesDocument::fromArray($draft)->warnings(null),
     );
 
-    expect($messages)->toContain(
-        'Charter manifest deadline is shorter than FIT — the source has charter earlier (30 vs 15 days).',
-    );
-    expect($messages)->toContain('Penalty drops closer to departure (90 days) — check the bands.');
+    expect($messages)->toContain('Penalty drops closer to arrival (90 days) — check the bands.');
     expect($messages)->not->toContain(
         'Charter page promises 24 h but the response SLA is 12 h — align in Engine Settings.',
     );

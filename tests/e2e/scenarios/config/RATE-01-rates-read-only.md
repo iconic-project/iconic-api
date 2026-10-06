@@ -8,7 +8,7 @@
 Sales Exec must not be able to edit prices. The page is still useful for the price check.
 
 ## Steps
-1. Hotel seed (`ICONIC_SEED_MODE=hotel` before `reset.sh`). A yacht seed still shows this page, but the price-check totals in E4 are the hotel reference stays.
+1. The seed is Hotel Demo. The price-check totals in E4 are the hotel reference stays.
 2. Sign in as `lucia@iconic.test` / `password`. Open `http://localhost:3001/rms/commercial/rates`.
 3. Read the top bar, the **Seasons** table, and **Price check — published vs your draft**. Open **Legacy (yacht) — read only** only far enough to see that its inputs are disabled.
 

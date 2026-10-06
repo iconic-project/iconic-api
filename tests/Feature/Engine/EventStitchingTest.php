@@ -12,7 +12,6 @@ use Database\Seeders\DemoUsersSeeder;
 use Database\Seeders\HotelSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
-use Illuminate\Support\Facades\Mail;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);

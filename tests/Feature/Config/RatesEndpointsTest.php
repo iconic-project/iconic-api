@@ -20,11 +20,12 @@ test('a sales exec can view rates and cannot publish', function (): void {
         ->getJson('/api/rms/rates')
         ->assertOk()
         ->assertJsonPath('version', 1)
-        ->assertJsonPath('document.years.0.suite_pp', 13300)
+        ->assertJsonPath('document.schema_version', 2)
+        ->assertJsonPath('document.rate_plans.0.code', 'BAR')
         ->assertJsonPath('published_by', null);
 
     $document = ratesDocument();
-    $document['years'][1]['suite_pp'] = 15000;
+    $document['occupancy']['extra_adult_nightly'] = (int) $document['occupancy']['extra_adult_nightly'] + 1;
 
     $this->actingAs($sales)
         ->postJson('/api/rms/rates/versions', [
@@ -97,6 +98,6 @@ test('get current rates is version 1 after the seeder', function (): void {
         ->assertOk()
         ->assertJsonPath('version', 1)
         ->assertJsonPath('document.currency', 'USD')
-        ->assertJsonPath('document.years.0.year', 2027)
+        ->assertJsonPath('document.schema_version', 2)
         ->assertJsonPath('approval_reference', ConfigSeeder::APPROVAL_REFERENCE);
 });

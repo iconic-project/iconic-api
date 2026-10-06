@@ -8,7 +8,7 @@
 The plan on a stay sets the deposit and the cancellation set. Changing the plan in the draft must change the price check without a publish.
 
 ## Steps
-1. Hotel seed (`ICONIC_SEED_MODE=hotel` before `reset.sh`).
+1. The seed is Hotel Demo.
 2. As Carolina, open `/rms/commercial/rates`. In **Rate plans**, read the BAR and NR rows. Do not change them yet.
 3. In **Price check**, find `STD · 2026-02-02 · 1 night` with adults `2` and plan Non-refundable (NR). Read the note under its night lines. Find `STD · 2026-02-02 · 2 nights` with adults `2` and plan Best available (BAR). Read that note.
 4. In the NR row of **Rate plans**, set **Deposit** from `100` to `50` and **Cancellation set** from `non_refundable` to `standard`. Leave **Adjust** at `-10`. Do not publish.

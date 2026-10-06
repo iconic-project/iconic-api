@@ -99,28 +99,44 @@ final class ReservationFixtures
      */
     private static function quotedTotal(array $payload): int
     {
-        $roomTypeCode = 'STD';
         $rooms = $payload['rooms'] ?? null;
 
-        if (is_array($rooms) && isset($rooms[0]) && is_array($rooms[0]) && is_string($rooms[0]['room_type'] ?? null)) {
-            $roomTypeCode = $rooms[0]['room_type'];
-        }
-
-        $type = RoomType::query()->where('code', $roomTypeCode)->first();
-
-        if (! $type instanceof RoomType || ! is_string($payload['check_in'] ?? null) || ! is_string($payload['check_out'] ?? null)) {
+        if (! is_array($rooms) || $rooms === [] || ! is_string($payload['check_in'] ?? null) || ! is_string($payload['check_out'] ?? null)) {
             return 0;
         }
 
-        $quoted = app(StayQuoter::class)->quote($type, new StayQuoteInput(
-            StayDates::of($payload['check_in'], $payload['check_out']),
-            $roomTypeCode,
-            2,
-            [],
-            'BAR',
-        ));
+        $stay = StayDates::of($payload['check_in'], $payload['check_out']);
+        $total = 0;
 
-        return $quoted instanceof StayReservationQuote ? $quoted->quote->total : 0;
+        foreach ($rooms as $room) {
+            if (! is_array($room) || ! is_string($room['room_type'] ?? null)) {
+                return 0;
+            }
+
+            $type = RoomType::query()->where('code', $room['room_type'])->orderBy('id')->first();
+
+            if (! $type instanceof RoomType) {
+                return 0;
+            }
+
+            $adults = is_int($room['adults'] ?? null) ? $room['adults'] : 2;
+            $childAges = is_array($room['child_ages'] ?? null) ? $room['child_ages'] : [];
+            $quoted = app(StayQuoter::class)->quote($type, new StayQuoteInput(
+                $stay,
+                $room['room_type'],
+                $adults,
+                $childAges,
+                'BAR',
+            ));
+
+            if (! $quoted instanceof StayReservationQuote) {
+                return 0;
+            }
+
+            $total += $quoted->quote->total;
+        }
+
+        return $total;
     }
 
     private static function publishRoomRates(): void

@@ -150,9 +150,11 @@ None.
 
 ### Notes for later
 
-- `composer check` is not green. PHPStan on `app/` is clean. `VocabularyTest` passes. The two new migration tests pass. `php artisan migrate:fresh` on `iconic_test` completes, including the new migrations. A set of feature tests still constructs the deleted yacht types (`Departure`, `Itinerary`, `Availability`, `PngCategory`, `CabinCategory`). They are listed by `rg` of those imports under `tests/`. Shared helpers `tests/Support/Bookings/ReservationFixtures.php` and `tests/Support/Offers/OfferFixtures.php` are in that set, and so are the yacht demo seeders under `database/seeders/`. Those seeders are no longer called from `DatabaseSeeder`.
+- Last full Pest run: 105 failed, 1264 passed. PHPStan on `app/` is clean. `tests/Arch` is green (15 tests, including `VocabularyTest`). `composer check` was not green.
+- `php artisan iconic:config-verify` against the local `iconic` database fails: the current rates, business-rules and engine-settings rows are still version 1 and do not match the hotel document. That database has not picked up `2026_10_06_190001_remove_legacy_config_keys`. The test schema is the one the suite migrates. `ConfigVerifyCommandTest` also failed in the full Pest run.
+- Remaining failures cluster around HTTP creates on dates outside the hotel seasons (no rate for STD), response totals that still assume a yacht price, `RoomType` lookups for retired codes, questionnaire and complete-reservation delivery links, and demo-seed assertions. Hotel stay, offer, and config migration tests in the targeted batch passed.
 - Task 05 regenerates OpenAPI types and should switch the remaining `departure_date` response keys to check-in.
-- The offer stay-window backfill test that built two departures was removed. The backfill still runs inside `2026_10_06_130001`, before the archive rename.
+- `DemoBookingsSeeder::run()` returns immediately. The old body is still in the file and is not called. Yacht demo seeder tests that only asserted that seed were deleted.
 
 ## 22-05 — Frontends cleanup
 
@@ -188,3 +190,97 @@ None.
 - Guest extras still describe the `png` fee, because the API still returns that fee code.
 - History rows for old itinerary and departure events still have those event names. `describe.ts` keeps the cases so old ledger rows stay readable.
 - The signed-out panel sends `/rms/booking-engine/departures` to login. Engine and portal were not running, so the 301s were not clicked in a browser.
+
+## 22-06 — Docs, OpenAPI and full regression
+
+### Migration summary
+
+Sprints 16–22 turn the unit of sale from a cabin on a Sunday departure into a room for a stay `[check_in, check_out)`. Inventory is a room-night. Rates are per night. Check-in and check-out times are operational. Offers match a stay window. Exclusive use (the old charter) is dropped. Legacy departure, itinerary, and cabin-claim tables and the yacht vocabulary are gone from `app/`, with an Arch test. The four frontends and the shared types describe a hotel. `09` ranks above `08` for stays, rooms, and nights. `01`–`07` are not rewritten; `INDEX.md` records which sections `09` supersedes.
+
+### What this task changed
+
+`README.md` describes the hotel API, documents `iconic:night-audit` and `iconic:hotel-contract-check`, and records that `iconic:voyage-status` and the seed mode are gone. `ICONIC_SEED_MODE` is removed from `.env.example`, `.env.testing.example`, and the e2e env files. The seed is Hotel Demo.
+
+`.cursor/rules/laravel.mdc` no longer keeps the Sprint 18 yacht price list. Tests and fixtures point at `hotel-seed-data.json`. `iconic-core.mdc` points fixtures at the same file. `09` records HQ1 as answered: exclusive use is dropped. HQ2–HQ12 stay open with the defaults already in that table.
+
+`docs/requirements/INDEX.md` has a supersession table from `01`–`07` to H-ids. Those files are not edited. `engine-property.json` and `engine-availability.json` match the current property and availability payloads (`discount` on night lines, `waitlist_enabled`, `offers`, guest and copy settings, `stay.max_nights` 30). `seed-data.json` and `booking-engine-feed.json` stay on disk as unused history. The business-rules seeder test no longer reads `seed-data.json`.
+
+Scramble is live at `/docs/api.json`. `iconic-ui` `app/types/api.d.ts` matches a fresh generation of that URL. `pnpm types:check` fails on drift. The engine OpenAPI test no longer requires the departures feed schemas, and it fails if a schema name or a removed engine path comes back.
+
+The active e2e catalogue is hotel scenarios plus smoke, auth, users-roles, and config. P1 is 39 rows in batches B1–B9. 138 other scenario files moved to `tests/e2e/scenarios/_archive/`.
+
+### HQ
+
+| Id | State | Default in force |
+|---|---|---|
+| HQ1 | Answered in Sprint 22 | Exclusive use dropped. No buyout type. Enquiry and proposal routes return 410. |
+| HQ2 | Open | Day-use (0 nights) is not supported. |
+| HQ3 | Open | Check-in `15:00`, check-out `11:00`, no-show cut-off `23:59`. Labelled demo. |
+| HQ4 | Open | Split-room stays are not supported. |
+| HQ5 | Open | Min-stay is applied on arrival. |
+| HQ6 | Open | One `stop_sell` flag. No public per-date note. |
+| HQ7 | Open | A no-show releases nights from `check_in + 1`. |
+| HQ8 | Open | Shortening a stay uses cancellation bands on the removed nights. |
+| HQ9 | Open | Registration fields: name, nationality, DOB, document number, arrival, departure. |
+| HQ10 | Open | USD only. |
+| HQ11 | Open | One business time zone. |
+| HQ12 | Open | Booking reference prefix unchanged. |
+
+### P1 regression
+
+`tests/e2e/bin/up.sh` was not started. The API, MySQL, Redis, and Mailpit were already healthy. Port 3001 was taken by the working panel. Engine 3000 and portal 3002 were down. `up.sh` would replace `.env` from `tests/e2e/environment/api.env` and then run `reset.sh`, and it refuses to start while 3001 is in use. The working panel was not stopped and `.env` was not replaced.
+
+One run is recorded: `tests/e2e/runs/2026-10-06-1834-sprint-22-p1.md`. Result ENV. 0 passed, 0 failed, 39 not run. A second fresh-stack run was not started, because the first did not reach `ALL UP`. The done-when (two consecutive green P1 walks) is not met.
+
+### Files
+
+- `README.md`, `.env.example`, `.env.testing.example`
+- `.cursor/rules/laravel.mdc`, `.cursor/rules/iconic-core.mdc`
+- `docs/requirements/09-hotel-generalisation.md`, `docs/requirements/INDEX.md`
+- `docs/requirements/examples/engine-property.json`, `docs/requirements/examples/engine-availability.json`
+- `tests/Feature/Config/BusinessRulesSeederTest.php`, `tests/Feature/OpenApi/EngineResponseSchemasTest.php`
+- `tests/e2e/scenarios/INDEX.md`, `tests/e2e/scenarios/_archive/`, `tests/e2e/README.md`, `tests/e2e/environment/api.env`, `tests/e2e/environment/api.testing.env`
+- `tests/e2e/runs/LEDGER.md`, `tests/e2e/runs/2026-10-06-1834-sprint-22-p1.md`
+- `docs/sprints/sprint-22/README.md`
+- `iconic-ui`: `scripts/types-check.sh`, `package.json`, `README.md`
+
+### Deviations
+
+- The active catalogue keeps only hotel scenarios and generic smoke, auth, users-roles, and config, as the task says. Payments, guests, documents, extras, CRM (except HCRM), portal PORT/PREQ, and the visual walks moved to `_archive/` with the yacht files. They are not all yacht-only. Restore a file from `_archive/` and add its INDEX row if that walk should stay active.
+- `01`–`07` are listed in INDEX and are not in this git tree. The supersession table names the yacht sections `09` replaces. The bodies were not edited, and they were not restored.
+- `DemoBookingsSeeder`, `DemoInventorySeeder`, `DemoRequestsSeeder`, and `DemoAgenciesSeeder` still open `seed-data.json`. `DatabaseSeeder` does not call them. No test reads that file.
+- Checkout's OpenAPI `quote` is an untyped array. The price-changed response still refs `StayRoomsQuoteResource`. The test follows that.
+
+### Residual risks
+
+- Two green P1 walks have not happened. Do not treat the hotel UI as browser-proved.
+- `charter_bands` and the `CHARTER` cancellation set remain on the business-rules document.
+- The API still returns a `png` fee code. Panel extras copy still names it.
+- `pnpm types:check` needs the API on `API_OPENAPI_URL`. It runs ESLint only when `node_modules/.bin/eslint` exists. A raw generation on 2026-10-06 matched the committed `api.d.ts`.
+
+### Git commands
+
+The working tree also holds tasks 22-01 through 22-05. Review `git status` in each repo before adding. These commands are not run from this task.
+
+```bash
+cd /home/mohammad/Code/iconic/iconic/iconic-api
+git status
+git add README.md .env.example .env.testing.example .cursor/rules/laravel.mdc .cursor/rules/iconic-core.mdc \
+  docs/requirements/09-hotel-generalisation.md docs/requirements/INDEX.md \
+  docs/requirements/examples/engine-property.json docs/requirements/examples/engine-availability.json \
+  tests/Feature/Config/BusinessRulesSeederTest.php tests/Feature/OpenApi/EngineResponseSchemasTest.php \
+  tests/e2e docs/sprints/sprint-22/README.md docs/sprints/sprint-22/REPORT.md
+git commit -m "$(cat <<'EOF'
+docs: close the hotel migration catalogue and lock the OpenAPI vocabulary.
+
+EOF
+)"
+
+cd /home/mohammad/Code/iconic/iconic/iconic-ui
+git add scripts/types-check.sh package.json README.md
+git commit -m "$(cat <<'EOF'
+chore: fail when generated API types drift from the live spec.
+
+EOF
+)"
+```

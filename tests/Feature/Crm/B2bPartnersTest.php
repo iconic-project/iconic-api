@@ -109,7 +109,7 @@ test('a matched agency shows the partner journey, ledger totals and only that ag
         ->whereHas('journey', fn ($query) => $query->where('key', 'b2b_partner_activation'))
         ->firstOrFail();
 
-    $agency->load(['bookings.departure', 'bookings.commissionPayout']);
+    $agency->load(['bookings.room', 'bookings.property', 'bookings.commissionPayout']);
     $stats = AgencyBookingWindow::stats($agency->bookings);
     $confirmed->refresh();
 

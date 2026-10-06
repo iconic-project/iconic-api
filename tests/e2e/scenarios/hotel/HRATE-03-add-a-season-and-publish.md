@@ -9,7 +9,7 @@
 A new season is published with an approval reference. A second editor who publishes first must win; the first editor's season must not overwrite that publish.
 
 ## Steps
-1. Hotel seed (`ICONIC_SEED_MODE=hotel` before `reset.sh`).
+1. The seed is Hotel Demo.
 2. Context A: sign in as Carolina. Open `/rms/commercial/rates`. Note the published version `N` in the top state line (`● PUBLISHED — VN`).
 3. Context A: **Seasons** → `Add a season`. Code `QUIET`, name `Quiet`, from `2026-10-01`, to `2026-12-19`. In **Room rates**, set the Standard Double (STD) cell under Quiet to `80` (the cell's accessible name is `STD · QUIET nightly`). Do **not** publish.
 4. Context B: sign in as Carolina in a separate private context. Open `/rms/commercial/rates`. In **Occupancy**, change **Extra adult, per night** from `40` to `45`. Top bar approval `E2E-HRATE-03-B`. `Save & publish`. Confirm `Publish these changes?`

@@ -8,7 +8,7 @@
 The calendar is rooms by night. A hotel seed with no claims must show every room under its type, a week of nights, and an occupancy row, without the page body scrolling sideways.
 
 ## Steps
-1. The API seed is hotel by default (`ICONIC_SEED_MODE=hotel`). Do not accept ANAMARA as this scenario.
+1. The seed is Hotel Demo. Do not accept ANAMARA as this scenario.
 2. Sign in as `carolina@iconic.test` / `password`. Open `http://localhost:3001/rms/reservations/calendar`.
 3. The property control shows **Hotel Demo**. Click **Today**. Leave **14 nights** selected.
 4. Read the occupancy row, the four free rows, and the room groups.

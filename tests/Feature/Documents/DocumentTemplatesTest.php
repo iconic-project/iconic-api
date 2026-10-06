@@ -82,7 +82,7 @@ function templateBooking(): Booking
         'reference' => 'ANK-2026-1101-D01',
     ]);
 
-    return $booking->fresh(['departure.itinerary', 'departure.property', 'guests', 'extras', 'payments', 'contact']);
+    return $booking->fresh(['room.roomType', 'property', 'guests', 'extras', 'payments', 'contact']);
 }
 
 /**

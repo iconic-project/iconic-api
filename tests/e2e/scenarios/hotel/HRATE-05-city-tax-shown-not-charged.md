@@ -8,7 +8,7 @@
 A tax can appear on the price check and stay out of the amount due when it is shown and not charged.
 
 ## Steps
-1. Hotel seed (`ICONIC_SEED_MODE=hotel` before `reset.sh`). The seeded taxes list is empty.
+1. The seed is Hotel Demo. The seeded taxes list is empty.
 2. As Carolina, open `/rms/admin/business-rules`. Find **Taxes and fees** (source `09 H9`). The current display is `none`.
 3. `Add a tax`. Code `CITY`, label `City tax`, basis `Per stay`, amount `25`. Leave **Charged** unchecked. Leave **Shown in price** checked.
 4. Top bar approval `E2E-HRATE-05`. `Save & publish`. Confirm `Publish these changes?`

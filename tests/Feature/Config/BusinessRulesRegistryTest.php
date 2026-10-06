@@ -82,7 +82,7 @@ test('a changed commission cap marks the FIN-005 row as differing', function ():
 
 test('a yacht year price is ignored and FIN-001 stays on the seeded rate plan', function (): void {
     $document = ratesDocument();
-    $document['years'][0]['suite_pp'] = 13000;
+    $document['years'] = [['year' => 2027, 'suite_pp' => 13000]];
 
     expect(fn () => app(ConfigPublisher::class)->publish(
         ConfigKind::Rates,

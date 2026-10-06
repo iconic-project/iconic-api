@@ -9,7 +9,6 @@ use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
-use Tests\Support\Bookings\ReservationFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);

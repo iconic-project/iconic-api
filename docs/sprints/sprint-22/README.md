@@ -22,7 +22,7 @@ At the end of this sprint:
 | 05 | [Frontends: remove yacht pages and types](05-frontends-cleanup.md) | ui, panel, engine, portal |
 | 06 | [Docs, OpenAPI and full regression](06-docs-and-regression.md) | api |
 
-**E2E scenarios:** HOFF-01, HOFF-02, HBUY-01 (if buyout kept); full P1 regression of every hotel scenario; all remaining yacht scenarios deleted from `INDEX.md`.
+**E2E scenarios:** HOFF-01 (P1), HOFF-02 (P2). HBUY-01 was not added (exclusive use dropped). The active P1 set is the hotel scenarios plus smoke, auth, users-roles and config. Yacht scenarios and the older product walks are in `tests/e2e/scenarios/_archive/`.
 
 ## Before you start
 Take a production database backup and run task 03's migrations against a **copy** of production. Record row counts before/after in REPORT. Dropping tables is irreversible.
