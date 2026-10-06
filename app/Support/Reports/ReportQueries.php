@@ -409,13 +409,13 @@ class ReportQueries
     {
         $rows = [];
 
-        foreach ($this->metrics->occupancy($window, $scope)['departures'] as $departure) {
+        foreach ($this->metrics->occupancy($window, $scope)['stays'] as $stay) {
             $rows[] = [
-                $departure['date'],
-                $departure['property_code'],
-                $departure['sold_berths'],
-                $departure['sellable_berths'],
-                (string) ($departure['occupancy'] ?? ''),
+                $stay['date'],
+                $stay['property_code'],
+                $stay['sold_berths'],
+                $stay['sellable_berths'],
+                (string) ($stay['occupancy'] ?? ''),
             ];
         }
 
