@@ -6,6 +6,8 @@ use App\Enums\BookingStatus;
 use App\Enums\MainChannel;
 use App\Models\Booking;
 use Database\Seeders\ConfigSeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\HotelSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Support\Facades\Auth;
@@ -14,8 +16,10 @@ use Tests\Support\Bookings\ReservationFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
-    $this->seed(InventorySeeder::class);
     $this->seed(ConfigSeeder::class);
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(InventorySeeder::class);
+    $this->seed(HotelSeeder::class);
 });
 
 test('the availability list query count does not grow with extra departures', function (): void {
@@ -25,14 +29,14 @@ test('the availability list query count does not grow with extra departures', fu
 
     $this->actingAs($user, 'agency')
         ->withHeaders(portalHeaders())
-        ->getJson('/api/portal/availability')
+        ->getJson('/api/portal/availability?check_in=2026-12-21&check_out=2026-12-25&adults=2')
         ->assertOk();
 
     DB::flushQueryLog();
     DB::enableQueryLog();
     $this->actingAs($user, 'agency')
         ->withHeaders(portalHeaders())
-        ->getJson('/api/portal/availability')
+        ->getJson('/api/portal/availability?check_in=2026-12-21&check_out=2026-12-25&adults=2')
         ->assertOk();
     $before = count(DB::getQueryLog());
 
@@ -48,7 +52,7 @@ test('the availability list query count does not grow with extra departures', fu
     DB::flushQueryLog();
     $this->actingAs($user, 'agency')
         ->withHeaders(portalHeaders())
-        ->getJson('/api/portal/availability')
+        ->getJson('/api/portal/availability?check_in=2026-12-21&check_out=2026-12-25&adults=2')
         ->assertOk();
     $after = count(DB::getQueryLog());
 

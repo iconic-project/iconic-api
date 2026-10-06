@@ -19,7 +19,10 @@ final class ReleaseCheckoutSession extends Action
     {
         return $this->transaction(function () use ($session): CheckoutSession {
             $session = CheckoutSession::query()->whereKey($session->id)->lockForUpdate()->firstOrFail();
-            DepartureLocks::lock((int) $session->departure_id);
+
+            if ($session->departure_id !== null) {
+                DepartureLocks::lock((int) $session->departure_id);
+            }
 
             if (in_array($session->status, [
                 CheckoutSessionStatus::Released,

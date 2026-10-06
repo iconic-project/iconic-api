@@ -6,14 +6,18 @@ use App\Enums\BookingStatus;
 use App\Enums\MainChannel;
 use App\Models\Booking;
 use Database\Seeders\ConfigSeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\HotelSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Tests\Support\Bookings\ReservationFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
-    $this->seed(InventorySeeder::class);
     $this->seed(ConfigSeeder::class);
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(InventorySeeder::class);
+    $this->seed(HotelSeeder::class);
 });
 
 test('every list endpoint scoped to agency A never shows agency Bs ids', function (): void {
@@ -68,7 +72,7 @@ test('an agency session is never met with a 403 anywhere in the portal', functio
     $agency = approvedAgency();
     $user = agencyUser([], $agency);
 
-    foreach (['/api/portal/me', '/api/portal/rates', '/api/portal/availability', '/api/portal/bookings', '/api/portal/commissions', '/api/portal/sales-materials'] as $uri) {
+    foreach (['/api/portal/me', '/api/portal/rates', '/api/portal/availability?check_in=2026-12-21&check_out=2026-12-25&adults=2', '/api/portal/bookings', '/api/portal/commissions', '/api/portal/sales-materials'] as $uri) {
         $this->actingAs($user, 'agency')
             ->withHeaders(portalHeaders())
             ->getJson($uri)

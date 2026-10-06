@@ -22,4 +22,4 @@ At the end of this sprint:
 | 06 | [Agency portal on stays](06-portal.md) | api, portal |
 | 07 | [Sprint close: e2e and report](07-sprint-close.md) | api |
 
-**E2E scenarios:** HENG-01 … HENG-07, HPOR-01 … HPOR-03 (new); `web/*` and `portal/*` scenarios rewritten or retired (state which).
+**E2E scenarios:** HENG-01 … HENG-07, HPOR-01 … HPOR-03 (new). WEB-01 … WEB-12 retired. PORTAL-PAY-02 retired. PORTAL-PAY-01, PREQ-04, PORT-04, and PREQ-02 notes rewritten onto stays. Other portal scenarios kept.

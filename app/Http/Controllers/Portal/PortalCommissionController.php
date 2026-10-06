@@ -18,7 +18,7 @@ final class PortalCommissionController extends PortalController
 
         $bookings = Booking::query()
             ->where('agency_id', $agency->id)
-            ->with(['departure.itinerary', 'commissionPayout'])
+            ->with(['roomType', 'commissionPayout'])
             ->orderByDesc('id')
             ->paginate($perPage);
 

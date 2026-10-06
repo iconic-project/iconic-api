@@ -10,15 +10,13 @@ Bookings and commissions are scoped to the signed-in agency. The agent sees the 
 
 ## Steps
 1. Sign in as Ada at `http://localhost:3002/login`. Open `/bookings`.
-2. Open the `ANK-2026-0007` row (the drawer).
-3. Open `/commissions`.
-4. Open `http://localhost:3002/bookings/ANK-2026-0021`.
+2. Open `/commissions`.
+3. Open `http://localhost:3002/bookings/ANK-2026-0021`.
 
 ## Expected
-- [ ] E1 · Bookings lists `ANK-2026-0007` and does not list `ANK-2026-0021`. Client is `Mariana Castellanos`. Status `CONFIRMED`. Net due USD 19,140. Next `Deposit received`. ⚠ UNVERIFIED — net due and next from `PortalPreview::netDue` and `paymentStateWords()` on the seeded balance.
-- [ ] E2 · The drawer repeats that reference, the client `Mariana Castellanos`, the net due and the next line. It has no other guest name, no passport, no guest email and no payment row.
-- [ ] E3 · Commissions lists `ANK-2026-0007` at `10%`, commission USD 2,328, status `EARNED ON COMPLETION`, payable 21 Dec 2027, and does not list `ANK-2026-0021`. ⚠ UNVERIFIED — accrual and payable date from `Accrual`, not a reset screen.
-- [ ] E4 · `/bookings/ANK-2026-0021` is the portal page titled `Page not found`. The bookings list still does not contain that reference.
+- [ ] E1 · Bookings lists only this agency. On a fresh hotel seed the list is empty. It does not list `ANK-2026-0021`.
+- [ ] E2 · Commissions is the same scope. On a fresh hotel seed the list is empty. It does not list `ANK-2026-0021`.
+- [ ] E3 · `/bookings/ANK-2026-0021` is the portal page titled `Page not found`.
 
 ## Notes
-The RMS bookings list abbreviates this client as `M. Castellanos`. The portal uses the lead guest display name. There is no per-booking route; the 404 is the portal page, not an API body.
+Hotel seed has no `ANK-2026-0007` and no `ANK-2026-0021`. The stay columns, the net, and the missing passport are HPOR-02. There is no per-booking route; the 404 is the portal page, not an API body. Hotel seed does not create `ada@portal.test`. If sign-in has no such user, stop and class ENV.

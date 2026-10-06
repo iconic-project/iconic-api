@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Rms\IndexRoomsRequest;
 use App\Http\Requests\Rms\StoreRoomRequest;
 use App\Http\Requests\Rms\UpdateRoomRequest;
+use App\Http\Resources\Rms\ChangeHistoryResource;
 use App\Http\Resources\Rms\RoomResource;
 use App\Models\Property;
 use App\Models\Room;
@@ -69,5 +70,18 @@ final class RoomController extends Controller
         $this->authorize('update', $room);
 
         return new RoomResource($action->handle($room));
+    }
+
+    public function history(Room $room): AnonymousResourceCollection
+    {
+        $this->authorize('viewHistory', $room);
+
+        $entries = $room->history()
+            ->with('actor')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(25);
+
+        return ChangeHistoryResource::collection($entries);
     }
 }

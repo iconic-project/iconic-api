@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Http\Resources\Rms;
 
 use App\Models\Property;
+use App\Support\Content\Completeness;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @mixin Property
@@ -38,6 +40,8 @@ class PropertyResource extends JsonResource
      *     policies_text: string|null,
      *     meta_title: string|null,
      *     meta_description: string|null,
+     *     hero_image_url: string|null,
+     *     completeness: array{pct: int, missing: list<string>, blocking: list<string>},
      *     status: string,
      *     rooms: list<array{id: int, code: string, label: string, floor: string|null, sort: int, status: string, room_type: array{id: int, code: string, name: string}}>
      * }
@@ -68,6 +72,8 @@ class PropertyResource extends JsonResource
             'policies_text' => $this->policies_text,
             'meta_title' => $this->meta_title,
             'meta_description' => $this->meta_description,
+            'hero_image_url' => $this->heroImageUrl(),
+            'completeness' => Completeness::forProperty($this->resource)->toArray(),
             'status' => $this->status->value,
             'rooms' => $this->roomPayloads(),
         ];
@@ -97,5 +103,14 @@ class PropertyResource extends JsonResource
         }
 
         return $rooms;
+    }
+
+    private function heroImageUrl(): ?string
+    {
+        if (! is_string($this->hero_image_path) || $this->hero_image_path === '') {
+            return null;
+        }
+
+        return Storage::disk('public')->url($this->hero_image_path);
     }
 }

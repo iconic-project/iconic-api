@@ -37,7 +37,9 @@ Also in this folder (not requirement docs):
 
 ## Examples
 
-- `examples/booking-engine-feed.json` — live export of the engine feed contract
+- `examples/booking-engine-feed.json` — live export of the engine feed contract (kept until the engine frontend switches)
+- `examples/engine-property.json` — `GET /api/engine/property`
+- `examples/engine-availability.json` — `GET /api/engine/availability`
 - `examples/seed-data.json` — every entity with realistic sample data (fixtures / test data)
 
 ## Screenshots

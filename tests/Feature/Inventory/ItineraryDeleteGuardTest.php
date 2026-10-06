@@ -13,56 +13,20 @@ beforeEach(function (): void {
     $this->seed(InventorySeeder::class);
 });
 
-test('delete succeeds when no departure uses the itinerary', function (): void {
-    $itinerary = Itinerary::factory()->create();
-    $mateo = managerUser();
-
-    $this->actingAs($mateo)
-        ->deleteJson("/api/rms/itineraries/{$itinerary->id}")
-        ->assertNoContent();
-});
-
-test('delete is refused while one departure uses the itinerary', function (): void {
-    $itinerary = Itinerary::factory()->create();
+test('delete is refused for an unused itinerary and for one a departure uses', function (): void {
+    $unused = Itinerary::factory()->create();
+    $used = Itinerary::factory()->create();
     $property = Property::query()->where('code', 'ANAMARA')->firstOrFail();
     Departure::factory()->create([
         'property_id' => $property->id,
-        'itinerary_id' => $itinerary->id,
+        'itinerary_id' => $used->id,
         'date' => '2028-04-02',
     ]);
-    $mateo = managerUser();
+    $admin = adminUser();
 
-    $this->actingAs($mateo)
-        ->deleteJson("/api/rms/itineraries/{$itinerary->id}")
-        ->assertConflict()
-        ->assertJsonPath('message', 'Used by 1 departure');
-});
+    $this->actingAs($admin)->deleteJson("/api/rms/itineraries/{$unused->id}")->assertForbidden();
+    $this->actingAs($admin)->deleteJson("/api/rms/itineraries/{$used->id}")->assertForbidden();
 
-test('delete is refused while several departures use the itinerary', function (): void {
-    $itinerary = Itinerary::factory()->create();
-    $anamara = Property::query()->where('code', 'ANAMARA')->firstOrFail();
-    $anativa = Property::query()->where('code', 'ANATIVA')->firstOrFail();
-
-    Departure::factory()->create([
-        'property_id' => $anamara->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-02',
-    ]);
-    Departure::factory()->create([
-        'property_id' => $anativa->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-02',
-    ]);
-    Departure::factory()->create([
-        'property_id' => $anamara->id,
-        'itinerary_id' => $itinerary->id,
-        'date' => '2028-04-09',
-    ]);
-
-    $mateo = managerUser();
-
-    $this->actingAs($mateo)
-        ->deleteJson("/api/rms/itineraries/{$itinerary->id}")
-        ->assertConflict()
-        ->assertJsonPath('message', 'Used by 3 departures');
+    expect(Itinerary::query()->whereKey($unused->id)->exists())->toBeTrue();
+    expect(Itinerary::query()->whereKey($used->id)->exists())->toBeTrue();
 });

@@ -22,6 +22,12 @@ final class BehaviouralEventParams
         'coupon_code',
         'page_path',
         'count',
+        'check_in',
+        'check_out',
+        'adults',
+        'children',
+        'rooms',
+        'room_type',
     ];
 
     /**
@@ -84,6 +90,8 @@ final class BehaviouralEventParams
             ],
             BehaviouralEventName::AbandonCart => ['itinerary_code', 'departure_id', 'step', 'cabin_count'],
             BehaviouralEventName::CharterInquirySubmit => ['itinerary_code', 'departure_id', 'value', 'currency'],
+            BehaviouralEventName::SearchPerformed => ['check_in', 'check_out', 'adults', 'children', 'rooms'],
+            BehaviouralEventName::RoomTypeViewed => ['room_type'],
             BehaviouralEventName::IdentityStitched => ['count'],
         };
     }
@@ -103,6 +111,11 @@ final class BehaviouralEventParams
             'coupon_code' => self::coupon($value, $field),
             'page_path' => self::pagePath($value, $field),
             'count' => self::intOf($value, $field, 0),
+            'check_in', 'check_out' => self::dateOf($value, $field),
+            'adults' => self::intOf($value, $field, 1),
+            'children' => self::intOf($value, $field, 0),
+            'rooms' => self::intOf($value, $field, 1),
+            'room_type' => self::stringOf($value, $field, 32),
             default => throw ValidationException::withMessages([$field => 'This parameter is not accepted.']),
         };
     }
@@ -162,6 +175,15 @@ final class BehaviouralEventParams
         }
 
         return strtoupper(trim($value));
+    }
+
+    private static function dateOf(mixed $value, string $field): string
+    {
+        if (! is_string($value) || preg_match('/^\d{4}-\d{2}-\d{2}$/', $value) !== 1) {
+            throw ValidationException::withMessages([$field => 'This value must be a date.']);
+        }
+
+        return $value;
     }
 
     private static function pagePath(mixed $value, string $field): string

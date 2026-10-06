@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources\Rms;
 
-use App\Enums\CabinCategory;
 use App\Enums\PreferredChannel;
 use App\Models\User;
 use App\Models\WaitlistEntry;
@@ -23,23 +22,21 @@ class WaitlistEntryResource extends JsonResource
      * @return array{
      *     id: int,
      *     contact: array{name: string, email: string|null},
-     *     departure: array{id: int, date: string, property: array{code: string, name: string}, festive: bool},
-     *     cabin_category: CabinCategory,
-     *     cabin_type: string,
+     *     stay: array{check_in: string, check_out: string, room_type: array{code: string, name: string}},
      *     position: int|null,
      *     since: string,
      *     notified: array{at: string, channel: PreferredChannel, by: string}|null,
      *     auto_notified: bool,
-     *     cabin_available: bool,
+     *     room_available: bool,
      *     notes: string|null
      * }
      */
     public function toArray(Request $request): array
     {
-        $this->resource->loadMissing(['departure.property', 'contact', 'notifiedBy']);
+        $this->resource->loadMissing(['roomType', 'contact', 'notifiedBy']);
 
         $position = $this->queuePosition;
-        $available = $this->cabinIsAvailable;
+        $available = $this->roomIsAvailable;
 
         $channel = $this->notified_channel;
         $notifier = $this->notifiedBy;
@@ -55,22 +52,19 @@ class WaitlistEntryResource extends JsonResource
                 'name' => $this->contact->name,
                 'email' => $this->contact->email,
             ],
-            'departure' => [
-                'id' => $this->departure->id,
-                'date' => $this->departure->date->toDateString(),
-                'property' => [
-                    'code' => $this->departure->property->code,
-                    'name' => $this->departure->property->name,
+            'stay' => [
+                'check_in' => $this->check_in->toDateString(),
+                'check_out' => $this->check_out->toDateString(),
+                'room_type' => [
+                    'code' => $this->roomType->code,
+                    'name' => $this->roomType->name,
                 ],
-                'festive' => $this->departure->festive,
             ],
-            'cabin_category' => $this->cabin_category,
-            'cabin_type' => $this->cabin_category === CabinCategory::Owner ? "Owner's Suite" : 'Suite',
             'position' => is_int($position) ? $position : null,
             'since' => Iso::utc($this->created_at),
             'notified' => $notified,
             'auto_notified' => (bool) ($this->notified_at !== null && $this->notified_by === null),
-            'cabin_available' => $available,
+            'room_available' => $available,
             'notes' => $this->notes,
         ];
     }

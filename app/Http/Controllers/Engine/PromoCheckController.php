@@ -21,6 +21,17 @@ final class PromoCheckController extends Controller
         EngineFeed $feed,
         EnginePromoCheck $checker,
     ): PromoCheckResource {
+        if ($request->filled('check_in')) {
+            $validated = $request->validated();
+
+            return new PromoCheckResource($checker->checkStay(
+                (string) $validated['code'],
+                (string) $validated['check_in'],
+                isset($validated['room_type']) ? (string) $validated['room_type'] : null,
+                $request->ip(),
+            ));
+        }
+
         $departure = Departure::query()
             ->with(['property.cabins', 'itinerary'])
             ->findOrFail((int) $request->validated('departure_id'));

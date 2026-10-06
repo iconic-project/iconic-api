@@ -7,68 +7,81 @@ namespace App\Support\Waitlist;
 use App\Actions\Crm\CloseTask;
 use App\Actions\Waitlist\OfferWaitlistEntry;
 use App\Enums\BookingStatus;
-use App\Enums\CabinCategory;
 use App\Enums\DeliveryKind;
 use App\Enums\TaskKind;
 use App\Enums\TaskStatus;
 use App\Models\Booking;
 use App\Models\CrmTask;
-use App\Models\Departure;
+use App\Models\RoomNightClaim;
+use App\Models\RoomType;
 use App\Models\WaitlistEntry;
-use App\Services\Inventory\Availability;
+use App\Services\Inventory\NightAvailability;
+use App\Support\Stays\StayDates;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 final class WaitlistOffers
 {
     public function __construct(
-        private readonly Availability $availability,
+        private readonly NightAvailability $availability,
         private readonly OfferWaitlistEntry $offer,
         private readonly CloseTask $close,
     ) {}
 
-    /**
-     * @param  list<int>  $departureIds
-     */
-    public function forDepartures(array $departureIds): int
-    {
-        $ids = array_values(array_unique(array_filter($departureIds, fn (int $id): bool => $id > 0)));
-        $sent = $ids === [] ? 0 : $this->offerWhere($ids);
-        $this->closeSettled();
-
-        return $sent;
-    }
-
     public function sweep(): int
     {
-        $sent = $this->offerWhere(null);
+        $sent = $this->offerWhere(WaitlistEntry::query());
         $this->closeSettled();
 
         return $sent;
     }
 
-    /**
-     * Free cabins come from Availability. A notice already sent still occupies a
-     * slot, so a second free cabin notifies the next person and a round with no
-     * new free cabin sends nothing. Nothing is claimed.
-     *
-     * @param  list<int>|null  $departureIds
-     */
-    private function offerWhere(?array $departureIds): int
+    public function forOverlap(int $propertyId, StayDates $window): int
     {
-        $waiting = WaitlistEntry::query()
+        $sent = $this->offerWhere(
+            WaitlistEntry::query()
+                ->whereHas('roomType', fn (Builder $query) => $query->where('property_id', $propertyId))
+                ->whereDate('check_in', '<', $window->checkOut()->toDateString())
+                ->whereDate('check_out', '>', $window->checkIn()->toDateString()),
+        );
+        $this->closeSettled();
+
+        return $sent;
+    }
+
+    public function forClaim(RoomNightClaim $claim): int
+    {
+        if ($claim->getAttribute('room_id') === null || $claim->getAttribute('night') === null) {
+            return 0;
+        }
+
+        $claim->loadMissing('room');
+
+        return $this->forOverlap(
+            (int) $claim->room->property_id,
+            StayDates::forNights($claim->night, 1),
+        );
+    }
+
+    /**
+     * A notice already sent still occupies a room, so a second free room
+     * notifies the next person. Nothing is claimed. A stay that is only
+     * partly free sends nothing.
+     *
+     * @param  Builder<WaitlistEntry>  $query
+     */
+    private function offerWhere(Builder $query): int
+    {
+        $waiting = $query
             ->active()
             ->whereNull('notified_at')
-            ->whereNotExists(function ($query): void {
-                $query->selectRaw('1')
+            ->whereNotNull('room_type_id')
+            ->whereNotExists(function ($inner): void {
+                $inner->selectRaw('1')
                     ->from('deliveries')
                     ->where('kind', DeliveryKind::WaitlistOffer->value)
                     ->whereRaw("deliveries.idempotency_key = CONCAT('waitlist:', waitlist_entries.id)");
             })
-            ->when(
-                $departureIds !== null,
-                fn (Builder $query) => $query->whereIn('departure_id', $departureIds),
-            )
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
@@ -77,34 +90,29 @@ final class WaitlistOffers
             return 0;
         }
 
-        $departures = Departure::query()
-            ->whereIn('id', $waiting->pluck('departure_id')->unique()->all())
-            ->get();
-        $snapshots = $this->availability->forDepartures($departures);
+        $types = RoomType::query()
+            ->whereIn('id', $waiting->pluck('room_type_id')->unique()->all())
+            ->get()
+            ->keyBy('id');
 
         $sent = 0;
 
-        foreach ($waiting->groupBy(fn (WaitlistEntry $entry): string => $entry->departure_id.'|'.$entry->cabin_category->value) as $group) {
+        foreach ($waiting->groupBy(fn (WaitlistEntry $entry): string => $entry->room_type_id.'|'.$entry->check_in->toDateString().'|'.$entry->check_out->toDateString()) as $group) {
             /** @var Collection<int, WaitlistEntry> $group */
             $first = $group->first();
+            $type = $first instanceof WaitlistEntry ? $types->get($first->room_type_id) : null;
 
-            if (! $first instanceof WaitlistEntry) {
+            if (! $first instanceof WaitlistEntry || ! $type instanceof RoomType) {
                 continue;
             }
 
-            $snapshot = $snapshots[$first->departure_id] ?? null;
-
-            if ($snapshot === null) {
-                continue;
-            }
-
-            $free = $first->cabin_category === CabinCategory::Owner
-                ? ($snapshot->counts['owner_free'] ? 1 : 0)
-                : $snapshot->counts['suites_free'];
+            $stay = StayDates::of($first->check_in, $first->check_out);
+            $free = $this->freeRooms($type, $stay);
             $notified = WaitlistEntry::query()
                 ->active()
-                ->where('departure_id', $first->departure_id)
-                ->where('cabin_category', $first->cabin_category)
+                ->where('room_type_id', $first->room_type_id)
+                ->whereDate('check_in', $first->check_in->toDateString())
+                ->whereDate('check_out', $first->check_out->toDateString())
                 ->whereNotNull('notified_at')
                 ->count();
             $slots = max(0, $free - $notified);
@@ -118,6 +126,10 @@ final class WaitlistOffers
                     break;
                 }
 
+                if (! $this->partyFits($type, $entry)) {
+                    continue;
+                }
+
                 if ($this->offer->handle($entry)) {
                     $sent++;
                     $slots--;
@@ -126,6 +138,30 @@ final class WaitlistOffers
         }
 
         return $sent;
+    }
+
+    private function freeRooms(RoomType $type, StayDates $stay): int
+    {
+        $one = $this->availability->canBook($type, $stay, 1);
+
+        if (! $one->ok) {
+            return 0;
+        }
+
+        $free = $one->nights === [] ? 0 : min(array_map(fn (array $night): int => $night['free'], $one->nights));
+
+        while ($free > 1 && ! $this->availability->canBook($type, $stay, $free)->ok) {
+            $free--;
+        }
+
+        return $free;
+    }
+
+    private function partyFits(RoomType $type, WaitlistEntry $entry): bool
+    {
+        return $entry->adults <= $type->max_adults
+            && $entry->children <= $type->max_children
+            && ($entry->adults + $entry->children) <= $type->max_occupancy;
     }
 
     private function closeSettled(): void
@@ -154,7 +190,9 @@ final class WaitlistOffers
 
                 $booked = Booking::query()
                     ->where('contact_id', $entry->contact_id)
-                    ->where('departure_id', $entry->departure_id)
+                    ->where('room_type_id', $entry->room_type_id)
+                    ->whereDate('check_in', $entry->check_in->toDateString())
+                    ->whereDate('check_out', $entry->check_out->toDateString())
                     ->whereIn('status', [
                         BookingStatus::PendingPayment,
                         BookingStatus::Confirmed,
@@ -167,7 +205,7 @@ final class WaitlistOffers
                     ->exists();
 
                 if ($booked) {
-                    $this->close->autoClose($task, 'the contact booked the departure');
+                    $this->close->autoClose($task, 'the contact booked the stay');
                 }
             });
     }

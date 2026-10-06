@@ -27,16 +27,16 @@ final class ItineraryPolicy extends Policy
 
     public function create(User $actor): bool
     {
-        return $actor->hasPermission(Permission::ItinerariesManage);
+        return false;
     }
 
     public function update(User $actor, Itinerary $itinerary): bool
     {
-        return $actor->hasPermission(Permission::ItinerariesManage);
+        return false;
     }
 
     public function delete(User $actor, Itinerary $itinerary): bool
     {
-        return $actor->hasPermission(Permission::ItinerariesManage);
+        return false;
     }
 }

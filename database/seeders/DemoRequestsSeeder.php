@@ -18,6 +18,7 @@ use App\Models\WaitlistEntry;
 use App\Services\References\ReferenceService;
 use App\Support\Bookings\ChannelSeedMap;
 use App\Support\BusinessTime;
+use App\Support\Rooms\BackfillRoomTypes;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -161,11 +162,15 @@ final class DemoRequestsSeeder extends Seeder
             'name' => $name,
             'email' => $email,
         ]);
+        $types = app(BackfillRoomTypes::class);
+        $type = $types->ensure((int) $departure->property_id, $category->value, $types->maxPerCabin());
+        $stay = $departure->stayDates();
 
         WaitlistEntry::query()->firstOrCreate(
             [
-                'departure_id' => $departure->id,
-                'cabin_category' => $category,
+                'room_type_id' => $type->id,
+                'check_in' => $stay->checkIn()->toDateString(),
+                'check_out' => $stay->checkOut()->toDateString(),
                 'contact_id' => $contact->id,
             ],
             [

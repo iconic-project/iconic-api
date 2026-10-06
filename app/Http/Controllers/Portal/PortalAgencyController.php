@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Resources\Portal\PortalAgencyMeResource;
-use App\Http\Resources\Portal\PortalNetRateResource;
+use App\Http\Resources\Portal\PortalStayRatesResource;
 use App\Models\AgencyUser;
 use App\Services\Config\CurrentConfig;
-use App\Support\Agencies\PortalPreview;
+use App\Support\Portal\PortalStayRates;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 final class PortalAgencyController extends PortalController
 {
@@ -25,12 +24,12 @@ final class PortalAgencyController extends PortalController
         return new PortalAgencyMeResource($agencyUser);
     }
 
-    public function rates(Request $request, CurrentConfig $config): AnonymousResourceCollection
+    public function rates(Request $request, CurrentConfig $config): PortalStayRatesResource
     {
-        $agency = $this->agency($request);
-
-        return PortalNetRateResource::collection(
-            PortalPreview::for($agency, $config->rates())['net_rates'],
-        );
+        return new PortalStayRatesResource(PortalStayRates::document(
+            $this->agency($request),
+            $config->rates(),
+            $config,
+        ));
     }
 }

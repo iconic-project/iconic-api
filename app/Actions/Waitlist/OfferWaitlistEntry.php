@@ -40,7 +40,7 @@ final class OfferWaitlistEntry extends Action
     {
         return $this->transaction(function () use ($entry): bool {
             $entry->refresh();
-            $entry->loadMissing(['contact', 'departure.property', 'departure.itinerary']);
+            $entry->loadMissing(['contact', 'roomType']);
 
             if ($entry->removed_at !== null || $entry->notified_at !== null) {
                 return false;
@@ -96,7 +96,7 @@ final class OfferWaitlistEntry extends Action
                 TaskKind::WaitlistFollowUp,
                 WaitlistOfferCopy::taskKey($entry),
                 'Waitlist follow-up · '.$entry->contact->name,
-                $entry->departure->date->toDateString().' · '.$entry->cabin_category->value,
+                $entry->check_in->toDateString().' · '.$entry->roomType->code,
                 TaskDue::businessDays(BusinessTime::now(), 2, $this->config->businessRules()),
                 null,
                 Permission::BookingsCreate,

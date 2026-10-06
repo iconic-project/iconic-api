@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Support\Waitlist;
 
-use App\Enums\CabinCategory;
 use App\Mail\Waitlist\WaitlistOfferMail;
 use App\Models\Delivery;
 use App\Models\WaitlistEntry;
@@ -14,29 +13,27 @@ final class WaitlistOfferCopy
 {
     public static function subject(WaitlistEntry $entry): string
     {
-        $entry->loadMissing('departure.property');
-
-        return 'A cabin is free — '.$entry->departure->property->name.' '.$entry->departure->date->toDateString();
+        return self::sentence($entry);
     }
 
     public static function sentence(WaitlistEntry $entry): string
     {
-        $entry->loadMissing('departure.property');
-        $category = $entry->cabin_category === CabinCategory::Owner ? "Owner's Suite" : 'Suite';
+        $entry->loadMissing('roomType');
 
-        return 'A '.$category.' is free on '.$entry->departure->property->name
-            .' departing '.$entry->departure->date->toDateString()
-            .'. Cabins are first-come and nothing is held for you.';
+        return 'A '.$entry->roomType->name.' is free — '.self::range($entry);
     }
 
     public static function url(WaitlistEntry $entry): string
     {
-        $entry->loadMissing('departure.itinerary');
         $base = rtrim((string) config('iconic.engine_url'), '/');
-        $slug = $entry->departure->itinerary->slug;
-        $path = is_string($slug) && $slug !== '' ? '/itineraries/'.$slug : '/';
+        $query = http_build_query([
+            'check_in' => $entry->check_in->toDateString(),
+            'check_out' => $entry->check_out->toDateString(),
+            'adults' => $entry->adults,
+            'rooms' => 1,
+        ]);
 
-        return $base.$path.'?departure='.$entry->departure_id;
+        return $base.'/book/rooms?'.$query;
     }
 
     public static function mail(Delivery $delivery): WaitlistOfferMail
@@ -59,6 +56,18 @@ final class WaitlistOfferCopy
     public static function taskKey(WaitlistEntry $entry): string
     {
         return 'waitlist-follow-up:'.$entry->id;
+    }
+
+    public static function range(WaitlistEntry $entry): string
+    {
+        $in = $entry->check_in;
+        $out = $entry->check_out;
+
+        if ($in->month === $out->month && $in->year === $out->year) {
+            return $in->format('D j').' – '.$out->format('D j M Y');
+        }
+
+        return $in->format('D j M Y').' – '.$out->format('D j M Y');
     }
 
     private static function entryId(Delivery $delivery): int

@@ -156,6 +156,7 @@ final class CreateStayReservation extends Action
         $rules = $this->config->businessRules();
         $submittedAt = now();
         $expiry = BusinessHours::fromDocument($rules)->holdExpiry($submittedAt, $row['stay']->checkIn(), $rules);
+        $commission = $this->commissions->resolve($data, null, null);
 
         $booking = $this->insertBooking(
             $row,
@@ -163,7 +164,7 @@ final class CreateStayReservation extends Action
             $contact,
             null,
             $actor,
-            null,
+            $commission,
             isset($data['internal_notes']) && is_string($data['internal_notes']) ? $data['internal_notes'] : null,
             $this->arrivalTime($data),
             sale: false,
@@ -199,7 +200,32 @@ final class CreateStayReservation extends Action
             $after['override_restrictions'] = $prepared['override']->codes;
         }
 
-        History::record($booking, 'booking.requested', after: $after, reason: $prepared['override']?->reason);
+        if (! empty($data['client_of_record'])) {
+            $after['client_of_record'] = true;
+            $after['what'] = 'Booking requested via the agent portal';
+        }
+
+        $actorLabel = isset($data['actor_label']) && is_string($data['actor_label']) && $data['actor_label'] !== ''
+            ? $data['actor_label']
+            : null;
+        $extra = [];
+
+        if (isset($data['agency_user_id']) && is_numeric($data['agency_user_id'])) {
+            $extra['agency_user_id'] = (int) $data['agency_user_id'];
+        }
+
+        History::record(
+            $booking,
+            'booking.requested',
+            after: $after,
+            reason: $prepared['override']?->reason,
+            extraContext: $extra,
+            actorLabel: $actorLabel,
+        );
+
+        if ($commission !== null) {
+            $this->commissions->recordHold($booking, $commission);
+        }
 
         return $booking->refresh()->load([
             'room',
@@ -447,9 +473,9 @@ final class CreateStayReservation extends Action
             'agency_id' => $commission === null ? null : $commission['agency_id'],
             'commission_pct' => $commission === null ? null : $commission['commission_pct'],
             'commission_approved' => $commission === null ? false : $commission['commission_approved'],
-            'status' => $sale
-                ? ($overCap ? BookingStatus::OnHoldAgency : BookingStatus::PendingPayment)
-                : BookingStatus::Requested,
+            'status' => $overCap
+                ? BookingStatus::OnHoldAgency
+                : ($sale ? BookingStatus::PendingPayment : BookingStatus::Requested),
             'main_channel' => $data['main_channel'],
             'channel_of_origin' => $data['channel_of_origin'],
             'adults' => $row['spec']['adults'],

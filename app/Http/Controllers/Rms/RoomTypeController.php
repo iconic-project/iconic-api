@@ -4,17 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Rms;
 
+use App\Actions\RoomTypes\AddRoomTypePhoto;
 use App\Actions\RoomTypes\CreateRoomType;
 use App\Actions\RoomTypes\DeactivateRoomType;
-use App\Actions\RoomTypes\UpdateRoomType;
+use App\Actions\RoomTypes\UpdateRoomTypeContent;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Rms\StoreContentImageRequest;
 use App\Http\Requests\Rms\StoreRoomTypeRequest;
 use App\Http\Requests\Rms\UpdateRoomTypeRequest;
+use App\Http\Resources\Rms\ChangeHistoryResource;
 use App\Http\Resources\Rms\RoomTypeResource;
 use App\Models\Property;
 use App\Models\RoomType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\UploadedFile;
 
 final class RoomTypeController extends Controller
 {
@@ -36,11 +40,37 @@ final class RoomTypeController extends Controller
             ->setStatusCode(201);
     }
 
-    public function update(UpdateRoomTypeRequest $request, RoomType $roomType, UpdateRoomType $action): RoomTypeResource
+    public function update(UpdateRoomTypeRequest $request, RoomType $roomType, UpdateRoomTypeContent $action): RoomTypeResource
     {
         $this->authorize('update', $roomType);
 
         return new RoomTypeResource($action->handle($roomType, $request->validated()));
+    }
+
+    public function photo(StoreContentImageRequest $request, RoomType $roomType, AddRoomTypePhoto $action): RoomTypeResource
+    {
+        $this->authorize('update', $roomType);
+
+        $file = $request->file('image');
+
+        if (! $file instanceof UploadedFile) {
+            abort(422);
+        }
+
+        return new RoomTypeResource($action->handle($roomType, $file, (string) $request->validated('alt')));
+    }
+
+    public function history(RoomType $roomType): AnonymousResourceCollection
+    {
+        $this->authorize('viewHistory', $roomType);
+
+        $entries = $roomType->history()
+            ->with('actor')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->paginate(25);
+
+        return ChangeHistoryResource::collection($entries);
     }
 
     public function deactivate(RoomType $roomType, DeactivateRoomType $action): RoomTypeResource

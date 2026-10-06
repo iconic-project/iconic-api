@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use App\Enums\BookingStatus;
-use App\Enums\CabinCategory;
 use App\Enums\ClaimKind;
 use App\Enums\DeliveryKind;
 use App\Enums\DeliveryStatus;
@@ -12,14 +11,14 @@ use App\Enums\ReleaseReason;
 use App\Enums\TaskKind;
 use App\Enums\TaskStatus;
 use App\Events\AvailabilityChanged;
-use App\Listeners\OfferWaitlistCabins;
+use App\Listeners\OfferWaitlistRooms;
 use App\Mail\Waitlist\WaitlistOfferMail;
 use App\Models\Booking;
-use App\Models\RoomNightClaim;
 use App\Models\CrmTask;
 use App\Models\Delivery;
 use App\Models\Departure;
 use App\Models\Room;
+use App\Models\RoomNightClaim;
 use App\Models\WaitlistEntry;
 use App\Services\Inventory\ClaimService;
 use Database\Seeders\ConfigSeeder;
@@ -71,7 +70,7 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
 
     $this->artisan('iconic:waitlist-notify')->assertSuccessful();
     $this->artisan('iconic:waitlist-notify')->assertSuccessful();
-    app(OfferWaitlistCabins::class)->handle(new AvailabilityChanged((int) $departure->property_id, $departure->stayDates()));
+    app(OfferWaitlistRooms::class)->handle(new AvailabilityChanged((int) $departure->property_id, $departure->stayDates()));
 
     expect(Delivery::query()->where('kind', DeliveryKind::WaitlistOffer)->where('status', DeliveryStatus::Sent)->count())->toBe(1)
         ->and(WaitlistEntry::query()->findOrFail($first)->notified_by)->toBeNull()
@@ -81,8 +80,9 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
         ->and(Booking::query()->orderBy('id')->pluck('status')->map(fn (BookingStatus $status): string => $status->value)->all())->toBe($statuses);
 
     Mail::assertSent(WaitlistOfferMail::class, function (WaitlistOfferMail $mail): bool {
-        return str_contains($mail->sentence, 'nothing is held')
-            && str_contains($mail->departureUrl, 'departure=');
+        return str_contains($mail->sentence, 'A Suite is free —')
+            && str_contains($mail->stayUrl, 'check_in=2028-03-05')
+            && str_contains($mail->stayUrl, '/book/rooms?');
     });
 
     $holder = $holders[array_key_first($holders)];
@@ -113,7 +113,7 @@ test('a cancelled booking notifies the queue once per free cabin and never holds
         ->and($task->status)->toBe(TaskStatus::Open);
 
     $this->actingAs($actor)
-        ->getJson('/api/rms/waitlist?departure_id='.$departure->id)
+        ->getJson('/api/rms/waitlist')
         ->assertOk()
         ->assertJsonPath('data.0.id', $first)
         ->assertJsonPath('data.0.position', 1)
@@ -204,10 +204,13 @@ function blockSuitesExcept(Departure $departure, string $keep): array
 
 function waitlistEntry(Departure $departure, string $name, ?string $email): int
 {
+    $type = $departure->property->roomTypes()->where('code', 'SUITE')->firstOrFail();
+    $stay = $departure->stayDates();
     $id = test()->actingAs(managerUser())
         ->postJson('/api/rms/waitlist', [
-            'departure_id' => $departure->id,
-            'cabin_category' => CabinCategory::Suite->value,
+            'room_type_id' => $type->id,
+            'check_in' => $stay->checkIn()->toDateString(),
+            'check_out' => $stay->checkOut()->toDateString(),
             'client' => [
                 'name' => $name,
                 'email' => $email,

@@ -9,8 +9,9 @@ use App\Enums\WaitlistSource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Engine\StoreEngineWaitlistRequest;
 use App\Http\Resources\Engine\EngineWaitlistResource;
-use App\Models\Departure;
-use App\Services\Engine\EngineFeed;
+use App\Models\RoomType;
+use App\Services\Engine\EnginePropertyFeed;
+use App\Support\Content\Completeness;
 use Dedoc\Scramble\Attributes\Response as DocumentedResponse;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,17 +21,22 @@ final class WaitlistController extends Controller
     #[DocumentedResponse(status: 201, type: EngineWaitlistResource::class)]
     public function __invoke(
         StoreEngineWaitlistRequest $request,
-        EngineFeed $feed,
+        EnginePropertyFeed $feed,
         AddWaitlistEntry $action,
     ): JsonResponse {
         $validated = $request->validated();
-        $departure = Departure::query()->findOrFail((int) $validated['departure_id']);
+        $property = $feed->property();
+        $code = (string) $validated['room_type'];
+        $type = $property->roomTypes->first(
+            fn (RoomType $candidate): bool => $candidate->code === $code && Completeness::engineVisible($candidate),
+        );
 
-        abort_unless($feed->isVisible($departure), Response::HTTP_NOT_FOUND);
+        abort_unless($type instanceof RoomType, Response::HTTP_NOT_FOUND);
 
         $entry = $action->handle([
-            'departure_id' => $departure->id,
-            'cabin_category' => $validated['cabin_category'],
+            'room_type_id' => $type->id,
+            'check_in' => $validated['check_in'],
+            'check_out' => $validated['check_out'],
             'client' => is_array($validated['contact'] ?? null) ? $validated['contact'] : [],
             'adults' => $validated['adults'],
             'children' => $validated['children'],

@@ -1,6 +1,8 @@
 # WEB-05 · Step 4 holds the cabin; leaving releases it
+
+Retired in sprint 20. The engine searches stays. Walk HENG-01 through HENG-07. Do not walk these departure steps.
 - **Tags:** sprint-8, web
-- **Priority:** P1
+- **Priority:** retired
 - **Users:** Guest + Carolina
 - **Start:** reset
 - **Needs:** two browser contexts

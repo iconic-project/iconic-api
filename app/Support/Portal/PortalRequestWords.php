@@ -20,13 +20,13 @@ final class PortalRequestWords
     public static function forStatus(BookingStatus $status, int $responseHours): string
     {
         if ($status === BookingStatus::OnHoldAgency) {
-            return 'This request does not hold a cabin. The team will answer within '
+            return 'This request holds the room. The team will answer within '
                 .$responseHours
                 .' hours. This request is waiting on the commission-cap decision.';
         }
 
         if ($status === BookingStatus::Requested) {
-            return 'This request does not hold a cabin. The team will answer within '
+            return 'This request holds the room. The team will answer within '
                 .$responseHours
                 .' hours.';
         }

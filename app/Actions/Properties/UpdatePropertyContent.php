@@ -6,6 +6,7 @@ namespace App\Actions\Properties;
 
 use App\Actions\Action;
 use App\Models\Property;
+use App\Services\Engine\EngineFeedVersion;
 use App\Support\History\History;
 
 final class UpdatePropertyContent extends Action
@@ -15,9 +16,11 @@ final class UpdatePropertyContent extends Action
      */
     public function handle(Property $property, array $data): Property
     {
-        unset($data['code']);
+        unset($data['code'], $data['hero_image_path']);
 
-        return $this->transaction(function () use ($property, $data): Property {
+        $changed = false;
+
+        $property = $this->transaction(function () use ($property, $data, &$changed): Property {
             $property->fill($data);
 
             if (! $property->isDirty()) {
@@ -25,6 +28,7 @@ final class UpdatePropertyContent extends Action
             }
 
             $property->save();
+            $changed = true;
 
             [$before, $after] = History::diff($property);
 
@@ -34,5 +38,11 @@ final class UpdatePropertyContent extends Action
 
             return $property;
         });
+
+        if ($changed) {
+            EngineFeedVersion::bump();
+        }
+
+        return $property;
     }
 }

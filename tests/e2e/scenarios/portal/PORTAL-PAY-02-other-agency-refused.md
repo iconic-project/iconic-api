@@ -1,6 +1,8 @@
 # PORTAL-PAY-02 · Another agency's booking cannot be paid
+
+Retired in sprint 20. Hotel seed has no `ANK-2026-0021`. The other-agency refusal stays in Pest (`PortalCrossAgencyScopeTest`). Do not walk these steps.
 - **Tags:** sprint-15, portal
-- **Priority:** P1
+- **Priority:** retired
 - **Batch:** B20
 - **Users:** Ada Agent
 - **Start:** reset

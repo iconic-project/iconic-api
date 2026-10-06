@@ -5,23 +5,24 @@ declare(strict_types=1);
 use App\Actions\Bookings\CreateBookingRequest;
 use App\Enums\AlertKind;
 use App\Enums\BookingStatus;
-use App\Enums\CabinCategory;
 use App\Enums\ClaimKind;
-use App\Enums\DepartureStatus;
 use App\Enums\TaskKind;
 use App\Models\AgencyUser;
 use App\Models\Alert;
 use App\Models\Booking;
-use App\Models\RoomNightClaim;
 use App\Models\ChangeHistory;
 use App\Models\CheckoutSession;
 use App\Models\CrmTask;
-use App\Models\Departure;
+use App\Models\Property;
+use App\Models\Room;
+use App\Models\RoomNightClaim;
 use App\Services\Config\CurrentConfig;
-use App\Services\Inventory\Availability;
 use App\Services\Inventory\ClaimService;
 use App\Support\Portal\PortalRequestWords;
+use App\Support\Stays\StayDates;
 use Database\Seeders\ConfigSeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\HotelSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Support\Facades\Auth;
@@ -32,8 +33,10 @@ use Tests\Support\Inventory\ClaimHolder;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
-    $this->seed(InventorySeeder::class);
     $this->seed(ConfigSeeder::class);
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(InventorySeeder::class);
+    $this->seed(HotelSeeder::class);
     adminUser();
 });
 
@@ -41,14 +44,17 @@ beforeEach(function (): void {
  * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>
  */
-function portalRequestBody(Departure $departure, array $overrides = []): array
+function portalRequestBody(array $overrides = []): array
 {
     return array_merge([
-        'departure_id' => $departure->id,
-        'category' => CabinCategory::Suite->value,
-        'cabins' => [
-            ['adults' => 2, 'children' => 0],
-        ],
+        'check_in' => '2026-12-21',
+        'check_out' => '2026-12-25',
+        'rooms' => [[
+            'room_type' => 'FAM',
+            'adults' => 2,
+            'child_ages' => [],
+            'rate_plan' => 'BAR',
+        ]],
         'client' => [
             'name' => 'Elena Guest',
             'email' => 'elena-'.uniqid().'@guest.test',
@@ -75,11 +81,10 @@ function asStaff(): void
 }
 
 test('a portal request matches an engine request and freezes the agency commission without a hold', function (): void {
-    $departure = ReservationFixtures::anamaraDeparture();
     $agency = approvedAgency(['name' => 'Blue Latitude', 'commission_pct' => 10]);
     $user = agencyUser(['name' => 'Ana Agent', 'email' => 'ana@agency.test'], $agency);
     $hours = app(CurrentConfig::class)->businessRules()->sla->responseHours;
-    $body = portalRequestBody($departure);
+    $body = portalRequestBody();
 
     $response = postPortalRequest($user, $body);
 
@@ -97,6 +102,9 @@ test('a portal request matches an engine request and freezes the agency commissi
         ->and($booking->commission_pct)->toBe(10)
         ->and($booking->commission_approved)->toBeTrue()
         ->and($booking->checkout_session_id)->toBeNull()
+        ->and($booking->check_in->toDateString())->toBe('2026-12-21')
+        ->and($booking->check_out->toDateString())->toBe('2026-12-25')
+        ->and($booking->roomType?->code)->toBe('FAM')
         ->and($booking->room_id)->not->toBeNull()
         ->and($booking->price_lines)->not->toBeEmpty()
         ->and($booking->total)->toBeGreaterThan(0)
@@ -107,13 +115,13 @@ test('a portal request matches an engine request and freezes the agency commissi
             $booking->bookingRequest?->submitted_at?->copy()->addHours($hours),
         ))->toBeTrue()
         ->and($booking->guests)->toHaveCount(0)
-        ->and($booking->claims)->toHaveCount(0)
+        ->and($booking->claims)->toHaveCount(4)
         ->and($booking->contact->name)->toBe('Elena Guest')
         ->and($booking->contact->email)->toBe($body['client']['email'])
         ->and($booking->contact->email)->not->toBe($user->email);
 
     expect(CrmTask::query()->where('kind', TaskKind::RequestResponse)->where('booking_id', $booking->id)->exists())->toBeTrue();
-    expect(RoomNightClaim::query()->where('holder_id', $booking->id)->where('holder_type', $booking->getMorphClass())->count())->toBe(0);
+    expect(RoomNightClaim::query()->where('holder_id', $booking->id)->where('holder_type', $booking->getMorphClass())->count())->toBe(4);
 
     $listed = $this->actingAs($user, 'agency')
         ->withHeaders(portalHeaders())
@@ -138,12 +146,14 @@ test('a portal request matches an engine request and freezes the agency commissi
 
     asStaff();
 
-    $this->actingAs(adminUser())
+    $rows = collect($this->actingAs(adminUser())
         ->getJson('/api/rms/requests')
         ->assertOk()
-        ->assertJsonPath('data.0.source', 'portal')
-        ->assertJsonPath('data.0.agency_name', 'Blue Latitude')
-        ->assertJsonPath('data.0.display_reference', $reference);
+        ->json('data'));
+    $portal = $rows->firstWhere('display_reference', $reference);
+
+    expect($portal['source'])->toBe('portal')
+        ->and($portal['agency_name'])->toBe('Blue Latitude');
 
     $agencyHistory = ChangeHistory::query()->where('event', 'portal.request_created')->where('subject_id', $agency->id)->firstOrFail();
     $bookingHistory = ChangeHistory::query()->where('event', 'booking.requested')->where('subject_id', $booking->id)->firstOrFail();
@@ -154,14 +164,13 @@ test('a portal request matches an engine request and freezes the agency commissi
         ->and($bookingHistory->context['agency_user_id'])->toBe($user->id);
 });
 
-test('two cabins become two bookings in one group and still claim nothing', function (): void {
-    $departure = ReservationFixtures::anamaraDeparture();
+test('two rooms become two bookings in one group and each holds its nights', function (): void {
     $user = agencyUser();
 
-    $response = postPortalRequest($user, portalRequestBody($departure, [
-        'cabins' => [
-            ['adults' => 2, 'children' => 0],
-            ['adults' => 1, 'children' => 1],
+    $response = postPortalRequest($user, portalRequestBody([
+        'rooms' => [
+            ['room_type' => 'FAM', 'adults' => 2, 'child_ages' => [], 'rate_plan' => 'BAR'],
+            ['room_type' => 'FAM', 'adults' => 2, 'child_ages' => [8], 'rate_plan' => 'BAR'],
         ],
     ]));
 
@@ -173,16 +182,16 @@ test('two cabins become two bookings in one group and still claim nothing', func
     expect($bookings)->toHaveCount(2)
         ->and($bookings->pluck('group_id')->unique())->toHaveCount(1)
         ->and($bookings->first()?->group_id)->not->toBeNull()
-        ->and(RoomNightClaim::query()->count())->toBe(0);
+        ->and($bookings->first()?->claims)->toHaveCount(4)
+        ->and($bookings->last()?->claims)->toHaveCount(4);
 });
 
 test('an over-cap agency lands on ON_HOLD_AGENCY with the existing cap task and alert', function (): void {
-    $departure = ReservationFixtures::anamaraDeparture();
     $agency = approvedAgency(['name' => 'Meridian', 'commission_pct' => 15]);
     $user = agencyUser([], $agency);
     $hours = app(CurrentConfig::class)->businessRules()->sla->responseHours;
 
-    $response = postPortalRequest($user, portalRequestBody($departure));
+    $response = postPortalRequest($user, portalRequestBody());
 
     $response->assertCreated()
         ->assertJsonPath('status', BookingStatus::OnHoldAgency->value)
@@ -193,7 +202,7 @@ test('an over-cap agency lands on ON_HOLD_AGENCY with the existing cap task and 
     expect($booking->status)->toBe(BookingStatus::OnHoldAgency)
         ->and($booking->commission_pct)->toBe(15)
         ->and($booking->commission_approved)->toBeFalse()
-        ->and($booking->claims)->toHaveCount(0);
+        ->and($booking->claims)->toHaveCount(4);
 
     expect(CrmTask::query()->where('kind', TaskKind::CommissionCap)->where('booking_id', $booking->id)->exists())->toBeTrue();
     expect(CrmTask::query()->where('kind', TaskKind::RequestResponse)->where('booking_id', $booking->id)->exists())->toBeFalse();
@@ -217,62 +226,39 @@ test('an over-cap agency lands on ON_HOLD_AGENCY with the existing cap task and 
     expect($ids)->not->toContain($booking->id);
 });
 
-test('a sold-out, closed, hidden, or out-of-calendar departure is refused and writes nothing', function (): void {
+test('a sold-out family stay is refused and writes no request', function (): void {
     $user = agencyUser();
-
-    $full = ReservationFixtures::anamaraDeparture('2027-11-21');
-    $full->load('property.cabins');
+    $property = Property::query()->where('code', 'HTL')->firstOrFail();
+    $rooms = Room::query()
+        ->where('property_id', $property->id)
+        ->whereHas('roomType', fn ($query) => $query->where('code', 'FAM'))
+        ->get();
     $holder = ClaimHolder::query()->create(['reference' => 'BLK', 'name' => 'Taken']);
+    $before = Booking::query()->count();
 
-    DB::transaction(function () use ($full, $holder): void {
-        app(ClaimService::class)->claim($full->stayDates(), $full->property->cabins, $holder, ClaimKind::Block);
+    DB::transaction(function () use ($rooms, $holder): void {
+        app(ClaimService::class)->claim(StayDates::of('2026-12-21', '2026-12-25'), $rooms, $holder, ClaimKind::Block);
     });
 
-    $label = app(Availability::class)->forDepartures(collect([$full->fresh(['property.cabins', 'itinerary'])]))[$full->id]->engineLabel['text'];
+    postPortalRequest($user, portalRequestBody())
+        ->assertConflict();
 
-    $closed = ReservationFixtures::anamaraDeparture('2027-11-28');
-    $closed->update(['status' => DepartureStatus::Closed]);
+    postPortalRequest($user, portalRequestBody([
+        'rooms' => [[
+            'room_type' => 'NOPE',
+            'adults' => 2,
+            'child_ages' => [],
+        ]],
+    ]))->assertUnprocessable();
 
-    $hidden = ReservationFixtures::anamaraDeparture('2027-12-05');
-    $hidden->update(['status' => DepartureStatus::Hidden]);
-
-    $early = ReservationFixtures::anamaraDeparture('2026-06-07');
-
-    $ownerTaken = ReservationFixtures::anamaraDeparture('2027-12-12');
-    $ownerTaken->load('property.cabins');
-    $owner = $ownerTaken->property->cabins->first(fn ($cabin) => $cabin->roomType->code === 'OWNER');
-    $ownerHolder = ClaimHolder::query()->create(['reference' => 'OWN', 'name' => 'Owner taken']);
-
-    DB::transaction(function () use ($ownerTaken, $owner, $ownerHolder): void {
-        app(ClaimService::class)->claim($ownerTaken->stayDates(), collect([$owner]), $ownerHolder, ClaimKind::Block);
-    });
-
-    postPortalRequest($user, portalRequestBody($full))
-        ->assertUnprocessable()
-        ->assertJsonPath('errors.departure.0', $label);
-
-    postPortalRequest($user, portalRequestBody($closed))
-        ->assertUnprocessable()
-        ->assertJsonPath('errors.departure.0', 'CLOSED — ENQUIRE');
-
-    postPortalRequest($user, portalRequestBody($hidden))->assertNotFound();
-
-    postPortalRequest($user, portalRequestBody($early))->assertNotFound();
-
-    postPortalRequest($user, portalRequestBody($ownerTaken, [
-        'category' => CabinCategory::Owner->value,
-    ]))
-        ->assertConflict()
-        ->assertJsonPath('message', 'Cabin unavailable.');
-
-    expect(Booking::query()->count())->toBe(0);
+    expect(Booking::query()->count())->toBe($before);
 });
 
 test('the portal cannot set a price, a discount, a commission, or another agency', function (): void {
-    $departure = ReservationFixtures::anamaraDeparture();
     $user = agencyUser();
+    $before = Booking::query()->count();
 
-    postPortalRequest($user, portalRequestBody($departure, [
+    postPortalRequest($user, portalRequestBody([
         'price' => 1000,
         'discount' => 10,
         'commission_pct' => 5,
@@ -282,19 +268,18 @@ test('the portal cannot set a price, a discount, a commission, or another agency
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['price', 'discount', 'commission_pct', 'promo_code', 'agency_id']);
 
-    postPortalRequest($user, portalRequestBody($departure, [
+    postPortalRequest($user, portalRequestBody([
         'client_of_record' => false,
     ]))->assertUnprocessable()->assertJsonValidationErrors(['client_of_record']);
 
-    expect(Booking::query()->count())->toBe(0);
+    expect(Booking::query()->count())->toBe($before);
 });
 
 test('an agency only sees its own requests', function (): void {
-    $departure = ReservationFixtures::anamaraDeparture();
     $owner = agencyUser();
     $other = agencyUser();
 
-    $created = postPortalRequest($owner, portalRequestBody($departure))->assertCreated();
+    $created = postPortalRequest($owner, portalRequestBody())->assertCreated();
 
     $this->actingAs($other, 'agency')
         ->withHeaders(portalHeaders())
@@ -331,7 +316,7 @@ test('the RMS request list marks engine, portal, and staff sources', function ()
     $session = CheckoutSession::factory()->create(['departure_id' => $departure->id]);
     Booking::query()->whereKey($engine->id)->update(['checkout_session_id' => $session->id]);
 
-    postPortalRequest($user, portalRequestBody($departure))->assertCreated();
+    postPortalRequest($user, portalRequestBody())->assertCreated();
 
     asStaff();
 

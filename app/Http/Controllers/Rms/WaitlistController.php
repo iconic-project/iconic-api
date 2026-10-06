@@ -7,7 +7,6 @@ namespace App\Http\Controllers\Rms;
 use App\Actions\Waitlist\AddWaitlistEntry;
 use App\Actions\Waitlist\NotifyWaitlistEntry;
 use App\Actions\Waitlist\RemoveWaitlistEntry;
-use App\Enums\CabinCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Rms\IndexWaitlistRequest;
 use App\Http\Requests\Rms\NotifyWaitlistEntryRequest;
@@ -16,7 +15,8 @@ use App\Http\Requests\Rms\StoreWaitlistEntryRequest;
 use App\Http\Resources\Rms\WaitlistEntryResource;
 use App\Models\User;
 use App\Models\WaitlistEntry;
-use App\Services\Inventory\Availability;
+use App\Services\Inventory\NightAvailability;
+use App\Support\Stays\StayDates;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -24,44 +24,44 @@ use Illuminate\Support\Facades\DB;
 
 final class WaitlistController extends Controller
 {
-    public function index(IndexWaitlistRequest $request, Availability $availability): AnonymousResourceCollection
+    public function index(IndexWaitlistRequest $request, NightAvailability $availability): AnonymousResourceCollection
     {
         $this->authorize('viewAny', WaitlistEntry::class);
 
         $entries = WaitlistEntry::query()
-            ->with(['departure.property', 'contact', 'notifiedBy'])
+            ->with(['roomType', 'contact', 'notifiedBy'])
             ->when(
                 ! $request->boolean('include_removed'),
                 fn (Builder $query) => $query->active(),
             )
             ->when(
-                $request->filled('departure_id'),
-                fn (Builder $query) => $query->where('departure_id', $request->validated('departure_id')),
+                $request->filled('from'),
+                fn (Builder $query) => $query->whereDate('check_out', '>', (string) $request->validated('from')),
             )
             ->when(
-                $request->filled('from') || $request->filled('to'),
-                function (Builder $query) use ($request): void {
-                    $query->whereHas('departure', function (Builder $departure) use ($request): void {
-                        $departure
-                            ->when($request->filled('from'), fn (Builder $inner) => $inner->whereDate('date', '>=', (string) $request->validated('from')))
-                            ->when($request->filled('to'), fn (Builder $inner) => $inner->whereDate('date', '<=', (string) $request->validated('to')));
-                    });
-                },
+                $request->filled('to'),
+                fn (Builder $query) => $query->whereDate('check_in', '<=', (string) $request->validated('to')),
             )
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();
 
-        $ranks = $this->positions($entries->pluck('departure_id')->unique()->all());
-        $departures = $entries->pluck('departure')->unique('id')->values();
-        $snapshots = $availability->forDepartures($departures);
+        $ranks = $this->positions($entries->pluck('room_type_id')->unique()->filter()->all());
+        $bookable = [];
 
         foreach ($entries as $entry) {
             $entry->queuePosition = $entry->isActive() ? ($ranks[$entry->id] ?? null) : null;
-            $counts = $snapshots[$entry->departure_id]->counts;
-            $entry->cabinIsAvailable = $entry->cabin_category === CabinCategory::Owner
-                ? $counts['owner_free']
-                : $counts['suites_free'] > 0;
+            $key = $entry->room_type_id.'|'.$entry->check_in->toDateString().'|'.$entry->check_out->toDateString();
+
+            if (! array_key_exists($key, $bookable)) {
+                $bookable[$key] = $availability->canBook(
+                    $entry->roomType,
+                    StayDates::of($entry->check_in, $entry->check_out),
+                    1,
+                )->ok;
+            }
+
+            $entry->roomIsAvailable = $bookable[$key];
         }
 
         return WaitlistEntryResource::collection($entries);
@@ -79,7 +79,7 @@ final class WaitlistController extends Controller
 
         $entry = $action->handle($request->validated(), $actor);
         $entry->queuePosition = 1;
-        $entry->cabinIsAvailable = false;
+        $entry->roomIsAvailable = false;
 
         return (new WaitlistEntryResource($entry))->response()->setStatusCode(201);
     }
@@ -117,20 +117,20 @@ final class WaitlistController extends Controller
     }
 
     /**
-     * @param  list<int|string>  $departureIds
+     * @param  list<int|string>  $roomTypeIds
      * @return array<int, int>
      */
-    private function positions(array $departureIds): array
+    private function positions(array $roomTypeIds): array
     {
-        if ($departureIds === []) {
+        if ($roomTypeIds === []) {
             return [];
         }
 
         $rows = DB::table('waitlist_entries')
             ->select('id')
-            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY departure_id, cabin_category ORDER BY created_at, id) AS queue_position')
+            ->selectRaw('ROW_NUMBER() OVER (PARTITION BY room_type_id, check_in, check_out ORDER BY created_at, id) AS queue_position')
             ->whereNull('removed_at')
-            ->whereIn('departure_id', $departureIds)
+            ->whereIn('room_type_id', $roomTypeIds)
             ->get();
 
         $ranks = [];

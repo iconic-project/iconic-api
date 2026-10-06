@@ -20,7 +20,10 @@ final class ExtendCheckoutSession extends Action
     {
         return $this->transaction(function () use ($session): CheckoutSession {
             $session = CheckoutSession::query()->whereKey($session->id)->lockForUpdate()->firstOrFail();
-            DepartureLocks::lock((int) $session->departure_id);
+
+            if ($session->departure_id !== null) {
+                DepartureLocks::lock((int) $session->departure_id);
+            }
 
             if ($session->status !== CheckoutSessionStatus::Holding || $session->expires_at->isPast()) {
                 throw new ConflictException('This checkout hold can no longer be extended.');

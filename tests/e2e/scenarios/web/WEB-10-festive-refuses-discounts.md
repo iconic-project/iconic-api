@@ -1,6 +1,8 @@
 # WEB-10 · A festive departure refuses every discount
+
+Retired in sprint 20. The engine searches stays. Walk HENG-01 through HENG-07. Do not walk these departure steps.
 - **Tags:** sprint-8, web
-- **Priority:** P2
+- **Priority:** retired
 - **Users:** Guest
 - **Start:** reset
 

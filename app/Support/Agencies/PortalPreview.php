@@ -9,9 +9,11 @@ use App\Models\Agency;
 use App\Models\Booking;
 use App\Models\CommissionPayout;
 use App\Models\Guest;
+use App\Services\Config\CurrentConfig;
 use App\Support\Commissions\Accrual;
 use App\Support\Config\Documents\BusinessRulesDocument;
 use App\Support\Config\Documents\RatesDocument;
+use App\Support\Portal\PortalStayRates;
 use App\Support\Rounding;
 
 final class PortalPreview
@@ -56,8 +58,9 @@ final class PortalPreview
      * @return array{
      *     commission_pct: int,
      *     net_rates: list<array{year: int, suite_pp: int, owner_pp: int, charter_week: int}>,
-     *     bookings: list<array{reference: string|null, lead_guest: string, departure_date: string, status: string, net_due: int}>,
-     *     commissions: list<array{reference: string|null, rate: int|null, commission_amount: int, payable_date: string, status: CommissionAccrualStatus, payout: array{paid_on: string, reference: string|null}|null}>,
+     *     bookings: list<array{reference: string|null, lead_guest: string, check_in: string, check_out: string, departure_date: string, status: string, net_due: int}>,
+     *     commissions: list<array{reference: string|null, check_in: string, check_out: string, rate: int|null, commission_amount: int, payable_date: string, status: CommissionAccrualStatus, payout: array{paid_on: string, reference: string|null}|null}>,
+     *     stay_rates: array<string, mixed>,
      *     sales_materials: array{items: list<string>, note: string}
      * }
      */
@@ -75,15 +78,20 @@ final class PortalPreview
         $commissions = [];
 
         foreach ($agency->bookings as $booking) {
+            $stay = $booking->stay();
             $bookings[] = [
                 'reference' => $booking->reference,
                 'lead_guest' => self::leadGuestName($booking),
-                'departure_date' => $booking->stay()->checkIn()->toDateString(),
+                'check_in' => $stay->checkIn()->toDateString(),
+                'check_out' => $stay->checkOut()->toDateString(),
+                'departure_date' => $stay->checkIn()->toDateString(),
                 'status' => $booking->status->value,
                 'net_due' => self::netDue($booking),
             ];
             $commissions[] = [
                 'reference' => self::nullableString($booking->reference),
+                'check_in' => $stay->checkIn()->toDateString(),
+                'check_out' => $stay->checkOut()->toDateString(),
                 'rate' => self::nullableInt($booking->commission_pct),
                 'commission_amount' => $booking->commissionAmount(),
                 'payable_date' => Accrual::payableDate($booking, $rules)->toDateString(),
@@ -98,6 +106,7 @@ final class PortalPreview
         return [
             'commission_pct' => $preview['commission_pct'],
             'net_rates' => $preview['net_rates'],
+            'stay_rates' => PortalStayRates::document($agency, $rates, app(CurrentConfig::class)),
             'bookings' => $bookings,
             'commissions' => $commissions,
             'sales_materials' => [

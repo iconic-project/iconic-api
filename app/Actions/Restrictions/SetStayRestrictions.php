@@ -9,6 +9,7 @@ use App\Models\Property;
 use App\Models\RoomType;
 use App\Models\StayRestriction;
 use App\Models\User;
+use App\Services\Engine\EngineFeedVersion;
 use App\Support\History\History;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
@@ -98,6 +99,8 @@ final class SetStayRestrictions extends Action
                 system: $actor === null,
             );
         });
+
+        EngineFeedVersion::bump();
     }
 
     /**

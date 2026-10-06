@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "demo": true,
+    "note": "Shape of GET /api/engine/property. Replaces the departures feed for the hotel engine. Room numbers are not part of this document."
+  },
+  "generated_at": "2026-10-05T12:00:00+00:00",
+  "property": {
+    "code": "HTL",
+    "name": "Hotel Demo",
+    "slug": "hotel-demo",
+    "address_line_1": "1 Demo Street",
+    "address_line_2": null,
+    "city": "Demo City",
+    "postcode": "00000",
+    "country": null,
+    "phone": "+1-555-0100",
+    "email": "stay@hotel-demo.test",
+    "description": "Demo hotel used by development and tests.",
+    "hero_alt": "Hotel Demo exterior",
+    "hero_image_url": "/storage/properties/hotel-demo-hero.jpg",
+    "highlights": ["24 rooms"],
+    "facts": [["Rooms", "24"]],
+    "faqs": [["Is this a live hotel?", "No. This property is demo data."]],
+    "policies_text": "Demo house rules.",
+    "meta_title": "Hotel Demo",
+    "meta_description": "Demo hotel for development and tests."
+  },
+  "room_types": [
+    {
+      "code": "TWN",
+      "name": "Twin",
+      "slug": "twin",
+      "description": "Demo twin room for two guests.",
+      "size_sqm": 22,
+      "bed_setup": "2 single beds",
+      "amenities": ["Wifi"],
+      "photos": [{"alt": "Twin room", "url": "/storage/room-types/twin.jpg"}],
+      "base_occupancy": 2,
+      "max_occupancy": 2,
+      "max_adults": 2,
+      "max_children": 0,
+      "from_price": 220,
+      "meta_title": "Twin",
+      "meta_description": "Demo twin room for two guests."
+    }
+  ],
+  "default_rate_plan": "BAR",
+  "rate_plans": [
+    {
+      "code": "BAR",
+      "name": "Best available",
+      "default": true,
+      "adjust_pct": 0,
+      "refundable": true,
+      "deposit_pct": 30,
+      "balance_days": 21,
+      "cancellation": "standard",
+      "meal_plan": "RO"
+    }
+  ],
+  "settings": {
+    "copy": {},
+    "guests": {},
+    "locale": {},
+    "stay": {
+      "min_nights": 1,
+      "max_nights": 62,
+      "max_rooms_per_booking": 5
+    },
+    "availability": {
+      "low_availability_threshold": 3
+    }
+  }
+}

@@ -25,7 +25,7 @@ final class PortalBookingController extends PortalController
         $bookings = Booking::query()
             ->where('agency_id', $agency->id)
             ->with([
-                'departure.itinerary',
+                'roomType',
                 'contact',
                 'guests',
                 'paymentLinks' => fn ($query) => $query->where('status', PaymentLinkStatus::Open),

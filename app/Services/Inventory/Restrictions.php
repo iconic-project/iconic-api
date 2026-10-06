@@ -11,6 +11,7 @@ use App\Services\Config\CurrentConfig;
 use App\Support\Config\Documents\BusinessRulesDocument;
 use App\Support\Config\Documents\StayRules;
 use App\Support\Stays\StayDates;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -77,6 +78,84 @@ final class Restrictions
         }
 
         return new RestrictionResult(Bookability::ordered($reasons));
+    }
+
+    /**
+     * One query for the inclusive range. A type row beats a property-wide row.
+     * A null min or max on the winning row falls through to the business-rule default.
+     *
+     * @param  list<RoomType>  $types
+     * @return array<string, array<int, array{stop_sell: bool, closed_to_arrival: bool, closed_to_departure: bool, min_stay: int, max_stay: int}>>
+     */
+    public function forTypes(int $propertyId, array $types, string $from, string $to): array
+    {
+        $ids = [];
+
+        foreach ($types as $type) {
+            $ids[] = $type->id;
+        }
+
+        $loaded = StayRestriction::query()
+            ->where('property_id', $propertyId)
+            ->whereBetween('night', [$from, $to])
+            ->where(function (Builder $query) use ($ids): void {
+                $query->whereNull('room_type_id');
+
+                if ($ids !== []) {
+                    $query->orWhereIn('room_type_id', $ids);
+                }
+            })
+            ->get();
+
+        /** @var array<string, array{type: array<int, StayRestriction>, property?: StayRestriction}> $byNight */
+        $byNight = [];
+
+        foreach ($loaded as $row) {
+            $night = $row->night->toDateString();
+
+            if ($row->room_type_id === null) {
+                $byNight[$night]['property'] = $row;
+            } else {
+                $byNight[$night]['type'][$row->room_type_id] = $row;
+            }
+        }
+
+        $defaults = $this->defaults();
+        $flags = [];
+        $cursor = CarbonImmutable::parse($from);
+        $end = CarbonImmutable::parse($to);
+
+        while ($cursor->lessThanOrEqualTo($end)) {
+            $night = $cursor->toDateString();
+
+            foreach ($types as $type) {
+                $row = $byNight[$night]['type'][$type->id] ?? $byNight[$night]['property'] ?? null;
+                $min = $defaults->minNights;
+                $max = $defaults->maxNights;
+
+                if ($row instanceof StayRestriction) {
+                    if ($row->min_stay !== null) {
+                        $min = $row->min_stay;
+                    }
+
+                    if ($row->max_stay !== null) {
+                        $max = $row->max_stay;
+                    }
+                }
+
+                $flags[$night][$type->id] = [
+                    'stop_sell' => $row instanceof StayRestriction && $row->stop_sell,
+                    'closed_to_arrival' => $row instanceof StayRestriction && $row->closed_to_arrival,
+                    'closed_to_departure' => $row instanceof StayRestriction && $row->closed_to_departure,
+                    'min_stay' => $min,
+                    'max_stay' => $max,
+                ];
+            }
+
+            $cursor = $cursor->addDay();
+        }
+
+        return $flags;
     }
 
     /**

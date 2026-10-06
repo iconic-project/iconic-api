@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Rms;
 
-use App\Enums\CabinCategory;
 use App\Enums\PreferredChannel;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -22,8 +21,9 @@ class StoreWaitlistEntryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'departure_id' => ['required', 'integer', 'exists:departures,id'],
-            'cabin_category' => ['required', Rule::enum(CabinCategory::class)],
+            'room_type_id' => ['required', 'integer', 'exists:room_types,id'],
+            'check_in' => ['required', 'date_format:Y-m-d'],
+            'check_out' => ['required', 'date_format:Y-m-d', 'after:check_in'],
             'client' => ['required', 'array'],
             'client.name' => ['required', 'string', 'max:255'],
             'client.email' => ['sometimes', 'nullable', 'email', 'max:255'],

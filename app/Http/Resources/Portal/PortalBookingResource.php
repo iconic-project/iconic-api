@@ -6,6 +6,7 @@ namespace App\Http\Resources\Portal;
 
 use App\Enums\BookingStatus;
 use App\Models\Booking;
+use App\Models\RoomType;
 use App\Support\Agencies\PortalPreview;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,8 +22,10 @@ class PortalBookingResource extends JsonResource
      * @return array{
      *     id: int,
      *     reference: string|null,
+     *     check_in: string,
+     *     check_out: string,
      *     departure_date: string,
-     *     itinerary: string,
+     *     room_type: array{code: string, name: string}|null,
      *     status: BookingStatus,
      *     lead_guest: string,
      *     net_due: int,
@@ -32,11 +35,20 @@ class PortalBookingResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $stay = $this->resource->stay();
+        $checkIn = $stay->checkIn()->toDateString();
+        $type = $this->resource->getRelationValue('roomType');
+
         return [
             'id' => $this->id,
             'reference' => $this->reference,
-            'departure_date' => $this->departure->date->toDateString(),
-            'itinerary' => $this->departure->itinerary->code,
+            'check_in' => $checkIn,
+            'check_out' => $stay->checkOut()->toDateString(),
+            'departure_date' => $checkIn,
+            'room_type' => $type instanceof RoomType ? [
+                'code' => $type->code,
+                'name' => $type->name,
+            ] : null,
             'status' => $this->bookingStatus(),
             'lead_guest' => PortalPreview::leadGuestName($this->resource),
             'net_due' => PortalPreview::netDue($this->resource),

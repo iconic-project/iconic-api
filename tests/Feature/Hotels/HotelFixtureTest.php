@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Property;
 use App\Models\Room;
 use App\Models\RoomType;
+use App\Support\Content\Completeness;
 use Carbon\CarbonImmutable;
 use Database\Seeders\ConfigSeeder;
 use Database\Seeders\DatabaseSeeder;
@@ -155,6 +156,12 @@ test('the hotel seeder is idempotent and bookings have no departure', function (
     expect(RoomType::query()->where('property_id', $property->id)->count())->toBe(4);
     expect(Room::query()->where('property_id', $property->id)->count())->toBe(24);
     expect($property->name)->toBe('Hotel Demo');
+    expect(Completeness::forProperty($property)->pct)->toBe(100);
+
+    foreach (RoomType::query()->where('property_id', $property->id)->get() as $type) {
+        expect(Completeness::forRoomType($type)->pct)->toBe(100);
+        expect(Completeness::engineVisible($type))->toBeTrue();
+    }
     expect(Booking::query()->count())->toBe(25);
     expect(Booking::query()->whereNotNull('departure_id')->count())->toBe(0);
 

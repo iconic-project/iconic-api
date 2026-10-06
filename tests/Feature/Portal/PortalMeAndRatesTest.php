@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 use App\Enums\AgencyStatus;
 use App\Services\Config\CurrentConfig;
-use App\Support\Agencies\PortalPreview;
+use App\Support\Portal\PortalStayRates;
 use Database\Seeders\ConfigSeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\HotelSeeder;
 use Database\Seeders\RolesSeeder;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
     $this->seed(ConfigSeeder::class);
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(HotelSeeder::class);
 });
 
 test('me shows the agency commercial profile and the user, with materials not yet available', function (): void {
@@ -36,22 +40,33 @@ test('me shows the agency commercial profile and the user, with materials not ye
         ->assertJsonPath('materials_exist', false);
 });
 
-test('rates returns only net rates, matching PortalPreview::for', function (): void {
+test('rates returns the published stay matrix net of commission', function (): void {
     $agency = approvedAgency(['commission_pct' => 10]);
     $user = agencyUser([], $agency);
-    $rates = app(CurrentConfig::class)->rates();
+    $config = app(CurrentConfig::class);
+    $rates = $config->rates();
 
     $response = $this->actingAs($user, 'agency')
         ->withHeaders(portalHeaders())
         ->getJson('/api/portal/rates')
         ->assertOk();
 
-    expect($response->json('data'))->toBe(PortalPreview::for($agency, $rates)['net_rates']);
+    expect($response->json())->toBe(PortalStayRates::document($agency, $rates, $config));
+
+    $family = collect($response->json('room_rates'))->first(
+        fn (array $row): bool => $row['room_type'] === 'FAM' && $row['season'] === 'LOW',
+    );
+    $public = collect($rates->roomRates)->first(
+        fn ($row): bool => $row->roomType === 'FAM' && $row->season === 'LOW',
+    );
+
+    expect($family['nightly'])->toBe($agency->netOf($public->nightly))
+        ->and($response->json('seasons'))->not->toBeEmpty()
+        ->and($response->json('rate_plans'))->not->toBeEmpty();
 
     $encoded = json_encode($response->json());
+    expect($encoded)->not->toContain('"nightly":'.$public->nightly);
     foreach ($rates->years as $year) {
         expect($encoded)->not->toContain('"suite_pp":'.$year->suitePp);
-        expect($encoded)->not->toContain('"owner_pp":'.$year->ownerPp);
-        expect($encoded)->not->toContain('"charter_week":'.$year->charterWeek);
     }
 });

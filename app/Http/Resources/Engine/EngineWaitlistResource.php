@@ -18,17 +18,21 @@ class EngineWaitlistResource extends JsonResource
     /**
      * @return array{
      *     id: int,
-     *     departure_id: int,
-     *     cabin_category: string,
+     *     room_type: string,
+     *     check_in: string,
+     *     check_out: string,
      *     source: string
      * }
      */
     public function toArray(Request $request): array
     {
+        $this->resource->loadMissing('roomType');
+
         return [
             'id' => $this->id,
-            'departure_id' => $this->departure_id,
-            'cabin_category' => $this->cabin_category->value,
+            'room_type' => $this->roomType->code,
+            'check_in' => $this->check_in->toDateString(),
+            'check_out' => $this->check_out->toDateString(),
             'source' => $this->source->value,
         ];
     }

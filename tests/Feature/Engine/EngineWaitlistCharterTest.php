@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-use App\Enums\CabinCategory;
 use App\Enums\CharterEnquiryStatus;
 use App\Enums\ContactType;
-use App\Enums\DepartureStatus;
 use App\Enums\Permission;
 use App\Enums\WaitlistSource;
 use App\Mail\CharterEnquiryMail;
 use App\Models\CharterEnquiry;
 use App\Models\Role;
+use App\Models\RoomType;
 use App\Models\User;
 use App\Models\WaitlistEntry;
 use Database\Seeders\ConfigSeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\HotelSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Support\Facades\Mail;
@@ -28,11 +29,12 @@ beforeEach(function (): void {
  * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>
  */
-function engineWaitlistPayload(int $departureId, array $overrides = []): array
+function engineWaitlistPayload(string $roomType = 'STD', array $overrides = []): array
 {
     return array_merge([
-        'departure_id' => $departureId,
-        'cabin_category' => CabinCategory::Suite->value,
+        'room_type' => $roomType,
+        'check_in' => '2026-12-21',
+        'check_out' => '2026-12-24',
         'contact' => [
             'name' => 'Wait Guest',
             'email' => 'wait-'.uniqid().'@iconic.test',
@@ -64,27 +66,27 @@ function engineCharterPayload(array $overrides = []): array
 }
 
 test('the engine waitlist is stored with source engine and refused when off', function (): void {
-    $departure = checkoutWestDeparture();
-
-    $this->postJson('/api/engine/waitlist', engineWaitlistPayload($departure->id))
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(HotelSeeder::class);
+    $this->postJson('/api/engine/waitlist', engineWaitlistPayload())
         ->assertCreated()
-        ->assertJsonPath('source', WaitlistSource::Engine->value);
+        ->assertJsonPath('source', WaitlistSource::Engine->value)
+        ->assertJsonPath('room_type', 'STD')
+        ->assertJsonPath('check_in', '2026-12-21');
 
     expect(WaitlistEntry::query()->value('source'))->toBe(WaitlistSource::Engine);
 
-    $closed = checkoutWestDeparture('2027-11-14');
-    $closed->update(['waitlist_enabled' => false]);
+    RoomType::query()->where('code', 'STD')->update(['waitlist_enabled' => false]);
 
-    $this->postJson('/api/engine/waitlist', engineWaitlistPayload($closed->id))
+    $this->postJson('/api/engine/waitlist', engineWaitlistPayload())
         ->assertUnprocessable()
-        ->assertJsonPath('errors.departure_id.0', 'The waitlist is off for this departure.');
+        ->assertJsonPath('errors.room_type.0', 'The waitlist is off for this room type.');
 });
 
-test('a hidden departure cannot be waitlisted from the engine', function (): void {
-    $departure = checkoutWestDeparture();
-    $departure->update(['status' => DepartureStatus::Hidden]);
-
-    $this->postJson('/api/engine/waitlist', engineWaitlistPayload($departure->id))->assertNotFound();
+test('a room type that is not on the published property cannot be waitlisted', function (): void {
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(HotelSeeder::class);
+    $this->postJson('/api/engine/waitlist', engineWaitlistPayload('HIDDEN'))->assertNotFound();
 });
 
 test('a charter enquiry is stored and mailed to the reservations mailbox', function (): void {
@@ -173,13 +175,13 @@ test('panel.rms without bookings.create cannot change a charter enquiry', functi
 });
 
 test('engine waitlist and charter are rate limited', function (): void {
-    $departure = checkoutWestDeparture();
-
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(HotelSeeder::class);
     for ($i = 0; $i < 5; $i++) {
-        $this->postJson('/api/engine/waitlist', engineWaitlistPayload($departure->id))->assertCreated();
+        $this->postJson('/api/engine/waitlist', engineWaitlistPayload())->assertCreated();
     }
 
-    $this->postJson('/api/engine/waitlist', engineWaitlistPayload($departure->id))->assertStatus(429);
+    $this->postJson('/api/engine/waitlist', engineWaitlistPayload())->assertStatus(429);
 
     for ($i = 0; $i < 5; $i++) {
         $this->postJson('/api/engine/charter-enquiries', engineCharterPayload())->assertCreated();

@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Portal;
 
-use App\Enums\CabinCategory;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StorePortalRequestRequest extends FormRequest
 {
@@ -21,11 +19,14 @@ class StorePortalRequestRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'departure_id' => ['required', 'integer', 'exists:departures,id'],
-            'category' => ['required', Rule::enum(CabinCategory::class)],
-            'cabins' => ['required', 'array', 'min:1'],
-            'cabins.*.adults' => ['required', 'integer', 'min:1'],
-            'cabins.*.children' => ['required', 'integer', 'min:0'],
+            'check_in' => ['required', 'date_format:Y-m-d'],
+            'check_out' => ['required', 'date_format:Y-m-d', 'after:check_in'],
+            'rooms' => ['required', 'array', 'min:1'],
+            'rooms.*.room_type' => ['required', 'string', 'max:32'],
+            'rooms.*.adults' => ['required', 'integer', 'min:1'],
+            'rooms.*.child_ages' => ['sometimes', 'array'],
+            'rooms.*.child_ages.*' => ['integer', 'min:0', 'max:120'],
+            'rooms.*.rate_plan' => ['sometimes', 'nullable', 'string', 'max:32'],
             'client' => ['required', 'array'],
             'client.name' => ['required', 'string', 'max:255'],
             'client.email' => ['required', 'email', 'max:255'],

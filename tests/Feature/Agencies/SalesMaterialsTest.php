@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Enums\CabinCategory;
 use App\Models\AgencyUser;
 use App\Models\ChangeHistory;
 use App\Models\SalesMaterial;
 use App\Models\User;
 use Database\Seeders\ConfigSeeder;
-use Database\Seeders\InventorySeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\HotelSeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\UploadedFile;
@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
-use Tests\Support\Bookings\ReservationFixtures;
 use Tests\TestCase;
 use ZipArchive;
 
@@ -350,13 +349,13 @@ test('the portal lists published shared and own materials and hides the rest', f
 });
 
 test('portal activity lists sign-ins failures requests and downloads newest first', function (): void {
-    $this->seed(InventorySeeder::class);
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(HotelSeeder::class);
     adminUser();
 
     $manager = managerUser();
     $agency = approvedAgency();
     $user = agencyUser(['name' => 'Ana Agent', 'email' => 'ana@agency.test'], $agency);
-    $departure = ReservationFixtures::anamaraDeparture();
 
     $materialId = postMaterial($manager, [
         'title' => 'Fact sheet',
@@ -380,11 +379,14 @@ test('portal activity lists sign-ins failures requests and downloads newest firs
     Auth::forgetGuards();
 
     withPortalCsrf()->actingAs($user, 'agency')->postJson('/api/portal/requests', [
-        'departure_id' => $departure->id,
-        'category' => CabinCategory::Suite->value,
-        'cabins' => [
-            ['adults' => 2, 'children' => 0],
-        ],
+        'check_in' => '2026-12-21',
+        'check_out' => '2026-12-25',
+        'rooms' => [[
+            'room_type' => 'FAM',
+            'adults' => 2,
+            'child_ages' => [],
+            'rate_plan' => 'BAR',
+        ]],
         'client' => [
             'name' => 'Elena Guest',
             'email' => 'elena-activity@guest.test',

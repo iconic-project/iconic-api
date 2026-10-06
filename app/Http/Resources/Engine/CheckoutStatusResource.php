@@ -24,7 +24,10 @@ class CheckoutStatusResource extends JsonResource
      *     email: string|null,
      *     bookings: list<array{reference: string|null, status: string}>,
      *     stripe_checkout_session_id: string|null,
-     *     stripe_expires_at: string|null
+     *     stripe_expires_at: string|null,
+     *     check_in: string|null,
+     *     check_out: string|null,
+     *     rooms: list<array{room_type: string, adults: int, children: int, rate_plan: string}>
      * }
      */
     public function toArray(Request $request): array
@@ -48,6 +51,28 @@ class CheckoutStatusResource extends JsonResource
                 ->all(),
             'stripe_checkout_session_id' => $this->stripe_checkout_session_id,
             'stripe_expires_at' => Iso::utc($this->stripe_expires_at),
+            'check_in' => $this->check_in?->toDateString(),
+            'check_out' => $this->check_out?->toDateString(),
+            'rooms' => $this->publicRooms(),
         ];
+    }
+
+    /**
+     * @return list<array{room_type: string, adults: int, children: int, rate_plan: string}>
+     */
+    private function publicRooms(): array
+    {
+        $rooms = [];
+
+        foreach ($this->rooms ?? [] as $line) {
+            $rooms[] = [
+                'room_type' => $line['room_type'],
+                'adults' => $line['adults'],
+                'children' => count($line['child_ages']),
+                'rate_plan' => $line['rate_plan'],
+            ];
+        }
+
+        return $rooms;
     }
 }

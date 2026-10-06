@@ -11,7 +11,7 @@ final class WaitlistNotifyCommand extends Command
 {
     protected $signature = 'iconic:waitlist-notify';
 
-    protected $description = 'Email the next waitlist entries when a cabin in their category is free';
+    protected $description = 'Email the next waitlist entries when their whole stay is bookable';
 
     public function handle(WaitlistOffers $offers): int
     {

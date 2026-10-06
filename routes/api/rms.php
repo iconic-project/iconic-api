@@ -101,17 +101,22 @@ Route::get('extras/versions/{version}', [ExtrasController::class, 'show'])
 Route::get('properties', [PropertyController::class, 'index']);
 Route::get('properties/{property}', [PropertyController::class, 'show'])->whereNumber('property');
 Route::patch('properties/{property}', [PropertyController::class, 'update'])->whereNumber('property');
+Route::post('properties/{property}/hero', [PropertyController::class, 'hero'])->whereNumber('property');
+Route::get('properties/{property}/history', [PropertyController::class, 'history'])->whereNumber('property');
 Route::get('yachts', [PropertyController::class, 'index']);
 
 Route::get('properties/{property}/room-types', [RoomTypeController::class, 'index'])->whereNumber('property');
 Route::post('properties/{property}/room-types', [RoomTypeController::class, 'store'])->whereNumber('property');
 Route::patch('room-types/{roomType}', [RoomTypeController::class, 'update'])->whereNumber('roomType');
+Route::post('room-types/{roomType}/photos', [RoomTypeController::class, 'photo'])->whereNumber('roomType');
 Route::post('room-types/{roomType}/deactivate', [RoomTypeController::class, 'deactivate'])->whereNumber('roomType');
+Route::get('room-types/{roomType}/history', [RoomTypeController::class, 'history'])->whereNumber('roomType');
 
 Route::get('properties/{property}/rooms', [RoomController::class, 'index'])->whereNumber('property');
 Route::post('properties/{property}/rooms', [RoomController::class, 'store'])->whereNumber('property');
 Route::patch('rooms/{room}', [RoomController::class, 'update'])->whereNumber('room');
 Route::post('rooms/{room}/deactivate', [RoomController::class, 'deactivate'])->whereNumber('room');
+Route::get('rooms/{room}/history', [RoomController::class, 'history'])->whereNumber('room');
 
 Route::get('itineraries', [ItineraryController::class, 'index']);
 Route::get('itineraries/defaults', [ItineraryController::class, 'defaults']);

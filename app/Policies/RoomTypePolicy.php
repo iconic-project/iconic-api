@@ -29,4 +29,9 @@ final class RoomTypePolicy extends Policy
     {
         return $actor->hasPermission(Permission::PropertiesManage);
     }
+
+    public function viewHistory(User $actor, RoomType $roomType): bool
+    {
+        return $actor->hasPermission(Permission::PanelRms);
+    }
 }

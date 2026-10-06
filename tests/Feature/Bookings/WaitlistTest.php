@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Enums\CabinCategory;
 use App\Enums\ClaimKind;
 use App\Enums\ReleaseReason;
 use App\Models\ChangeHistory;
@@ -25,11 +24,19 @@ beforeEach(function (): void {
 /**
  * @return array<string, mixed>
  */
-function waitlistPayload(Departure $departure, array $overrides = []): array
+/**
+ * @param  array<string, mixed>  $overrides
+ * @return array<string, mixed>
+ */
+function waitlistPayload(Departure $departure, array $overrides = [], string $code = 'SUITE'): array
 {
+    $type = $departure->property->roomTypes()->where('code', $code)->firstOrFail();
+    $stay = $departure->stayDates();
+
     return array_merge([
-        'departure_id' => $departure->id,
-        'cabin_category' => CabinCategory::Suite->value,
+        'room_type_id' => $type->id,
+        'check_in' => $stay->checkIn()->toDateString(),
+        'check_out' => $stay->checkOut()->toDateString(),
         'client' => [
             'name' => 'Anna Whitfield',
             'email' => 'anna-'.uniqid().'@iconic.test',
@@ -45,21 +52,21 @@ test('a waitlist entry is added and refused when the waitlist is off', function 
     $this->actingAs(managerUser())
         ->postJson('/api/rms/waitlist', waitlistPayload($departure))
         ->assertCreated()
-        ->assertJsonPath('cabin_category', 'SUITE')
+        ->assertJsonPath('stay.room_type.code', 'SUITE')
         ->assertJsonPath('position', 1);
 
     expect(ChangeHistory::query()->where('event', 'waitlist.added')->count())->toBe(1);
 
     $closed = ReservationFixtures::anamaraDeparture('2027-11-14');
-    $closed->update(['waitlist_enabled' => false]);
+    $closed->property->roomTypes()->where('code', 'SUITE')->firstOrFail()->update(['waitlist_enabled' => false]);
 
     $this->actingAs(managerUser())
         ->postJson('/api/rms/waitlist', waitlistPayload($closed))
         ->assertUnprocessable()
-        ->assertJsonPath('errors.departure_id.0', 'The waitlist is off for this departure.');
+        ->assertJsonPath('errors.room_type.0', 'The waitlist is off for this room type.');
 });
 
-test('positions compact after a removal and cabin_available flips when a block is released', function (): void {
+test('positions compact after a removal and room_available flips when a block is released', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
     $actor = managerUser();
 
@@ -108,24 +115,25 @@ test('positions compact after a removal and cabin_available flips when a block i
 
     $this->actingAs($actor)
         ->postJson('/api/rms/waitlist', waitlistPayload($departure, [
-            'cabin_category' => CabinCategory::Owner->value,
             'client' => ['name' => 'Owner wait', 'email' => 'owner-wait@iconic.test'],
-        ]))
+        ], 'OWNER'))
         ->assertCreated();
 
     $this->actingAs($actor)
-        ->getJson('/api/rms/waitlist?departure_id='.$departure->id)
+        ->getJson('/api/rms/waitlist')
         ->assertOk()
-        ->assertJsonFragment(['cabin_category' => 'OWNER', 'cabin_available' => false]);
+        ->assertJsonFragment(['code' => 'OWNER'])
+        ->assertJsonFragment(['room_available' => false]);
 
     DB::transaction(function () use ($holder): void {
         app(ClaimService::class)->release($holder, ReleaseReason::Released);
     });
 
     $this->actingAs($actor)
-        ->getJson('/api/rms/waitlist?departure_id='.$departure->id)
+        ->getJson('/api/rms/waitlist')
         ->assertOk()
-        ->assertJsonFragment(['cabin_category' => 'OWNER', 'cabin_available' => true]);
+        ->assertJsonFragment(['code' => 'OWNER'])
+        ->assertJsonFragment(['room_available' => true]);
 });
 
 test('notify records the channel and writes history without sending mail', function (): void {

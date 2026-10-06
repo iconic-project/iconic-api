@@ -8,14 +8,18 @@ use App\Models\Booking;
 use App\Models\Guest;
 use App\Services\Config\CurrentConfig;
 use Database\Seeders\ConfigSeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\HotelSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Tests\Support\Bookings\ReservationFixtures;
 
 beforeEach(function (): void {
     $this->seed(RolesSeeder::class);
-    $this->seed(InventorySeeder::class);
     $this->seed(ConfigSeeder::class);
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(InventorySeeder::class);
+    $this->seed(HotelSeeder::class);
 });
 
 /**
@@ -107,7 +111,7 @@ test('no portal response leaks a public rate, sensitive guest fields, or a payme
     $endpoints = [
         '/api/portal/me' => $alwaysForbidden,
         '/api/portal/rates' => $alwaysForbidden,
-        '/api/portal/availability' => [...$alwaysForbidden, 'email'],
+        '/api/portal/availability?check_in=2026-12-21&check_out=2026-12-25&adults=2' => [...$alwaysForbidden, 'email'],
         '/api/portal/bookings' => [...$alwaysForbidden, 'email'],
         '/api/portal/commissions' => [...$alwaysForbidden, 'email'],
         '/api/portal/sales-materials' => $alwaysForbidden,

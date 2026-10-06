@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Casts\CalendarDate;
 use App\Enums\CheckoutPath;
 use App\Enums\CheckoutSessionStatus;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
 use App\Support\Iso;
+use Carbon\CarbonImmutable;
 use Database\Factories\CheckoutSessionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,8 +25,12 @@ use Illuminate\Support\Collection;
 /**
  * @property int $id
  * @property string $token_hash
- * @property int $departure_id
+ * @property int|null $departure_id
  * @property list<array{cabin_code: string, adults: int, children: int}> $cabins
+ * @property CarbonImmutable|null $check_in
+ * @property CarbonImmutable|null $check_out
+ * @property list<array{room_type: string, adults: int, child_ages: list<int>, rate_plan: string, room_id: int}>|null $rooms
+ * @property array{first_name: string, last_name: string, email: string, phone: string|null, preferred_channel: string, marketing: bool, declarations: list<string>, travel_advisor: bool, notes: string|null}|null $guest
  * @property CheckoutSessionStatus $status
  * @property Carbon $expires_at
  * @property bool $extended
@@ -36,7 +42,7 @@ use Illuminate\Support\Collection;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure $departure
+ * @property-read Departure|null $departure
  * @property-read Collection<int, Booking> $bookings
  * @property-read Collection<int, RoomNightClaim> $claims
  */
@@ -44,6 +50,10 @@ use Illuminate\Support\Collection;
     'token_hash',
     'departure_id',
     'cabins',
+    'check_in',
+    'check_out',
+    'rooms',
+    'guest',
     'status',
     'expires_at',
     'extended',
@@ -64,6 +74,10 @@ class CheckoutSession extends Model
     {
         return [
             'cabins' => 'array',
+            'check_in' => CalendarDate::class,
+            'check_out' => CalendarDate::class,
+            'rooms' => 'array',
+            'guest' => 'array',
             'status' => CheckoutSessionStatus::class,
             'expires_at' => 'datetime',
             'extended' => 'boolean',
@@ -110,6 +124,11 @@ class CheckoutSession extends Model
     public function scopeHolding(Builder $query): void
     {
         $query->where('status', CheckoutSessionStatus::Holding);
+    }
+
+    public function isStay(): bool
+    {
+        return $this->check_in !== null;
     }
 
     public function isExpired(): bool

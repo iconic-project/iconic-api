@@ -19,11 +19,12 @@ class IndexPortalAvailabilityRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'from' => ['sometimes', 'date_format:Y-m-d'],
-            'to' => ['sometimes', 'date_format:Y-m-d'],
-            'property' => ['sometimes', 'string', 'exists:properties,code'],
-            'itinerary' => ['sometimes', 'string', 'exists:itineraries,code'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:500'],
+            'check_in' => ['required', 'date_format:Y-m-d'],
+            'check_out' => ['required', 'date_format:Y-m-d', 'after:check_in'],
+            'adults' => ['required', 'integer', 'min:1', 'max:36'],
+            'child_ages' => ['sometimes', 'array'],
+            'child_ages.*' => ['integer', 'min:0', 'max:120'],
+            'rooms' => ['sometimes', 'integer', 'min:1', 'max:36'],
         ];
     }
 }

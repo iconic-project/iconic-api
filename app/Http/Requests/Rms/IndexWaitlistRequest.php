@@ -21,7 +21,6 @@ class IndexWaitlistRequest extends FormRequest
         return [
             'from' => ['sometimes', 'date_format:Y-m-d'],
             'to' => ['sometimes', 'date_format:Y-m-d'],
-            'departure_id' => ['sometimes', 'integer', 'exists:departures,id'],
             'include_removed' => ['sometimes', 'boolean'],
         ];
     }

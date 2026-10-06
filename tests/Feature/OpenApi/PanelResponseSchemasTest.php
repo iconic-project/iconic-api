@@ -997,8 +997,7 @@ test('sprint 12 report, metric, waitlist and charter schemas name their enums', 
     expect(sprint11SchemaRef($subscription['properties']['cadence']))->toContain('ReportCadence');
 
     $waitlist = openApiSchema($spec, 'WaitlistEntryResource');
-    expect($waitlist['properties'])->toHaveKeys(['auto_notified', 'position']);
-    expect(sprint11SchemaRef($waitlist['properties']['cabin_category']))->toContain('CabinCategory');
+    expect($waitlist['properties'])->toHaveKeys(['auto_notified', 'position', 'stay', 'room_available']);
 
     $enquiry = openApiSchema($spec, 'CharterEnquiryResource');
     expect($enquiry['properties'])->toHaveKeys(['proposal', 'sla_breached', 'booking']);

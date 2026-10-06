@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
-use App\Enums\CabinCategory;
 use App\Enums\WaitlistSource;
 use App\Models\Contact;
-use App\Models\Departure;
+use App\Models\RoomType;
 use App\Models\WaitlistEntry;
+use App\Support\Stays\StayDates;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -21,9 +21,12 @@ class WaitlistEntryFactory extends Factory
      */
     public function definition(): array
     {
+        $stay = StayDates::forNights('2028-03-05', 3);
+
         return [
-            'departure_id' => Departure::factory(),
-            'cabin_category' => CabinCategory::Suite,
+            'room_type_id' => RoomType::factory(),
+            'check_in' => $stay->checkIn()->toDateString(),
+            'check_out' => $stay->checkOut()->toDateString(),
             'contact_id' => Contact::factory(),
             'adults' => 2,
             'children' => 0,

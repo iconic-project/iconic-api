@@ -7,12 +7,11 @@ namespace App\Actions\Waitlist;
 use App\Actions\Action;
 use App\Actions\Contacts\ResolveContact;
 use App\Actions\Contacts\StitchEngineIdentity;
-use App\Enums\CabinCategory;
 use App\Enums\WaitlistSource;
+use App\Models\RoomType;
 use App\Models\User;
 use App\Models\WaitlistEntry;
 use App\Support\History\History;
-use App\Support\Inventory\DepartureLocks;
 use Illuminate\Validation\ValidationException;
 
 final class AddWaitlistEntry extends Action
@@ -28,11 +27,11 @@ final class AddWaitlistEntry extends Action
     public function handle(array $data, ?User $actor = null): WaitlistEntry
     {
         return $this->transaction(function () use ($data, $actor): WaitlistEntry {
-            $departure = DepartureLocks::lock((int) $data['departure_id']);
+            $type = RoomType::query()->whereKey((int) $data['room_type_id'])->lockForUpdate()->first();
 
-            if (! $departure->waitlist_enabled) {
+            if (! $type instanceof RoomType || ! $type->waitlist_enabled) {
                 throw ValidationException::withMessages([
-                    'departure_id' => ['The waitlist is off for this departure.'],
+                    'room_type' => ['The waitlist is off for this room type.'],
                 ]);
             }
 
@@ -43,18 +42,15 @@ final class AddWaitlistEntry extends Action
                 isset($data['session_id']) && is_string($data['session_id']) ? $data['session_id'] : null,
             );
 
-            $category = $data['cabin_category'] instanceof CabinCategory
-                ? $data['cabin_category']
-                : CabinCategory::from((string) $data['cabin_category']);
-
             $source = $data['source'] ?? WaitlistSource::Rms;
             $source = $source instanceof WaitlistSource
                 ? $source
                 : WaitlistSource::from((string) $source);
 
             $entry = WaitlistEntry::query()->create([
-                'departure_id' => $departure->id,
-                'cabin_category' => $category,
+                'room_type_id' => $type->id,
+                'check_in' => $data['check_in'],
+                'check_out' => $data['check_out'],
                 'contact_id' => $contact->id,
                 'adults' => (int) $data['adults'],
                 'children' => (int) $data['children'],
@@ -63,13 +59,14 @@ final class AddWaitlistEntry extends Action
             ]);
 
             History::record($entry, 'waitlist.added', after: [
-                'departure_id' => $entry->departure_id,
-                'cabin_category' => $entry->cabin_category->value,
+                'room_type_id' => $entry->room_type_id,
+                'check_in' => $entry->check_in->toDateString(),
+                'check_out' => $entry->check_out->toDateString(),
                 'contact_id' => $entry->contact_id,
                 'source' => $entry->source->value,
             ], actor: $actor, system: $actor === null);
 
-            return $entry->refresh()->load(['departure.property', 'contact']);
+            return $entry->refresh()->load(['roomType.property', 'contact']);
         });
     }
 }

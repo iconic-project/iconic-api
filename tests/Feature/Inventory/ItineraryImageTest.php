@@ -15,25 +15,17 @@ beforeEach(function (): void {
     Storage::fake('public');
 });
 
-test('mateo can upload a hero image', function (): void {
+test('an admin cannot upload an itinerary image', function (): void {
     $itinerary = Itinerary::factory()->create();
-    $mateo = managerUser();
 
-    $file = UploadedFile::fake()->image('hero.jpg', 800, 600);
+    $this->actingAs(adminUser())
+        ->post("/api/rms/itineraries/{$itinerary->id}/image", [
+            'image' => UploadedFile::fake()->image('hero.jpg', 800, 600),
+        ], ['Accept' => 'application/json'])
+        ->assertForbidden();
 
-    $url = $this->actingAs($mateo)
-        ->post("/api/rms/itineraries/{$itinerary->id}/image", ['image' => $file], [
-            'Accept' => 'application/json',
-        ])
-        ->assertOk()
-        ->json('hero_image_url');
-
-    expect($url)->toBeString()->toContain('/storage/itineraries/');
-
-    $itinerary->refresh();
-    expect($itinerary->hero_image_path)->toBeString();
-    Storage::disk('public')->assertExists((string) $itinerary->hero_image_path);
-    expect(ChangeHistory::query()->where('event', 'itinerary.image_replaced')->count())->toBe(1);
+    expect($itinerary->fresh()?->hero_image_path)->toBeNull();
+    expect(ChangeHistory::query()->where('event', 'itinerary.image_replaced')->count())->toBe(0);
 });
 
 test('image upload rejects files that are too large or the wrong type', function (): void {
@@ -55,21 +47,20 @@ test('image upload rejects files that are too large or the wrong type', function
         ->assertJsonValidationErrors(['image']);
 });
 
-test('replacing an image deletes the previous file after commit', function (): void {
+test('a valid replacement is refused and the previous file stays', function (): void {
     $itinerary = Itinerary::factory()->create();
-    $mateo = managerUser();
 
     Storage::disk('public')->put('itineraries/old.jpg', 'old-bytes');
     $itinerary->forceFill(['hero_image_path' => 'itineraries/old.jpg'])->save();
 
-    $this->actingAs($mateo)
+    $this->actingAs(adminUser())
         ->post("/api/rms/itineraries/{$itinerary->id}/image", [
             'image' => UploadedFile::fake()->image('new.jpg'),
         ], ['Accept' => 'application/json'])
-        ->assertOk();
+        ->assertForbidden();
 
-    Storage::disk('public')->assertMissing('itineraries/old.jpg');
-    Storage::disk('public')->assertExists((string) $itinerary->fresh()?->hero_image_path);
+    Storage::disk('public')->assertExists('itineraries/old.jpg');
+    expect($itinerary->fresh()?->hero_image_path)->toBe('itineraries/old.jpg');
 });
 
 test('a forced failure after store leaves the old file and path intact', function (): void {

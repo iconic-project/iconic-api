@@ -28,6 +28,15 @@ class SubmitCheckoutRequest extends FormRequest
      */
     public function rules(): array
     {
+        if ($this->staySession()) {
+            return [
+                'path' => ['required', Rule::enum(CheckoutPath::class)],
+                'expected_total' => ['required', 'integer', 'min:0'],
+                'session_id' => EngineSessionId::rules(),
+                'attribution' => ['sometimes', 'nullable', 'array'],
+            ];
+        }
+
         return [
             'first_name' => ['required', 'string', 'max:120'],
             'last_name' => ['required', 'string', 'max:120'],
@@ -57,6 +66,10 @@ class SubmitCheckoutRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
+        if ($this->staySession()) {
+            return;
+        }
+
         $validator->after(function (Validator $after): void {
             $path = $this->input('path');
             $path = is_string($path) ? CheckoutPath::tryFrom($path) : null;
@@ -144,6 +157,11 @@ class SubmitCheckoutRequest extends FormRequest
             ConsentDocument::Privacy,
             ConsentDocument::Insurance,
         ];
+    }
+
+    private function staySession(): bool
+    {
+        return $this->sessionModel()?->isStay() === true;
     }
 
     private function sessionModel(): ?CheckoutSession

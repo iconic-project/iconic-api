@@ -33,4 +33,14 @@ final class EngineFeedVersion
     {
         return 'engine:cabins:'.$departureId;
     }
+
+    public static function propertyKey(?int $version = null): string
+    {
+        return 'engine:property:'.($version ?? self::current());
+    }
+
+    public static function calendarKey(string $month, int $months, int $adults, int $children, ?int $version = null): string
+    {
+        return 'engine:calendar:'.($version ?? self::current()).':'.$month.':'.$months.':'.$adults.':'.$children;
+    }
 }

@@ -41,7 +41,7 @@ final class NotifyWaitlistEntry extends Action
                 'notified_by' => $actor->id,
             ], actor: $actor);
 
-            return $entry->refresh()->load(['departure.property', 'contact', 'notifiedBy']);
+            return $entry->refresh()->load(['roomType', 'contact', 'notifiedBy']);
         });
     }
 }

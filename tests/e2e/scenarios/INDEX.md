@@ -44,9 +44,9 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | VIS-01 | Pages against the prototype | visual, sprint-2 | P3 | — | Carolina | [visual/VIS-01-pages-against-prototype.md](visual/VIS-01-pages-against-prototype.md) |
 | VIS-02 | Theme toggle everywhere | visual | P3 | — | Carolina | [visual/VIS-02-theme-toggle.md](visual/VIS-02-theme-toggle.md) |
 | INV-01 | Seeded inventory in the Calendar | sprint-3, inventory | retired | — | Carolina | [inventory/INV-01-seeded-calendar.md](inventory/INV-01-seeded-calendar.md) |
-| INV-02 | Write and publish an itinerary | sprint-3, inventory | P1 | B3 | Carolina | [inventory/INV-02-write-publish-itinerary.md](inventory/INV-02-write-publish-itinerary.md) |
-| INV-03 | Itinerary photo | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-03-itinerary-photo.md](inventory/INV-03-itinerary-photo.md) |
-| INV-04 | Itinerary delete guard | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-04-itinerary-delete-guard.md](inventory/INV-04-itinerary-delete-guard.md) |
+| INV-02 | Write and publish an itinerary | sprint-3, inventory | retired | — | Carolina | [inventory/INV-02-write-publish-itinerary.md](inventory/INV-02-write-publish-itinerary.md) |
+| INV-03 | Itinerary photo | sprint-3, inventory | retired | — | Carolina | [inventory/INV-03-itinerary-photo.md](inventory/INV-03-itinerary-photo.md) |
+| INV-04 | Itinerary delete guard | sprint-3, inventory | retired | — | Carolina | [inventory/INV-04-itinerary-delete-guard.md](inventory/INV-04-itinerary-delete-guard.md) |
 | INV-05 | Departure date rules | sprint-3, inventory | P1 | B3 | Carolina | [inventory/INV-05-departure-date-rules.md](inventory/INV-05-departure-date-rules.md) |
 | INV-06 | Generate a season | sprint-3, inventory | P1 | B3 | Carolina | [inventory/INV-06-generate-season.md](inventory/INV-06-generate-season.md) |
 | INV-07 | Status and engine label | sprint-3, inventory | P2 | — | Carolina | [inventory/INV-07-status-engine-label.md](inventory/INV-07-status-engine-label.md) |
@@ -102,18 +102,18 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | DOC-08 | Wire instructions: LEG-004 warning and placeholder PDF | sprint-7, documents | P2 | — | Carolina | [documents/DOC-08-wire-instructions.md](documents/DOC-08-wire-instructions.md) |
 | DOC-09 | Documents & Manifests: filter and open the booking | sprint-7, documents | P2 | — | Carolina | [documents/DOC-09-documents-manifests.md](documents/DOC-09-documents-manifests.md) |
 | DOC-10 | Balance reminder: documents-due once, then nothing | sprint-7, documents | P2 | — | Carolina | [documents/DOC-10-balance-reminder.md](documents/DOC-10-balance-reminder.md) |
-| WEB-01 | November search matches the RMS | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-01-november-search-matches-rms.md](web/WEB-01-november-search-matches-rms.md) |
-| WEB-02 | Drafts, hidden, paused and promo codes never leak | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-02-drafts-hidden-paused-promo-never-leak.md](web/WEB-02-drafts-hidden-paused-promo-never-leak.md) |
-| WEB-03 | Block then FULL · WAITLIST then LIMITED AVAILABILITY | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-03-block-then-full-then-limited.md](web/WEB-03-block-then-full-then-limited.md) |
-| WEB-04 | Trip details tabs and the Western route map | sprint-8, web | P1 | B8 | Guest | [web/WEB-04-trip-details-tabs-and-west-map.md](web/WEB-04-trip-details-tabs-and-west-map.md) |
-| WEB-05 | Step 4 holds the cabin; leaving releases it | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-05-step4-hold-and-abandon-release.md](web/WEB-05-step4-hold-and-abandon-release.md) |
-| WEB-06 | Walkthrough with ICONIC10 on both paths | sprint-8, web | P1 | B8 | Guest | [web/WEB-06-walkthrough-iconic10-both-paths.md](web/WEB-06-walkthrough-iconic10-both-paths.md) |
-| WEB-07 | Pay later creates an ANK-R- request | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-07-pay-later-request-in-rms.md](web/WEB-07-pay-later-request-in-rms.md) |
-| WEB-08 | Pay deposit → replay completed → CONFIRMED | sprint-8, web | P1 | B8 | Guest + Carolina | [web/WEB-08-pay-deposit-replay-confirmed.md](web/WEB-08-pay-deposit-replay-confirmed.md) |
-| WEB-09 | Pay deposit → replay expired → request remains | sprint-8, web | P2 | — | Guest + Carolina | [web/WEB-09-pay-deposit-replay-expired.md](web/WEB-09-pay-deposit-replay-expired.md) |
-| WEB-10 | A festive departure refuses every discount | sprint-8, web | P2 | — | Guest | [web/WEB-10-festive-refuses-discounts.md](web/WEB-10-festive-refuses-discounts.md) |
-| WEB-11 | Cabin taken in the RMS between steps 3 and 4 | sprint-8, web | P2 | — | Guest + Carolina | [web/WEB-11-cabin-taken-between-3-and-4.md](web/WEB-11-cabin-taken-between-3-and-4.md) |
-| WEB-12 | Complete your reservation from the payment-link email | sprint-8, web | P2 | — | Guest + Carolina | [web/WEB-12-complete-from-payment-link-email.md](web/WEB-12-complete-from-payment-link-email.md) |
+| WEB-01 | November search matches the RMS | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-01-november-search-matches-rms.md](web/WEB-01-november-search-matches-rms.md) |
+| WEB-02 | Drafts, hidden, paused and promo codes never leak | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-02-drafts-hidden-paused-promo-never-leak.md](web/WEB-02-drafts-hidden-paused-promo-never-leak.md) |
+| WEB-03 | Block then FULL · WAITLIST then LIMITED AVAILABILITY | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-03-block-then-full-then-limited.md](web/WEB-03-block-then-full-then-limited.md) |
+| WEB-04 | Trip details tabs and the Western route map | sprint-8, web | retired | — | Guest | [web/WEB-04-trip-details-tabs-and-west-map.md](web/WEB-04-trip-details-tabs-and-west-map.md) |
+| WEB-05 | Step 4 holds the cabin; leaving releases it | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-05-step4-hold-and-abandon-release.md](web/WEB-05-step4-hold-and-abandon-release.md) |
+| WEB-06 | Walkthrough with ICONIC10 on both paths | sprint-8, web | retired | — | Guest | [web/WEB-06-walkthrough-iconic10-both-paths.md](web/WEB-06-walkthrough-iconic10-both-paths.md) |
+| WEB-07 | Pay later creates an ANK-R- request | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-07-pay-later-request-in-rms.md](web/WEB-07-pay-later-request-in-rms.md) |
+| WEB-08 | Pay deposit → replay completed → CONFIRMED | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-08-pay-deposit-replay-confirmed.md](web/WEB-08-pay-deposit-replay-confirmed.md) |
+| WEB-09 | Pay deposit → replay expired → request remains | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-09-pay-deposit-replay-expired.md](web/WEB-09-pay-deposit-replay-expired.md) |
+| WEB-10 | A festive departure refuses every discount | sprint-8, web | retired | — | Guest | [web/WEB-10-festive-refuses-discounts.md](web/WEB-10-festive-refuses-discounts.md) |
+| WEB-11 | Cabin taken in the RMS between steps 3 and 4 | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-11-cabin-taken-between-3-and-4.md](web/WEB-11-cabin-taken-between-3-and-4.md) |
+| WEB-12 | Complete your reservation from the payment-link email | sprint-8, web | retired | — | Guest + Carolina | [web/WEB-12-complete-from-payment-link-email.md](web/WEB-12-complete-from-payment-link-email.md) |
 | OFF-01 | A PCT offer is PENDING DIRECTOR until approved, then LIVE | sprint-8, offers | P1 | B8 | Carolina + Guest | [offers/OFF-01-pct-pending-director-then-live.md](offers/OFF-01-pct-pending-director-then-live.md) |
 | OFF-02 | Pause a live offer — gone from the engine within 30 seconds | sprint-8, offers | P2 | — | Carolina + Guest | [offers/OFF-02-pause-live-offer-gone-in-30s.md](offers/OFF-02-pause-live-offer-gone-in-30s.md) |
 | OFF-03 | Festive itinerary cannot be selected; B2B never shows publicly | sprint-8, offers | P2 | — | Carolina + Guest | [offers/OFF-03-festive-blocked-b2b-never-public.md](offers/OFF-03-festive-blocked-b2b-never-public.md) |
@@ -150,9 +150,9 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | PORT-04 | This agency only, and no passenger detail | sprint-13, portal | P1 | B16 | Ada Agent | [portal/PORT-04-agency-scope.md](portal/PORT-04-agency-scope.md) |
 | PORT-05 | Publish a material, the agent downloads it, activity records it | sprint-13, portal | P1 | B16 | Carolina + Ada | [portal/PORT-05-publish-and-download-material.md](portal/PORT-05-publish-and-download-material.md) |
 | PORT-06 | Suspend ends the session; resume restores sign-in | sprint-13, portal | P1 | B16 | Carolina + Ada | [portal/PORT-06-suspend-and-resume.md](portal/PORT-06-suspend-and-resume.md) |
-| PREQ-01 | An available departure becomes a REQUESTED booking | sprint-13, portal | P1 | B17 | Ada + Lucía | [portal/PREQ-01-request-from-available.md](portal/PREQ-01-request-from-available.md) |
+| PREQ-01 | A free Family room for four nights becomes a REQUESTED booking | sprint-13, sprint-20, portal | P1 | B17 | Ada + Lucía | [portal/PREQ-01-request-from-available.md](portal/PREQ-01-request-from-available.md) |
 | PREQ-02 | An over-cap agency's request is held | sprint-13, portal | P1 | B17 | Meridian agent + Carolina | [portal/PREQ-02-over-cap-on-hold.md](portal/PREQ-02-over-cap-on-hold.md) |
-| PREQ-03 | A departure that cannot be requested does not hold a cabin | sprint-13, portal | P1 | B17 | Ada Agent | [portal/PREQ-03-sold-out-refused.md](portal/PREQ-03-sold-out-refused.md) |
+| PREQ-03 | A stay that cannot be requested does not create a booking | sprint-13, sprint-20, portal | P1 | B17 | Ada Agent | [portal/PREQ-03-sold-out-refused.md](portal/PREQ-03-sold-out-refused.md) |
 | PREQ-04 | Portal activity names the user | sprint-13, portal | P2 | B17 | Carolina + Ada | [portal/PREQ-04-activity-names-the-user.md](portal/PREQ-04-activity-names-the-user.md) |
 | PORT-07 | Staff and agent sessions stay on their own apps | sprint-13, portal | P2 | B17 | Carolina + Ada | [portal/PORT-07-staff-and-agent-sessions.md](portal/PORT-07-staff-and-agent-sessions.md) |
 | SEG-01 | The nine segment counts match their lists | sprint-14, crm | P1 | B18 | Carolina | [crm/SEG-01-fresh-seed-counts.md](crm/SEG-01-fresh-seed-counts.md) |
@@ -174,7 +174,7 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | B2B-04 | An activation enrolment matches the journeys drawer | sprint-15, crm | P1 | B20 | Carolina | [crm/B2B-04-activation-matches-drawer.md](crm/B2B-04-activation-matches-drawer.md) |
 | B2B-05 | An agency with no CRM contact shows the no-enrolment sentence | sprint-15, crm | P1 | B20 | Carolina | [crm/B2B-05-no-contact.md](crm/B2B-05-no-contact.md) |
 | PORTAL-PAY-01 | An agent deposit link settles like a staff link | sprint-15, portal | P1 | B20 | Ada Agent + Carolina | [portal/PORTAL-PAY-01-deposit-settles.md](portal/PORTAL-PAY-01-deposit-settles.md) |
-| PORTAL-PAY-02 | Another agency's booking cannot be paid | sprint-15, portal | P1 | B20 | Ada Agent | [portal/PORTAL-PAY-02-other-agency-refused.md](portal/PORTAL-PAY-02-other-agency-refused.md) |
+| PORTAL-PAY-02 | Another agency's booking cannot be paid | sprint-15, portal | retired | — | Ada Agent | [portal/PORTAL-PAY-02-other-agency-refused.md](portal/PORTAL-PAY-02-other-agency-refused.md) |
 | LOCALE-01 | Spanish panel chrome persists, then English returns | sprint-15, panel | P2 | B20 | Carolina | [panel/LOCALE-01-spanish-persists.md](panel/LOCALE-01-spanish-persists.md) |
 | HSET-01 | Properties and room types in the RMS | sprint-16, hotel | P1 | B21 | Carolina | [hotel/HSET-01-properties-and-room-types.md](hotel/HSET-01-properties-and-room-types.md) |
 | HSET-02 | Stay rules on the Business Rules page | sprint-16, hotel | P1 | B21 | Carolina | [hotel/HSET-02-stay-rules.md](hotel/HSET-02-stay-rules.md) |
@@ -199,3 +199,13 @@ The latest result for every P1 is [`runs/LEDGER.md`](../runs/LEDGER.md).
 | HBKG-08 | Move room, timeline updates | sprint-19, hotel, bookings | P2 | B24 | Carolina | [hotel/HBKG-08-move-room.md](hotel/HBKG-08-move-room.md) |
 | HBKG-09 | Balance due counts from arrival | sprint-19, hotel, bookings | P2 | B24 | Carolina | [hotel/HBKG-09-balance-from-arrival.md](hotel/HBKG-09-balance-from-arrival.md) |
 | HBKG-10 | Night audit raises alerts, no status change | sprint-19, hotel, bookings | P2 | B24 | Carolina | [hotel/HBKG-10-night-audit.md](hotel/HBKG-10-night-audit.md) |
+| HENG-01 | Search a stay from the home page | sprint-20, engine | P1 | B25 | Guest | [engine/HENG-01-search-and-from-prices.md](engine/HENG-01-search-and-from-prices.md) |
+| HENG-02 | Min-stay reason and one-click fix | sprint-20, engine | P1 | B25 | Guest | [engine/HENG-02-min-stay-one-click.md](engine/HENG-02-min-stay-one-click.md) |
+| HENG-03 | Book now, pay later | sprint-20, engine | P1 | B25 | Guest + Carolina | [engine/HENG-03-pay-later-in-rms.md](engine/HENG-03-pay-later-in-rms.md) |
+| HENG-04 | Online deposit confirms the booking | sprint-20, engine | P1 | B25 | Guest + Carolina | [engine/HENG-04-deposit-stripe-confirmed.md](engine/HENG-04-deposit-stripe-confirmed.md) |
+| HENG-05 | Two browsers race for the last room | sprint-20, engine | P1 | B25 | Carolina + two guests | [engine/HENG-05-two-browsers-last-room.md](engine/HENG-05-two-browsers-last-room.md) |
+| HENG-06 | Hold expires and the nights are free | sprint-20, engine | P2 | B25 | Guest + Carolina | [engine/HENG-06-hold-expires-nights-free.md](engine/HENG-06-hold-expires-nights-free.md) |
+| HENG-07 | Sold out, then join the waitlist | sprint-20, engine | P2 | B25 | Guest + Carolina | [engine/HENG-07-sold-out-waitlist.md](engine/HENG-07-sold-out-waitlist.md) |
+| HPOR-01 | Agency availability and rates | sprint-20, portal | P1 | B26 | Ada Agent | [portal/HPOR-01-availability-and-rates.md](portal/HPOR-01-availability-and-rates.md) |
+| HPOR-02 | Agency request, hold visible in the RMS | sprint-20, portal | P1 | B26 | Ada Agent + Carolina | [portal/HPOR-02-request-hold-on-timeline.md](portal/HPOR-02-request-hold-on-timeline.md) |
+| HPOR-03 | Commission payable date is after check-out | sprint-20, portal | P2 | B26 | Ada Agent | [portal/HPOR-03-commission-payable-after-checkout.md](portal/HPOR-03-commission-payable-after-checkout.md) |

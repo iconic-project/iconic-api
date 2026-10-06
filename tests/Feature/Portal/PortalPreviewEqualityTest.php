@@ -76,9 +76,9 @@ test('the portal payloads match the RMS preview figures exactly', function (): v
         ->withHeaders(portalHeaders())
         ->getJson('/api/portal/rates')
         ->assertOk()
-        ->json('data');
+        ->json();
 
-    expect($portalRates)->toBe($preview['net_rates']);
+    expect($portalRates)->toBe($preview['stay_rates']);
 
     $portalBookings = $this->actingAs($user, 'agency')
         ->withHeaders(portalHeaders())

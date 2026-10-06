@@ -23,6 +23,8 @@ enum BehaviouralEventName: string
     case CharterInquirySubmit = 'charter_inquiry_submit';
     case ViewDeparture = 'view_departure';
     case PageView = 'page_view';
+    case SearchPerformed = 'search_performed';
+    case RoomTypeViewed = 'room_type_viewed';
     case IdentityStitched = 'identity.stitched';
 
     public function isClient(): bool

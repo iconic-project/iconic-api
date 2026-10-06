@@ -3,9 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\ItineraryStatus;
-use App\Models\ChangeHistory;
 use App\Models\Itinerary;
-use App\Support\Itineraries\Defaults;
 use App\Support\Itineraries\Gradients;
 use Database\Seeders\RolesSeeder;
 
@@ -43,36 +41,20 @@ test('lucia can view itineraries and cannot write', function (): void {
         ->assertForbidden();
 });
 
-test('mateo can create a draft itinerary with mkItin defaults', function (): void {
-    $mateo = managerUser();
+test('an admin cannot create, update or delete an itinerary', function (): void {
+    $itinerary = Itinerary::factory()->create(['code' => 'WEST']);
+    $admin = adminUser();
 
-    $response = $this->actingAs($mateo)
+    $this->actingAs($admin)
         ->postJson('/api/rms/itineraries', [
             'code' => 'south',
             'name' => 'Southern Isles',
-        ]);
+        ])
+        ->assertForbidden();
 
-    $response->assertCreated()
-        ->assertJsonPath('code', 'SOUTH')
-        ->assertJsonPath('status', 'DRAFT')
-        ->assertJsonPath('days', 8)
-        ->assertJsonPath('nights', 7)
-        ->assertJsonPath('embark', 'San Cristóbal (SCY)')
-        ->assertJsonPath('fallback_gradient', Gradients::css(Gradients::DEFAULT_KEY))
-        ->assertJsonPath('fallback_gradient_key', Gradients::DEFAULT_KEY)
-        ->assertJsonPath('chips.0', Defaults::CHIPS[0]);
+    expect(Itinerary::query()->where('code', 'SOUTH')->exists())->toBeFalse();
 
-    expect(Itinerary::query()->where('code', 'SOUTH')->firstOrFail()->status)->toBe(ItineraryStatus::Draft);
-
-    $entry = ChangeHistory::query()->where('event', 'itinerary.created')->first();
-    expect($entry)->not->toBeNull();
-    expect($entry?->subject_type)->toBe('itinerary');
-});
-
-test('a panel-shaped create with empty draft strings succeeds', function (): void {
-    $mateo = managerUser();
-
-    $this->actingAs($mateo)
+    $this->actingAs($admin)
         ->postJson('/api/rms/itineraries', [
             'code' => 'SOUTH',
             'name' => 'Southern Isles',
@@ -86,12 +68,26 @@ test('a panel-shaped create with empty draft strings succeeds', function (): voi
             'highlights' => [],
             'day_plan' => [],
         ])
-        ->assertCreated()
-        ->assertJsonPath('code', 'SOUTH')
-        ->assertJsonPath('status', 'DRAFT')
-        ->assertJsonPath('hero_alt', '')
-        ->assertJsonPath('card_description', '')
-        ->assertJsonPath('slug', null);
+        ->assertForbidden();
+
+    $this->actingAs($admin)
+        ->patchJson("/api/rms/itineraries/{$itinerary->id}", ['code' => 'EAST', 'name' => 'Renamed'])
+        ->assertForbidden();
+
+    expect($itinerary->fresh()?->code)->toBe('WEST');
+    expect($itinerary->fresh()?->name)->not->toBe('Renamed');
+
+    $this->actingAs($admin)
+        ->patchJson("/api/rms/itineraries/{$itinerary->id}", ['status' => 'PUBLISHED'])
+        ->assertForbidden();
+
+    expect($itinerary->fresh()?->status)->toBe(ItineraryStatus::Draft);
+
+    $this->actingAs($admin)
+        ->deleteJson("/api/rms/itineraries/{$itinerary->id}")
+        ->assertForbidden();
+
+    expect(Itinerary::query()->whereKey($itinerary->id)->exists())->toBeTrue();
 });
 
 test('defaults match mkItin', function (): void {
@@ -131,62 +127,7 @@ test('itinerary rows expose fallback_gradient_key alongside the css', function (
         ->assertJsonPath('data.0.fallback_gradient', Gradients::css('Northern (forest)'));
 });
 
-test('code is immutable after creation', function (): void {
-    $itinerary = Itinerary::factory()->create(['code' => 'WEST']);
-    $mateo = managerUser();
-
-    $this->actingAs($mateo)
-        ->patchJson("/api/rms/itineraries/{$itinerary->id}", ['code' => 'EAST'])
-        ->assertOk()
-        ->assertJsonPath('code', 'WEST');
-
-    expect($itinerary->fresh()?->code)->toBe('WEST');
-});
-
-test('publishing without a day plan returns 422 naming day-by-day plan', function (): void {
-    $itinerary = Itinerary::factory()->create([
-        'name' => 'Western Realm',
-        'card_description' => 'A card description.',
-        'days' => 8,
-        'nights' => 7,
-        'day_plan' => [],
-    ]);
-    $mateo = managerUser();
-
-    $this->actingAs($mateo)
-        ->patchJson("/api/rms/itineraries/{$itinerary->id}", ['status' => 'PUBLISHED'])
-        ->assertStatus(422)
-        ->assertJsonValidationErrors(['status']);
-
-    expect($this->actingAs($mateo)->patchJson("/api/rms/itineraries/{$itinerary->id}", ['status' => 'PUBLISHED'])->json('message'))
-        ->toContain('day-by-day plan');
-
-    expect($itinerary->fresh()?->status)->toBe(ItineraryStatus::Draft);
-});
-
-test('publishing a complete itinerary succeeds', function (): void {
-    $itinerary = Itinerary::factory()->publishable()->create();
-    $mateo = managerUser();
-
-    $this->actingAs($mateo)
-        ->patchJson("/api/rms/itineraries/{$itinerary->id}", ['status' => 'PUBLISHED'])
-        ->assertOk()
-        ->assertJsonPath('status', 'PUBLISHED');
-});
-
-test('an itinerary can be deleted while no departures exist', function (): void {
-    $itinerary = Itinerary::factory()->create();
-    $mateo = managerUser();
-
-    $this->actingAs($mateo)
-        ->deleteJson("/api/rms/itineraries/{$itinerary->id}")
-        ->assertNoContent();
-
-    expect(Itinerary::query()->count())->toBe(0);
-    expect(ChangeHistory::query()->where('event', 'itinerary.deleted')->count())->toBe(1);
-});
-
-test('code validation follows the prototype editor', function (): void {
+test('code validation still runs before the read-only denial', function (): void {
     $mateo = managerUser();
 
     $this->actingAs($mateo)
@@ -242,10 +183,10 @@ test('completeness lists missing fields in prototype order', function (): void {
         ->toBe((int) round((13 - 12) / 13 * 100));
 });
 
-test('INV-02 publish path is 54 percent with the six non-blocking gaps', function (): void {
-    $mateo = managerUser();
+test('a publish-shaped write is forbidden', function (): void {
+    $admin = adminUser();
 
-    $created = $this->actingAs($mateo)
+    $this->actingAs($admin)
         ->postJson('/api/rms/itineraries', [
             'code' => 'SOUTH',
             'name' => 'Southern Isles',
@@ -259,32 +200,7 @@ test('INV-02 publish path is 54 percent with the six non-blocking gaps', functio
             'highlights' => [],
             'day_plan' => [],
         ])
-        ->assertCreated()
-        ->json();
+        ->assertForbidden();
 
-    $published = $this->actingAs($mateo)
-        ->patchJson("/api/rms/itineraries/{$created['id']}", [
-            'name' => 'Southern Isles',
-            'card_description' => 'Southern isles — a test itinerary.',
-            'long_description' => '',
-            'highlights' => [],
-            'day_plan' => [['Day 1', 'Day 1 at sea.']],
-            'slug' => null,
-            'meta_title' => '',
-            'meta_description' => '',
-            'status' => 'PUBLISHED',
-        ])
-        ->assertOk();
-
-    $published
-        ->assertJsonPath('status', 'PUBLISHED')
-        ->assertJsonPath('completeness.pct', 54)
-        ->assertJsonPath('completeness.missing', [
-            'hero photo',
-            'highlights',
-            'long description',
-            'URL slug',
-            'SEO title',
-            'SEO description',
-        ]);
+    expect(Itinerary::query()->where('code', 'SOUTH')->exists())->toBeFalse();
 });

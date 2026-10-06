@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Engine\AvailabilityController;
+use App\Http\Controllers\Engine\CalendarController;
 use App\Http\Controllers\Engine\CharterEnquiryController;
 use App\Http\Controllers\Engine\CharterProposalController;
 use App\Http\Controllers\Engine\CheckoutController;
@@ -12,6 +14,7 @@ use App\Http\Controllers\Engine\EngineEventsController;
 use App\Http\Controllers\Engine\FeedController;
 use App\Http\Controllers\Engine\MarketingLeadController;
 use App\Http\Controllers\Engine\PromoCheckController;
+use App\Http\Controllers\Engine\PropertyFeedController;
 use App\Http\Controllers\Engine\QuestionnaireController;
 use App\Http\Controllers\Engine\QuoteController;
 use App\Http\Controllers\Engine\SurveyController;
@@ -22,6 +25,9 @@ use Illuminate\Support\Facades\Route;
 Route::post('events', EngineEventsController::class)->middleware('throttle:engine-events');
 
 Route::get('feed', FeedController::class);
+Route::get('property', PropertyFeedController::class);
+Route::get('calendar', CalendarController::class);
+Route::get('availability', AvailabilityController::class);
 Route::get('countries', CountryController::class);
 Route::get('departures/{departure}/cabins', DepartureCabinController::class);
 Route::post('promo/check', PromoCheckController::class)->middleware('throttle:engine-promo');

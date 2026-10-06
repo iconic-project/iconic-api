@@ -23,6 +23,7 @@ Route::middleware('portal.auth')->group(function (): void {
     Route::get('/me', [PortalAgencyController::class, 'me']);
     Route::get('/rates', [PortalAgencyController::class, 'rates']);
     Route::get('/availability', [PortalAvailabilityController::class, 'index']);
+    Route::get('/calendar', [PortalAvailabilityController::class, 'calendar']);
     Route::get('/bookings', [PortalBookingController::class, 'index']);
     Route::post('/bookings/{booking}/payment-link', [PortalBookingController::class, 'storePaymentLink'])->whereNumber('booking');
     Route::get('/requests', [PortalRequestController::class, 'index']);

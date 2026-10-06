@@ -1,0 +1,42 @@
+{
+  "meta": {
+    "demo": true,
+    "note": "Shape of GET /api/engine/availability. rooms_left is capped at the low-availability threshold plus one. A quote is for one room with this party."
+  },
+  "check_in": "2026-02-02",
+  "check_out": "2026-02-04",
+  "adults": 2,
+  "child_ages": [],
+  "rooms": 1,
+  "room_types": [
+    {
+      "code": "STD",
+      "name": "Standard Double",
+      "bookable": true,
+      "reasons": [],
+      "rooms_left": 4,
+      "quotes": [
+        {
+          "rate_plan": "BAR",
+          "night_lines": [
+            {"night": "2026-02-02", "season": "LOW", "base": 100, "extras": 0, "single": 0, "dow": 0, "supplements": 0, "plan_adjust": 0, "total": 100}
+          ],
+          "lines": [{"code": "room", "label": "room", "amount": 200}],
+          "tax_lines": [],
+          "total": 200,
+          "deposit_pct": 30,
+          "deposit": 60,
+          "total_including_charged_taxes": 200
+        }
+      ]
+    },
+    {
+      "code": "STD",
+      "name": "Standard Double",
+      "bookable": false,
+      "reasons": ["MIN_STAY:3"],
+      "rooms_left": 4,
+      "quotes": []
+    }
+  ]
+}

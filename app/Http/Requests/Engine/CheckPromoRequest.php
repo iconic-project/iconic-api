@@ -22,6 +22,15 @@ class CheckPromoRequest extends FormRequest
      */
     public function rules(): array
     {
+        if ($this->filled('check_in')) {
+            return [
+                'code' => ['required', 'string', 'max:64'],
+                'check_in' => ['required', 'date_format:Y-m-d'],
+                'check_out' => ['required', 'date_format:Y-m-d', 'after:check_in'],
+                'room_type' => ['sometimes', 'nullable', 'string', 'max:32'],
+            ];
+        }
+
         return [
             'code' => ['required', 'string', 'max:64'],
             'departure_id' => ['required', 'integer', 'exists:departures,id'],
@@ -34,6 +43,10 @@ class CheckPromoRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
+        if ($this->filled('check_in')) {
+            return;
+        }
+
         $this->validateAndNormalizeCabins($validator);
     }
 }

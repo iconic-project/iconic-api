@@ -34,3 +34,4 @@ Thumbs.db
 /tests/e2e/runs/.logs/
 
 *.plan.md
+.pnpm-store/

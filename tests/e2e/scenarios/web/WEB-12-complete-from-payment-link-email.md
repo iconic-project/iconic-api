@@ -1,6 +1,8 @@
 # WEB-12 · Complete your reservation from the payment-link email
+
+Retired in sprint 20. The engine searches stays. Walk HENG-01 through HENG-07. Do not walk these departure steps.
 - **Tags:** sprint-8, web
-- **Priority:** P2
+- **Priority:** retired
 - **Users:** Guest + Carolina
 - **Start:** reset
 - **Needs:** Mailpit · two browser contexts

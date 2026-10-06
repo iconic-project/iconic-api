@@ -24,4 +24,9 @@ final class PropertyPolicy extends Policy
     {
         return $actor->hasPermission(Permission::PropertiesManage);
     }
+
+    public function viewHistory(User $actor, Property $property): bool
+    {
+        return $actor->hasPermission(Permission::PanelRms);
+    }
 }

@@ -87,8 +87,9 @@ test('portal OpenAPI schemas have properties and name their enums', function ():
     foreach ([
         'PortalMeResource',
         'PortalAgencyMeResource',
-        'PortalNetRateResource',
+        'PortalStayRatesResource',
         'PortalAvailabilityResource',
+        'PortalCalendarResource',
         'PortalBookingResource',
         'PortalCommissionResource',
         'PortalRequestResource',
@@ -114,22 +115,21 @@ test('portal OpenAPI schemas have properties and name their enums', function ():
     portalSchemaRef($agency['status'], 'AgencyStatus');
     expect($agencyMe['properties']['materials_exist']['type'] ?? null)->toBe('boolean');
 
-    $rates = portalOpenApiSchema($spec, 'PortalNetRateResource');
-    expect($rates['properties'])->toHaveKeys(['year', 'suite_pp', 'owner_pp', 'charter_week']);
+    $rates = portalOpenApiSchema($spec, 'PortalStayRatesResource');
+    expect($rates['properties'])->toHaveKeys(['commission_pct', 'seasons', 'room_types', 'room_rates', 'rate_plans', 'length_of_stay', 'supplements']);
 
     $ratesResponse = $spec['paths']['/portal/rates']['get']['responses'][200]['content']['application/json']['schema'] ?? [];
     expect($ratesResponse)->toBeArray();
-    portalSchemaRef($ratesResponse['properties']['data']['items'] ?? [], 'PortalNetRateResource');
+    portalSchemaRef($ratesResponse, 'PortalStayRatesResource');
 
     $availability = portalOpenApiSchema($spec, 'PortalAvailabilityResource');
-    expect($availability['properties']['id']['type'] ?? null)->toBe('integer');
-    expect($availability['properties']['festive']['type'] ?? null)->toBe('boolean');
-    portalSchemaRef($availability['properties']['status'], 'DepartureStatus');
-    $label = portalOpenApiProperties($availability['properties']['label']);
-    portalSchemaRef($label['code'], 'EngineLabelCode');
-    $net = portalOpenApiProperties($availability['properties']['net_rates']);
-    expect($net['suite_pp']['type'] ?? null)->toBe('integer');
-    expect($net['owner_pp']['type'] ?? null)->toBe('integer');
+    expect($availability['properties']['check_in']['type'] ?? null)->toBe('string');
+    expect($availability['properties']['commission_pct']['type'] ?? null)->toBe('integer');
+    expect($availability['properties']['room_types']['type'] ?? null)->toBe('array');
+
+    $calendar = portalOpenApiSchema($spec, 'PortalCalendarResource');
+    expect($calendar['properties']['from']['type'] ?? null)->toBe('string');
+    expect($calendar['properties']['nights']['type'] ?? null)->toBe('array');
 
     $portalBooking = portalOpenApiSchema($spec, 'PortalBookingResource');
     portalSchemaRef($portalBooking['properties']['status'], 'BookingStatus');
@@ -150,7 +150,8 @@ test('portal OpenAPI schemas have properties and name their enums', function ():
 
     portalSchemaRef(portalOpenApiSchema($spec, 'PortalSalesMaterialResource')['properties']['kind'], 'SalesMaterialKind');
     portalSchemaRef(portalOpenApiSchema($spec, 'SalesMaterialResource')['properties']['kind'], 'SalesMaterialKind');
-    portalSchemaRef(portalOpenApiSchema($spec, 'StorePortalRequestRequest')['properties']['category'], 'CabinCategory');
+    expect(portalOpenApiSchema($spec, 'StorePortalRequestRequest')['properties'])->toHaveKey('check_in');
+    expect(portalOpenApiSchema($spec, 'StorePortalRequestRequest')['properties'])->toHaveKey('rooms');
     portalSchemaRef(portalOpenApiSchema($spec, 'StoreSalesMaterialRequest')['properties']['kind'], 'SalesMaterialKind');
 
     $activity = portalOpenApiSchema($spec, 'PortalActivityResource');
@@ -178,8 +179,6 @@ test('portal OpenAPI schemas have properties and name their enums', function ():
         'BookingStatus',
         'CommissionAccrualStatus',
         'SalesMaterialKind',
-        'EngineLabelCode',
-        'CabinCategory',
     ] as $enum) {
         $schema = $spec['components']['schemas'][$enum] ?? null;
         expect($schema)->toBeArray("schema {$enum} is missing");

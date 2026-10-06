@@ -1,6 +1,8 @@
 # WEB-04 · Trip details tabs and the Western route map
+
+Retired in sprint 20. The engine searches stays. Walk HENG-01 through HENG-07. Do not walk these departure steps.
 - **Tags:** sprint-8, web
-- **Priority:** P1
+- **Priority:** retired
 - **Users:** Guest
 - **Start:** reset
 

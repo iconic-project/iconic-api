@@ -72,6 +72,9 @@ final class HotelSeeder extends Seeder
                     'size_sqm' => $row['size_sqm'],
                     'bed_setup' => $row['bed_setup'],
                     'amenities' => $row['amenities'],
+                    'photos' => $row['photos'] ?? null,
+                    'meta_title' => $row['meta_title'] ?? null,
+                    'meta_description' => $row['meta_description'] ?? null,
                 ],
             );
             $types[$type->code] = $type;

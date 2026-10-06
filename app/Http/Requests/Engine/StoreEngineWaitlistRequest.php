@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Engine;
 
-use App\Enums\CabinCategory;
 use App\Enums\PreferredChannel;
 use App\Support\Engine\EngineSessionId;
 use Illuminate\Foundation\Http\FormRequest;
@@ -23,8 +22,9 @@ class StoreEngineWaitlistRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'departure_id' => ['required', 'integer', 'exists:departures,id'],
-            'cabin_category' => ['required', Rule::enum(CabinCategory::class)],
+            'room_type' => ['required', 'string', 'max:32'],
+            'check_in' => ['required', 'date_format:Y-m-d'],
+            'check_out' => ['required', 'date_format:Y-m-d', 'after:check_in'],
             'contact' => ['required', 'array'],
             'contact.name' => ['required', 'string', 'max:255'],
             'contact.email' => ['required', 'email', 'max:255'],

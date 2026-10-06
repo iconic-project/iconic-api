@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Enums\CabinCategory;
+use App\Casts\CalendarDate;
 use App\Enums\PreferredChannel;
 use App\Enums\WaitlistSource;
 use App\Models\Concerns\HasAuditColumns;
 use App\Models\Concerns\SerializesDatesAsUtc;
+use Carbon\CarbonImmutable;
 use Database\Factories\WaitlistEntryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -20,8 +21,9 @@ use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
- * @property int $departure_id
- * @property CabinCategory $cabin_category
+ * @property int $room_type_id
+ * @property CarbonImmutable $check_in
+ * @property CarbonImmutable $check_out
  * @property int $contact_id
  * @property int $adults
  * @property int $children
@@ -37,14 +39,15 @@ use Illuminate\Support\Carbon;
  * @property int|null $updated_by
  * @property Carbon $created_at
  * @property Carbon $updated_at
- * @property-read Departure $departure
+ * @property-read RoomType $roomType
  * @property-read Contact $contact
  * @property-read User|null $notifiedBy
  * @property-read User|null $removedBy
  */
 #[Fillable([
-    'departure_id',
-    'cabin_category',
+    'room_type_id',
+    'check_in',
+    'check_out',
     'contact_id',
     'adults',
     'children',
@@ -65,7 +68,7 @@ class WaitlistEntry extends Model
 
     public ?int $queuePosition = null;
 
-    public bool $cabinIsAvailable = false;
+    public bool $roomIsAvailable = false;
 
     /**
      * @return array<string, string>
@@ -73,7 +76,8 @@ class WaitlistEntry extends Model
     protected function casts(): array
     {
         return [
-            'cabin_category' => CabinCategory::class,
+            'check_in' => CalendarDate::class,
+            'check_out' => CalendarDate::class,
             'source' => WaitlistSource::class,
             'adults' => 'integer',
             'children' => 'integer',
@@ -84,11 +88,11 @@ class WaitlistEntry extends Model
     }
 
     /**
-     * @return BelongsTo<Departure, $this>
+     * @return BelongsTo<RoomType, $this>
      */
-    public function departure(): BelongsTo
+    public function roomType(): BelongsTo
     {
-        return $this->belongsTo(Departure::class);
+        return $this->belongsTo(RoomType::class);
     }
 
     /**

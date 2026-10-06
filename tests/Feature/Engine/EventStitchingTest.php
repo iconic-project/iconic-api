@@ -8,6 +8,8 @@ use App\Models\BehaviouralEvent;
 use App\Models\ChangeHistory;
 use App\Models\Contact;
 use Database\Seeders\ConfigSeeder;
+use Database\Seeders\DemoUsersSeeder;
+use Database\Seeders\HotelSeeder;
 use Database\Seeders\InventorySeeder;
 use Database\Seeders\RolesSeeder;
 use Illuminate\Support\Facades\Mail;
@@ -48,14 +50,15 @@ test('checkout submit back-fills a session and writes one identity.stitched', fu
 });
 
 test('a waitlist stitch with no booking makes the contact MQL', function (): void {
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(HotelSeeder::class);
     $session = engineSessionId();
     $this->postJson('/api/engine/events', [
         'session_id' => $session,
         'events' => [engineEvent(BehaviouralEventName::ViewDeparture->value, ['itinerary_code' => 'WEST'])],
     ])->assertOk();
 
-    $departure = checkoutWestDeparture();
-    $payload = engineWaitlistPayload($departure->id, ['session_id' => $session]);
+    $payload = engineWaitlistPayload('STD', ['session_id' => $session]);
 
     $this->postJson('/api/engine/waitlist', $payload)->assertCreated();
 
@@ -67,14 +70,15 @@ test('a waitlist stitch with no booking makes the contact MQL', function (): voi
 });
 
 test('a second contact on the same session does not rewrite the first', function (): void {
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(HotelSeeder::class);
     $session = engineSessionId();
     $this->postJson('/api/engine/events', [
         'session_id' => $session,
         'events' => [engineEvent(BehaviouralEventName::PageView->value, ['page_path' => '/first'])],
     ])->assertOk();
 
-    $departure = checkoutWestDeparture();
-    $first = engineWaitlistPayload($departure->id, [
+    $first = engineWaitlistPayload('STD', [
         'session_id' => $session,
         'contact' => ['name' => 'First Guest', 'email' => 'first-'.uniqid().'@iconic.test'],
     ]);
@@ -86,7 +90,7 @@ test('a second contact on the same session does not rewrite the first', function
         'events' => [engineEvent(BehaviouralEventName::PageView->value, ['page_path' => '/after-first'])],
     ])->assertOk();
 
-    $second = engineWaitlistPayload($departure->id, [
+    $second = engineWaitlistPayload('STD', [
         'session_id' => $session,
         'contact' => ['name' => 'Second Guest', 'email' => 'second-'.uniqid().'@iconic.test'],
     ]);
@@ -149,14 +153,15 @@ test('a charter enquiry stitches the session', function (): void {
 });
 
 test('submitting the same session twice for one contact writes one stitch', function (): void {
+    $this->seed(DemoUsersSeeder::class);
+    $this->seed(HotelSeeder::class);
     $session = engineSessionId();
     $this->postJson('/api/engine/events', [
         'session_id' => $session,
         'events' => [engineEvent(BehaviouralEventName::PageView->value, ['page_path' => '/'])],
     ])->assertOk();
 
-    $departure = checkoutWestDeparture();
-    $payload = engineWaitlistPayload($departure->id, ['session_id' => $session]);
+    $payload = engineWaitlistPayload('STD', ['session_id' => $session]);
     $this->postJson('/api/engine/waitlist', $payload)->assertCreated();
     $this->postJson('/api/engine/waitlist', array_merge($payload, [
         'contact' => $payload['contact'],

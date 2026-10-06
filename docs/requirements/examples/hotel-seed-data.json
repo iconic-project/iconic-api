@@ -16,8 +16,8 @@
     "phone": "+1-555-0100",
     "email": "stay@hotel-demo.test",
     "description": "Demo hotel used by development and tests. Twenty-four rooms on three floors. Real copy is a client input.",
-    "hero_image_path": null,
-    "hero_alt": null,
+    "hero_image_path": "properties/hotel-demo-hero.jpg",
+    "hero_alt": "Hotel Demo exterior",
     "highlights": [
       "24 rooms",
       "3 floors",
@@ -49,6 +49,9 @@
       "size_sqm": 22,
       "bed_setup": "1 double bed",
       "amenities": ["Wifi", "Desk"],
+      "photos": [{"path": "room-types/standard-double.jpg", "alt": "Standard double room"}],
+      "meta_title": "Standard Double",
+      "meta_description": "Demo double room for two guests.",
       "status": "ACTIVE"
     },
     {
@@ -64,6 +67,9 @@
       "size_sqm": 22,
       "bed_setup": "2 single beds",
       "amenities": ["Wifi", "Desk"],
+      "photos": [{"path": "room-types/twin.jpg", "alt": "Twin room"}],
+      "meta_title": "Twin",
+      "meta_description": "Demo twin room for two guests.",
       "status": "ACTIVE"
     },
     {
@@ -79,6 +85,9 @@
       "size_sqm": 32,
       "bed_setup": "1 double bed and 2 singles",
       "amenities": ["Wifi", "Desk"],
+      "photos": [{"path": "room-types/family.jpg", "alt": "Family room"}],
+      "meta_title": "Family",
+      "meta_description": "Demo family room for up to four guests.",
       "status": "ACTIVE"
     },
     {
@@ -94,6 +103,9 @@
       "size_sqm": 40,
       "bed_setup": "1 king bed and 1 single",
       "amenities": ["Wifi", "Desk", "Sofa"],
+      "photos": [{"path": "room-types/suite.jpg", "alt": "Suite"}],
+      "meta_title": "Suite",
+      "meta_description": "Demo suite for up to three guests.",
       "status": "ACTIVE"
     }
   ],

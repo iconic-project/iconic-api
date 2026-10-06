@@ -1,6 +1,8 @@
 # WEB-09 · Pay deposit → replay expired → request remains
+
+Retired in sprint 20. The engine searches stays. Walk HENG-01 through HENG-07. Do not walk these departure steps.
 - **Tags:** sprint-8, web
-- **Priority:** P2
+- **Priority:** retired
 - **Users:** Guest + Carolina
 - **Start:** reset
 - **Needs:** two browser contexts

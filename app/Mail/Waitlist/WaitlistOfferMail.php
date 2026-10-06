@@ -20,7 +20,7 @@ final class WaitlistOfferMail extends Mailable
     public function __construct(
         public Delivery $delivery,
         public string $sentence,
-        public string $departureUrl,
+        public string $stayUrl,
     ) {}
 
     public function envelope(): Envelope
