@@ -182,6 +182,36 @@ test('groups filter by stay check-in from and to', function (): void {
         ->assertJsonPath('data.0.id', $decGroup->id);
 });
 
+test('the booking list is newest first and paginates', function (): void {
+    $property = ReservationFixtures::anamaraDeparture()->property;
+    $older = Booking::factory()->create([
+        'room_id' => $property->rooms->firstWhere('code', 'S1')?->id,
+        'owner_id' => adminUser()->id,
+    ]);
+    $newer = Booking::factory()->create([
+        'room_id' => $property->rooms->firstWhere('code', 'S2')?->id,
+        'owner_id' => adminUser()->id,
+    ]);
+    $older->forceFill(['created_at' => now()->subDays(2)])->save();
+    $newer->forceFill(['created_at' => now()->subDay()])->save();
+
+    $this->actingAs(adminUser())
+        ->getJson('/api/rms/bookings?per_page=1')
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $newer->id)
+        ->assertJsonPath('meta.current_page', 1)
+        ->assertJsonPath('meta.last_page', 2)
+        ->assertJsonPath('meta.per_page', 1)
+        ->assertJsonPath('meta.total', 2);
+
+    $this->actingAs(adminUser())
+        ->getJson('/api/rms/bookings?per_page=1&page=2')
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $older->id)
+        ->assertJsonPath('meta.current_page', 2);
+});
+
 test('booking owners lists active panel.rms users to records.act_on_any', function (): void {
     $carolina = adminUser(['name' => 'Carolina M.']);
     $mateo = managerUser(['name' => 'Mateo R.']);
