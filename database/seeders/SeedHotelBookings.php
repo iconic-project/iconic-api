@@ -162,7 +162,7 @@ final class SeedHotelBookings
         foreach ($rest as $row) {
             $reference = (string) $row['reference'];
 
-            if ($this->exists($reference)) {
+            if ($this->exists($reference) || (string) $row['status'] === BookingStatus::OnHoldAgency->value) {
                 continue;
             }
 

@@ -163,7 +163,7 @@ test('the hotel seeder is idempotent and bookings have no departure', function (
         expect(Completeness::forRoomType($type)->pct)->toBe(100);
         expect(Completeness::engineVisible($type))->toBeTrue();
     }
-    expect(Booking::query()->count())->toBe(25);
+    expect(Booking::query()->count())->toBe(29);
     expect(Schema::hasColumn('bookings', 'departure_id'))->toBeFalse();
 
     $group = Booking::query()->where('reference', 'HTL-001')->firstOrFail();
@@ -179,7 +179,8 @@ test('the hotel seeder is idempotent and bookings have no departure', function (
     expect(Booking::query()->where('reference', 'HTL-011')->firstOrFail()->status)->toBe(BookingStatus::CheckedOut);
     expect(Booking::query()->where('reference', 'HTL-016')->firstOrFail()->status)->toBe(BookingStatus::Cancelled);
     expect(Booking::query()->where('reference', 'HTL-019')->firstOrFail()->status)->toBe(BookingStatus::InHouse);
-    expect(Booking::query()->where('reference', 'HTL-026')->exists())->toBeFalse();
+    expect(Booking::query()->where('reference', 'HTL-026')->firstOrFail()->status)->toBe(BookingStatus::FullyPaid);
+    expect(Booking::query()->where('reference', 'HTL-029')->exists())->toBeFalse();
 });
 
 test('hotel seed writes the hotel', function (): void {

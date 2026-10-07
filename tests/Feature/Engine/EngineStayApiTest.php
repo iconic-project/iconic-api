@@ -170,7 +170,7 @@ test('availability caps rooms left and returns a reason when the party does not 
 
     expect(collect($short['room_types'])->firstWhere('code', 'STD')['reasons'])->toContain('MIN_STAY:3');
 
-    $this->getJson('/api/engine/availability?check_in=2026-10-05&check_out=2026-10-06&adults=2&rooms=1')
+    $this->getJson('/api/engine/availability?check_in=2027-01-05&check_out=2027-01-06&adults=2&rooms=1')
         ->assertOk()
         ->assertJsonPath('room_types.0.reasons.0', 'NO_RATE');
 });

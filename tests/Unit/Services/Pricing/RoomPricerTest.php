@@ -378,14 +378,14 @@ test('per-night percentage rounding wins over rounding the stay sum', function (
 test('a missing night is named and later nights are not priced', function (): void {
     $result = quoteStay([
         'room_type' => 'STD',
-        'check_in' => '2026-09-30',
+        'check_in' => '2026-12-31',
         'nights' => 2,
         'adults' => 2,
         'rate_plan' => 'BAR',
     ]);
 
     expect($result)->toBeInstanceOf(NoRate::class);
-    expect($result->reason)->toBe('No rate for STD on 2026-10-01');
+    expect($result->reason)->toBe('No rate for STD on 2027-01-01');
 });
 
 test('a season without a room rate names that night', function (): void {
