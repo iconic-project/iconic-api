@@ -17,7 +17,7 @@ beforeEach(function (): void {
     $this->seed(ConfigSeeder::class);
 });
 
-test('the queue lists requests with meta.rules and SLA order', function (): void {
+test('the queue lists requests newest first with meta.rules', function (): void {
     $departure = ReservationFixtures::anamaraDeparture();
     $actor = managerUser();
 
@@ -40,23 +40,33 @@ test('the queue lists requests with meta.rules and SLA order', function (): void
     $response = $this->actingAs($actor)
         ->getJson('/api/rms/requests')
         ->assertOk()
-        ->assertJsonPath('data.0.id', $first->id)
-        ->assertJsonPath('data.1.id', $second->id)
-        ->assertJsonPath('data.1.party', '2 adults + 1 child · 1 cabin')
-        ->assertJsonPath('data.1.travel_advisor', true)
-        ->assertJsonPath('data.1.contact.preferred_channel', 'WHATSAPP')
+        ->assertJsonPath('data.0.id', $second->id)
+        ->assertJsonPath('data.1.id', $first->id)
+        ->assertJsonPath('data.0.party', '2 adults · 1 room')
+        ->assertJsonPath('data.0.travel_advisor', true)
+        ->assertJsonPath('data.0.contact.preferred_channel', 'WHATSAPP')
         ->assertJsonPath('data.0.hold.expired', false)
         ->assertJsonPath('data.0.sla.breached', false)
+        ->assertJsonPath('meta.current_page', 1)
+        ->assertJsonPath('meta.total', 2)
         ->assertJsonPath('meta.rules.near_term_business_hours', 48)
         ->assertJsonPath('meta.rules.long_lead_business_days', 5)
         ->assertJsonPath('meta.rules.near_term_max_days', 120)
         ->assertJsonPath('meta.rules.response_hours', 24)
         ->assertJsonPath('meta.rules.business_day_minutes', 540)
-        ->assertJsonPath('meta.rules.cabin_deposit_pct', 10);
+        ->assertJsonPath('meta.rules.deposit_pct', 30);
 
     expect($response->json('data.0.hold.remaining_business_minutes'))
         ->toBeInt()
         ->toBeGreaterThan(0);
+
+    $this->actingAs($actor)
+        ->getJson('/api/rms/requests?per_page=1&page=2')
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $first->id)
+        ->assertJsonPath('meta.current_page', 2)
+        ->assertJsonPath('meta.last_page', 2);
 });
 
 test('confirm converts the hold and release requires a reason', function (): void {

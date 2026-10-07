@@ -138,39 +138,39 @@ test('confirm after expiry offers another room of the type and does not swap it 
         ->assertJsonPath('status', BookingStatus::PendingPayment->value);
 });
 
-test('the request queue sorts by check-in and keeps the SLA', function (): void {
+test('the request queue is newest first and keeps the SLA', function (): void {
     $room = queueRoom('401', 1);
-    $later = queueRequest($room, ['check_in' => '2026-02-11', 'check_out' => '2026-02-13']);
+    $older = queueRequest($room, ['check_in' => '2026-02-04', 'check_out' => '2026-02-06']);
     $this->travel(2)->hours();
-    $earlier = queueRequest($room, ['check_in' => '2026-02-04', 'check_out' => '2026-02-06']);
+    $newer = queueRequest($room, ['check_in' => '2026-02-11', 'check_out' => '2026-02-13']);
 
-    $response = $this->actingAs($earlier->owner)
+    $response = $this->actingAs($older->owner)
         ->getJson('/api/rms/requests')
         ->assertOk()
-        ->assertJsonPath('data.0.id', $earlier->id)
-        ->assertJsonPath('data.1.id', $later->id)
-        ->assertJsonPath('data.0.stay.check_in', '2026-02-04')
-        ->assertJsonPath('data.0.stay.check_out', '2026-02-06')
-        ->assertJsonPath('data.0.nights', 2)
-        ->assertJsonPath('data.0.rooms_count', 1)
-        ->assertJsonPath('data.0.room_type.code', 'STD')
-        ->assertJsonPath('data.0.copy', '1 room · Wed 4 – Fri 6 Feb 2026 · 2 nights')
+        ->assertJsonPath('data.0.id', $newer->id)
+        ->assertJsonPath('data.1.id', $older->id)
+        ->assertJsonPath('data.1.stay.check_in', '2026-02-04')
+        ->assertJsonPath('data.1.stay.check_out', '2026-02-06')
+        ->assertJsonPath('data.1.nights', 2)
+        ->assertJsonPath('data.1.rooms_count', 1)
+        ->assertJsonPath('data.1.room_type.code', 'STD')
+        ->assertJsonPath('data.1.copy', '1 room · Wed 4 – Fri 6 Feb 2026 · 2 nights')
         ->assertJsonPath('data.0.sla.breached', false)
         ->assertJsonPath('meta.rules.response_hours', 24)
         ->assertJsonPath('meta.rules.near_term_business_hours', 48)
         ->assertJsonPath('meta.rules.business_day_minutes', 540);
 
-    $due = $earlier->fresh()?->bookingRequest?->sla_due_at;
+    $due = $newer->fresh()?->bookingRequest?->sla_due_at;
 
     expect(array_keys($response->json('data.0')))->not->toContain('departure')
         ->and($response->json('data.0.sla.due_at'))->toBe(Iso::utc($due))
-        ->and($later->bookingRequest?->sla_due_at?->lt($due))->toBeTrue();
+        ->and($older->bookingRequest?->sla_due_at?->lt($due))->toBeTrue();
 
-    $this->actingAs($earlier->owner)
+    $this->actingAs($older->owner)
         ->getJson('/api/rms/requests?from=2026-02-11&to=2026-02-11')
         ->assertOk()
         ->assertJsonCount(1, 'data')
-        ->assertJsonPath('data.0.id', $later->id);
+        ->assertJsonPath('data.0.id', $newer->id);
 });
 
 function queueRoom(string $code, int $sort): Room

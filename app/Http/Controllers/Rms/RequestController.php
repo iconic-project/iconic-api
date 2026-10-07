@@ -43,6 +43,8 @@ final class RequestController extends Controller
             abort(401);
         }
 
+        $perPage = $request->integer('per_page', 15);
+
         $bookings = Booking::query()
             ->select('bookings.*')
             ->join('booking_requests', 'booking_requests.booking_id', '=', 'bookings.id')
@@ -66,9 +68,9 @@ final class RequestController extends Controller
                 $request->filled('to'),
                 fn (Builder $query) => $query->whereDate('bookings.check_in', '<=', (string) $request->validated('to')),
             )
-            ->orderBy('bookings.check_in')
-            ->orderBy('bookings.id')
-            ->get();
+            ->orderByDesc('bookings.created_at')
+            ->orderByDesc('bookings.id')
+            ->paginate($perPage);
 
         return BookingRequestResource::collection($bookings)->additional([
             'meta' => [
