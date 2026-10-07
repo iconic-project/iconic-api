@@ -43,8 +43,8 @@ enum ReferenceType: string
         $number = str_pad((string) $value, $this->padWidth(), '0', STR_PAD_LEFT);
 
         return match ($this) {
-            self::Booking => "ANK-{$year}-{$number}",
-            self::Request => "ANK-R-{$year}-{$number}",
+            self::Booking => "HTL-{$year}-{$number}",
+            self::Request => "HTL-R-{$year}-{$number}",
             self::Block => "BLK-{$number}",
             self::Group => "GRP-{$number}",
             self::Offer => "OF-{$number}",

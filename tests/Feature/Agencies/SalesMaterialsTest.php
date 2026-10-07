@@ -424,7 +424,7 @@ test('portal activity lists sign-ins failures requests and downloads newest firs
         ]);
 
     $requestRow = collect($activity->json('data'))->firstWhere('event', 'portal.request_created');
-    expect($requestRow['references'][0] ?? null)->toStartWith('ANK-R-');
+    expect($requestRow['references'][0] ?? null)->toStartWith('HTL-R-');
     expect(json_encode($activity->json('data')))->not->toContain('wrong password');
 });
 

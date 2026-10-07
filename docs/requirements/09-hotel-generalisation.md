@@ -155,7 +155,7 @@ Never edit a merged migration (`laravel.mdc`). Every rename is a new migration.
 
 **H23 — Offers and promos.** Offer validity uses a **stay window** (`stay_from`, `stay_to`, applied per night that falls inside) and a **booking window**, plus optional `min_nights`. Replaces "travel date = departure date".
 
-**H24 — References.** `DEP-…` sequences stop being drawn. Booking references (`ANK-YYYY-NNNN`) keep their format; `YYYY` remains the year of sale (unchanged rule). Prefix change is a client decision (HQ12) and a one-line config change in `ReferenceService`.
+**H24 — References.** `DEP-…` sequences stop being drawn. New booking references are `HTL-YYYY-NNNN` and new requests are `HTL-R-YYYY-NNNN`. `YYYY` remains the year of sale. References already issued keep the prefix they were drawn with.
 
 ## 4. Target schema (summary)
 
@@ -193,4 +193,4 @@ offers              + stay_from, stay_to, min_nights
 | HQ9 | Guest registration fields per jurisdiction | Name, nationality, DOB, document no., arrival, departure |
 | HQ10 | Multi-currency | USD only |
 | HQ11 | Multiple time zones | One business time zone |
-| HQ12 | Booking reference prefix | Unchanged |
+| HQ12 | Booking reference prefix | **Answered:** `HTL` for new bookings and requests. Issued references stay as drawn. |

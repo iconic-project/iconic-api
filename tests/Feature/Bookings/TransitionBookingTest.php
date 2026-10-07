@@ -197,7 +197,7 @@ test('confirming a request converts the hold and assigns a booking reference', f
         ->assertJsonPath('request_reference', $booking->request_reference);
 
     $booking->refresh();
-    expect($booking->reference)->toStartWith('ANK-');
+    expect($booking->reference)->toStartWith('HTL-');
     expect($booking->claims()->whereNull('released_at')->where('kind', ClaimKind::Booking)->pluck('room_id')->unique())->toHaveCount(1);
     expect($booking->claims()->whereNull('released_at')->where('kind', ClaimKind::Hold)->count())->toBe(0);
 });

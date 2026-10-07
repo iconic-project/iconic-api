@@ -72,7 +72,7 @@ test('a settled deposit confirms a pending booking as system with the payment re
         ->assertJsonPath('warnings', []);
 
     $booking->refresh();
-    expect($booking->reference)->toStartWith('ANK-');
+    expect($booking->reference)->toStartWith('HTL-');
 
     $events = ChangeHistory::query()
         ->where('subject_type', 'booking')

@@ -275,7 +275,7 @@ Conflict when a cabin already has a booking claim: `{cabin} on {j M Y} · {YACHT
 | ANK-2026-0018 | 12 Dec 2027 ANAMARA | Suite 02 | CONFIRMED (seed OVERDUE) | 26,600 | Lucía | D2C | A. Fontaine |
 | ANK-2026-0021 | 14 Nov 2027 ANAMARA (DEP-003) | Suite 01 | ON_HOLD_AGENCY | 26,600 | Carolina | B2B | Meridian Voyages hold |
 
-GRP-007: `Alvear family & friends`, coordinator Lorena Alvear, 28 Nov 2027 ANAMARA. Next draws after a fresh seed (`ensureAtLeast` after agencies + Pest): `ANK-2026-0022`, `GRP-008`, `ANK-R-2026-0043`.
+GRP-007: `Alvear family & friends`, coordinator Lorena Alvear, 28 Nov 2027 ANAMARA. Next draws after a fresh seed (`ensureAtLeast` after agencies + Pest): `HTL-2026-0022`, `GRP-008`, `HTL-R-2026-0043`. Seeded rows above keep the `ANK-` prefix they were issued with.
 
 ### Seeded money (Sprint 5)
 
@@ -367,7 +367,7 @@ Public badge offers after reset (feed `offers[]` + departure `offers[]`): OPENIN
 
 ## Engine walkthrough (2 adults · 7 Nov 2027 ANAMARA WEST · Suite 03 · ICONIC10)
 
-Walkthrough cabin after reset: **7 Nov 2027 ANAMARA · Suite 03** (S01/S02 taken). Next request `ANK-R-2026-0043`.
+Walkthrough cabin after reset: **7 Nov 2027 ANAMARA · Suite 03** (S01/S02 taken). Next request `HTL-R-2026-0043`.
 
 Do **not** copy Pest LAST12 totals (21,067 / 20,014). Those used a factory −12 % on that Sunday. Seeded LAST12 is 2 Jan 2028 WEST — no departure. Seeded Nov–Dec public offer is OPENING-27 (CREDIT, not a price cut).
 
@@ -592,7 +592,7 @@ Ada Agent, `ada@portal.test`, agency AG-001. Password `password`.
 
 `ANK-2026-0021` belongs to AG-002. Ada's lists do not include it. `CreatePortalPaymentLink` throws `AuthorizationException` with `This booking is not available to your agency.` The HTTP route returns 403.
 
-The next request reference on a fresh reset, when this scenario is the first new request, is `ANK-R-2026-0043` (same sequence fact as PREQ-01). A portal deposit payment settles to `PaymentStatus::Settled` and the booking becomes `CONFIRMED` (`PortalPaymentLinkTest`). History actor label is `Ada Agent via portal`. `payment_links.created_by` stays null.
+The next request reference on a fresh reset, when this scenario is the first new request, is `HTL-R-2026-0043` (same sequence fact as PREQ-01). A portal deposit payment settles to `PaymentStatus::Settled` and the booking becomes `CONFIRMED` (`PortalPaymentLinkTest`). History actor label is `Ada Agent via portal`. `payment_links.created_by` stays null.
 
 ### Spanish
 

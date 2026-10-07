@@ -41,7 +41,7 @@ test('a request draws ANK-R, writes a HOLD and SLA, and leaves reference null', 
     );
 
     expect($booking->reference)->toBeNull();
-    expect($booking->request_reference)->toStartWith('ANK-R-');
+    expect($booking->request_reference)->toStartWith('HTL-R-');
     expect($booking->status)->toBe(BookingStatus::Requested);
     expect($booking->bookingRequest?->preferred_channel)->toBe(PreferredChannel::Whatsapp);
     expect($booking->bookingRequest?->hold_rule)->toBe(HoldRule::LongLead);

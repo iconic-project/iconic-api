@@ -96,7 +96,7 @@ test('a portal request matches an engine request and freezes the agency commissi
     $booking = Booking::query()->where('request_reference', $reference)->firstOrFail();
 
     expect($booking->reference)->toBeNull()
-        ->and($booking->request_reference)->toStartWith('ANK-R-')
+        ->and($booking->request_reference)->toStartWith('HTL-R-')
         ->and($booking->status)->toBe(BookingStatus::Requested)
         ->and($booking->agency_id)->toBe($agency->id)
         ->and($booking->commission_pct)->toBe(10)

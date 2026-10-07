@@ -43,7 +43,7 @@ test('an existing scope waits with 1205 then yields the next number', function (
 
     onDefaultConnection('mysql', function () use ($service, $at): void {
         DB::beginTransaction();
-        expect($service->next(ReferenceType::Booking, $at))->toBe('ANK-2026-0001');
+        expect($service->next(ReferenceType::Booking, $at))->toBe('HTL-2026-0001');
         DB::commit();
     });
 
@@ -53,7 +53,7 @@ test('an existing scope waits with 1205 then yields the next number', function (
         return $service->next(ReferenceType::Booking, $at);
     });
 
-    expect($first)->toBe('ANK-2026-0002');
+    expect($first)->toBe('HTL-2026-0002');
 
     onDefaultConnection('mysql_lock', function () use ($service, $at): void {
         DB::beginTransaction();
@@ -80,7 +80,7 @@ test('an existing scope waits with 1205 then yields the next number', function (
         return $ref;
     });
 
-    expect($second)->toBe('ANK-2026-0003');
+    expect($second)->toBe('HTL-2026-0003');
 });
 
 test('a new scope waits with 1205 then yields the next number', function (): void {
@@ -93,7 +93,7 @@ test('a new scope waits with 1205 then yields the next number', function (): voi
         return $service->next(ReferenceType::Booking, $at);
     });
 
-    expect($first)->toBe('ANK-2031-0001');
+    expect($first)->toBe('HTL-2031-0001');
 
     onDefaultConnection('mysql_lock', function () use ($service, $at): void {
         DB::beginTransaction();
@@ -120,5 +120,5 @@ test('a new scope waits with 1205 then yields the next number', function (): voi
         return $ref;
     });
 
-    expect($second)->toBe('ANK-2031-0002');
+    expect($second)->toBe('HTL-2031-0002');
 });

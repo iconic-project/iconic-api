@@ -637,8 +637,8 @@ cmd_portal_pay() {
   local reference kind code output line
   reference="${1:-}"
   kind="${2:-}"
-  if ! printf '%s' "${reference}" | grep -Eq '^ANK-(R-)?[0-9]{4}-[0-9]+$'; then
-    die "reference must look like ANK-2026-0007 or ANK-R-2026-0043"
+  if ! printf '%s' "${reference}" | grep -Eq '^(ANK|HTL)-(R-)?[0-9]{4}-[0-9]+$'; then
+    die "reference must look like HTL-2026-0007, ANK-2026-0007 or ANK-R-2026-0043"
   fi
   if ! printf '%s' "${kind}" | grep -Eq '^(DEPOSIT|BALANCE)$'; then
     die "kind must be DEPOSIT or BALANCE"
