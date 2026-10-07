@@ -31,7 +31,7 @@ final class StripeSdkGateway implements StripeGateway
      * @param  list<array{booking: Booking, amountUsd: int}>  $items
      * @param  array<string, string>  $metadata
      */
-    public function createCheckoutSession(array $items, array $metadata, CarbonInterface $expiresAt): CreatedCheckoutSession
+    public function createCheckoutSession(array $items, array $metadata, CarbonInterface $expiresAt, ?string $customerEmail = null): CreatedCheckoutSession
     {
         $lineItems = [];
 
@@ -50,7 +50,7 @@ final class StripeSdkGateway implements StripeGateway
         }
 
         $engineUrl = rtrim((string) config('iconic.engine_url'), '/');
-        $session = $this->client()->checkout->sessions->create([
+        $params = [
             'mode' => 'payment',
             'line_items' => $lineItems,
             'expires_at' => $expiresAt->getTimestamp(),
@@ -60,7 +60,13 @@ final class StripeSdkGateway implements StripeGateway
             'payment_intent_data' => [
                 'metadata' => $metadata,
             ],
-        ]);
+        ];
+
+        if (is_string($customerEmail) && $customerEmail !== '') {
+            $params['customer_email'] = $customerEmail;
+        }
+
+        $session = $this->client()->checkout->sessions->create($params);
 
         return new CreatedCheckoutSession(
             (string) $session->id,

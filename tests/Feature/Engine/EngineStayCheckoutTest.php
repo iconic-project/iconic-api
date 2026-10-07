@@ -368,6 +368,11 @@ test('a guest can hold and pay a three night two room stay', function (): void {
         ->assertJsonStructure(['references', 'checkout_url']);
 
     $session = CheckoutSession::findByToken($created['token']);
+    $gateway = app(FakeStripeGateway::class);
+    assert($gateway instanceof FakeStripeGateway);
+    $email = is_array($session?->guest) ? ($session->guest['email'] ?? null) : null;
+    expect($gateway->lastCustomerEmail)->toBe($email)->not->toBeEmpty();
+
     $bookings = Booking::query()->where('checkout_session_id', $session?->id)->orderBy('id')->get();
     expect($bookings)->toHaveCount(2);
     expect($bookings->every(fn (Booking $booking): bool => $booking->deposit_pct === 30))->toBeTrue();

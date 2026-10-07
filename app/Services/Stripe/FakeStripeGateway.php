@@ -43,6 +43,8 @@ final class FakeStripeGateway implements StripeGateway
 
     public ?string $lastCancelUrl = null;
 
+    public ?string $lastCustomerEmail = null;
+
     public static function fixturePath(): string
     {
         return database_path('fixtures/stripe-charges.json');
@@ -52,7 +54,7 @@ final class FakeStripeGateway implements StripeGateway
      * @param  list<array{booking: Booking, amountUsd: int}>  $items
      * @param  array<string, string>  $metadata
      */
-    public function createCheckoutSession(array $items, array $metadata, CarbonInterface $expiresAt): CreatedCheckoutSession
+    public function createCheckoutSession(array $items, array $metadata, CarbonInterface $expiresAt, ?string $customerEmail = null): CreatedCheckoutSession
     {
         if ($this->failCheckout) {
             throw new RuntimeException('Stripe Checkout Session could not be created.');
@@ -64,6 +66,7 @@ final class FakeStripeGateway implements StripeGateway
         $engineUrl = rtrim((string) config('iconic.engine_url'), '/');
         $this->lastSuccessUrl = $engineUrl.'/book/confirmation?session_id={CHECKOUT_SESSION_ID}';
         $this->lastCancelUrl = $engineUrl.'/book/details?cancelled=1';
+        $this->lastCustomerEmail = $customerEmail;
         $created = new CreatedCheckoutSession($id, 'https://checkout.stripe.com/c/pay/'.$id, $expires);
         $this->checkoutSessions[$id] = [
             'session' => $created,
