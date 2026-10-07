@@ -34,7 +34,7 @@
       "size_sqm": 22,
       "bed_setup": "2 single beds",
       "amenities": ["Wifi"],
-      "photos": [{"alt": "Twin room", "url": "/storage/room-types/twin.jpg"}],
+      "photos": [{"alt": "Twin room", "url": "/storage/room-types/twin.png"}],
       "base_occupancy": 2,
       "max_occupancy": 2,
       "max_adults": 2,

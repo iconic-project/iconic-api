@@ -1,2 +1,4 @@
 *
 !.gitignore
+!room-types/*
+!room-types

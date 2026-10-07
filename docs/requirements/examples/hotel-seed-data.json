@@ -49,7 +49,7 @@
       "size_sqm": 22,
       "bed_setup": "1 double bed",
       "amenities": ["Wifi", "Desk"],
-      "photos": [{"path": "room-types/standard-double.jpg", "alt": "Standard double room"}],
+      "photos": [{"path": "room-types/standard-double.png", "alt": "Standard double room"}],
       "meta_title": "Standard Double",
       "meta_description": "Demo double room for two guests.",
       "status": "ACTIVE"
@@ -67,7 +67,7 @@
       "size_sqm": 22,
       "bed_setup": "2 single beds",
       "amenities": ["Wifi", "Desk"],
-      "photos": [{"path": "room-types/twin.jpg", "alt": "Twin room"}],
+      "photos": [{"path": "room-types/twin.png", "alt": "Twin room"}],
       "meta_title": "Twin",
       "meta_description": "Demo twin room for two guests.",
       "status": "ACTIVE"
@@ -85,7 +85,7 @@
       "size_sqm": 32,
       "bed_setup": "1 double bed and 2 singles",
       "amenities": ["Wifi", "Desk"],
-      "photos": [{"path": "room-types/family.jpg", "alt": "Family room"}],
+      "photos": [{"path": "room-types/suite.png", "alt": "Family room"}],
       "meta_title": "Family",
       "meta_description": "Demo family room for up to four guests.",
       "status": "ACTIVE"
@@ -103,7 +103,7 @@
       "size_sqm": 40,
       "bed_setup": "1 king bed and 1 single",
       "amenities": ["Wifi", "Desk", "Sofa"],
-      "photos": [{"path": "room-types/suite.jpg", "alt": "Suite"}],
+      "photos": [{"path": "room-types/suite.png", "alt": "Suite"}],
       "meta_title": "Suite",
       "meta_description": "Demo suite for up to three guests.",
       "status": "ACTIVE"
