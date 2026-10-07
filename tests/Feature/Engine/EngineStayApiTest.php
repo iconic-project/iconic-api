@@ -197,6 +197,23 @@ test('a stay quote is signed and an unbookable stay is refused', function (): vo
     expect($token['total'])->toBe(200);
     expect($token['rates_version_id'])->toBe($quoted['rates_version_id']);
 
+    $online = $this->postJson('/api/engine/quote', [
+        'check_in' => '2026-02-02',
+        'check_out' => '2026-02-04',
+        'rooms' => [[
+            'room_type' => 'STD',
+            'adults' => 2,
+            'child_ages' => [],
+            'rate_plan' => 'BAR',
+            'online_deposit' => true,
+        ]],
+    ])->assertOk()->json();
+
+    expect($online['check_in'])->toBe('2026-02-02');
+    expect($online['check_out'])->toBe('2026-02-04');
+    expect($online['total'])->toBeLessThan($quoted['total']);
+    expect($online['deposit'])->toBeLessThan($quoted['deposit']);
+
     $this->postJson('/api/engine/quote', [
         'check_in' => '2026-02-02',
         'check_out' => '2026-02-04',

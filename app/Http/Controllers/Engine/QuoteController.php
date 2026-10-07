@@ -15,7 +15,7 @@ final class QuoteController extends Controller
     #[DocumentedResponse(status: 200, type: EngineStayQuoteResource::class)]
     public function __invoke(StayQuoteRequest $request, EngineStayQuote $stays): EngineStayQuoteResource
     {
-        /** @var array{check_in: string, check_out: string, rooms: list<array{room_type: string, adults: int, child_ages: list<int>, rate_plan: string}>} $validated */
+        /** @var array{check_in: string, check_out: string, rooms: list<array{room_type: string, adults: int, child_ages: list<int>, rate_plan: string, online_deposit?: bool}>} $validated */
         $validated = $request->validated();
 
         return new EngineStayQuoteResource($stays->quote($validated));

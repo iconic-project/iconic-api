@@ -312,6 +312,27 @@ test('pay later converts both rooms of a three night stay', function (): void {
     expect(CheckoutSession::findByToken($created['token'])?->status)->toBe(CheckoutSessionStatus::Submitted);
 });
 
+test('paying the deposit with the shop total is refused on the same dates', function (): void {
+    $rooms = [['room_type' => 'STD', 'adults' => 2, 'child_ages' => [], 'rate_plan' => 'BAR']];
+    $quote = stayQuote($rooms);
+    $created = $this->postJson('/api/engine/checkout', [
+        'quote_token' => $quote['quote_token'],
+        ...stayGuest(stayDepositDeclarations()),
+    ])->assertCreated()->json();
+
+    $this->postJson('/api/engine/checkout/'.$created['token'].'/submit', [
+        'path' => CheckoutPath::PayDeposit->value,
+        'expected_total' => $quote['total'],
+    ])
+        ->assertStatus(409)
+        ->assertJsonPath('message', 'The price changed. Review the new quote and submit again.')
+        ->assertJsonPath('quote.check_in', '2026-12-21')
+        ->assertJsonPath('quote.check_out', '2026-12-24')
+        ->assertJsonPath('quote.total', stayOnlineTotal($rooms));
+
+    expect(CheckoutSession::findByToken($created['token'])?->status)->toBe(CheckoutSessionStatus::Holding);
+});
+
 test('submitting a stale total keeps the hold', function (): void {
     $quote = stayQuote([['room_type' => 'STD', 'adults' => 2, 'child_ages' => [], 'rate_plan' => 'BAR']]);
     $created = $this->postJson('/api/engine/checkout', [

@@ -27,7 +27,7 @@ final class EngineStayQuote
     ) {}
 
     /**
-     * @param  array{check_in: string, check_out: string, rooms: list<array{room_type: string, adults: int, child_ages: list<int>, rate_plan: string}>}  $input
+     * @param  array{check_in: string, check_out: string, rooms: list<array{room_type: string, adults: int, child_ages: list<int>, rate_plan: string, online_deposit?: bool}>}  $input
      * @return array<string, mixed>
      */
     public function quote(array $input): array
@@ -79,12 +79,18 @@ final class EngineStayQuote
         $spec = [];
 
         foreach ($input['rooms'] as $room) {
-            $spec[] = [
+            $line = [
                 'room_type' => $room['room_type'],
                 'adults' => $room['adults'],
                 'child_ages' => $room['child_ages'],
                 'rate_plan' => $room['rate_plan'],
             ];
+
+            if (($room['online_deposit'] ?? false) === true) {
+                $line['online_deposit'] = true;
+            }
+
+            $spec[] = $line;
         }
 
         $quoted = $this->quoter->quoteRooms($stay, $spec);

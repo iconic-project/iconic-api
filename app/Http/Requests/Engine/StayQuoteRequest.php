@@ -27,6 +27,7 @@ class StayQuoteRequest extends FormRequest
             'rooms.*.child_ages' => ['present', 'array'],
             'rooms.*.child_ages.*' => ['integer', 'min:0', 'max:120'],
             'rooms.*.rate_plan' => ['required', 'string', 'max:32'],
+            'rooms.*.online_deposit' => ['sometimes', 'boolean'],
         ];
     }
 }
