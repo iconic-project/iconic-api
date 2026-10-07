@@ -10,7 +10,7 @@ A stay shorter than the arrival night's minimum says why, and one control length
 
 ## Steps
 1. Hotel seed. Open `http://localhost:3000`. Click `Analytics off`.
-2. Check-in **3 Jul 2026**, check-out **4 Jul 2026** (one night). Adults `2`. Rooms `1`. Click `Check availability`.
+2. Click `Reserve now`. Check-in **3 Jul 2026**, check-out **4 Jul 2026** (one night). Adults `2`. Rooms `1`. Click `Search`.
 3. On a room card, click `Change to 3 nights`.
 
 ## Expected

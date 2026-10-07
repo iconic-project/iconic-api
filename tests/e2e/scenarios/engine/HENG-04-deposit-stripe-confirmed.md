@@ -22,4 +22,4 @@ Pay the deposit online, then the Stripe test replay, and the stay booking is con
 - [ ] E3 · Replaying the same reference again does not add a second settled deposit.
 
 ## Notes
-Empty Stripe keys use FakeStripe. Never live mode. The reference is the one this run just created. Do not reuse a seeded `ANK-R-` number.
+Empty Stripe keys use FakeStripe. Never live mode. The reference is the one this run just created. Do not reuse a seeded `ANK-R-` number. Pay later confirmation stays in the reserve panel. Paying the deposit leaves for hosted checkout; Stripe sends the guest back to `/book/confirmation`.

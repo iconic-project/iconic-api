@@ -11,7 +11,7 @@ A room type with no room for the whole stay offers the waitlist. Joining claims 
 
 ## Steps
 1. **Carolina.** On the calendar, block every Standard Double room for check-in 21 Dec 2026, check-out 24 Dec 2026. Use New block with **Choose a room type and a count**, type Standard Double, count `10` (the fresh-seed free count). Reason `HENG-07`.
-2. **Guest.** `http://localhost:3000`, `Analytics off`, search 21–24 Dec 2026, 2 adults, 1 room.
+2. **Guest.** `http://localhost:3000`, `Analytics off`, click `Reserve now`, search 21–24 Dec 2026, 2 adults, 1 room.
 3. On **Standard Double**, name `E2E Waitlist`, email `e2e.heng07@iconic.test`. Click `Join the waitlist`.
 4. **Carolina.** Open `http://localhost:3001/rms/operations/holds`, tab **Waitlist**, date range **All dates**.
 
